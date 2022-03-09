@@ -1,0 +1,162 @@
+/* コメビュ用 */
+span.user_name_by_extention { 
+    color: #b70000; border: 1px solid #b70000; padding: 2px 7px 1px 7px; margin-right: 9px; border-radius: 10px; font-size: 12px; 
+}
+span.user_name_by_extention.user184 { 
+    color: #424242; border: 1px solid #424242; padding: 2px 10px 1px 10px; font-size: 11px;
+}
+
+/* 設定アイコン */
+.ext-setting-btn:before {
+    background-color: #252525;
+    border-radius: 2px;
+    bottom: 100%;
+    box-shadow: 0 0 2px 0 rgb(0 0 0 / 50%);
+    box-sizing: border-box;
+    color: #fff;
+    content: attr(aria-label);
+    display: block;
+    font-size: 12px;
+    left: 50%;
+    letter-spacing: normal;
+    line-height: 1;
+    opacity: 0;
+    padding: 6px 8px;
+    pointer-events: none;
+    position: absolute;
+    text-align: center;
+    transform: translate(-50%);
+    transition: opacity .12s ease;
+    white-space: nowrap;
+    z-index: 10000;
+}
+.ext-setting-btn:enabled:hover:before,
+.ext-setting-btn:not([aira-disabled]:enabled:disabled):hover:before,
+[data-input-mode=keyboard] .ext-mute-btn:enabled:focus:before {
+    opacity: 1;
+}
+
+.ext-setting-btn { 
+    cursor: pointer;
+    background-color:transparent;
+    border: 0;
+    height: 36px;
+    margin: 0;
+    overflow: visible;
+    padding: 0;
+    position: relative;
+    width: 32px;
+}
+.ext-setting-btn svg { 
+    height: var(--player-controller-icon-butoon-icon-size,16px);
+    vertical-align: bottom;
+    width: var(--player-controller-icon-butoon-icon-size,16px);
+}
+.ext-setting-btn svg path {
+    fill: #fffcfc;
+    transition: fill .12s ease;
+}
+.ext-setting-btn:hover svg path {
+    fill: #1f7cff;
+}
+.ext-setting-btn:before {
+    background-color: #252525;
+    border-radius: 2px;
+    bottom: 100%;
+    box-shadow: 0 0 2px 0 rgb(0 0 0 / 50%);
+    box-sizing: border-box;
+    color: #fff;
+    content: attr(aria-label);
+    display: block;
+    font-size: 12px;
+    left: 50%;
+    letter-spacing: normal;
+    line-height: 1;
+    opacity: 0;
+    padding: 6px 8px;
+    pointer-events: none;
+    position: absolute;
+    text-align: center;
+    transform: translate(-50%);
+    transition: opacity .12s ease;
+    white-space: nowrap;
+    z-index: 10000;
+}
+.ext-setting-btn.ON svg path {
+    fill: #088700;
+}
+
+.ext-setting-menu {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 20px);
+    right: 0;
+    background-color: rgba(37,37,37,.95);
+    border: 1px solid #404040;
+    border-radius: 4px;
+    overflow: hidden;
+    width: 294px;
+    transition: 0.3s;
+    z-index: 2;
+}
+.ext-setting-menu[ext-attr-show] {
+    display: block;
+}
+.ext-setting-menu .item {
+    color: white;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    padding: 8px 10px;
+    transition: 0.3s;
+}
+.ext-setting-menu .item:hover {
+    background: rgb(255 255 255 / 20%);
+}
+.ext-setting-menu .item .name .mini {
+    color: red;
+    font-size: 11px;
+    padding-left: 7px;
+}
+.ext-setting-menu .item .value {
+    font-weight: bold;
+}
+.ext-setting-menu .item[ext-attr-on] .value {
+    color: #056dff;
+}
+
+#ext_overlay {
+    background-color: transparent;
+    display: none;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    z-index: 1;
+}
+
+
+/* シークバー関係　*/
+.extBtnCover {
+    display: none;
+    /*background-color: red;*/
+    width: 32px;
+    height: 36px;
+    position: absolute;
+    /*cursor: not-allowed;*/
+    z-index: 1;
+}
+
+div#ext_dom_message {
+    color: white;
+    text-align: center;
+    font-size: 14px;
+    padding: 10px;
+    background-color: #857c7c;
+}
+
+
+[class^=___player-display-footer___] {
+    z-index: 1;
+}
