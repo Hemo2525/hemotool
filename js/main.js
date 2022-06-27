@@ -11,13 +11,13 @@ window.addEventListener('load', function () {
             initialize(function(ret){
 
                 if(ret) {
-                
+
                     // GUIを設定
                     insertBtnToPlayer();
-    
+
                     // 設定を読み込む
                     setSettingValue();
-    
+
                 } else {
                     /*
                     // メッセージを表示
@@ -54,7 +54,7 @@ function initialize(callback, timeoutMiliSec) {
         "[class^=___time-text-box___]",
         "[class^=___back-button___]",
         "[class^=___head-button___]",
-        "[class^=___play-button___]",
+        // "[class^=___play-button___]", // 一般・未ログインだとDOMがないので対象外とする
         "[class^=___control-area___]",
         "[class^=___seek-information___]",
         "[class^=___controller___]",
@@ -169,51 +169,51 @@ function insertBtnToPlayer() {
     // 拡張機能ボタンの挿入
     //let settingMenu = document.querySelector('.___comment-button___FCHFf');
     let settingMenu = document.querySelector("[class^=___comment-button___]");
-    
+
     let p1 = document.createElement('div');
     p1.innerHTML = '<button class="ext-setting-btn" aria-label="拡張機能" type="button" data-toggle-mode="state" data-toggle-state="true">' +
         '<svg version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve"><g><path class="st0" d="M496.446,420.572h-62.161v36.571h62.161c8.59,0,15.554-6.964,15.554-15.554v-5.464C512,427.536,505.036,420.572,496.446,420.572z"></path><path class="st0" d="M0,436.125v5.464c0,8.59,6.964,15.554,15.554,15.554h290.732v-36.571H15.554C6.964,420.572,0,427.536,0,436.125z"></path><path class="st0" d="M375.759,365.714h-10.946c-17.179,0-31.098,13.928-31.098,31.098v84.089c0,17.17,13.919,31.098,31.098,31.098h10.946c17.178,0,31.098-13.928,31.098-31.098v-84.089C406.857,379.642,392.937,365.714,375.759,365.714z"></path><path class="st0" d="M496.446,237.696H214.125v36.572h282.322c8.59,0,15.554-6.964,15.554-15.553v-5.464C512,244.661,505.036,237.696,496.446,237.696z" ></path><path class="st0" d="M15.554,274.268h70.571v-36.572H15.554C6.964,237.696,0,244.661,0,253.25v5.464C0,267.303,6.964,274.268,15.554,274.268z" ></path><path class="st0" d="M144.652,182.839c-17.178,0-31.098,13.929-31.098,31.098v84.09c0,17.17,13.92,31.098,31.098,31.098h10.946c17.179,0,31.098-13.928,31.098-31.098v-84.09c0-17.169-13.92-31.098-31.098-31.098H144.652z" ></path><path class="st0" d="M15.554,91.428H236.91V54.857H15.554C6.964,54.857,0,61.821,0,70.411v5.464C0,84.464,6.964,91.428,15.554,91.428z"></path><path class="st0" d="M496.446,54.857H364.911v36.571h131.536c8.59,0,15.554-6.964,15.554-15.554v-5.464C512,61.821,505.036,54.857,496.446,54.857z"></path><path class="st0" d="M295.438,146.286h10.946c17.178,0,31.098-13.928,31.098-31.098V31.098c0-17.17-13.92-31.098-31.098-31.098h-10.946c-17.179,0-31.098,13.928-31.098,31.098v84.089C264.339,132.358,278.259,146.286,295.438,146.286z"></path></g></svg>' +
         '</button>' +
         '<div class="ext-setting-menu">' +
-            '<div class="item ext-comeview">' +
-                '<div class="name">コメビュ<span class="mini">(要ブラウザ更新)</span></div>' +
-                '<div class="value">ON</div>' +
-            '</div>' +
-            '<div class="item ext-rightClick" title="ニコ生ゲーム『魔道士vsゾンビ?』で役立つかも？">' +
-                '<div class="name">右クリックメニューOFF</div>' +
-                '<div class="value">ON</div>' +
-            '</div>' +
-            '<div class="item ext-seekbar">' +
-                '<div class="name">シークバーOFF</div>' +
-                '<div class="value">ON</div>' +
-            '</div>' +
-            '<div class="item ext-video">' +
-                '<div class="name">配信映像OFF</div>' +
-                '<div class="value">ON</div>' +
-            '</div>' +
-            '<div class="item ext-video-mute">' +
-                '<div class="name">配信音ミュート</div>' +
-                '<div class="value">ON</div>' +
-            '</div>' +
-            '<div class="item ext-game">' +
-                '<div class="name">ニコ生ゲーム画面OFF</div>' +
-                '<div class="value">ON</div>' +
-            '</div>' +
-            '<div class="item ext-game-mute">' +
-                '<div class="name">ニコ生ゲーム音ミュート<span class="mini">※一部は非対応</span></div>' +
-                '<div class="value">ON</div>' +
-            '</div>' +
-            '<div class="item ext-pip">' +
-                '<div class="name">小窓表示<span class="mini">※高負荷 & ニコ生ゲーム非対応</span></div>' +
-                '<div class="value">ON</div>' +
-            '</div>' +            
+        '<div class="item ext-comeview">' +
+        '<div class="name">コメビュ<span class="mini">(要ブラウザ更新)</span></div>' +
+        '<div class="value">ON</div>' +
+        '</div>' +
+        '<div class="item ext-rightClick" title="ニコ生ゲーム『魔道士vsゾンビ?』で役立つかも？">' +
+        '<div class="name">右クリックメニューOFF</div>' +
+        '<div class="value">ON</div>' +
+        '</div>' +
+        '<div class="item ext-seekbar">' +
+        '<div class="name">シークバーOFF</div>' +
+        '<div class="value">ON</div>' +
+        '</div>' +
+        '<div class="item ext-video">' +
+        '<div class="name">配信映像OFF</div>' +
+        '<div class="value">ON</div>' +
+        '</div>' +
+        '<div class="item ext-video-mute">' +
+        '<div class="name">配信音ミュート</div>' +
+        '<div class="value">ON</div>' +
+        '</div>' +
+        '<div class="item ext-game">' +
+        '<div class="name">ニコ生ゲーム画面OFF</div>' +
+        '<div class="value">ON</div>' +
+        '</div>' +
+        '<div class="item ext-game-mute">' +
+        '<div class="name">ニコ生ゲーム音ミュート<span class="mini">※一部は非対応</span></div>' +
+        '<div class="value">ON</div>' +
+        '</div>' +
+        '<div class="item ext-pip">' +
+        '<div class="name">小窓表示<span class="mini">※高負荷 & ニコ生ゲーム非対応</span></div>' +
+        '<div class="value">ON</div>' +
+        '</div>' +
         '</div>';
 
-            /*
-            '<div class="item ext-pip-rec">' +
-            '<div class="name">録画開始<span class="mini">(ニコ生ゲーム非対応)</span></div>' +
-            '<div class="value">ON</div>' +
-            */
+    /*
+    '<div class="item ext-pip-rec">' +
+    '<div class="name">録画開始<span class="mini">(ニコ生ゲーム非対応)</span></div>' +
+    '<div class="value">ON</div>' +
+    */
 
 
     // ボタンの挿入
@@ -223,8 +223,8 @@ function insertBtnToPlayer() {
     let overlay = document.createElement('div');
     overlay.id = "ext_overlay";
     document.querySelector('[class^=___player-display-screen]').prepend(overlay);
-    
-    
+
+
 
 
 
@@ -235,7 +235,7 @@ function insertBtnToPlayer() {
         //menu.toggleAttribute("ext-attr-show");
 
         if(menu.getAttribute("ext-attr-show")) {
-            document.querySelector("#ext_overlay").style.display = "none";                
+            document.querySelector("#ext_overlay").style.display = "none";
             menu.removeAttribute("ext-attr-show");
 
         } else {
@@ -244,18 +244,18 @@ function insertBtnToPlayer() {
             menu.setAttribute("ext-attr-show", "ON");
         }
     });
-    
+
     //let overlay = document.querySelector('#ext_overlay');
     overlay.addEventListener('click', function () {
-        document.querySelector("#ext_overlay").style.display = "none";                
+        document.querySelector("#ext_overlay").style.display = "none";
         document.querySelector('.ext-setting-menu').removeAttribute("ext-attr-show");
     });
     let settingBtn = document.querySelector("[class^=___setting-popup-control___]");
     settingBtn.addEventListener('click', function(){
-        document.querySelector("#ext_overlay").style.display = "none";                
+        document.querySelector("#ext_overlay").style.display = "none";
         document.querySelector('.ext-setting-menu').removeAttribute("ext-attr-show");
     });
-    
+
 
     // コメビュ
     let comeviewBtn = document.querySelector('.ext-setting-menu .ext-comeview');
@@ -286,12 +286,12 @@ function insertBtnToPlayer() {
 
     // ゲームミュート
     let gameMuteBtn = document.querySelector('.ext-setting-menu .ext-game-mute');
-    gameMuteBtn.addEventListener('click', gameMute);    
-/*
-    // 録画開始
-    let recBtn = document.querySelector('.ext-setting-menu .ext-pip-rec');
-    recBtn.addEventListener('click', pipRec);
-*/
+    gameMuteBtn.addEventListener('click', gameMute);
+    /*
+        // 録画開始
+        let recBtn = document.querySelector('.ext-setting-menu .ext-pip-rec');
+        recBtn.addEventListener('click', pipRec);
+    */
     // ピクチャーインピクチャー
     let pictureBtn = document.querySelector('.ext-setting-menu .ext-pip');
     pictureBtn.addEventListener('click', pip);

@@ -26,7 +26,10 @@ function initSeekbar() {
     wrapDom(forwardBtn);
     wrapDom(backBtn);
     wrapDom(headBtn);
-    wrapDom(pauseBtn);
+    // 一時停止ボタンは存在しない可能性がある
+    if (pauseBtn != null) {
+        wrapDom(pauseBtn);
+    }
     //wrapDom(timeInput);
     
 
