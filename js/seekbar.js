@@ -66,7 +66,10 @@ function seekbar() {
         timeInput.disabled = false;
         backBtn.disabled = false;
         headBtn.disabled = false;
-        pauseBtn.disabled = false;
+        // 一時停止ボタンは存在しない可能性がある
+        if (pauseBtn != null) {
+            pauseBtn.disabled = false;
+        }
 
         var list = document.querySelectorAll(".extBtnCover");
         for(let dom of list){
