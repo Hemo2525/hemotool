@@ -208,8 +208,13 @@ div#ext_dom_message {
 */
 
 
+/* コメントの背景を行ごとに色付けして読みやすく */
 [class^=___table-row___]:nth-child(odd) {
     background-color: #f1f1f1;
+}
+/* コメントの行の背景がDark ReaderというChrome拡張機能を入れているときにダークモードにならないと指摘があったので対応 */
+html[data-darkreader-scheme] [class^=___table-row___]:nth-child(odd) {
+    background-color: inherit;
 }
 
 /*ここまで------------------------------------------*/
