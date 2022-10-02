@@ -166,7 +166,17 @@ function watchCommentDOM(mutationsList, observer) {
   
         }        
       }
+      // コメントに行送りを対応させるためクラスを付与
+      //currentNode.classList.add('wordbreak');
+      if(currentNode.querySelector("[class^=___comment-text___]").clientHeight > 28){
+        //console.log("YES  " + currentNode.querySelector("[class^=___comment-text___]").textContent + "  " + currentNode.querySelector("[class^=___comment-text___]").clientHeight);
+        currentNode.querySelector("[class^=___comment-text___]").classList.add('multiple-line');
+      } else {
+        //console.log("NO  " + currentNode.querySelector("[class^=___comment-text___]").textContent + "  " + currentNode.querySelector("[class^=___comment-text___]").clientHeight);
+        currentNode.querySelector("[class^=___comment-text___]").classList.add('one-line');
+      }
     }
+
   } 
 }
 
