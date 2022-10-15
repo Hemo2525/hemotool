@@ -16,6 +16,8 @@ function rightClick() {
         for(let dom of list){
             dom.oncontextmenu = function () {return true;}
         }    
+        // ショートカットを非アクティブ状態
+        document.querySelector('#ext_shortcut .item.click').removeAttribute("active");
 
     } else {
         chrome.storage.local.set({ "ext_rightClick": "ON" }, function () {
@@ -30,6 +32,8 @@ function rightClick() {
         var list = document.querySelectorAll("canvas");
         for(let dom of list){
             dom.oncontextmenu = function () {return false;}
-        }    
+        }
+        // ショートカットをアクティブ状態
+        document.querySelector('#ext_shortcut .item.click').setAttribute("active", "ON");
     }
 }

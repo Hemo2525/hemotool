@@ -13,7 +13,52 @@ WebSocket = new Proxy(WebSocket, {
     }
 });
 
+// 現在の再生時間(秒数)を取得
+function getStartPlayTime() {
+  var currentPlayPos;
+  var posArray;
+  var hour;
+  var minits;
+  var second;
+  var totalSec;
 
+  if(document.querySelectorAll('[class^=___time-score___] [class^=___value___]')
+    && document.querySelectorAll('[class^=___time-score___] [class^=___value___]')[0])
+  {
+    currentPlayPos = document.querySelectorAll('[class^=___time-score___] [class^=___value___]')[0].textContent;
+    posArray = currentPlayPos.split(':');
+
+    if(posArray.length == 2) {
+      // 分:秒　だけの場合
+
+      if(posArray[0] === "00" && posArray[1] === "00") {
+        // ニコ生プレイヤーの読み込み中で正確な時間が取得できないケースはundefinedにしておく
+        totalSec = undefined;
+      } else {
+        minits = posArray[0] * 60;
+        second = posArray[1];
+        totalSec = minits + second;  
+      }
+
+      //console.log(posArray);
+
+    } else if(posArray.length == 3) {
+      // 時間:分:秒　の場合
+      hour = Number(posArray[0]) * 60 * 60;
+      minits = posArray[1] * 60;
+      second = posArray[2];
+      totalSec = hour + minits + second;
+
+      //console.log(posArray);
+
+    } else {
+      //console.log("ここにはこないはず");
+    }
+  }
+  return totalSec;
+}
+
+var _startTime;
 
 var _commentList = {};      // KEY:コメント番号, VALUE:対応するユーザー名(最大7文字)
 var _commentListFull = {};  // KEY:コメント番号, VALUE:対応するユーザー名(フルネーム)
@@ -38,12 +83,18 @@ function recvEvent(event) {
   // chatメッセージのみ解析
   if (message.chat) {
 
+    if(_startTime === undefined || isNaN(_startTime)){
+      _startTime = getStartPlayTime();
+      //console.log("再生開始秒数(vpos) : " + _startTime);
+    }
+
+    //console.log(message.chat);
 
     //console.log(message.chat.no + ", " + message.chat.content + ", " + message.chat.user_id);
 
     if (isNaN(message.chat.user_id)) {
       // 184さんの処理
-      _commentList[message.chat.no] = message.chat.user_id.substr(0, 4) + "･･";
+      _commentList[message.chat.no] = message.chat.user_id.substring(0, 4) + "･･";
       _commentListFull[message.chat.no] = message.chat.user_id;
       _183UserList[message.chat.no] = message.chat.user_id;
 
@@ -82,7 +133,7 @@ function recvEvent(event) {
           var userName = userNameFull;
           // 8文字より長い場合は省略
           if(userName.length > 7) {
-            userName = userName.substr(0, 7) + "･･";
+            userName = userName.substring(0, 7) + "･･";
           }
 
           _rawUserList[message.chat.user_id] = userName;
@@ -118,6 +169,29 @@ function recvEvent(event) {
 
       }, false);
     }
+
+    // ブラウザにWeb Speech API Speech Synthesis機能があるか判定
+    if('speechSynthesis' in window) {
+
+      // 再生開始時
+      if( _startTime !== undefined && message.chat.vpos > _startTime) {
+        
+        // 発言を設定
+        const uttr = new SpeechSynthesisUtterance();
+        uttr.rate = 6; // 速度　min 0.1～ max 10.0
+        uttr.volume = 1.0; // 音量 min 0 ~ max 1
+        uttr.text = message.chat.content;
+        // 発言を再生
+        window.speechSynthesis.speak(uttr);
+
+        console.log("読み上げます → [" + message.chat.no + "] " + message.chat.content);
+      }
+
+
+    } else {
+      alert('大変申し訳ありません。このブラウザは音声合成に対応していません。')
+    }
+
   }
 
 }

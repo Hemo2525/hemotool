@@ -78,6 +78,8 @@ function seekbar() {
 
         // ストレージにボタンの状態を保存
         chrome.storage.local.set({"ext_seekbar": "OFF"}, function() {});
+        // ショートカットを非アクティブ状態
+        document.querySelector('#ext_shortcut .item.seek').removeAttribute("active");
         
     } else {
 
@@ -110,5 +112,8 @@ function seekbar() {
 
         // ストレージにボタンの状態を保存
         chrome.storage.local.set({"ext_seekbar": "ON"}, function() {});
+
+        // ショートカットをアクティブ状態
+        document.querySelector('#ext_shortcut .item.seek').setAttribute("active", "ON");
     }
 }

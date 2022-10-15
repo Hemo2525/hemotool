@@ -1,5 +1,5 @@
 function setAkashicParentFrameEvent(){
-    
+
     /*-----------------------------------------
     ここはakashicのiframe内(親)
     -------------------------------------------*/
@@ -12,7 +12,10 @@ function setAkashicParentFrameEvent(){
     window.addEventListener("message", receiveMessage, false);
 
     function receiveMessage(event) {
-        //console.log(event);
+        console.log("-------------------------------------");
+        console.log(event);
+
+        alert(event);
 
         /*
         if(event.data.type != "amf:[t]") {
@@ -41,3 +44,4 @@ function setAkashicParentFrameEvent(){
         return true;
     }
 }
+

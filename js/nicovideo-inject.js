@@ -16,7 +16,7 @@ const obs_ext_muteBtn_obj = new MutationObserver(watchGameMuteBtn);
 obs_ext_muteBtn_obj.observe(watchGameMuteBtn_btn, watchGameMuteBtn_option);  
 
 function watchGameMuteBtn(){
-    //console.log("変化を検知。。。");
+    console.log("変化を検知。。。");
     let btn = document.querySelector('.ext-setting-menu .ext-game-mute');
     if(btn.getAttribute("ext-attr-on")) {
         //console.log("MUTE");
@@ -57,7 +57,8 @@ function watchAkashicGame_for_Mute(){
 
     let btn = document.querySelector('.ext-setting-menu .ext-game-mute');
     if(btn.getAttribute("ext-attr-on")) {
-        //console.log("自動MUTE");
+        
+        console.log("自動MUTE");
         
         // nicovideo側のゲームをミュート
         window.__akashic__.audioContext.suspend();
@@ -74,8 +75,11 @@ function watchAkashicGame_for_Mute(){
             // iframeの準備ができるとstyle属性にheight等が設定されるようなのでそれから送信する
             if(frame.getAttribute("style").indexOf("height") >= 0){
                 var volume = {type:"loader:setMasterVolume", data:0}; // MAX 0.4っぽい
-                frame.contentWindow.postMessage(volume, "https://ak.cdn.nimg.jp/");    
+                frame.contentWindow.postMessage(volume, "https://ak.cdn.nimg.jp/");
+                //frame.contentWindow.postMessage(volume, "*"); // 右記のエラーが出る現象を回避　→　Failed to execute 'postMessage' on 'DOMWindow': The target origin provided
             }
+        } else {
+            //console.log("iframeいませんね");
         }
 
     }

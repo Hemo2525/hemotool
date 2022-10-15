@@ -1,15 +1,19 @@
 function comeview(){
   let menu = document.querySelector('.ext-setting-menu .ext-comeview');
   
+  // トグル
   if(menu.getAttribute("ext-attr-on")) {  
     chrome.storage.local.set({"ext_comeview": "OFF"}, function() {});
     menu.removeAttribute("ext-attr-on");
+    // ショートカットを非アクティブ状態
+    document.querySelector('#ext_shortcut .item.comeview').removeAttribute("active");
   } else {
     chrome.storage.local.set({"ext_comeview": "ON"}, function() {});
     menu.setAttribute("ext-attr-on", "ON");
+    // ショートカットをアクティブ状態
+    document.querySelector('#ext_shortcut .item.comeview').setAttribute("active", "ON");
   }
 }
-
 
 if(location.href.startsWith("https://live.nicovideo.jp/")){
 

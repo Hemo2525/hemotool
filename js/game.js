@@ -14,6 +14,8 @@ function gameOff() {
 
         // ストレージにボタンの状態を保存
         chrome.storage.local.set({"ext_game": "OFF"}, function() {});
+        // ショートカットを非アクティブ状態
+        document.querySelector('#ext_shortcut .item.game').removeAttribute("active");
         
     } else {
 
@@ -24,7 +26,9 @@ function gameOff() {
         menu.setAttribute("ext-attr-on", "ON");
 
         // ストレージにボタンの状態を保存
-        chrome.storage.local.set({"ext_game": "ON"}, function() {});       
+        chrome.storage.local.set({"ext_game": "ON"}, function() {});
+        // ショートカットをアクティブ状態
+        document.querySelector('#ext_shortcut .item.game').setAttribute("active", "ON");
     }
     
 }
@@ -40,6 +44,8 @@ function gameMute() {
         var volume = {type:"loader:setMasterVolume", data:0.4}; // MAX 0.4っぽい
         if(frame){
             frame.contentWindow.postMessage(volume, "https://ak.cdn.nimg.jp/");
+        } else {
+            console.log("iframeがいません");
         }
 
         // ボタンをOFF状態に
@@ -49,13 +55,17 @@ function gameMute() {
         // ストレージにボタンの状態を保存
         chrome.storage.local.set({"ext_game_mute": "OFF"}, function() {});            
         
-        
+        // ショートカットを非アクティブ状態
+        document.querySelector('#ext_shortcut .item.game-mute').removeAttribute("active");
+
     } else {
 
 
         var volume = {type:"loader:setMasterVolume", data:0}; // MAX 0.4っぽい
         if(frame){
             frame.contentWindow.postMessage(volume, "https://ak.cdn.nimg.jp/");
+        } else {
+            console.log("iframeがいません");
         }
 
 
@@ -64,7 +74,12 @@ function gameMute() {
 
 
         // ストレージにボタンの状態を保存
-        chrome.storage.local.set({"ext_game_mute": "ON"}, function() {});    
+        chrome.storage.local.set({"ext_game_mute": "ON"}, function() {});
+
+
+        // ショートカットをアクティブ状態
+        document.querySelector('#ext_shortcut .item.game-mute').setAttribute("active", "ON");
+
     }
 }
 

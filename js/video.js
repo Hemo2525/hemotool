@@ -16,7 +16,9 @@ function videoOff() {
         chrome.storage.local.set({"ext_video": "OFF"}, function() {
             //console.log('Value is set to ' + "OFF");
         });
-        
+        // ショートカットを非アクティブ状態
+        document.querySelector('#ext_shortcut .item.video').removeAttribute("active");
+
     } else {
 
         // videoタグを非表示に
@@ -32,7 +34,8 @@ function videoOff() {
         chrome.storage.local.set({"ext_video": "ON"}, function() {
             //console.log('Value is set to ' + "ON");
         });    
-        
+        // ショートカットをアクティブ状態
+        document.querySelector('#ext_shortcut .item.video').setAttribute("active", "ON");
     }
 }
 
@@ -56,7 +59,8 @@ function videoMute() {
             //console.log('Value is set to ' + "OFF");
         });            
         
-        
+        // ショートカットを非アクティブ状態
+        document.querySelector('#ext_shortcut .item.video-mute').removeAttribute("active");
     } else {
 
         // videoタグを非表示に
@@ -72,6 +76,9 @@ function videoMute() {
         // ストレージにボタンの状態を保存
         chrome.storage.local.set({"ext_video_mute": "ON"}, function() {
             //console.log('Value is set to ' + "ON");
-        });    
+        });
+
+        // ショートカットをアクティブ状態
+        document.querySelector('#ext_shortcut .item.video-mute').setAttribute("active", "ON");        
     }
 }
