@@ -218,9 +218,35 @@ function setSettingValue() {
         chrome.storage.local.get("ext_game_mute", function (value) {
             initGame();
             if (value.ext_game_mute == "ON") {
-                gameMute();
-            } else {
+                console.log("前回ゲーム音ミュートが有効でした");
+                //document.querySelector('.ext-setting-menu .ext-game-mute').setAttribute("ext-attr-on", "true"); 
+                chrome.storage.local.get("ext_game_volume", function (value) {
+                    
+                    console.log(value);
+                    if (value.ext_game_volume) {
+                        
+                        // 前回のビデオボリュームを設定
+                        document.querySelector('div[data-layer-name="videoLayer"] video').volume =  value.ext_game_volume / 100;
+                        document.querySelector('#ext_videoVolumeSlider').value = value.ext_game_volume;
+                    } else {
+                        /*
+                        console.log("ボリュームはストレージに保存されていません");
+                        let videoVolume = document.querySelector('div[data-layer-name="videoLayer"] video').volume;
+                        document.querySelector('#ext_videoVolumeSlider').value = videoVolume * 100;
+                        */
+                    }
 
+                    // ゲーム音ミュートが有効の場合は必ずニコ生のミュートは解除しておく
+                    if(document.querySelector('[class^=___mute-button___]').getAttribute("data-toggle-state") == 'true'){
+                        document.querySelector('[class^=___mute-button___]').click();
+                    } else {
+                        console.log("ニコ生のボタンが非ミュート状態22");
+                    }
+
+                    gameMute();
+                });
+
+                
             }
         });
         // ゲーム音楽ミュート機能のピン状態
@@ -328,7 +354,7 @@ function insertBtnToPlayer() {
                             '</div>'+
                         '</div>' +
                         '<div class="item ext-game-mute">' +
-                            '<div class="name">ニコ生ゲーム音ミュート<span class="mini">※一部非対応</span></div>' +
+                            '<div class="name">ニコ生ゲーム音ミュート</div>' +
                             '<div class="btn-group">' +
                                 '<div class="value">ON</div>' +
                                 '<div class="pin">'+
@@ -604,7 +630,49 @@ function insertBtnToPlayer() {
         }
     });
     document.querySelector('#ext_shortcut .game-mute').addEventListener('click', function() {
+
         gameMute();
+    });
+    // ニコ生プレイヤーのミュートボタンを操作できないようにする用のDOMを作成しておく
+    let nicoMuteBtn = document.querySelector('[class^=___mute-button___]');
+    let overlayMute = document.createElement('div');
+    overlayMute.id = "ext_volume_overlay";
+    overlayMute.textContent = "配信の音量→";
+    overlayMute.style.cssText = "width: " + nicoMuteBtn.clientWidth + "px;" + "height: " + nicoMuteBtn.clientHeight + "px;";
+    document.querySelector('[class^=___volume-setting___]').insertBefore(overlayMute, nicoMuteBtn);
+
+    let overlayVideoMute = document.createElement('div');
+    overlayVideoMute.id = "ext_video_volume_overlay";
+    overlayVideoMute.textContent = "配信音停止中";
+    overlayVideoMute.style.cssText = "width: " + nicoMuteBtn.clientWidth + "px;" + "height: " + nicoMuteBtn.clientHeight + "px;";
+    document.querySelector('[class^=___volume-setting___]').insertBefore(overlayVideoMute, nicoMuteBtn);
+
+
+    // ニコ生プレイヤーのボリュームスライダーの代わりを作成しておく
+    let extSlider = document.createElement('input');
+    extSlider.id = "ext_videoVolumeSlider";
+    extSlider.type = "range";
+    extSlider.name= "volumeSize";
+    extSlider.min = "0";
+    extSlider.max = "100";
+    extSlider.step = "1";
+    extSlider.value = document.querySelector('div[data-layer-name="videoLayer"] video').volume;
+    document.querySelector('[class^=___volume-size-control___]').insertBefore(extSlider, 
+        document.querySelector('[class^=___volume-size-control___] span[class^=___slider___]'));
+
+    document.querySelector('#ext_videoVolumeSlider').addEventListener('input', function(e){
+        // changeイベントではなくinputイベントにすることでつまみを移動させているあいだも発火してくれる
+
+        // ストレージにビデオ音量を保存
+        chrome.storage.local.set({"ext_game_volume": e.target.value}, function() {});        
+
+        document.querySelector('div[data-layer-name="videoLayer"] video').volume =  e.target.value / 100;
+        document.querySelector('div[data-layer-name="videoLayer"] video').muted = false;
+
+        /* 下記動作しなかった
+        document.querySelector('[class^=___volume-size-control___] input[class^=___slider___]').value = e.target.value / 100;
+        document.querySelector('[class^=___volume-size-control___] input[class^=___slider___]').dispatchEvent(new Event('change'));
+        */
     });
 
     /*

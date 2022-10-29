@@ -85,12 +85,105 @@ function recvEvent(event) {
 
     if(_startTime === undefined || isNaN(_startTime)){
       _startTime = getStartPlayTime();
-      //console.log("再生開始秒数(vpos) : " + _startTime);
+      console.log("再生開始秒数(vpos) : " + _startTime);
     }
+
+
+
+    // ブラウザにWeb Speech API Speech Synthesis機能があるか判定
+    if ('speechSynthesis' in window) {
+
+      // 再生開始時
+      if (_startTime !== undefined && message.chat.vpos > _startTime) {
+
+        console.log(message);
+
+        let yomiage_text = message.chat.content;
+
+        if (message.chat.content.startsWith('/nicoad', 0)) {
+          // 広告
+          // 例 →　/nicoad {"version":"1","totalAdPoint":32000,"message":"【広告貢献3位】もぴ太郎さんが100ptニコニ広告しました"}
+          const content = message.chat.content;
+          const pos = content.indexOf('{');
+          const obj = JSON.parse(content.substr(pos));
+          yomiage_text = obj.message;
+        }
+
+        if (message.chat.content.startsWith('/gift', 0)) {
+          // ギフト
+          // 例 →　/gift flowerstandmsg 36777535 "げすと" 5000 "お誕生日おめでとう" "フラワースタンド" 1
+          let content = message.chat.content;
+          content = content.split(' ');
+          if (content.length >= 3) {
+            yomiage_text = content[3] + "さんが" + content[4] + "ptギフトしました";
+          }
+        }
+
+        if (message.chat.content.startsWith('/spi', 0)) {
+          // ゲームリクエスト
+          // 例 →　/spi "「ナンプレ」がリクエストされました"
+          let content = message.chat.content;
+          const pos = content.indexOf(' ');
+          yomiage_text = content.substr(pos);
+        }
+
+        if (message.chat.content.startsWith('/info', 0)) {
+          // インフォ
+          // 例 →　/info 10 放送者のサポーターが1人来場しました
+          //       /info 10 ニコニ広告枠から1人が来場しました
+          let content = message.chat.content;
+          const pos = content.indexOf(' ', content.indexOf(' ') + 1); // ２つ目の半角スペースの位置を探す
+          yomiage_text = content.substr(pos);
+        }
+
+        if (message.chat.content.startsWith('/emotion', 0)) {
+          // エモーション
+          // 例 →　/emotion ちいさい秋
+          let content = message.chat.content;
+          const pos = content.indexOf(' ');
+          yomiage_text = content.substr(pos);
+        }
+
+
+        // 発言を設定
+        const uttr = new SpeechSynthesisUtterance();
+        uttr.rate = 6; // 速度　min 0.1～ max 10.0
+        uttr.volume = 1.0; // 音量 min 0 ~ max 1
+        uttr.text = yomiage_text;
+        // 発言を再生
+        window.speechSynthesis.speak(uttr);
+
+        console.log("読み上げます → [" + message.chat.no + "] " + yomiage_text);
+      } else {
+        console.log('message.chat.vpos: ' + message.chat.vpos + ', _startTime: ' + _startTime);
+      }
+
+
+    } else {
+      console.log('大変申し訳ありません。このブラウザは音声合成に対応していません。')
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     //console.log(message.chat);
 
-    //console.log(message.chat.no + ", " + message.chat.content + ", " + message.chat.user_id);
+    console.log(message.chat.no + ", " + message.chat.content + ", " + message.chat.user_id);
 
     if (isNaN(message.chat.user_id)) {
       // 184さんの処理
@@ -170,27 +263,6 @@ function recvEvent(event) {
       }, false);
     }
 
-    // ブラウザにWeb Speech API Speech Synthesis機能があるか判定
-    if('speechSynthesis' in window) {
-
-      // 再生開始時
-      if( _startTime !== undefined && message.chat.vpos > _startTime) {
-        
-        // 発言を設定
-        const uttr = new SpeechSynthesisUtterance();
-        uttr.rate = 6; // 速度　min 0.1～ max 10.0
-        uttr.volume = 1.0; // 音量 min 0 ~ max 1
-        uttr.text = message.chat.content;
-        // 発言を再生
-        window.speechSynthesis.speak(uttr);
-
-        console.log("読み上げます → [" + message.chat.no + "] " + message.chat.content);
-      }
-
-
-    } else {
-      alert('大変申し訳ありません。このブラウザは音声合成に対応していません。')
-    }
 
   }
 

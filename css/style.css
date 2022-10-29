@@ -96,11 +96,23 @@ span.user_name_by_extention.user184 {
     background-color: rgba(37,37,37,.95);
     border: 1px solid #404040;
     border-radius: 4px;
-    overflow: hidden;
+    overflow: auto;
     width: 294px;
     transition: 0.3s;
     z-index: 2;
+
+    overflow-y: scroll;
+    max-height: 306px;
 }
+.ext-setting-menu::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    background: #657586;
+}
+.ext-setting-menu::-webkit-scrollbar-thumb {
+    background: #b2bec2;
+}
+
 .ext-setting-menu[ext-attr-show] {
     display: block;
 }
@@ -210,12 +222,13 @@ div#ext_dom_message {
     text-align: right;
     padding: 2px 6px 7px 6px;
     box-sizing: border-box;
+    
+    
 }
 #ext_shortcut .item {
     display: none;
     cursor: pointer;
     user-select: none;
-    transition: 0.2s;
     position: relative;
     font-size: 10px;
     border: 1px solid #fff;
@@ -224,20 +237,23 @@ div#ext_dom_message {
 
     padding: 2px 10px 2px;
     margin-left: 3px;    
+    color: white;
 }
 #ext_shortcut .item[ext-pin-on] {
     display: inline-block;
+
 }
 #ext_shortcut .item::before {
     background-color: rgb(37, 37, 37);
-    bottom: 100%;
+    /*bottom: 100%;*/
+    top: -33px;
+    left: 50%;
     box-shadow: rgba(0, 0, 0, 0.5) 0px 0px 2px 0px;
     box-sizing: border-box;
     color: rgb(255, 255, 255);
     content: attr(aria-label);
     display: block;
     font-size: 12px;
-    left: 50%;
     letter-spacing: normal;
     line-height: 1;
     opacity: 0;
@@ -259,8 +275,7 @@ div#ext_dom_message {
     height: 16px;
 }
 #ext_shortcut .item {
-    color: white;
-    transition: 0s;
+    
 }
 #ext_shortcut .item:hover {
     color: #858585;
@@ -274,10 +289,86 @@ div#ext_dom_message {
 
 
 
+#ext_volume_overlay {
+    display: none;
+    position: absolute;
+    color: white;
+    background-color: black;
+    /*background-color: #000000a6;*/
+    /*cursor: not-allowed;*/
+    z-index: 1;
+    line-height: 1.4;
+    font-size: 9px;
+    user-select: none;
+    box-sizing: border-box;
+    padding-top: 3px;
+    text-align: justify;    
+}
+#ext_volume_overlay.show {
+    display: block;
+}
 
+#ext_video_volume_overlay {
+    display: none;
+    position: absolute;
+    color: white;
+    background-color: black;
+    /*background-color: #000000a6;*/
+    /*cursor: not-allowed;*/
+    z-index: 1;
+    line-height: 1.4;
+    font-size: 9px;
+    user-select: none;
+    box-sizing: border-box;
+    padding-top: 3px;
+    text-align: justify;  
+}
+#ext_video_volume_overlay.show {
+    display: block;
+}
 
+#ext_videoVolumeSlider {
+    display: none;
+    cursor: pointer;
 
+    /* 独自の見た目を有効化 */
+    -webkit-appearance: none;
+    appearance: none;
 
+    background: #e78a00;
+    outline: none;
+    height: 7px;
+    border-radius: 12px;
+}
+
+#ext_videoVolumeSlider::-webkit-slider-thumb {
+    
+    /* 独自の見た目を有効化 */
+    -webkit-appearance: none;
+    appearance: none;
+    
+    background: #7a4900;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    box-shadow: 0px 3px 6px 0px rgba(0, 0, 0, 0.15);
+
+}
+
+#ext_videoVolumeSlider.show {
+    display: block;
+}
+#ext_videoVolumeSlider[disabled] {
+    cursor: not-allowed;
+    background: #7c7c7c;
+}
+#ext_videoVolumeSlider[disabled]::-webkit-slider-thumb {
+    background: #474747;
+}
+
+[class^=___volume-size-control___] input[class^=___slider___][disabled] {
+    cursor: not-allowed;
+}
 
 /* コメント折り返しここから ------------------------------------ */
 
