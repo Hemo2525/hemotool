@@ -1,48 +1,48 @@
 /*---------------------------------------
-　コメビュ機能
+ コメビュ機能
 ----------------------------------------*/
-  
+
 // WebSocketのProxyを作成
 WebSocket = new Proxy(WebSocket, {
-    construct: function (target, args) {
-      // create WebSocket instance
-      const instance = new target(...args);
-      const messageHandler = (event) => { recvEvent(event); };
-      instance.addEventListener('message', messageHandler);
-      return instance;
-    }
+  construct: function (target, args) {
+    // create WebSocket instance
+    const instance = new target(...args);
+    const messageHandler = (event) => { recvEvent(event); };
+    instance.addEventListener('message', messageHandler);
+    return instance;
+  }
 });
 
 // 現在の再生時間(秒数)を取得
 function getStartPlayTime() {
+
   var currentPlayPos;
   var posArray;
   var hour;
   var minits;
   var second;
-  var totalSec;
+  var totalSec = undefined;
 
-  if(document.querySelectorAll('[class^=___time-score___] [class^=___value___]')
-    && document.querySelectorAll('[class^=___time-score___] [class^=___value___]')[0])
-  {
+  if (document.querySelectorAll('[class^=___time-score___] [class^=___value___]')
+    && document.querySelectorAll('[class^=___time-score___] [class^=___value___]')[0]) {
     currentPlayPos = document.querySelectorAll('[class^=___time-score___] [class^=___value___]')[0].textContent;
     posArray = currentPlayPos.split(':');
 
-    if(posArray.length == 2) {
+    if (posArray.length == 2) {
       // 分:秒　だけの場合
 
-      if(posArray[0] === "00" && posArray[1] === "00") {
+      if (posArray[0] === "00" && posArray[1] === "00") {
         // ニコ生プレイヤーの読み込み中で正確な時間が取得できないケースはundefinedにしておく
         totalSec = undefined;
       } else {
         minits = posArray[0] * 60;
         second = posArray[1];
-        totalSec = minits + second;  
+        totalSec = minits + second;
       }
 
       //console.log(posArray);
 
-    } else if(posArray.length == 3) {
+    } else if (posArray.length == 3) {
       // 時間:分:秒　の場合
       hour = Number(posArray[0]) * 60 * 60;
       minits = posArray[1] * 60;
@@ -59,11 +59,13 @@ function getStartPlayTime() {
 }
 
 var _startTime;
+var _currentVoiceName = "";
 
 var _commentList = {};      // KEY:コメント番号, VALUE:対応するユーザー名(最大7文字)
 var _commentListFull = {};  // KEY:コメント番号, VALUE:対応するユーザー名(フルネーム)
 var _183UserList = {};      // KEY:コメント番号, VALUE:184ユーザーID
 var _newUserList = {};      // KEY:コメント番号, VALUE:初めて書き込むユーザーID 
+var _premiumList = {};      // KEY:コメント番号,  VALUE:何でもいい値
 var _rawUserList = {};      // KEY:ユーザーID,   VALUE:GETしてきたユーザー名(最大7文字)
 var _rawUserListFull = {};  // KEY:ユーザーID,   VALUE:GETしてきたユーザー名(フルネーム)
 var _gettingList = {};      // KEY:ユーザーID,   VALUE:何でもいい値
@@ -83,20 +85,22 @@ function recvEvent(event) {
   // chatメッセージのみ解析
   if (message.chat) {
 
-    if(_startTime === undefined || isNaN(_startTime)){
+    if (_startTime === undefined || isNaN(_startTime)) {
       _startTime = getStartPlayTime();
-      console.log("再生開始秒数(vpos) : " + _startTime);
+      //console.log("再生開始秒数(vpos) : " + _startTime);
     }
 
 
 
     // ブラウザにWeb Speech API Speech Synthesis機能があるか判定
     if ('speechSynthesis' in window) {
-
+      
       // 再生開始時
       if (_startTime !== undefined && message.chat.vpos > _startTime) {
+        
+        //console.log("再生開始秒数(vpos)　これは呼ばれる？ : " + _startTime);
 
-        console.log(message);
+        //console.log(message);
 
         let yomiage_text = message.chat.content;
 
@@ -131,6 +135,7 @@ function recvEvent(event) {
           // インフォ
           // 例 →　/info 10 放送者のサポーターが1人来場しました
           //       /info 10 ニコニ広告枠から1人が来場しました
+          //       /info 8 第16位にランクインしました
           let content = message.chat.content;
           const pos = content.indexOf(' ', content.indexOf(' ') + 1); // ２つ目の半角スペースの位置を探す
           yomiage_text = content.substr(pos);
@@ -146,12 +151,54 @@ function recvEvent(event) {
 
 
         // 発言を設定
+        /*
         const uttr = new SpeechSynthesisUtterance();
-        uttr.rate = 6; // 速度　min 0.1～ max 10.0
-        uttr.volume = 1.0; // 音量 min 0 ~ max 1
+        const input_voice = document.querySelector('.ext-setting-menu .ext-bouyomi .option.voices select');
+
+        if (input_voice && input_voice.length) {
+          if(_currentVoiceName !== input_voice.value) {
+            _currentVoiceName = input_voice.value;
+            console.debug(input_voice.value);
+            console.debug(speechSynthesis.getVoices());
+            console.debug(speechSynthesis.getVoices().filter(voice => voice.name === input_voice.value)[0]);
+            uttr.voice = speechSynthesis.getVoices().filter(voice => voice.name === input_voice.value)[0];
+            speechSynthesis.cancel();  
+          }
+        }
+        const input_rate = document.querySelector('.ext-setting-menu .ext-bouyomi .option.rate input');
+        if (input_rate) {
+          uttr.rate = input_rate.value; // 速度　min 0.1～ max 10.0
+        }
+
+        const input_pitch = document.querySelector('.ext-setting-menu .ext-bouyomi .option.pitch input');
+        if (input_pitch) {
+          uttr.pitch = input_pitch.value;
+        }
+
+        const input_volume = document.querySelector('.ext-setting-menu .ext-bouyomi .option.volume input');
+        if (input_volume) {
+          uttr.volume = input_volume.value; // 音量 min 0 ~ max 1
+        }
+
         uttr.text = yomiage_text;
+
+        uttr.onerror = function (event) {
+          console.error(event);
+        };
+        */
+
         // 発言を再生
-        window.speechSynthesis.speak(uttr);
+        //window.speechSynthesis.speak(uttr);
+        //chrome.runtime.sendMessage({toSay: "hello Vikra mhello Vikram hello Vikram hello Vikram"});
+
+        // 新しいHTML要素を作成
+        if(document.querySelector("#ext_logBox")){
+          var newYomiCommentDom = document.createElement('p');
+          var newYomiCommentText = document.createTextNode(yomiage_text);
+          newYomiCommentDom.appendChild(newYomiCommentText);
+          document.querySelector("#ext_logBox").appendChild(newYomiCommentDom);  
+        }
+
 
         console.log("読み上げます → [" + message.chat.no + "] " + yomiage_text);
       } else {
@@ -176,14 +223,15 @@ function recvEvent(event) {
 
 
 
+    if (message.chat && message.chat.no && message.chat.premium && message.chat.premium === 1) {
+      _premiumList[message.chat.no] = true;
+    }
 
 
 
+    console.log(message.chat);
 
-
-    //console.log(message.chat);
-
-    console.log(message.chat.no + ", " + message.chat.content + ", " + message.chat.user_id);
+    //console.log(message.chat.no + ", " + message.chat.content + ", " + message.chat.user_id);
 
     if (isNaN(message.chat.user_id)) {
       // 184さんの処理
@@ -206,7 +254,7 @@ function recvEvent(event) {
       }
 
       // 取得中のユーザーIDなら取得せず終わる
-      if(_gettingList[message.chat.user_id]) {
+      if (_gettingList[message.chat.user_id]) {
         return;
       } else {
         _gettingList[message.chat.user_id] = true;
@@ -225,7 +273,7 @@ function recvEvent(event) {
           var userNameFull = xmlDom.getElementsByTagName("dc:creator")[0].innerHTML;
           var userName = userNameFull;
           // 8文字より長い場合は省略
-          if(userName.length > 7) {
+          if (userName.length > 7) {
             userName = userName.substring(0, 7) + "･･";
           }
 
@@ -236,21 +284,21 @@ function recvEvent(event) {
 
           // 過去のコメントの名前を置き換える
           for (let key in _commentList) {
-            if(_commentList[key] == message.chat.user_id) {
+            if (_commentList[key] == message.chat.user_id) {
               _commentList[key] = userName;
             }
           }
           // 過去のコメントの名前を置き換える
           for (let key in _commentListFull) {
-            if(_commentListFull[key] == message.chat.user_id) {
+            if (_commentListFull[key] == message.chat.user_id) {
               _commentListFull[key] = userNameFull;
             }
           }
 
           var currentCommentList = document.querySelectorAll('.user_name_by_extention:not(.user184)');
-          for(var i = 0 ; i < currentCommentList.length ; i++){
-            if(currentCommentList[i].innerText == message.chat.user_id){
-              currentCommentList[i].innerText = userName ;
+          for (var i = 0; i < currentCommentList.length; i++) {
+            if (currentCommentList[i].innerText == message.chat.user_id) {
+              currentCommentList[i].innerText = userName;
               currentCommentList[i].setAttribute("title", userNameFull);
             }
           }
@@ -269,52 +317,83 @@ function recvEvent(event) {
 }
 
 function InsertUserName(currentNode, newNo) {
-    // 追加する名前のDOMを作成
-    var newElement = document.createElement("span");
-    var newContent = document.createTextNode(_commentList[newNo]);
-    newElement.appendChild(newContent);
-    if (_183UserList[newNo]) {
-      newElement.setAttribute("class", "user_name_by_extention user184");
-    } else {
-      newElement.setAttribute("class", "user_name_by_extention");
-    }
-    newElement.setAttribute("title", _commentListFull[newNo]);
+  // 追加する名前のDOMを作成
+  var newElement = document.createElement("span");
+  var newContent = document.createTextNode(_commentList[newNo]);
+  newElement.appendChild(newContent);
+  if (_183UserList[newNo]) {
+    newElement.setAttribute("class", "user_name_by_extention user184");
+  } else {
+    newElement.setAttribute("class", "user_name_by_extention");
+  }
+  newElement.setAttribute("title", _commentListFull[newNo]);
 
-    // 作成したDOMの挿入
-    //var comment = currentNode.querySelector(".___comment-text___1pM9h"); // コメントテキストのDOM
-    var comment = currentNode.querySelector("[class^=___comment-text___]"); // コメントテキストのDOM
-    comment.parentNode.insertBefore(newElement, comment);
+  // 作成したDOMの挿入
+  //var comment = currentNode.querySelector(".___comment-text___1pM9h"); // コメントテキストのDOM
+  var comment = currentNode.querySelector("[class^=___comment-text___]"); // コメントテキストのDOM
+  comment.parentNode.insertBefore(newElement, comment);
+}
+
+
+function InsertPremium(currentNode) {
+  // 追加するDOMを作成
+  var newElement = document.createElement("span");
+  var newContent = document.createTextNode("P");
+  newElement.appendChild(newContent);
+  newElement.setAttribute("class", "premium_by_extention");
+  newElement.setAttribute("title", "プレミアムアカウント");
+
+  // 作成したDOMの挿入
+  //var comment = currentNode.querySelector(".___comment-text___1pM9h"); // コメントテキストのDOM
+  var comment = currentNode.querySelector("[class^=___comment-text___]"); // コメントテキストのDOM
+  comment.parentNode.insertBefore(newElement, comment);
 }
 
 function watchCommentDOM(mutationsList, observer) {
 
   for (const mutation of mutationsList) {
 
-    for(var i = 0 ; i < mutation.target.childNodes.length ; i++ ){
+    for (var i = 0; i < mutation.target.childNodes.length; i++) {
       var currentNode = mutation.target.childNodes[i];
       //if(currentNode.querySelector('.___comment-number___i8gp1')){ // コメント番号のDOM
-      if(currentNode.querySelector("[class^=___comment-number___]")){ // コメント番号のDOM
+      if (currentNode.querySelector("[class^=___comment-number___]")) { // コメント番号のDOM
         //var newNo = currentNode.querySelector('.___comment-number___i8gp1').outerText;
         var newNo = currentNode.querySelector("[class^=___comment-number___]").outerText;
 
         if (newNo.length > 0 && !currentNode.querySelector(".user_name_by_extention")) {
 
+
+          // プレ垢のDOMを挿入
+          if (_premiumList[newNo] === true) {
+            InsertPremium(currentNode);
+          }
+
+          // 名前のDOMを挿入
           if (_commentList[newNo]) {
 
             InsertUserName(currentNode, newNo);
-  
 
           } else {
             //console.log(`${newNo} に対応する名前がありません。取得失敗さんにします。`);
             _commentList[newNo] = "取得失敗";
             InsertUserName(currentNode, newNo);
           }
-  
-        }        
+
+          /*
+          if(newNo % 2 === 0){
+            currentNode.classList.add('odd_by_extention');
+          } else {
+            currentNode.classList.add('even_by_extention');
+          }
+          */
+
+
+        }
       }
+
       // コメントに行送りを対応させるためクラスを付与
       //currentNode.classList.add('wordbreak');
-      if(currentNode.querySelector("[class^=___comment-text___]").clientHeight > 28){
+      if (currentNode.querySelector("[class^=___comment-text___]").clientHeight > 28) {
         //console.log("YES  " + currentNode.querySelector("[class^=___comment-text___]").textContent + "  " + currentNode.querySelector("[class^=___comment-text___]").clientHeight);
         currentNode.querySelector("[class^=___comment-text___]").classList.add('multiple-line');
       } else {
@@ -323,25 +402,25 @@ function watchCommentDOM(mutationsList, observer) {
       }
     }
 
-  } 
+  }
 }
 
 
 //監視オプション
 const options = {
-  childList:              true,  //直接の子の変更を監視
-  characterData:          true,  //文字の変化を監視
-  characterDataOldValue:  false, //属性の変化前を記録
-  attributes:             true,  //属性の変化を監視
-  subtree:                false, //全ての子要素を監視
+  childList: true,  //直接の子の変更を監視
+  characterData: true,  //文字の変化を監視
+  characterDataOldValue: false, //属性の変化前を記録
+  attributes: true,  //属性の変化を監視
+  subtree: false, //全ての子要素を監視
 }
 
-function startWathCommentDOM(){
+function startWathCommentDOM() {
   //const target = document.querySelector(".___table___2e1QA"); // コメントDOMの直上の親DOMを指定
   const target = document.querySelector("[class^=___table___]"); // コメントDOMの直上の親DOMを指定
-  if(target){
+  if (target) {
     const obs = new MutationObserver(watchCommentDOM);
-    obs.observe(target, options);  
+    obs.observe(target, options);
     // 監視をスタートしたら直後に再描画させる
     var now = new Date();
     target.setAttribute("byExtention", now.getSeconds());
@@ -353,7 +432,7 @@ function watchParentDOM(mutationsList, observer) {
   startWathCommentDOM();
 }
 
-window.addEventListener('load', function() {
+window.addEventListener('load', function () {
 
   // コメントDOMの監視を開始
   startWathCommentDOM();
@@ -361,9 +440,9 @@ window.addEventListener('load', function() {
   // コメントDOMの親DOMの監視を開始(フルスクリーン解除時、放送ネタ画面の表示時に対応するため)
   //const target_parent = document.querySelector(".___contents-area___wNY_j"); // コメントDOMの大元の親DOMを指定
   const target_parent = document.querySelector("[class^=___contents-area___]"); // コメントDOMの大元の親DOMを指定
-  if(target_parent){
+  if (target_parent) {
     const obs = new MutationObserver(watchParentDOM);
-    obs.observe(target_parent, options);  
+    obs.observe(target_parent, options);
   }
 
 });

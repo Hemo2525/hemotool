@@ -4,13 +4,18 @@
   "version": "0.29",
   "description": "ニコ生にいろいろな拡張機能を追加します",
   "permissions": [
-    "storage"
+    "storage",
+    "tts"
   ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "web_accessible_resources": [
     { 
       "resources": [
         "/js/comeview-inject.js",
-        "/js/nicovideo-inject.js"
+        "/js/nicovideo-inject.js",
+        "/html/parts-menu.html"
       ],
       "matches": ["https://live.nicovideo.jp/*"]
     },
