@@ -52,14 +52,15 @@ window.addEventListener('load', function () {
         //console.log("ここくる？-------------------------------------");
         setAkashicParentFrameEvent();
     }
+
     
     window.addEventListener('beforeunload', function(e) {
-        console.log("プッシュ");
-        chrome.runtime.sendMessage({stop: "AAAA"});
+        chrome.runtime.sendMessage({stop: "stop"});
     }, false);
 
 
 });
+
 
 // へもツールで使用するニコ生のDOMがちゃんと存在しているか確認
 function initialize(callback, timeoutMiliSec) {
@@ -120,18 +121,15 @@ function initialize(callback, timeoutMiliSec) {
 }
 
 
-
 // ニコニコプレイヤーにボタンのDOMを挿入
 function insertBtnToPlayer(parts_data) {
-
-
 
     // 拡張機能ボタンの挿入
     let settingMenu = document.querySelector("[class^=___comment-button___]");
 
     let p1 = document.createElement('div');
     p1.innerHTML = parts_data;
-    
+    settingMenu.parentNode.prepend(p1);
     /*
     '<div class="item ext-pip-rec">' +
     '<div class="name">録画開始<span class="mini">(ニコ生ゲーム非対応)</span></div>' +
@@ -139,16 +137,9 @@ function insertBtnToPlayer(parts_data) {
     */
 
 
-    // ボタンの挿入
-    settingMenu.parentNode.prepend(p1);
-
-
     let overlay = document.createElement('div');
     overlay.id = "ext_overlay";
     document.querySelector('[class^=___player-display-screen]').prepend(overlay);
-
-
-
 
 
     // 拡張機能ボタンのメニュー表示
@@ -180,26 +171,12 @@ function insertBtnToPlayer(parts_data) {
     });
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    // 各種ショートカット用のDOMを作成しておく
     let shortcut = document.createElement('div');
     shortcut.id = "ext_shortcut";
     shortcut.innerHTML = 
         '<div class="item comeview" aria-label="コメントビューアー機能をONにします">コメビュ</div>'+
+        '<div class="item yomiage" aria-label="読み上げ機能をONにします">読み上げ</div>'+
         '<div class="item click" aria-label="ブラウザの右クリックメニューを無効化します">右クリックメニューOFF</div>'+
         '<div class="item seek" aria-label="シークバーを無効化します">シークバーOFF</div>'+
         '<div class="item video" aria-label="配信映像を非表示にします">配信映像OFF</div>'+
@@ -209,11 +186,6 @@ function insertBtnToPlayer(parts_data) {
         '<div class="item picture" aria-label="映像＋コメントを小窓で表示します">小窓表示</div>';
     document.querySelector('[class^=___player-controller___]').append(shortcut);
     
-
-
-
-
-
 
     // コメビュ
     let comeviewBtn = document.querySelector('.ext-setting-menu .ext-comeview .item .value');
@@ -238,8 +210,36 @@ function insertBtnToPlayer(parts_data) {
     });
     document.querySelector('#ext_shortcut .comeview').addEventListener('click', function() {
         comeview();
-
     });
+
+
+
+    // 読み上げ
+    let yomiageBtn = document.querySelector('.ext-setting-menu .ext-yomiage .item .value');
+    yomiageBtn.addEventListener('click', yomiage);
+    let yomiagePin = document.querySelector('.ext-setting-menu .ext-yomiage .item .pin');
+    yomiagePin.addEventListener('click', function() {
+        if(yomiagePin.getAttribute("ext-pin-on")){
+            // 設定画面のピンのアイコンをOFF表示
+            yomiagePin.removeAttribute("ext-pin-on");
+            // ショートカットを非表示
+            document.querySelector('#ext_shortcut .item.yomiage').removeAttribute("ext-pin-on");
+            // 拡張機能の設定に保存
+            chrome.storage.local.set({"ext_yomiage_pin": "OFF"}, function() {});
+        } else {
+            // 設定画面のピンのアイコンをON表示
+            yomiagePin.setAttribute("ext-pin-on", "ON");
+            // ショートカットを表示
+            document.querySelector('#ext_shortcut .item.yomiage').setAttribute("ext-pin-on", "ON");
+            // 拡張機能の設定に保存
+            chrome.storage.local.set({"ext_yomiage_pin": "ON"}, function() {});
+        }
+    });
+    document.querySelector('#ext_shortcut .yomiage').addEventListener('click', function() {
+        yomiage();
+    });
+
+
 
     // 右クリックOFF
     let righClickBtn = document.querySelector('.ext-setting-menu .ext-rightClick .value');
@@ -462,7 +462,7 @@ function insertBtnToPlayer(parts_data) {
         }
     });
     document.querySelector('#ext_shortcut .picture').addEventListener('click', function() {
-        //pip();
+        pip();
     });
 
 
@@ -480,9 +480,9 @@ function insertBtnToPlayer(parts_data) {
         document.querySelector('.ext-setting-menu .ext-comeview .setting').classList.toggle('active')
     }, false);
 
-    document.querySelector('.ext-setting-menu .ext-bouyomi .setting').addEventListener('click', (e) => {
-        changeElement(document.querySelector('.ext-setting-menu .ext-bouyomi .option-box'));
-        document.querySelector('.ext-setting-menu .ext-bouyomi .setting').classList.toggle('active')
+    document.querySelector('.ext-setting-menu .ext-yomiage .setting').addEventListener('click', (e) => {
+        changeElement(document.querySelector('.ext-setting-menu .ext-yomiage .option-box'));
+        document.querySelector('.ext-setting-menu .ext-yomiage .setting').classList.toggle('active')
     }, false);
 
     let settingsBtn = document.querySelectorAll('.ext-setting-menu .option-box');
@@ -508,43 +508,132 @@ function insertBtnToPlayer(parts_data) {
     document.querySelector('.ext-setting-menu .ext-comeview .option.premium input').addEventListener('change', () => {
         comeview_option_premium();
     });
+    // [コメント] コテハン表示
+    document.querySelector('.ext-setting-menu .ext-comeview .option.kotehan input').addEventListener('change', () => {
+        comeview_option_kotehan();
+    });
 
     // [読み上げ] 音声の種類
-    document.querySelector('.ext-setting-menu .ext-bouyomi .option.voices select').addEventListener('change', (e) => {
+    document.querySelector('.ext-setting-menu .ext-yomiage .option.voices select').addEventListener('change', (e) => {
         if(e.isTrusted){
-            chrome.runtime.sendMessage({setVoiceName: document.querySelector('.ext-setting-menu .ext-bouyomi .option.voices select').value});
+            chrome.runtime.sendMessage({setVoiceName: document.querySelector('.ext-setting-menu .ext-yomiage .option.voices select').value});
+            chrome.storage.local.set({"ext_yomiage_opt_voices": document.querySelector('.ext-setting-menu .ext-yomiage .option.voices select').value}, function() {});
         }
-    });    
+    });
     // [読み上げ] 音量
-    document.querySelector('.ext-setting-menu .ext-bouyomi .option.volume input').addEventListener('change', (e) => {
+    document.querySelector('.ext-setting-menu .ext-yomiage .option.volume input').addEventListener('change', (e) => {
         if(e.isTrusted){
-            chrome.runtime.sendMessage({setVolume: document.querySelector('.ext-setting-menu .ext-bouyomi .option.volume input').value});
+            chrome.runtime.sendMessage({setVolume: document.querySelector('.ext-setting-menu .ext-yomiage .option.volume input').value});
+            chrome.storage.local.set({"ext_yomiage_opt_volume": document.querySelector('.ext-setting-menu .ext-yomiage .option.volume input').value}, function() {});
         }
     });
     // [読み上げ] 速度
-    document.querySelector('.ext-setting-menu .ext-bouyomi .option.rate input').addEventListener('change', (e) => {
+    document.querySelector('.ext-setting-menu .ext-yomiage .option.rate input').addEventListener('change', (e) => {
         if(e.isTrusted){
-            chrome.runtime.sendMessage({setRate: document.querySelector('.ext-setting-menu .ext-bouyomi .option.rate input').value});
+            chrome.runtime.sendMessage({setRate: document.querySelector('.ext-setting-menu .ext-yomiage .option.rate input').value});
+            chrome.storage.local.set({"ext_yomiage_opt_rate": document.querySelector('.ext-setting-menu .ext-yomiage .option.rate input').value}, function() {});
         }
     });
     // [読み上げ] ピッチ
-    document.querySelector('.ext-setting-menu .ext-bouyomi .option.pitch input').addEventListener('change', (e) => {
+    document.querySelector('.ext-setting-menu .ext-yomiage .option.pitch input').addEventListener('change', (e) => {
         if(e.isTrusted){
-            chrome.runtime.sendMessage({setPitch: document.querySelector('.ext-setting-menu .ext-bouyomi .option.pitch input').value});
+            chrome.runtime.sendMessage({setPitch: document.querySelector('.ext-setting-menu .ext-yomiage .option.pitch input').value});
+            chrome.storage.local.set({"ext_yomiage_opt_pitch": document.querySelector('.ext-setting-menu .ext-yomiage .option.pitch input').value}, function() {});
         }
     });
+
+    // [読み上げ] ギフトの読み上げ
+    document.querySelector('.ext-setting-menu .ext-yomiage .option.gift input').addEventListener('change', (e) => {
+        if(document.querySelector('.ext-setting-menu .ext-yomiage .option.gift input').checked){
+            chrome.storage.local.set({"ext_yomiage_opt_gift": "ON"}, function() {});
+        } else {
+            chrome.storage.local.set({"ext_yomiage_opt_gift": "OFF"}, function() {});
+        }
+    });
+    // [読み上げ] 広告の読み上げ
+    document.querySelector('.ext-setting-menu .ext-yomiage .option.koukoku input').addEventListener('change', (e) => {
+        if(document.querySelector('.ext-setting-menu .ext-yomiage .option.koukoku input').checked){
+            chrome.storage.local.set({"ext_yomiage_opt_koukoku": "ON"}, function() {});
+        } else {
+            chrome.storage.local.set({"ext_yomiage_opt_koukoku": "OFF"}, function() {});
+        }
+    });
+    // [読み上げ] 来場者の読み上げ
+    document.querySelector('.ext-setting-menu .ext-yomiage .option.raijosya input').addEventListener('change', (e) => {
+        if(document.querySelector('.ext-setting-menu .ext-yomiage .option.raijosya input').checked){
+            chrome.storage.local.set({"ext_yomiage_opt_raijosya": "ON"}, function() {});
+        } else {
+            chrome.storage.local.set({"ext_yomiage_opt_raijosya": "OFF"}, function() {});
+        }
+    });
+    // [読み上げ] リクエストの読み上げ
+    document.querySelector('.ext-setting-menu .ext-yomiage .option.request input').addEventListener('change', (e) => {
+        if(document.querySelector('.ext-setting-menu .ext-yomiage .option.request input').checked){
+            chrome.storage.local.set({"ext_yomiage_opt_request": "ON"}, function() {});
+        } else {
+            chrome.storage.local.set({"ext_yomiage_opt_request": "OFF"}, function() {});
+        }
+    });
+    // [読み上げ] エモーションの読み上げ
+    document.querySelector('.ext-setting-menu .ext-yomiage .option.emotion input').addEventListener('change', (e) => {
+        if(document.querySelector('.ext-setting-menu .ext-yomiage .option.emotion input').checked){
+            chrome.storage.local.set({"ext_yomiage_opt_emotion": "ON"}, function() {});
+        } else {
+            chrome.storage.local.set({"ext_yomiage_opt_emotion": "OFF"}, function() {});
+        }
+    });
+    // [読み上げ] 長いコメントの省略
+    document.querySelector('.ext-setting-menu .ext-yomiage .option.syoryaku input').addEventListener('change', (e) => {
+        let syoryakuValue = document.querySelector('.ext-setting-menu .ext-yomiage .option.syoryaku input').value;
+        if(syoryakuValue && !isNaN(syoryakuValue)) {
+            chrome.storage.local.set({"ext_yomiage_opt_syoryaku": syoryakuValue}, function() {});            
+        }
+    });
+    // [読み上げ] 名前の読み上げ
+    document.querySelector('.ext-setting-menu .ext-yomiage .option.nameyomiage input').addEventListener('change', (e) => {
+        if(document.querySelector('.ext-setting-menu .ext-yomiage .option.nameyomiage input').checked){
+            chrome.storage.local.set({"ext_yomiage_opt_nameyomiage": "ON"}, function() {});
+        } else {
+            chrome.storage.local.set({"ext_yomiage_opt_nameyomiage": "OFF"}, function() {});
+        }
+    });
+    // [読み上げ] 教育機能の有効
+    document.querySelector('.ext-setting-menu .ext-yomiage .option.kyoiku input').addEventListener('change', (e) => {
+        if(document.querySelector('.ext-setting-menu .ext-yomiage .option.kyoiku input').checked){
+            chrome.storage.local.set({"ext_yomiage_opt_kyoiku": "ON"}, function() {});
+        } else {
+            chrome.storage.local.set({"ext_yomiage_opt_kyoiku": "OFF"}, function() {});
+        }
+    });
+
     let s = setSpeech();
     s.then((voices) => {
-        voices.forEach(function (voice, i) {
-            //console.debug(voice.name + " (" + voice.lang + ")");
-            let item = document.createElement('option');
-            
-            item.text = voice.name + " (" + voice.lang + ")";
-            item.value = voice.name;
-    
-            let select = document.querySelector('.ext-setting-menu .ext-bouyomi .option.voices select');
-            select.appendChild(item);
+
+        chrome.storage.local.get("ext_yomiage_opt_voices", function (value) {
+
+            voices.forEach(function (voice, i) {
+                //console.debug(voice.name + " (" + voice.lang + ")");
+                let item = document.createElement('option');
+                
+                item.text = voice.name + " (" + voice.lang + ")";
+                item.value = voice.name;
+
+                if (value.ext_yomiage_opt_voices
+                    && value.ext_yomiage_opt_voices === item.value) {
+                    item.selected = true;
+                }
+        
+                let select = document.querySelector('.ext-setting-menu .ext-yomiage .option.voices select');
+                select.appendChild(item);
+
+
+
+            });
+
+
         });
+
+
         
         //chrome.runtime.sendMessage({init: "AAA"});
     });
@@ -566,26 +655,98 @@ function insertBtnToPlayer(parts_data) {
     let targetLogDom = document.querySelector('#ext_logBox');
 
     _obsLogBox = new MutationObserver(wathLogBox);
-    _obsLogBox.observe(targetLogDom, logOption); 
+    _obsLogBox.observe(targetLogDom, logOption);
+
+
+
+    // 新しいHTML要素を作成
+    var kotehanElement = document.createElement('div');
+    kotehanElement.id = "ext_kotehanBox";
+
+    // 指定した要素の中の末尾に挿入
+    targeteElement.appendChild(kotehanElement);
+
+
+    // 新しいHTML要素を作成
+    var kotehanToInject = document.createElement('div');
+    kotehanToInject.id = "ext_kotehanToInjectBox";
+
+    // 指定した要素の中の末尾に挿入
+    targeteElement.appendChild(kotehanToInject);
+
+    kotehanInitialize();
+    getKotehan();
 }
+
+
+let ___first_run = true; // ★拡張機能の更新後にブラウザを更新すると動かなくなる不具合の暫定対処★
 
 function wathLogBox(mutationRecords, observer){
     if(mutationRecords && mutationRecords.length > 0 && mutationRecords[0].addedNodes && mutationRecords[0].addedNodes.length > 0){
-        console.debug(mutationRecords[0].addedNodes[0].outerText);
-        chrome.runtime.sendMessage({toSay: mutationRecords[0].addedNodes[0].outerText});
         
-        /** DOM変化の監視を一時停止 */
-        _obsLogBox.disconnect();
+        // 一度に2つ以上のDOM追加にも対応
+        mutationRecords.forEach(item => {
+            //console.debug(item.addedNodes[0].outerText);
+            let yomiage_text = item.addedNodes[0].outerText;
 
-        /* pタグの削除 */
-        document.querySelector('#ext_logBox').innerHTML = "";
+            // 教育機能が有効ならば
+            if(document.querySelector('.ext-setting-menu .ext-yomiage .option.kyoiku input').checked){
+                let kyoikuRet = kyoiku(yomiage_text, false);
+                if(kyoikuRet.bIsSuccess) {
+                    yomiage_text = kyoikuRet.leftWord + "、は、" + kyoikuRet.rightWord + "、を覚えました";
+                    setKyoiku(kyoikuRet.leftWord, kyoikuRet.rightWord);
+                }
+    
+                let boukyakuRet = boukyaku(yomiage_text, false);
+                if(boukyakuRet.bIsSuccess) {
+                    yomiage_text = boukyakuRet.word + "、を忘れました";
+                    deleteKyoiku(boukyakuRet.word);
+                }
+    
+                // 教育コマンドや忘却コマンドではないときに限り置換
+                if(kyoikuRet.bIsSuccess === false && boukyakuRet.bIsSuccess === false) {
+                    yomiage_text = replaceKyoiku(yomiage_text);
+                }
+            }
 
-        /** DOM変化の監視を再開 */
-        let targetLogDom = document.querySelector('#ext_logBox');
-        const logOption = {
-            childList:  true,  //直接の子の変更を監視
-        };
-        _obsLogBox.observe(targetLogDom, logOption);
+
+/*
+            let kotehanAt = yomiage_text.indexOf('@');
+            if(kotehanAt === -1){
+              kotehanAt = yomiage_text.indexOf('＠');
+            }
+            if(kotehanAt !== -1){
+              let kotehan = yomiage_text.substring(kotehanAt + 1); // ＠の次の文字から後ろを抽出
+              if(kotehan && kotehan.length > 0) {
+                kotehan = kotehan.substr( 0, 16 ); // 最大16文字(公式の仕様にあわせる)
+              }
+            }
+*/            
+            
+
+
+            if(___first_run) {
+                ___first_run = false;
+                chrome.runtime.sendMessage({setVoiceName: document.querySelector('.ext-setting-menu .ext-yomiage .option.voices select').value});
+            }
+
+            chrome.runtime.sendMessage({toSay: yomiage_text });
+        
+            /** DOM変化の監視を一時停止 */
+            _obsLogBox.disconnect();
+    
+            /* pタグの削除 */
+            document.querySelector('#ext_logBox').innerHTML = "";
+    
+            /** DOM変化の監視を再開 */
+            let targetLogDom = document.querySelector('#ext_logBox');
+            const logOption = {
+                childList:  true,  //直接の子の変更を監視
+            };
+            _obsLogBox.observe(targetLogDom, logOption);
+
+        });
+
     }
 }
 
@@ -610,6 +771,7 @@ function setSpeech() {
 function setSettingValue() {
 
     if (chrome.storage.local) {
+
         // コメビュ機能
         chrome.storage.local.get("ext_comeview", function (value) {
             if (value.ext_comeview == "ON") {
@@ -649,10 +811,102 @@ function setSettingValue() {
                 comeview_option_premium();
             }
         });
-
-
-
-        
+        // コメビュ機能のコテハン表示オプション
+        chrome.storage.local.get("ext_comeview_opt_kotehan", function (value) {
+            if (value.ext_comeview_opt_kotehan == "ON") {
+                document.querySelector('.ext-setting-menu .ext-comeview .option.kotehan input').checked = true;
+                comeview_option_kotehan();
+            }
+        });
+        // 読み上げ機能
+        chrome.storage.local.get("ext_yomiage", function (value) {
+            if (value.ext_yomiage == "ON") {
+                yomiage();
+            }
+        });
+        // 読み上げ機能のピン状態
+        chrome.storage.local.get("ext_yomiage_pin", function (value) {
+            if (value.ext_yomiage_pin == "ON") {
+                // 設定画面のピンのアイコンをON表示
+                document.querySelector('.ext-setting-menu .ext-yomiage .pin').setAttribute("ext-pin-on", "ON");
+                // ショートカットを表示
+                document.querySelector('#ext_shortcut .item.yomiage').setAttribute("ext-pin-on", "ON");                
+            }
+        });
+        // 読み上げ機能の音声の種類
+        /*
+        chrome.storage.local.get("ext_yomiage_opt_voices", function (value) {
+            if (value.ext_yomiage_opt_voices) {
+                document.querySelector('.ext-setting-menu .ext-yomiage .option.voices select').value = value.ext_yomiage_opt_voices;
+            }
+        });
+        */
+        // 読み上げ機能の音量
+        chrome.storage.local.get("ext_yomiage_opt_volume", function (value) {
+            if (value.ext_yomiage_opt_volume) {
+                document.querySelector('.ext-setting-menu .ext-yomiage .option.volume input').value = value.ext_yomiage_opt_volume;
+            }
+        });
+        // 読み上げ機能の速度
+        chrome.storage.local.get("ext_yomiage_opt_rate", function (value) {
+            if (value.ext_yomiage_opt_rate) {
+                document.querySelector('.ext-setting-menu .ext-yomiage .option.rate input').value = value.ext_yomiage_opt_rate;
+            }
+        });
+         // 読み上げ機能のピッチ
+        chrome.storage.local.get("ext_yomiage_opt_pitch", function (value) {
+            if (value.ext_yomiage_opt_pitch) {
+                document.querySelector('.ext-setting-menu .ext-yomiage .option.pitch input').value = value.ext_yomiage_opt_pitch;
+            }
+        });
+        // 読み上げ機能のギフト読み上げ
+        chrome.storage.local.get("ext_yomiage_opt_gift", function (value) {
+            if (value.ext_yomiage_opt_gift == "ON") {
+                document.querySelector('.ext-setting-menu .ext-yomiage .option.gift input').checked = true;
+            }
+        });
+        // 読み上げ機能の広告読み上げ
+        chrome.storage.local.get("ext_yomiage_opt_koukoku", function (value) {
+            if (value.ext_yomiage_opt_koukoku == "ON") {
+                document.querySelector('.ext-setting-menu .ext-yomiage .option.koukoku input').checked = true;
+            }
+        });
+        // 読み上げ機能の来場者読み上げ
+        chrome.storage.local.get("ext_yomiage_opt_raijosya", function (value) {
+            if (value.ext_yomiage_opt_raijosya == "ON") {
+                document.querySelector('.ext-setting-menu .ext-yomiage .option.raijosya input').checked = true;
+            }
+        });
+        // 読み上げ機能のリクエスト読み上げ
+        chrome.storage.local.get("ext_yomiage_opt_request", function (value) {
+            if (value.ext_yomiage_opt_request == "ON") {
+                document.querySelector('.ext-setting-menu .ext-yomiage .option.request input').checked = true;
+            }
+        });
+        // 読み上げ機能のエモーション読み上げ
+        chrome.storage.local.get("ext_yomiage_opt_emotion", function (value) {
+            if (value.ext_yomiage_opt_emotion == "ON") {
+                document.querySelector('.ext-setting-menu .ext-yomiage .option.emotion input').checked = true;
+            }
+        });
+        // 読み上げ機能の長いコメントを省略
+        chrome.storage.local.get("ext_yomiage_opt_syoryaku", function (value) {
+            if (value.ext_yomiage_opt_syoryaku && !isNaN(value.ext_yomiage_opt_syoryaku)) {
+                document.querySelector('.ext-setting-menu .ext-yomiage .option.syoryaku input').value = value.ext_yomiage_opt_syoryaku;
+            }
+        });
+        // 読み上げ機能の名前の読み上げ
+        chrome.storage.local.get("ext_yomiage_opt_nameyomiage", function (value) {
+            if (value.ext_yomiage_opt_nameyomiage == "ON") {
+                document.querySelector('.ext-setting-menu .ext-yomiage .option.nameyomiage input').checked = true;
+            }
+        });
+        // 読み上げ機能の教育機能
+        chrome.storage.local.get("ext_yomiage_opt_kyoiku", function (value) {
+            if (value.ext_yomiage_opt_kyoiku == "ON") {
+                document.querySelector('.ext-setting-menu .ext-yomiage .option.kyoiku input').checked = true;
+            }
+        });
         // 右クリックOFF
         chrome.storage.local.get("ext_rightClick", function (value) {
             if (value.ext_rightClick == "ON") {

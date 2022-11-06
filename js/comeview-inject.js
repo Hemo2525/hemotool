@@ -52,7 +52,7 @@ function getStartPlayTime() {
       //console.log(posArray);
 
     } else {
-      //console.log("ここにはこないはず");
+      console.log("ここにはこないはず");
     }
   }
   return totalSec;
@@ -65,10 +65,14 @@ var _commentList = {};      // KEY:コメント番号, VALUE:対応するユー�
 var _commentListFull = {};  // KEY:コメント番号, VALUE:対応するユーザー名(フルネーム)
 var _183UserList = {};      // KEY:コメント番号, VALUE:184ユーザーID
 var _newUserList = {};      // KEY:コメント番号, VALUE:初めて書き込むユーザーID 
-var _premiumList = {};      // KEY:コメント番号,  VALUE:何でもいい値
+var _premiumList = {};      // KEY:コメント番号, VALUE:何でもいい値
 var _rawUserList = {};      // KEY:ユーザーID,   VALUE:GETしてきたユーザー名(最大7文字)
 var _rawUserListFull = {};  // KEY:ユーザーID,   VALUE:GETしてきたユーザー名(フルネーム)
 var _gettingList = {};      // KEY:ユーザーID,   VALUE:何でもいい値
+
+var _commentRawIdList = {}; // KEY:コメント番号   VALUE:ユーザーID
+var _kotehanList = [];      // KEY:ユーザーID,    VALUE:コテハン
+
 
 
 // WebSocketの受信イベントハンドラ
@@ -86,34 +90,27 @@ function recvEvent(event) {
   if (message.chat) {
 
     if (_startTime === undefined || isNaN(_startTime)) {
-      _startTime = getStartPlayTime();
+      //_startTime = getStartPlayTime();
       //console.log("再生開始秒数(vpos) : " + _startTime);
     }
 
 
 
-    // ブラウザにWeb Speech API Speech Synthesis機能があるか判定
-    if ('speechSynthesis' in window) {
+    
+    // 再生開始時
+    if (_startTime !== undefined && (message.chat.vpos + 10) > _startTime) {  // startTimeは常に更新してるので10秒?の足を履かせる
       
-      // 再生開始時
-      if (_startTime !== undefined && message.chat.vpos > _startTime) {
-        
-        //console.log("再生開始秒数(vpos)　これは呼ばれる？ : " + _startTime);
+      //console.log("再生開始秒数(vpos)　これは呼ばれる？ : " + _startTime);
 
-        //console.log(message);
+      //console.log(message);
 
-        let yomiage_text = message.chat.content;
+      let yomiage_text = message.chat.content;
+      let isSystemComment = false;
 
-        if (message.chat.content.startsWith('/nicoad', 0)) {
-          // 広告
-          // 例 →　/nicoad {"version":"1","totalAdPoint":32000,"message":"【広告貢献3位】もぴ太郎さんが100ptニコニ広告しました"}
-          const content = message.chat.content;
-          const pos = content.indexOf('{');
-          const obj = JSON.parse(content.substr(pos));
-          yomiage_text = obj.message;
-        }
-
-        if (message.chat.content.startsWith('/gift', 0)) {
+      
+      if (message.chat.content.startsWith('/gift', 0)) {
+        isSystemComment = true;
+        if (document.querySelector('.ext-yomiage .option.gift input').checked ){
           // ギフト
           // 例 →　/gift flowerstandmsg 36777535 "げすと" 5000 "お誕生日おめでとう" "フラワースタンド" 1
           let content = message.chat.content;
@@ -121,17 +118,30 @@ function recvEvent(event) {
           if (content.length >= 3) {
             yomiage_text = content[3] + "さんが" + content[4] + "ptギフトしました";
           }
+        } else {
+          yomiage_text = "";
         }
+      }
 
-        if (message.chat.content.startsWith('/spi', 0)) {
-          // ゲームリクエスト
-          // 例 →　/spi "「ナンプレ」がリクエストされました"
-          let content = message.chat.content;
-          const pos = content.indexOf(' ');
-          yomiage_text = content.substr(pos);
+      
+      if (message.chat.content.startsWith('/nicoad', 0)) {
+        isSystemComment = true;
+        if (document.querySelector('.ext-yomiage .option.koukoku input').checked ){
+          // 広告
+          // 例 →　/nicoad {"version":"1","totalAdPoint":32000,"message":"【広告貢献3位】もぴ太郎さんが100ptニコニ広告しました"}
+          const content = message.chat.content;
+          const pos = content.indexOf('{');
+          const obj = JSON.parse(content.substr(pos));
+          yomiage_text = obj.message;
+        } else {
+          yomiage_text = "";
         }
+      }
 
-        if (message.chat.content.startsWith('/info', 0)) {
+      
+      if (message.chat.content.startsWith('/info', 0)) {
+        isSystemComment = true;
+        if (document.querySelector('.ext-yomiage .option.raijosya input').checked ){
           // インフォ
           // 例 →　/info 10 放送者のサポーターが1人来場しました
           //       /info 10 ニコニ広告枠から1人が来場しました
@@ -139,75 +149,127 @@ function recvEvent(event) {
           let content = message.chat.content;
           const pos = content.indexOf(' ', content.indexOf(' ') + 1); // ２つ目の半角スペースの位置を探す
           yomiage_text = content.substr(pos);
+        } else {
+          yomiage_text = "";
         }
+      }
 
-        if (message.chat.content.startsWith('/emotion', 0)) {
+      
+      if (message.chat.content.startsWith('/spi', 0)) {
+        isSystemComment = true;
+        if (document.querySelector('.ext-yomiage .option.request input').checked ){
+          // ゲームリクエスト
+          // 例 →　/spi "「ナンプレ」がリクエストされました"
+          let content = message.chat.content;
+          const pos = content.indexOf(' ');
+          yomiage_text = content.substr(pos);
+        } else {
+          yomiage_text = "";
+        }
+      }
+
+
+      if (message.chat.content.startsWith('/emotion', 0)) {
+        isSystemComment = true;
+        if (document.querySelector('.ext-yomiage .option.emotion input').checked ){
           // エモーション
           // 例 →　/emotion ちいさい秋
           let content = message.chat.content;
           const pos = content.indexOf(' ');
           yomiage_text = content.substr(pos);
+        } else {
+          yomiage_text = "";
         }
-
-
-        // 発言を設定
-        /*
-        const uttr = new SpeechSynthesisUtterance();
-        const input_voice = document.querySelector('.ext-setting-menu .ext-bouyomi .option.voices select');
-
-        if (input_voice && input_voice.length) {
-          if(_currentVoiceName !== input_voice.value) {
-            _currentVoiceName = input_voice.value;
-            console.debug(input_voice.value);
-            console.debug(speechSynthesis.getVoices());
-            console.debug(speechSynthesis.getVoices().filter(voice => voice.name === input_voice.value)[0]);
-            uttr.voice = speechSynthesis.getVoices().filter(voice => voice.name === input_voice.value)[0];
-            speechSynthesis.cancel();  
-          }
-        }
-        const input_rate = document.querySelector('.ext-setting-menu .ext-bouyomi .option.rate input');
-        if (input_rate) {
-          uttr.rate = input_rate.value; // 速度　min 0.1～ max 10.0
-        }
-
-        const input_pitch = document.querySelector('.ext-setting-menu .ext-bouyomi .option.pitch input');
-        if (input_pitch) {
-          uttr.pitch = input_pitch.value;
-        }
-
-        const input_volume = document.querySelector('.ext-setting-menu .ext-bouyomi .option.volume input');
-        if (input_volume) {
-          uttr.volume = input_volume.value; // 音量 min 0 ~ max 1
-        }
-
-        uttr.text = yomiage_text;
-
-        uttr.onerror = function (event) {
-          console.error(event);
-        };
-        */
-
-        // 発言を再生
-        //window.speechSynthesis.speak(uttr);
-        //chrome.runtime.sendMessage({toSay: "hello Vikra mhello Vikram hello Vikram hello Vikram"});
-
-        // 新しいHTML要素を作成
-        if(document.querySelector("#ext_logBox")){
-          var newYomiCommentDom = document.createElement('p');
-          var newYomiCommentText = document.createTextNode(yomiage_text);
-          newYomiCommentDom.appendChild(newYomiCommentText);
-          document.querySelector("#ext_logBox").appendChild(newYomiCommentDom);  
-        }
-
-
-        console.log("読み上げます → [" + message.chat.no + "] " + yomiage_text);
-      } else {
-        console.log('message.chat.vpos: ' + message.chat.vpos + ', _startTime: ' + _startTime);
       }
 
 
+      yomiage_text = yomiage_text.replace(/wwww/g, 'ワラワラ');
+      yomiage_text = yomiage_text.replace(/ww/g, 'ワラワラ');
+      yomiage_text = yomiage_text.replace(/w/g, 'ワラ');
+      yomiage_text = yomiage_text.replace(/ｗｗｗ/g, 'ワラワラ');
+      yomiage_text = yomiage_text.replace(/ｗｗ/g, 'ワラワラ');
+      yomiage_text = yomiage_text.replace(/ｗ/g, 'ワラ');
+      yomiage_text = yomiage_text.replace(/8888/g, 'ぱちぱちぱち');
+      yomiage_text = yomiage_text.replace(/888/g, 'ぱちぱちぱち');
+      yomiage_text = yomiage_text.replace(/88/g, 'ぱちぱち');
+      yomiage_text = yomiage_text.replace(/８８８８/g, 'ぱちぱちぱち');
+      yomiage_text = yomiage_text.replace(/８８８/g, 'ぱちぱちぱち');
+      yomiage_text = yomiage_text.replace(/８８/g, 'ぱちぱち');
+      yomiage_text = yomiage_text.replace(/・/g, '');  // 「なかぐろ」と読み上げられる為
+
+      if ( yomiage_text.match(/http/)) yomiage_text = "URL省略";
+      
+
+
+      // オプションの省略機能が有効ならば
+      if (yomiage_text.length > 0 && document.querySelector('.ext-yomiage .option.syoryaku input').value ){
+        let syouryaku = document.querySelector('.ext-yomiage .option.syoryaku input').value;
+        if(!isNaN(syouryaku) && syouryaku > 0) {
+          if(yomiage_text.length >= syouryaku) {
+            yomiage_text = yomiage_text.substr( 0, syouryaku );
+            yomiage_text += "、以下略";
+          }
+        }
+      }
+
+
+
+
+
+      // オプションの名前の読み上げ機能がONならば
+      if (isSystemComment === false && document.querySelector('.ext-yomiage .option.nameyomiage input').checked ){
+        if (message.chat && message.chat.user_id && isNaN(message.chat.user_id)) {
+          // 184さんの処理
+          // yomiage_text += "　イヤヨ";
+        } else if(_rawUserListFull[message.chat.user_id]){
+          yomiage_text += "、" + _rawUserListFull[message.chat.user_id];
+        }
+      }
+
+      // 読み上げ機能がONならば
+      if(document.querySelector('.ext-setting-menu .ext-yomiage').getAttribute("ext-attr-on")) {
+        
+        // 読み上げ用のDOMに読み上げテキストを挿入（結果、読み上げられる）
+        if(yomiage_text.length > 0 && document.querySelector("#ext_logBox")){
+          var newYomiCommentDom = document.createElement('p');
+          var newYomiCommentText = document.createTextNode(yomiage_text);
+          newYomiCommentDom.appendChild(newYomiCommentText);
+          document.querySelector("#ext_logBox").appendChild(newYomiCommentDom);
+        }
+
+      }
+
+      //console.log("読み上げます → [" + message.chat.no + "] " + yomiage_text);
     } else {
-      console.log('大変申し訳ありません。このブラウザは音声合成に対応していません。')
+      //console.log('message.chat.vpos: ' + message.chat.vpos + ', _startTime: ' + _startTime);
+    }
+
+
+
+    let kotehanAt = message.chat.content.indexOf('@');
+    if(kotehanAt === -1){
+      kotehanAt = message.chat.content.indexOf('＠');
+    }
+    if(kotehanAt !== -1){
+      let kotehan = message.chat.content.substring(kotehanAt + 1); // ＠の次の文字から後ろを抽出
+      if(kotehan && kotehan.length > 0) {
+        kotehan = kotehan.substr( 0, 16 ); // 最大16文字(公式の仕様にあわせる)
+        let kotehanItem = {id: message.chat.user_id, kotehan: kotehan};
+        // 既に同じIDの人が登録されていれば削除してから追加
+        _kotehanList = _kotehanList.filter(function (x) { return x.id !== message.chat.user_id });
+
+        _kotehanList.push(kotehanItem);
+        //_kotehanList[message.chat.user_id] = kotehan;
+      }
+
+      // コテハン保存用のDOMにコテハンをテキストを挿入（結果、読み上げられる）
+      if(kotehan.length > 0 && document.querySelector("#ext_kotehanBox")) {
+        let item = { id : message.chat.user_id, kotehan : kotehan};
+        var newYomiCommentDom = document.createElement('p');
+        var newYomiCommentText = document.createTextNode(JSON.stringify(item));
+        newYomiCommentDom.appendChild(newYomiCommentText);
+        document.querySelector("#ext_kotehanBox").appendChild(newYomiCommentDom);
+      }
     }
 
 
@@ -218,29 +280,34 @@ function recvEvent(event) {
 
 
 
-
-
-
-
-
+    // プレ垢の判定
     if (message.chat && message.chat.no && message.chat.premium && message.chat.premium === 1) {
       _premiumList[message.chat.no] = true;
     }
 
-
-
-    console.log(message.chat);
+    //console.log(message.chat);
 
     //console.log(message.chat.no + ", " + message.chat.content + ", " + message.chat.user_id);
 
     if (isNaN(message.chat.user_id)) {
-      // 184さんの処理
+      // 184さんの処理----------------------------
+      _commentRawIdList[message.chat.no] = message.chat.user_id;
+
       _commentList[message.chat.no] = message.chat.user_id.substring(0, 4) + "･･";
       _commentListFull[message.chat.no] = message.chat.user_id;
       _183UserList[message.chat.no] = message.chat.user_id;
+      
+      /*
+      if(_kotehanList[message.chat.user_id]){
+        _commentkotehanList[message.chat.no] = _kotehanList[message.chat.user_id];
+      } else {
+        _commentkotehanList[message.chat.no] = message.chat.user_id.substring(0, 4) + "･･";
+      }
+      */
 
     } else {
-      // 生IDさんの処理
+      // 生IDさんの処理----------------------------
+      _commentRawIdList[message.chat.no] = message.chat.user_id;
 
       // すでに名前を取得ずみであれば名前を取得しない
       if (_rawUserList[message.chat.user_id]) {
@@ -312,6 +379,7 @@ function recvEvent(event) {
     }
 
 
+    
   }
 
 }
@@ -321,6 +389,7 @@ function InsertUserName(currentNode, newNo) {
   var newElement = document.createElement("span");
   var newContent = document.createTextNode(_commentList[newNo]);
   newElement.appendChild(newContent);
+
   if (_183UserList[newNo]) {
     newElement.setAttribute("class", "user_name_by_extention user184");
   } else {
@@ -329,9 +398,50 @@ function InsertUserName(currentNode, newNo) {
   newElement.setAttribute("title", _commentListFull[newNo]);
 
   // 作成したDOMの挿入
-  //var comment = currentNode.querySelector(".___comment-text___1pM9h"); // コメントテキストのDOM
   var comment = currentNode.querySelector("[class^=___comment-text___]"); // コメントテキストのDOM
   comment.parentNode.insertBefore(newElement, comment);
+
+
+  //console.log(_kotehanList);
+  //console.log(_commentListFull);
+  //console.log(_commentRawIdList);
+
+  let currentNoId = _commentRawIdList[newNo];
+  //console.log(currentNoId);
+
+  var kotehanElement = document.createElement("span");
+  var kotehanContent = "";
+  var kotehan = "";
+
+  let hitKotehan = _kotehanList.filter(function (x) { return x.id == currentNoId });
+  //console.log("hitKotehanは下記");
+  //console.log(hitKotehan);
+
+  if(hitKotehan[0]){
+
+    //kotehan = _kotehanList[currentNoId];
+    kotehan = hitKotehan[0].kotehan;
+    kotehanElement.setAttribute("class", "user_name_by_extention viewKotehan kotehan");
+    
+  } else {
+    kotehan = _commentList[newNo]
+    if (_183UserList[newNo]) {
+      kotehanElement.setAttribute("class", "user_name_by_extention viewKotehan user184");
+    } else {
+      kotehanElement.setAttribute("class", "user_name_by_extention viewKotehan");
+    }
+  }
+
+  kotehanContent = document.createTextNode(kotehan);
+  kotehanElement.appendChild(kotehanContent);
+
+  kotehanElement.setAttribute("title", kotehan);
+
+
+  // 作成したDOMの挿入
+  comment.parentNode.insertBefore(kotehanElement, comment);
+
+
 }
 
 
@@ -445,5 +555,105 @@ window.addEventListener('load', function () {
     obs.observe(target_parent, options);
   }
 
+
+
+
+
+
+  // 拡張機能の初期化処理
+  initialize(function (ret) {
+
+    if (ret) {
+
+      const logOption = {
+        childList: true,  //直接の子の変更を監視
+        characterData: true,  //文字の変化を監視
+        attributes: true,  //属性の変化を監視
+        subtree: true, //全ての子要素を監視
+      };
+      const targetTimeDom = document.querySelector("[class^=___time-score___] span");
+      const obsTimeBox = new MutationObserver(watchTime);
+      obsTimeBox.observe(targetTimeDom, logOption);
+
+      /*
+      const targetKotehanDom = document.querySelector("#ext_kotehanToInjectBox");
+      console.log(targetKotehanDom);
+      const obsKotehanBox = new MutationObserver(watchKotehan);
+      obsKotehanBox.observe(targetKotehanDom, logOption);
+      */
+
+      const kotehanJson = document.querySelector("#ext_kotehanToInjectBox p");
+      if(kotehanJson && kotehanJson.outerText){
+        _kotehanList = JSON.parse(kotehanJson.outerText);
+        console.log("▼inject側で受け取ったコテハン2");
+        console.log(_kotehanList);  
+      }
+
+    }
+
+  }, 6000 * 10 * 5); // 5分
+
+
+
+
 });
 
+function watchTime(mutationRecords, observer){ 
+  // 一度に2つ以上のDOM追加にも対応
+  mutationRecords.forEach(item => {
+      _startTime = getStartPlayTime();
+      //console.log("再生開始秒数(vpos) : " + _startTime);
+  });
+};
+
+function watchKotehan(mutationRecords, observer){ 
+
+  // 初回に一度だけ受信する用
+
+  console.log("コテハン検知");
+
+  // 一度に2つ以上のDOM追加にも対応
+  mutationRecords.forEach(item => {
+    //console.log(item.addedNodes[0].outerText);
+    _kotehanList = JSON.parse(item.addedNodes[0].outerText);
+    console.log("▼inject側で受け取ったコテハン");
+    console.log(_kotehanList);
+  });
+
+};
+
+function initialize(callback, timeoutMiliSec) {
+
+  let domList = [
+      "[class^=___time-score___] span[class^=___value___]",
+      "#ext_kotehanToInjectBox"
+  ];
+
+  const startMiliSec= Date.now();
+  searchDoms();
+
+  function searchDoms() {
+
+      let bFindAllDom = true;
+      for(const selector of domList) {
+          if(!document.querySelector(selector)){
+              console.log(selector + " が存在しません。待機します。");
+              bFindAllDom = false;
+              break;
+          }
+      }
+
+      if (bFindAllDom) {
+          callback(true);
+          return;
+      } else {
+          setTimeout(() => {
+              if (Date.now() - startMiliSec >= timeoutMiliSec) {
+                  callback(false);
+                  return;
+              }
+              searchDoms();
+          }, 100);
+      }
+  }
+}

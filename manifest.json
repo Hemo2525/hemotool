@@ -35,6 +35,7 @@
       "js": [
         "/js/main.js",
         "/js/comeview.js",
+        "/js/yomiage.js",
         "/js/seekbar.js",
         "/js/video.js",
         "/js/game.js",

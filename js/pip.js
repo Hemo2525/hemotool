@@ -44,23 +44,29 @@ function pipRec() {
 async function pip() {
 
     let menu = document.querySelector('.ext-setting-menu .ext-pip');
+
+    // 拡張機能の設定メニューを閉じる
+    document.querySelector('.ext-setting-menu').removeAttribute("ext-attr-show");
     
     if(menu.getAttribute("ext-attr-on")) {
-                
-        document.querySelector('.ext-setting-menu').toggleAttribute("ext-attr-show");
 
+        // PIPを終了
         if (document.pictureInPictureElement) {
             document.exitPictureInPicture();
         }
+
+        // ショートカットを非アクティブ状態
+        document.querySelector('#ext_shortcut .item.picture').removeAttribute("active");
 
     } else {
 
         // ON状態に
         menu.setAttribute("ext-attr-on", "ON");
 
-        _canvasUpdate();
+        // ショートカットをアクティブ状態
+        document.querySelector('#ext_shortcut .item.picture').setAttribute("active", "ON");
 
-        document.querySelector('.ext-setting-menu').toggleAttribute("ext-attr-show");
+        _canvasUpdate();
 
         var video = document.querySelector('div[data-layer-name="videoLayer"] video');
 

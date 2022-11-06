@@ -23,6 +23,7 @@ chrome.runtime.onMessage.addListener(function (request) {
         });
     }
     if(request.stop){
+        console.log("読み上げ停止を受信しました");
         stopVoice();
     }
     if(request.setVolume){
@@ -47,7 +48,7 @@ chrome.runtime.onMessage.addListener(function (request) {
     }
     if(request.toSay){
         // 一定の数だけキューが溜まったらリセット
-        if(_queCount > 20) {
+        if(_queCount > 50) {
 
             console.log("キューが溜まったのでリセットします");
             stopVoice();
@@ -67,12 +68,14 @@ chrome.runtime.onMessage.addListener(function (request) {
                     onEvent: function (event) {
                         console.log(event);
                         if(event.type === "start"){
-                            
+                            console.log("読み上げが開始されました");
                         }
                         if(event.type === "end"){
+                            console.log("読み上げが終了しました");
                             if(_queCount > 0) _queCount--;
                         }
                         if(event.type === "cancelled"){
+                            console.log("読み上げがキャンセルされました");
                             if(_queCount > 0) _queCount--;
                         }
                     }
