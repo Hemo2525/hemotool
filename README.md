@@ -2,7 +2,7 @@
 
 ## Overview
 
-Chromブラウザ向けの拡張機能です。  
+Chromeブラウザ向けの拡張機能です。  
 ニコニコ動画のニコ生再生画面に各種の機能を追加します。
 
 ## Description
@@ -17,6 +17,9 @@ Chromブラウザ向けの拡張機能です。
 ### コメビュ機能  
 ニコ生に簡易的なコメントビューワー機能を追加します。  
 コメントの隣にIDや名前などが表示され、誰がコメントしたのかわかりやすくなります。
+
+### コメント読み上げ機能
+端末にインストールされている読み上げ音声でコメントを読み上げることができます。
 
 ### 右クリックメニューOFF機能  
 右クリックを利用するニコ生ゲームの場合(魔道士vsゾンビ?など)、右クリックによるメニュー表示が邪魔になる場合があるので、メニューを表示しないようにします。
@@ -55,6 +58,7 @@ Chromeウェブストアからインストールできます
 [MIT](https://github.com/Hemo2525/hemotool/blob/main/LICENSE)
 
 ## Author
-
-[Github - Hemo](https://github.com/Hemo2525/)  
-[Twitter - Hemo](https://twitter.com/hemo2525cat)
+Hemo 
+- [WebSite](https://sites.google.com/view/hemo2525/home)  
+- [Github](https://github.com/Hemo2525/)  
+- [Twitter](https://twitter.com/hemo2525cat)
