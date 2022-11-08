@@ -49,7 +49,6 @@ Chromブラウザ向けの拡張機能です。
 Chromeウェブストアからインストールできます  
 [Chromeウェブストア](https://chrome.google.com/webstore/detail/bakmgoejpahphkdcgeembmbkklggiocc/)
 
-Chromeをデベロッパーモードにすることでソースコードからも拡張機能をインストールできます。
 
 ## Licence
 
