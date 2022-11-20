@@ -359,20 +359,39 @@ div#ext_dom_message {
 #ext_volume_overlay {
     display: none;
     position: absolute;
-    color: white;
+    /* color: white; */
     background-color: black;
     /*background-color: #000000a6;*/
     /*cursor: not-allowed;*/
     z-index: 1;
+    /*
     line-height: 1.4;
     font-size: 9px;
+    */
     user-select: none;
     box-sizing: border-box;
-    padding-top: 3px;
+    /*padding-top: 3px;
     text-align: justify;    
+    */
+
 }
 #ext_volume_overlay.show {
-    display: block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#ext_volume_overlay svg {
+    /* ニコ生のもともとの定義 */
+    height: var(--player-controller-icon-butoon-icon-size,16px);
+    vertical-align: bottom;
+    width: var(--player-controller-icon-butoon-icon-size,16px);
+
+    /* */
+    cursor: pointer;
+}
+#ext_volume_overlay svg path{
+    fill: #fff;
+    transition: fill .12s ease;
 }
 
 #ext_video_volume_overlay {

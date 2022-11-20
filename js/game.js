@@ -186,150 +186,8 @@ function gameMute() {
 
     }
 }
-/*
-function gameMute() {
-    console.log("gameMuteが押されました");
-
-    let menu = document.querySelector('.ext-setting-menu .ext-game-mute');
-
-    if(menu.getAttribute("ext-attr-on")) {
-        console.log("ミュート機能をONからOFFに切り替えます");
 
 
-        // ボタンをOFF状態に
-        menu.removeAttribute("ext-attr-on");
-
-        // ストレージにボタンの状態を保存
-        chrome.storage.local.set({"ext_game_mute": "OFF"}, function() {});            
-        
-        // ショートカットを非アクティブ状態
-        document.querySelector('#ext_shortcut .item.game-mute').removeAttribute("active");
-
-        let nicoMuteBtn = document.querySelector('[class^=___mute-button___]');
-        if(nicoMuteBtn.getAttribute("data-toggle-state") == 'true') {
-            // ミュート状態ならばそのまま
-            // ミュートを解除状態だとopacityで親DOMが半透明になっているので見た目だけ解除
-            console.log("aaa");
-            document.querySelector('[class^=___mute-button___]').click();
-            //document.querySelector('[class^=___volume-size-control___]').setAttribute("data-isolated", "true");   
-        } else {
-            console.log("bbb");
-            // ビデオ、ゲームの両方をミュートにする
-
-
-        }
-        
-        // プレイヤーのミュートボタンを押せるように戻しておく
-        document.querySelector('#ext_volume_overlay').classList.remove('show');
-
-        document.querySelector('#ext_videoVolumeSlider').classList.remove('show');
-        
-        // ボリュームコントローラーは見た目を初期化
-        document.querySelector('[class^=___volume-size-control___]').style.cssText = "";
-
-        document.querySelector('[class^=___volume-size-control___] [class^=___slider___]').style.cssText = "";
-
-    } else {
-
-        console.log("ミュート機能をOFFからONに切り替えます");
-
-
-        // ON状態に
-        menu.setAttribute("ext-attr-on", "ON");
-
-        // ストレージにボタンの状態を保存
-        chrome.storage.local.set({"ext_game_mute": "ON"}, function() {});
-
-        // ショートカットをアクティブ状態
-        document.querySelector('#ext_shortcut .item.game-mute').setAttribute("active", "ON");
-
-        let nicoMuteBtn = document.querySelector('[class^=___mute-button___]');
-        let videoVolume = document.querySelector('div[data-layer-name="videoLayer"] video').volume;
-
-        // ストレージにビデオ音量を保存
-        //chrome.storage.local.set({"ext_game_volume": videoVolume * 100}, function() {});  
-
-        const hemo_videoMuteBtn = document.querySelector('.ext-setting-menu .ext-video-mute');
-        hemo_videoMuteBtn.getAttribute("ext-attr-on");
-        
-        if(nicoMuteBtn.getAttribute("data-toggle-state") == 'false'
-            && hemo_videoMuteBtn.getAttribute("ext-attr-on") !== "ON") {
-
-            console.log("ミュート機能はONの状態で、ニコ生のミュートボタンは通常通りです");
-
-            // プレイヤーが非ミュート状態
-
-            // 現在のビデオのボリューム設定を取得
-            
-
-            // プレイヤーのミュートボタンを押せないようにしておく
-            document.querySelector('#ext_volume_overlay').classList.add('show');
-
-            // ボリュームコントローラーは見た目を有効化
-            document.querySelector('[class^=___volume-size-control___]').style.cssText = "opacity: 1;";
-            
-            document.querySelector('#ext_videoVolumeSlider').classList.add('show');
-
-            // ビデオ、ゲームの両方をミュートにする
-            document.querySelector('[class^=___mute-button___]').click();
-
-            // ビデオだけミュートを解除する（結果的にゲームだけミュートになる）
-            chrome.storage.local.get("ext_game_volume", function (value) {
-                if (value.ext_game_volume) {
-                    // 前回のビデオボリュームを設定
-                    document.querySelector('div[data-layer-name="videoLayer"] video').volume =  value.ext_game_volume / 100;
-                    document.querySelector('#ext_videoVolumeSlider').value = value.ext_game_volume;
-                } else {   
-                    document.querySelector('div[data-layer-name="videoLayer"] video').volume = videoVolume;         
-                    document.querySelector('#ext_videoVolumeSlider').value = videoVolume * 100;
-                }
-            });
-            
-            document.querySelector('div[data-layer-name="videoLayer"] video').muted = false;
-
-            document.querySelector('[class^=___volume-size-control___] [class^=___slider___]').style.cssText = "display:none;"
-            
-
-        } else {
-            // プレイヤーがミュート状態
-            console.log("ミュート機能はONの状態で、ニコ生のミュートボタンはミュート状態です");
-
-            // ミュートを解除状態だとopacityで親DOMが半透明になっているので見た目だけ解除
-            document.querySelector('[class^=___volume-size-control___]').setAttribute("data-isolated", "false");      
-
-            if(hemo_videoMuteBtn.getAttribute("ext-attr-on") !== "ON") {
-                document.querySelector('div[data-layer-name="videoLayer"] video').muted = false;
-            }
-            
-            chrome.storage.local.get("ext_game_volume", function (value) {
-                if (value.ext_game_volume) {
-                    // 前回のビデオボリュームを設定
-                    console.log("A" + value.ext_game_volume);
-                    document.querySelector('div[data-layer-name="videoLayer"] video').volume =  value.ext_game_volume / 100;
-                    document.querySelector('#ext_videoVolumeSlider').value = value.ext_game_volume;
-                } else {
-                    console.log("B" + value.ext_game_volume);
-                    document.querySelector('#ext_videoVolumeSlider').value = videoVolume * 100;
-                }
-            });
-
-
-
-            // プレイヤーのミュートボタンを押せないようにしておく
-            document.querySelector('#ext_volume_overlay').classList.add('show');
-
-            document.querySelector('#ext_videoVolumeSlider').classList.add('show');
-            document.querySelector('[class^=___volume-size-control___] [class^=___slider___]').style.cssText = "display:none;"
-        }
-
-
-
-
-
-
-    }
-}
-*/
 function initGame() {
     console.log("initGame()");
     function injectScript(file, node) {
@@ -341,4 +199,29 @@ function initGame() {
     }
     injectScript( chrome.runtime.getURL('/js/nicovideo-inject.js'), 'body');
 
+
+    
+    //監視オプション
+    const options = {
+        childList: true,  //直接の子の変更を監視
+        characterData: true,  //文字の変化を監視
+        attributes: true,  //属性の変化を監視
+        subtree: true, //全ての子要素を監視
+    }
+    let videoDom = document.querySelector('div[data-layer-name="videoLayer"] video');
+    if(videoDom){
+        let watchVideo = new MutationObserver(observeVideo);
+        watchVideo.observe(videoDom, options);    
+    } else {
+        console.error("videoがありません");
+    }
+}
+
+function observeVideo(mutationRecords, observer) {
+    // ニコ生ゲーム音ミュート時に、ニコ生プレイヤーのリロードボタン押下時や、画質が切り替わったとき、ビデオの音声が消える不具合の対処
+    chrome.storage.local.get("ext_game_volume", function (value) {
+        if (value.ext_game_volume) {
+            document.querySelector('div[data-layer-name="videoLayer"] video').volume =  value.ext_game_volume / 100;
+        }
+    });
 }

@@ -61,6 +61,7 @@ function videoMute() {
         document.querySelector('div[data-layer-name="videoLayer"] video').muted = false;
 
         document.querySelector('div[data-layer-name="videoLayer"] video').volume = _savedVideVolume;
+        
        
         //
         document.querySelector('#ext_videoVolumeSlider').disabled = false;
@@ -88,7 +89,7 @@ function videoMute() {
         document.querySelector('div[data-layer-name="videoLayer"] video').muted = true;
 
         _savedVideVolume = document.querySelector('div[data-layer-name="videoLayer"] video').volume;
-
+        
         //
         document.querySelector('#ext_videoVolumeSlider').disabled = true;
         document.querySelector('[class^=___volume-size-control___] input[class^=___slider___]').disabled = true;
