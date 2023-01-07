@@ -2,7 +2,10 @@
 let _obsLogBox;
 
 
+
 window.addEventListener('load', function () {
+
+
 
     let currentURL = location.href;
     if (currentURL.startsWith("https://live.nicovideo.jp/")) {
@@ -132,12 +135,6 @@ function insertBtnToPlayer(parts_data) {
     let p1 = document.createElement('div');
     p1.innerHTML = parts_data;
     settingMenu.parentNode.prepend(p1);
-    /*
-    '<div class="item ext-pip-rec">' +
-    '<div class="name">録画開始<span class="mini">(ニコ生ゲーム非対応)</span></div>' +
-    '<div class="value">ON</div>' +
-    */
-
 
     let overlay = document.createElement('div');
     overlay.id = "ext_overlay";
@@ -145,8 +142,7 @@ function insertBtnToPlayer(parts_data) {
 
 
     // 拡張機能ボタンのメニュー表示
-    let button = document.querySelector('.ext-setting-btn');
-    button.addEventListener('click', function () {
+    document.querySelector('.ext-setting-btn').addEventListener('click', function () {
         let menu = document.querySelector('.ext-setting-menu');
         //menu.toggleAttribute("ext-attr-show");
 
@@ -166,6 +162,7 @@ function insertBtnToPlayer(parts_data) {
         document.querySelector("#ext_overlay").style.display = "none";
         document.querySelector('.ext-setting-menu').removeAttribute("ext-attr-show");
     });
+
     let settingBtn = document.querySelector("[class^=___setting-popup-control___]");
     settingBtn.addEventListener('click', function(){
         document.querySelector("#ext_overlay").style.display = "none";
@@ -185,6 +182,7 @@ function insertBtnToPlayer(parts_data) {
         '<div class="item video-mute" aria-label="配信音をミュートにします">配信音ミュート</div>'+
         '<div class="item game" aria-label="ニコ生ゲームの映像を非表示にします">ニコ生ゲーム画面OFF</div>'+
         '<div class="item game-mute" aria-label="ニコ生ゲームの音をミュートします">ニコ生ゲーム音ミュート</div>'+
+        '<div class="item video-effect" aria-label="配信映像を加工します">映像加工</div>'+
         '<div class="item picture" aria-label="映像＋コメントを小窓で表示します">小窓表示</div>';
     document.querySelector('[class^=___player-controller___]').append(shortcut);
     
@@ -468,6 +466,31 @@ function insertBtnToPlayer(parts_data) {
     */
 
 
+    // 映像加工
+    document.querySelector('.ext-setting-menu .ext-video-effect .item .value').addEventListener('click', videoEffect);
+    let effectPin = document.querySelector('.ext-setting-menu .ext-video-effect .item .pin');
+    effectPin.addEventListener('click', function() {
+        if(effectPin.getAttribute("ext-pin-on")){
+            // 設定画面のピンのアイコンをOFF表示
+            effectPin.removeAttribute("ext-pin-on");
+            // ショートカットを非表示
+            document.querySelector('#ext_shortcut .item.video-effect').removeAttribute("ext-pin-on");
+            // 拡張機能の設定に保存
+            chrome.storage.local.set({"ext_video_effect_pin": "OFF"}, function() {});
+        } else {
+            // 設定画面のピンのアイコンをON表示
+            effectPin.setAttribute("ext-pin-on", "ON");
+            // ショートカットを表示
+            document.querySelector('#ext_shortcut .item.video-effect').setAttribute("ext-pin-on", "ON");
+            // 拡張機能の設定に保存
+            chrome.storage.local.set({"ext_video_effect_pin": "ON"}, function() {});
+        }
+    });
+    document.querySelector('#ext_shortcut .video-effect').addEventListener('click', function() {
+        videoEffect();
+    });
+
+
     // ピクチャーインピクチャー
     let pictureBtn = document.querySelector('.ext-setting-menu .ext-pip .value');
     pictureBtn.addEventListener('click', pip);
@@ -503,14 +526,22 @@ function insertBtnToPlayer(parts_data) {
         el.classList.toggle('show');
     }
 
+    // [コメビュ]の詳細設定ボタン
     document.querySelector('.ext-setting-menu .ext-comeview .setting').addEventListener('click', (e) => {
         changeElement(document.querySelector('.ext-setting-menu .ext-comeview .option-box'));
         document.querySelector('.ext-setting-menu .ext-comeview .setting').classList.toggle('active')
     }, false);
 
+    // [読み上げ]の詳細設定ボタン
     document.querySelector('.ext-setting-menu .ext-yomiage .setting').addEventListener('click', (e) => {
         changeElement(document.querySelector('.ext-setting-menu .ext-yomiage .option-box'));
         document.querySelector('.ext-setting-menu .ext-yomiage .setting').classList.toggle('active')
+    }, false);
+
+    // [映像加工]の詳細設定ボタン
+    document.querySelector('.ext-setting-menu .ext-video-effect .setting').addEventListener('click', (e) => {
+        changeElement(document.querySelector('.ext-setting-menu .ext-video-effect .option-box'));
+        document.querySelector('.ext-setting-menu .ext-video-effect .setting').classList.toggle('active')
     }, false);
 
     let settingsBtn = document.querySelectorAll('.ext-setting-menu .option-box');
@@ -540,6 +571,62 @@ function insertBtnToPlayer(parts_data) {
     document.querySelector('.ext-setting-menu .ext-comeview .option.kotehan input').addEventListener('change', () => {
         comeview_option_kotehan();
     });
+
+    //-------------------------------------------------------
+
+    // [映像加工] 左右反転
+    document.querySelector('.ext-setting-menu .ext-video-effect .option.reverse input').addEventListener('change', () => {
+        videoeffect_option_reverse();
+    });
+    // [映像加工] 明るさ
+    document.querySelector('.ext-setting-menu .ext-video-effect .option.brightness input').addEventListener('change', (e) => {
+        if(e.isTrusted){
+            let value = document.querySelector('.ext-setting-menu .ext-video-effect .option.brightness input').value;
+            videoeffect_set_brightness(value);
+            chrome.storage.local.set({"ext_videoeffect_opt_brightness": document.querySelector('.ext-setting-menu .ext-video-effect .option.brightness input').value}, function() {});
+        }
+    });
+    // [映像加工] グレースケール
+    document.querySelector('.ext-setting-menu .ext-video-effect .option.grayscale input').addEventListener('change', (e) => {
+        if(e.isTrusted){
+            let value = document.querySelector('.ext-setting-menu .ext-video-effect .option.grayscale input').value;
+            videoeffect_set_grayscale(value);
+            chrome.storage.local.set({"ext_videoeffect_opt_grayscale": document.querySelector('.ext-setting-menu .ext-video-effect .option.grayscale input').value}, function() {});
+        }
+    });
+    // [映像加工] コントラスト
+    document.querySelector('.ext-setting-menu .ext-video-effect .option.contrast input').addEventListener('change', (e) => {
+        if(e.isTrusted){
+            let value = document.querySelector('.ext-setting-menu .ext-video-effect .option.contrast input').value;
+            videoeffect_set_contrast(value);
+            chrome.storage.local.set({"ext_videoeffect_opt_contrast": document.querySelector('.ext-setting-menu .ext-video-effect .option.contrast input').value}, function() {});
+        }
+    });
+    // [映像加工] 不透明度
+    document.querySelector('.ext-setting-menu .ext-video-effect .option.opacity input').addEventListener('change', (e) => {
+        if(e.isTrusted){
+            let value = document.querySelector('.ext-setting-menu .ext-video-effect .option.opacity input').value;
+            videoeffect_set_opacity(value);
+            chrome.storage.local.set({"ext_videoeffect_opt_opacity": document.querySelector('.ext-setting-menu .ext-video-effect .option.opacity input').value}, function() {});
+        }
+    });
+    // [映像加工] リセット
+    document.querySelector('.ext-setting-menu .ext-video-effect .option.reset input').addEventListener('click', (e) => {
+        if(e.isTrusted){
+            document.querySelector('.ext-setting-menu .ext-video-effect .option.brightness input').value = 1;
+            document.querySelector('.ext-setting-menu .ext-video-effect .option.grayscale input').value = 0;
+            document.querySelector('.ext-setting-menu .ext-video-effect .option.contrast input').value = 1;
+            document.querySelector('.ext-setting-menu .ext-video-effect .option.opacity input').value = 1;
+            videoeffect_set_default();
+            videoeffect_aplly_options();
+            chrome.storage.local.set({"ext_videoeffect_opt_brightness": document.querySelector('.ext-setting-menu .ext-video-effect .option.brightness input').value}, function() {});
+            chrome.storage.local.set({"ext_videoeffect_opt_grayscale": document.querySelector('.ext-setting-menu .ext-video-effect .option.grayscale input').value}, function() {});
+            chrome.storage.local.set({"ext_videoeffect_opt_contrast": document.querySelector('.ext-setting-menu .ext-video-effect .option.contrast input').value}, function() {});
+            chrome.storage.local.set({"ext_videoeffect_opt_opacity": document.querySelector('.ext-setting-menu .ext-video-effect .option.opacity input').value}, function() {});
+        }
+    });
+
+    //-------------------------------------------------------
 
     // [読み上げ] 音声の種類
     document.querySelector('.ext-setting-menu .ext-yomiage .option.voices select').addEventListener('change', (e) => {
@@ -704,6 +791,47 @@ function insertBtnToPlayer(parts_data) {
 
     kotehanInitialize();
     getKotehan();
+
+
+
+    // ニコニコ動画のフロントエンドバージョンを取得
+    let nicoData = document.querySelector('#embedded-data');
+    if(nicoData){
+        let dataProps = nicoData.getAttribute("data-props");
+        if(dataProps){
+            try {
+                let dataJson = JSON.parse(dataProps);
+                if(dataJson && dataJson.site && dataJson.site.frontendVersion) {
+                    document.querySelector('.ext-setting-menu .item.info .niconico .ver').textContent  = dataJson.site.frontendVersion;
+                }    
+            } catch (err) {
+                console.error(err);
+            }
+        
+        }
+    }
+
+    // へもツールのバージョン情報を取得
+    var manifestData = chrome.runtime.getManifest();
+    document.querySelector('.ext-setting-menu .item.info .hemotool .ver').textContent = manifestData.version;
+
+
+    // 「へもツールが更新されました」のポップアップ表示判定
+    chrome.storage.local.get("ext_current_version", function (value) {
+        // ストレージに保存されたバージョン情報とマニフェストのバージョン情報が異なる場合にポップアップを表示
+        if(value && value.ext_current_version !== manifestData.version) {
+            document.querySelector('.ext-popup').classList.add('show');
+        }
+    });
+    document.querySelector('.ext-popup').addEventListener('click', function () {
+        // ポップアップを非表示
+        document.querySelector('.ext-popup').classList.remove('show');
+        // ストレージに現在のマニフェストのバージョン情報を保存
+        var manifestData = chrome.runtime.getManifest();
+        chrome.storage.local.set({"ext_current_version": manifestData.version});
+    
+    });
+
 }
 
 
@@ -994,6 +1122,63 @@ function setSettingValue() {
             }
         });
 
+
+
+
+
+
+        // [映像加工] 反転
+        chrome.storage.local.get("ext_videoeffect_opt_reverse", function (value) {
+            if (value.ext_videoeffect_opt_reverse == "ON") {
+                document.querySelector('.ext-setting-menu .ext-video-effect .option.reverse input').checked = true;
+                videoeffect_option_reverse();
+            }
+        });
+        // [映像加工] 明るさ
+        chrome.storage.local.get("ext_videoeffect_opt_brightness", function (value) {
+            if (value.ext_videoeffect_opt_brightness) {
+                document.querySelector('.ext-setting-menu .ext-video-effect .option.brightness input').value = value.ext_videoeffect_opt_brightness;
+                videoeffect_set_brightness(value.ext_videoeffect_opt_brightness);
+            }
+        });
+        // [映像加工] グレースケール
+        chrome.storage.local.get("ext_videoeffect_opt_grayscale", function (value) {
+            if (value.ext_videoeffect_opt_grayscale) {
+                document.querySelector('.ext-setting-menu .ext-video-effect .option.grayscale input').value = value.ext_videoeffect_opt_grayscale;
+                videoeffect_set_grayscale(value.ext_videoeffect_opt_grayscale);
+            }
+        });
+        // [映像加工] コントラスト
+        chrome.storage.local.get("ext_videoeffect_opt_contrast", function (value) {
+            if (value.ext_videoeffect_opt_contrast) {
+                document.querySelector('.ext-setting-menu .ext-video-effect .option.contrast input').value = value.ext_videoeffect_opt_contrast;
+                videoeffect_set_contrast(value.ext_videoeffect_opt_contrast);
+            }
+        });
+        // [映像加工] 不透明度
+        chrome.storage.local.get("ext_videoeffect_opt_opacity", function (value) {
+            if (value.ext_videoeffect_opt_opacity) {
+                document.querySelector('.ext-setting-menu .ext-video-effect .option.opacity input').value = value.ext_videoeffect_opt_opacity;
+                videoeffect_set_opacity(value.ext_videoeffect_opt_opacity);
+            }
+        });
+        // 映像加工 ※必ずオプションを設定したあとで実行
+        chrome.storage.local.get("ext_video_effect", function (value) {
+            if (value.ext_video_effect == "ON") {
+                videoEffect();
+                // ショートカットをアクティブ状態
+                document.querySelector('#ext_shortcut .item.video-effect').setAttribute("active", "ON");   
+            }
+        });
+        // 映像加工のピン状態
+        chrome.storage.local.get("ext_video_effect_pin", function (value) {
+            if (value.ext_video_effect_pin == "ON") {
+                // 設定画面のピンのアイコンをON表示
+                document.querySelector('.ext-setting-menu .ext-video-effect .pin').setAttribute("ext-pin-on", "ON");
+                // ショートカットを表示
+                document.querySelector('#ext_shortcut .item.video-effect').setAttribute("ext-pin-on", "ON");                
+            }
+        });
 
         // 配信映像ミュート
         chrome.storage.local.get("ext_video_mute", function (value) {

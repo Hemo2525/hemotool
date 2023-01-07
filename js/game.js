@@ -48,6 +48,7 @@ function isNicoBtnMuted(){
 // OFF→ONのときにニコ生ボタンをミュート状態にする必要があるか（true=あり)
 let _REQUIRE_MUTE = false;
 
+//let _MUTE_CHECK_TIMER_ID;
 
 function gameMute() {
     console.log("gameMuteが押されました");
@@ -108,6 +109,15 @@ function gameMute() {
         extOverlay.classList.remove('show');
         extSlider.classList.remove('show');
         nicoSpanSlider.style.cssText = "";
+
+        /*
+        if(_MUTE_CHECK_TIMER_ID) {
+            clearInterval(_MUTE_CHECK_TIMER_ID);
+        }
+        */
+        nicoVideo.removeEventListener('volumechange', checkVideoMute);
+
+
 
     } else {
         console.log("----------------------------------");
@@ -196,6 +206,42 @@ function gameMute() {
             _REQUIRE_MUTE = true;
         }
 
+        /*
+        _MUTE_CHECK_TIMER_ID = setInterval(() => {
+
+            console.log("音量チェック中 : " + document.querySelector('div[data-layer-name="videoLayer"] video').volume);
+
+            // ニコ生ゲーム音ミュート時に、ニコ生プレイヤーのリロードボタン押下時や、画質が切り替わったとき、ビデオの音声が消える不具合の対処
+            chrome.storage.local.get("ext_game_volume", function (value) {
+                if (value.ext_game_volume) {
+                    document.querySelector('div[data-layer-name="videoLayer"] video').volume =  value.ext_game_volume / 100;
+                }
+            });
+        }, 500);
+        */
+
+        nicoVideo.addEventListener('volumechange', checkVideoMute);
+
+    }
+}
+
+function checkVideoMute() {
+
+    //console.log("音量変化を検知");
+
+    let nicoVideo = document.querySelector('div[data-layer-name="videoLayer"] video');
+
+    if(nicoVideo.muted == false) {
+
+        if(nicoVideo.volume == 0 && document.querySelector('#ext_videoVolumeSlider').value > 0) {
+            // ニコ生ゲーム音ミュート時に、ニコ生プレイヤーのリロードボタン押下時や、画質が切り替わったとき、ビデオの音声が消える不具合の対処
+            chrome.storage.local.get("ext_game_volume", function (value) {
+                if (value.ext_game_volume) {
+                    nicoVideo.volume =  value.ext_game_volume / 100;
+                    //console.log("音量変化を補正");
+                }
+            });
+        }
 
     }
 }
@@ -214,6 +260,7 @@ function initGame() {
 
 
     
+    // ニコ生プレイヤーの更新ボタンをクリックを押したときにvideoの音量がゼロになるのを監視
     //監視オプション
     const options = {
         childList: true,  //直接の子の変更を監視

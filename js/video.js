@@ -109,3 +109,105 @@ function videoMute() {
         document.querySelector('#ext_shortcut .item.video-mute').setAttribute("active", "ON");        
     }
 }
+
+
+function videoEffect() {
+    
+    let menu = document.querySelector('.ext-setting-menu .ext-video-effect');
+
+    if(menu.getAttribute("ext-attr-on")) {
+        /* ON →　OFF */
+
+        videoeffect_aplly_defaults_withoutSave();// 映像加工のデフォルト値を反映
+
+        document.querySelector('div[data-layer-name="videoLayer"] video').removeAttribute("ext-master-videoeffect");
+       
+        // ボタンをOFF状態に
+        menu.removeAttribute("ext-attr-on");
+
+        
+        // ストレージにボタンの状態を保存
+        chrome.storage.local.set({"ext_video_effect": "OFF"}, function() {
+            //console.log('Value is set to ' + "OFF");
+        });
+        // ショートカットを非アクティブ状態
+        document.querySelector('#ext_shortcut .item.video-effect').removeAttribute("active");
+
+    } else {
+        /* OFF →　ON */
+
+        videoeffect_aplly_options();// 映像加工の現在値を反映
+
+        document.querySelector('div[data-layer-name="videoLayer"] video').setAttribute("ext-master-videoeffect", "ON");
+
+        // ON状態に
+        menu.setAttribute("ext-attr-on", "ON");        
+        
+        // ストレージにボタンの状態を保存
+        chrome.storage.local.set({"ext_video_effect": "ON"}, function() {
+            //console.log('Value is set to ' + "ON");
+        });    
+        // ショートカットをアクティブ状態
+        document.querySelector('#ext_shortcut .item.video-effect').setAttribute("active", "ON");
+    }
+}
+
+function videoeffect_option_reverse(){
+    let input = document.querySelector('.ext-setting-menu .ext-video-effect .option.reverse input');
+    
+    // トグル
+    if(input.checked) {  // 注意　クリックされて変化後の値が入っている
+      chrome.storage.local.set({"ext_videoeffect_opt_reverse": "ON"}, function() {});
+      document.querySelector('div[data-layer-name="videoLayer"] video').setAttribute("ext-opt-reverse", "ON");
+  
+    } else {
+      chrome.storage.local.set({"ext_videoeffect_opt_reverse": "OFF"}, function() {});
+      document.querySelector('div[data-layer-name="videoLayer"] video').removeAttribute("ext-opt-reverse");
+    }
+}
+
+let _video_brightness = 1;
+let _video_grayscale = 0;
+let _video_contrast = 1;
+let _video_opacity = 1;
+
+function videoeffect_set_brightness(value) {
+    _video_brightness = value;
+
+    if(document.querySelector('.ext-setting-menu .ext-video-effect').getAttribute("ext-attr-on")) {
+        videoeffect_aplly_options();
+    }
+}
+function videoeffect_set_grayscale(value) {
+    _video_grayscale = value;
+    
+    if(document.querySelector('.ext-setting-menu .ext-video-effect').getAttribute("ext-attr-on")) {
+        videoeffect_aplly_options();
+    }
+}
+function videoeffect_set_contrast(value) {
+    _video_contrast = value;
+    
+    if(document.querySelector('.ext-setting-menu .ext-video-effect').getAttribute("ext-attr-on")) {
+        videoeffect_aplly_options();
+    }
+}
+function videoeffect_set_opacity(value) {
+    _video_opacity = value;
+    
+    if(document.querySelector('.ext-setting-menu .ext-video-effect').getAttribute("ext-attr-on")) {
+        videoeffect_aplly_options();
+    }
+}
+function videoeffect_set_default(){
+    _video_brightness = 1;
+    _video_grayscale = 0;
+    _video_contrast = 1;
+    _video_opacity = 1;
+}
+function videoeffect_aplly_options(){
+    document.querySelector('div[data-layer-name="videoLayer"] video').style.filter = 'brightness('+ _video_brightness +')  grayscale('+ _video_grayscale +') contrast(' + _video_contrast + ') opacity(' + _video_opacity + ')';
+}
+function videoeffect_aplly_defaults_withoutSave(){
+    document.querySelector('div[data-layer-name="videoLayer"] video').style.filter = 'brightness('+ 1 +')  grayscale('+ 0 +') contrast(' + 1 + ') opacity(' + 1 + ')';
+}

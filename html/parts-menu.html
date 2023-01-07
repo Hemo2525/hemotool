@@ -319,10 +319,9 @@
         </div>
     </div>
 
-<!--
-    <div class="ext-cursor ext-on-off">
+    <div class="ext-video-effect ext-on-off">
         <div class="item">
-            <div class="name">カーソルの切り替え</div>
+            <div class="name new">映像加工</div>
             <div class="btn-group">
                 <div class="value">ON</div>
                 <div class="pin">
@@ -351,23 +350,48 @@
             </div>
         </div>
         <div class="option-box">
-            <div class="option name">
-                <div class="name">名前表示</div>
+            <div class="option reverse">
+                <div class="name">左右反転</div>
                 <div class="value">
                     <input type="checkbox">
                 </div>
             </div>
-            <div class="option orikaeshi">
-                <div class="name">長いコメント折り返し</div>
+            <div class="border"></div>
+            <div class="option brightness">
+                <div class="name">明るさ</div>
                 <div class="value">
-                    <input type="checkbox">
+                    <input type="range" min="0" max="5" step="0.1" value="1">
+                </div>
+            </div>
+            <div class="option grayscale">
+                <div class="name">グレースケール</div>
+                <div class="value">
+                    <input type="range" min="0" max="1" step="0.1" value="0">
+                </div>
+            </div>
+            <div class="option contrast">
+                <div class="name">コントラスト</div>
+                <div class="value">
+                    <input type="range" min="0" max="2" step="0.1" value="1">
+                </div>
+            </div>
+            <div class="option opacity">
+                <div class="name">不透明度</div>
+                <div class="value">
+                    <input type="range" min="0" max="1" step="0.1" value="1">
+                </div>
+            </div>
+            <div class="option reset">
+                <div class="name">リセット</div>
+                <div class="value">
+                    <input type="button" value="デフォルトに戻す">
                 </div>
             </div>
         </div>
     </div>
--->
+
     <div class="item ext-pip">
-        <div class="name">小窓表示<span class="mini">※高負荷 & ゲーム非対応</span></div>
+        <div class="name">小窓表示</div>
         <div class="btn-group">
             <div class="value">ON</div>
             <div class="pin">
@@ -386,4 +410,15 @@
             </div>
         </div>
     </div>
+
+    <div class="item info">
+        <div class="niconico">NicoNico ver. <div class="ver"></div></div>
+        <div class="hemotool">HemoTool ver. <div class="ver"></div></div>
+    </div>
+</div>
+
+
+<div class="ext-popup">
+    <h2>へもツールが<br>更新されました</h2>
+    <span>✕ 閉じる</span>
 </div>

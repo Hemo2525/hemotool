@@ -1,12 +1,14 @@
 function setAkashicParentFrameEvent(){
 
+
+
     /*-----------------------------------------
     ここはakashicのiframe内(親)
     -------------------------------------------*/
 
     var childFrame = document.querySelector("iframe"); // akashicのiframeは1つだけ
     if(childFrame){
-        //console.log(childFrame.contentDocument);
+
     }
 
     window.addEventListener("message", receiveMessage, false);
@@ -41,7 +43,7 @@ function setAkashicParentFrameEvent(){
                 document.oncontextmenu = function () {return false;}
                 childFrame.contentDocument.oncontextmenu = function () {return false;}
             }
-
+        
         }
         return true;
     }
