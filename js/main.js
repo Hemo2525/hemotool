@@ -186,6 +186,9 @@ function insertBtnToPlayer(parts_data) {
         '<div class="item picture" aria-label="映像＋コメントを小窓で表示します">小窓表示</div>';
     document.querySelector('[class^=___player-controller___]').append(shortcut);
     
+    // 録画開始
+    let recBtn = document.querySelector('.ext-setting-menu .ext-rec .item .value');
+    recBtn.addEventListener('click', pipRec);
 
     // コメビュ
     let comeviewBtn = document.querySelector('.ext-setting-menu .ext-comeview .item .value');
@@ -459,11 +462,6 @@ function insertBtnToPlayer(parts_data) {
         */
     });
 
-    /*
-        // 録画開始
-        let recBtn = document.querySelector('.ext-setting-menu .ext-pip-rec');
-        recBtn.addEventListener('click', pipRec);
-    */
 
 
     // 映像加工
