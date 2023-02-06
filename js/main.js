@@ -183,12 +183,54 @@ function insertBtnToPlayer(parts_data) {
         '<div class="item game" aria-label="ニコ生ゲームの映像を非表示にします">ニコ生ゲーム画面OFF</div>'+
         '<div class="item game-mute" aria-label="ニコ生ゲームの音をミュートします">ニコ生ゲーム音ミュート</div>'+
         '<div class="item video-effect" aria-label="配信映像を加工します">映像加工</div>'+
-        '<div class="item picture" aria-label="映像＋コメントを小窓で表示します">小窓表示</div>';
+        '<div class="item picture" aria-label="映像＋コメントを小窓で表示します">小窓表示</div>'+
+        '<div class="item rec" aria-label="録画を開始します"><span class="status">●</span><span class="recBtn">録画開始</span></div>';
     document.querySelector('[class^=___player-controller___]').append(shortcut);
     
-    // 録画開始
-    let recBtn = document.querySelector('.ext-setting-menu .ext-rec .item .value');
-    recBtn.addEventListener('click', pipRec);
+
+    
+
+
+    // 簡易録画機能
+    document.querySelector('.ext-setting-menu .ext-rec .item .value').addEventListener('click', function(){
+        
+        if(document.querySelector('#ext_shortcut .item.rec').getAttribute("ext-pin-on")) {
+            // ON → OFF
+            document.querySelector('.ext-setting-menu .ext-rec').removeAttribute("ext-attr-on");
+            document.querySelector('#ext_shortcut .item.rec').removeAttribute("ext-pin-on");
+            chrome.storage.local.set({"ext_rec_pin": "OFF"}, function() {});
+        } else {
+            // OFF → ON
+            document.querySelector('.ext-setting-menu .ext-rec').setAttribute("ext-attr-on", "on");
+            document.querySelector('#ext_shortcut .item.rec').setAttribute("ext-pin-on", "ON");
+            chrome.storage.local.set({"ext_rec_pin": "ON"}, function() {});
+        }
+        //pipRec();
+    });
+
+    // 録画開始、録画停止
+    document.querySelector('#ext_shortcut .item.rec').addEventListener('click', function(){
+        if(document.querySelector('#ext_shortcut .item.rec').getAttribute("recording")) {
+            // ON → OFF
+            recStop();
+            document.querySelector('#ext_shortcut .item.rec').removeAttribute("recording");
+            document.querySelector('#ext_shortcut .item.rec .recBtn').textContent = "録画開始";
+            document.querySelector('#ext_shortcut .item.rec .status').removeAttribute("rec");
+            document.querySelector('#ext_shortcut .item.rec').setAttribute("aria-label", "録画を開始します");
+
+        } else {
+            // OFF → ON
+            recStart();
+            document.querySelector('#ext_shortcut .item.rec').setAttribute("recording", "ON");
+            document.querySelector('#ext_shortcut .item.rec .recBtn').textContent = "録画停止";
+            document.querySelector('#ext_shortcut .item.rec .status').setAttribute("rec", "on");
+            document.querySelector('#ext_shortcut .item.rec').setAttribute("aria-label", "録画を停止します");
+        }
+    });
+
+
+
+
 
     // コメビュ
     let comeviewBtn = document.querySelector('.ext-setting-menu .ext-comeview .item .value');
@@ -524,6 +566,12 @@ function insertBtnToPlayer(parts_data) {
         el.classList.toggle('show');
     }
 
+    // [録画機能]の詳細設定ボタン
+    document.querySelector('.ext-setting-menu .ext-rec .setting').addEventListener('click', (e) => {
+        changeElement(document.querySelector('.ext-setting-menu .ext-rec .option-box'));
+        document.querySelector('.ext-setting-menu .ext-rec .setting').classList.toggle('active')
+    }, false);
+
     // [コメビュ]の詳細設定ボタン
     document.querySelector('.ext-setting-menu .ext-comeview .setting').addEventListener('click', (e) => {
         changeElement(document.querySelector('.ext-setting-menu .ext-comeview .option-box'));
@@ -551,6 +599,42 @@ function insertBtnToPlayer(parts_data) {
         const height = (items.length * 41) + (borders.length * 10) + 10;
         el.style.setProperty("--max-height", height + "px");
         
+    });
+
+
+
+
+    // [録画機能] FPS
+    document.querySelector('.ext-setting-menu .ext-rec .option.fps select').addEventListener('change', (e) => {
+        if(e.isTrusted){
+
+            setRecFps(document.querySelector('.ext-setting-menu .ext-rec .option.fps select').value);
+            
+            chrome.storage.local.set({"ext_rec_opt_fps": document.querySelector('.ext-setting-menu .ext-rec .option.fps select').value}, function() {});
+
+        }
+    });
+
+    // [録画機能] 画質
+    document.querySelector('.ext-setting-menu .ext-rec .option.size select').addEventListener('change', (e) => {
+        if(e.isTrusted){
+
+            apllyRecSize(document.querySelector('.ext-setting-menu .ext-rec .option.size select').value);
+            
+            chrome.storage.local.set({"ext_rec_opt_size": document.querySelector('.ext-setting-menu .ext-rec .option.size select').value}, function() {});
+
+        }
+    });
+
+    // [録画機能] 拡張子
+    document.querySelector('.ext-setting-menu .ext-rec .option.kaku select').addEventListener('change', (e) => {
+        if(e.isTrusted){
+
+            setRecKaku(document.querySelector('.ext-setting-menu .ext-rec .option.kaku select').value);
+            
+            chrome.storage.local.set({"ext_rec_opt_kaku": document.querySelector('.ext-setting-menu .ext-rec .option.kaku select').value}, function() {});
+
+        }
     });
 
     // [コメント] 名前の表示
@@ -925,6 +1009,49 @@ function setSpeech() {
 function setSettingValue() {
 
     if (chrome.storage.local) {
+
+        // 録画機能
+        chrome.storage.local.get("ext_rec_pin", function (value) {
+            if (value.ext_rec_pin == "ON") {
+
+                // ONマークをアクティブ状態
+                document.querySelector('.ext-setting-menu .ext-rec').setAttribute("ext-attr-on", "on");
+  
+                // ショートカットエリアにプレイヤーを表示
+                document.querySelector('#ext_shortcut .item.rec').setAttribute("ext-pin-on", "ON");
+            }
+        });
+        // 録画機能のFPS
+        chrome.storage.local.get("ext_rec_opt_fps", function (value) {
+            if (value.ext_rec_opt_fps) {
+                document.querySelector('.ext-setting-menu .ext-rec .option.fps select').value = value.ext_rec_opt_fps;
+                setRecFps(value.ext_rec_opt_fps);
+            } else {
+                document.querySelector('.ext-setting-menu .ext-rec .option.fps select').value = "60fps";
+                setRecFps("60fps");
+            }
+
+        });
+        // 録画機能の画質
+         chrome.storage.local.get("ext_rec_opt_size", function (value) {
+            if (value.ext_rec_opt_size) {
+                document.querySelector('.ext-setting-menu .ext-rec .option.size select').value = value.ext_rec_opt_size;
+                apllyRecSize(value.ext_rec_opt_size);
+            } else {
+                document.querySelector('.ext-setting-menu .ext-rec .option.size select').value = "HD";
+                apllyRecSize("HD");
+            }
+        });
+        // 録画機能の拡張子
+        chrome.storage.local.get("ext_rec_opt_kaku", function (value) {
+            if (value.ext_rec_opt_kaku) {
+                document.querySelector('.ext-setting-menu .ext-rec .option.kaku select').value = value.ext_rec_opt_kaku;
+                setRecKaku(value.ext_rec_opt_kaku);
+            } else {
+                document.querySelector('.ext-setting-menu .ext-rec .option.kaku select').value = "webm";
+                setRecKaku("webm");
+            }
+        });
 
         // コメビュ機能
         chrome.storage.local.get("ext_comeview", function (value) {

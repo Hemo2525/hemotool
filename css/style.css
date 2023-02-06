@@ -177,6 +177,11 @@
     margin-left: 13px;
     cursor: pointer;
 }
+.ext-setting-menu .item .pin.blank {
+    cursor: default;
+    width: 11px;
+    height: 11px;
+}
 .ext-setting-menu .item .pin svg {
     width: 11px;
     height: 11px;
@@ -234,6 +239,10 @@
 .ext-setting-menu .option-box .option:hover {
     background: rgba(255, 255, 255, 0.2);
 }
+.ext-setting-menu .option-box .option.desc:hover {
+    background: none;
+}
+
 .ext-setting-menu .option-box .option .value * {
     cursor: pointer;
 }
@@ -447,12 +456,37 @@ div#ext_dom_message {
     border: 1px solid #858585;
 }
 #ext_shortcut .item[active] {
-    color: #056dff;
-    border: 2px solid #056dff;
+    color: white;
+    border: 2px solid rgb(0 61 147);
+    background-color: rgb(0 61 147);
     padding: 1px 9px;
 }
 
-
+#ext_shortcut .item.rec {
+    border: none;
+    margin-left: 10px;
+    font-size: 12px;
+}
+#ext_shortcut .item.rec .status {
+    color: rgb(88, 88, 88);
+    margin-right: 10px;
+}
+#ext_shortcut .item.rec .status[rec] {
+    color: rgb(204, 0, 0);
+    animation: recFlash 1.5s linear infinite;
+}
+#ext_shortcut .item.rec .recBtn {
+    cursor: pointer;
+}
+@keyframes recFlash {
+    0%,100% {
+      opacity: 1;
+    }
+  
+    50% {
+      opacity: 0;
+    }
+  }
 
 #ext_volume_overlay {
     display: none;
