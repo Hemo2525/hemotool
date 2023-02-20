@@ -13,6 +13,439 @@ WebSocket = new Proxy(WebSocket, {
   }
 });
 
+
+
+
+// injection先でloadイベント待機
+window.addEventListener('load', function () {
+
+  console.log("★injectionのload発生");
+
+  // ニコ生URLであり、かつニコ生プレイヤーがあれば。
+  if (location.href.startsWith("https://live.nicovideo.jp/")) {
+    if (document.querySelector('[class^=___player-area___]')) {
+
+
+      // コメビュ機能の初期化処理
+      initialize(function (ret) {
+
+        // コメビュ機能に必要なDOMが作成されていればtrue
+        if (ret) {
+
+          let myChatLog = document.querySelector('#ext_chat_log');
+          let logBox = document.querySelector('[class^=___comment-panel___]');
+        
+          if(myChatLog && logBox) {
+        
+            myChatLog.style.width = logBox.clientWidth + "px";
+            myChatLog.style.height = (logBox.clientHeight - 300) + "px";
+          
+            var clientRect = logBox.getBoundingClientRect();
+            // ページ内の位置
+            var py = window.pageYOffset + clientRect.top ;
+            var px = window.pageXOffset + clientRect.left ;
+            myChatLog.style.top = py + "px";
+            myChatLog.style.left = (px - 500) + "px"; 
+        
+          }
+    
+          // コメントDOMの監視を開始
+          console.log("☆☆☆コメントDOMの親監視が発生");
+          startWatchCommentDOM();
+    
+          // コメントDOMの親DOMの監視を開始
+          // (フルスクリーン解除時や、放送ネタ画面の表示時には監視対象のDOMが消去されるので監視を再設定する為)
+          const target_parent = document.querySelector("[class^=___contents-area___]"); // コメントDOMの大元の親DOMを指定
+          if (target_parent) {
+    
+            //監視オプション
+            const parentDomOption = {
+              childList:              true,   //直接の子の変更を監視
+              characterData:          true,   //文字の変化を監視
+              characterDataOldValue:  false,  //属性の変化前を記録
+              attributes:             false,  //属性の変化を監視
+              subtree:                false,  //全ての子要素を監視
+            }
+    
+            const obs = new MutationObserver(watchParentDOM);
+            obs.observe(target_parent, parentDomOption);
+          }
+
+          // [コメント]タブ、[おすすめ生放送]タブにクリックイベントを設定
+          setCommentBtnEvent();
+
+          // 再生時間の監視
+          const timeOption = {
+            childList:      true,  //直接の子の変更を監視
+            characterData:  true,  //文字の変化を監視
+            attributes:     true,  //属性の変化を監視
+            subtree:        true, //全ての子要素を監視
+          };
+          const targetTimeDom = document.querySelector("[class^=___time-score___] span");
+          const obsTimeBox = new MutationObserver(watchTime);
+          obsTimeBox.observe(targetTimeDom, timeOption);
+
+          // コテハン情報の取得
+          const kotehanJson = document.querySelector("#ext_kotehanToInjectBox p");
+          if(kotehanJson && kotehanJson.outerText){
+            _kotehanList = JSON.parse(kotehanJson.outerText);
+            console.log("▼inject側で受け取ったコテハン2");
+            console.log(_kotehanList);  
+          }
+
+        }
+
+      }, 6000 * 10 * 5); // 5分
+
+    }
+  }
+
+});
+
+
+// コメビュ機能に必要なDOMが作成されるまで待機
+function initialize(callback, timeoutMiliSec) {
+
+  let domList = [
+      "[class^=___time-score___] span[class^=___value___]",
+      "#ext_kotehanToInjectBox",
+      "[class^=___contents-area___]"
+  ];
+
+  const startMiliSec= Date.now();
+  searchDoms();
+
+  function searchDoms() {
+
+      let bFindAllDom = true;
+      for(const selector of domList) {
+          if(!document.querySelector(selector)){
+              console.log(selector + " が存在しません。待機します。");
+              bFindAllDom = false;
+              break;
+          }
+      }
+
+      if (bFindAllDom) {
+          callback(true);
+          return;
+      } else {
+          setTimeout(() => {
+              if (Date.now() - startMiliSec >= timeoutMiliSec) {
+                  callback(false);
+                  return;
+              }
+              searchDoms();
+          }, 100);
+      }
+  }
+}
+
+function watchParentDOM(mutationsList, observer) {
+
+  console.log("コメントの親DOM監視が発生");
+  //console.log(mutationsList);
+
+  mutationsList.forEach((mutation)=> {
+
+    // 子ノードの増減
+    if(mutation.type === "childList"){
+
+      // REMOVED ----------------------------------------------------------------
+      mutation.removedNodes.forEach((removeNode) => {
+        if(removeNode.querySelector('[class^=___comment-panel___]')) {
+          console.log("HEREHERE");
+          if(_domObs) {
+            console.log("コメントDOMの監視を解除");
+            _domObs.disconnect();
+            document.getElementById('ext_chat_log').classList.add('hide');
+          }
+        }
+
+      });
+      
+      // ADD ----------------------------------------------------------------
+      mutation.addedNodes.forEach((addNode) => {
+        if(addNode.querySelector('[class^=___comment-panel___]')) {
+          console.log("コメントDOMの監視を開始");
+          startWatchCommentDOM();
+          document.getElementById('ext_chat_log').classList.remove('hide');
+          // [コメント]タブ、[おすすめ生放送]タブにクリックイベントを再設定（DOMごと消えているので再設定が必要）
+          setCommentBtnEvent();
+        }
+      });
+
+      
+    }
+
+  });
+}
+
+
+function setCommentBtnEvent(){
+  // [コメント]タブ
+  document.querySelector('[class^=___comment-tab___]').addEventListener('click', function(){
+    document.getElementById('ext_chat_log').classList.remove('hide');
+  });
+  // [おすすめ生放送]タブ
+  document.querySelector('[class^=___program-recommend-tab___]').addEventListener('click', function(){
+    document.getElementById('ext_chat_log').classList.add('hide');
+  });  
+}
+
+
+
+// コメントDOMに新しいコメントが来たかどうか監視
+let _domObs;
+
+function startWatchCommentDOM() {
+
+  if(_domObs) {
+    console.log("監視終了");
+    _domObs.disconnect();
+  }
+
+  console.log("監視スタート");
+
+  const target = document.querySelector("[class^=___table___]"); // コメントDOMの直上の親DOMを指定
+  if (target) {
+
+    //監視オプション
+    const options = {
+      childList:              true,   //直接の子の変更を監視
+      characterData:          false,  //文字の変化を監視
+      characterDataOldValue:  false,  //属性の変化前を記録
+      attributes:             true,  //属性の変化を監視
+      subtree:                false,  //全ての子要素を監視
+    }
+
+    _domObs = new MutationObserver(watchCommentDOM);
+    _domObs.observe(target, options);
+
+
+    // 監視をスタートしたら直後に再描画させる
+    // (フルスクリーン解除時や、放送ネタ画面の表示時には監視対象のDOMがすべて消去されて、再びコメントDOMが作成されるが、
+    // その時はコメント監視が検知されないので、属性を変更してコメント監視の検知を発動させる）
+    var now = new Date();
+    target.setAttribute('currentTime', now.getMilliseconds())
+
+  }
+}
+
+// パフォーマンスをあげるため仮想?DOMを作成しておく
+let _masterFrag = document.createDocumentFragment();
+
+// コメント監視関数
+function watchCommentDOM(mutationsList, observer) {
+
+  console.log("START -------");
+  //console.log(mutationsList);
+
+
+  mutationsList.forEach((mutation)=> {
+    //console.log("FOR 1-------");
+
+    let chatDom = document.getElementById('ext_chat_log');
+
+
+
+    // 子ノードの増減
+    if(mutation.type === "childList"){
+
+      // REMOVED ----------------------------------------------------------------
+      /*
+      mutation.removedNodes.forEach((removeNode) => {
+        console.log("削除対象ノード");
+        console.log(removeNode);
+
+        // ものすごく単純にremovedNodesの回数だけマスターフラグメントのファーストチャイルドから消せばいいかも      
+        // マスターフラグメントの先頭の子から削除していく
+        if(_masterFrag.childNodes.length > 0){
+          _masterFrag.firstChild.remove();
+        }
+      });
+      */
+
+      while(_masterFrag.childNodes.length > 60){
+        _masterFrag.firstChild.remove();
+      }
+      
+      // ADD ----------------------------------------------------------------
+      mutation.addedNodes.forEach((addNode) => {
+        buildComment(addNode);          
+      });
+
+    }
+
+    // 親ノードの属性変更
+    if(mutation.type === "attributes" && mutation.attributeName === "currenttime") {
+      
+      console.log("強制的にリロードします");
+      
+      while( _masterFrag.firstChild ){
+        _masterFrag.removeChild( _masterFrag.firstChild );
+      }
+
+      mutation.target.childNodes.forEach((node)=>{   
+
+        buildComment(node);
+
+      });
+    }
+
+    // コメントBOXを空にする方法１
+    //chatDom.innerHTML = "";
+
+    // コメントBOXを空にする方法２
+    while( chatDom.firstChild ){
+      chatDom.removeChild( chatDom.firstChild );
+    }
+    
+
+    // コメントBOXを空にする方法３
+    /*
+    var clone = chatDom.cloneNode( false ); //ガワだけ複製して…
+    chatDom.parentNode.replaceChild( clone , chatDom ); //すげ替え。
+    */
+    
+    // マスターフラグメントをコメントBOXに貼り付ける
+    chatDom.append(_masterFrag.cloneNode(true));
+    
+
+  });
+
+
+}
+
+function buildComment(node) {
+
+
+  // HTMLのコメント文以外ならば
+  if(node.querySelector) {
+
+    let copyNode = node.cloneNode(true);
+    _masterFrag.append(copyNode);
+  
+    if (copyNode.querySelector("[class^=___comment-number___]")) { // コメント番号のDOM
+  
+      //console.log("コメント番号 : " + copyNode.querySelector("[class^=___comment-number___]").outerText );
+  
+      var newNo = copyNode.querySelector("[class^=___comment-number___]").outerText;
+  
+      if (newNo.length > 0 && !copyNode.querySelector(".user_name_by_extention")) {
+  
+  
+        // プレ垢のDOMを挿入
+        if (_premiumList[newNo] === true) {
+          InsertPremium(copyNode);
+        }
+  
+        // 名前のDOMを挿入
+        if (_commentList[newNo]) {
+  
+          InsertUserName(copyNode, newNo);
+  
+        } else {
+          //console.log(`${newNo} に対応する名前がありません。取得失敗さんにします。`);
+          _commentList[newNo] = "取得失敗";
+          InsertUserName(copyNode, newNo);
+        }
+  
+      }
+    }
+  
+    // コメントに行送りを対応させるためクラスを付与
+    //currentNode.classList.add('wordbreak');
+    if (copyNode.querySelector("[class^=___comment-text___]").clientHeight > 28) {
+      //console.log("YES  " + currentNode.querySelector("[class^=___comment-text___]").textContent + "  " + currentNode.querySelector("[class^=___comment-text___]").clientHeight);
+      copyNode.querySelector("[class^=___comment-text___]").classList.add('multiple-line');
+    } else {
+      //console.log("NO  " + currentNode.querySelector("[class^=___comment-text___]").textContent + "  " + currentNode.querySelector("[class^=___comment-text___]").clientHeight);
+      copyNode.querySelector("[class^=___comment-text___]").classList.add('one-line');
+    }  
+  }
+
+}
+
+
+
+function InsertUserName(currentNode, newNo) {
+  // 追加する名前のDOMを作成
+  var newElement = document.createElement("span");
+  var newContent = document.createTextNode(_commentList[newNo]);
+  newElement.appendChild(newContent);
+
+  if (_183UserList[newNo]) {
+    newElement.setAttribute("class", "user_name_by_extention user184");
+  } else {
+    newElement.setAttribute("class", "user_name_by_extention");
+  }
+  newElement.setAttribute("title", _commentListFull[newNo]);
+
+  // 作成したDOMの挿入
+  var comment = currentNode.querySelector("[class^=___comment-text___]"); // コメントテキストのDOM
+  comment.parentNode.insertBefore(newElement, comment);
+
+
+  //console.log(_kotehanList);
+  //console.log(_commentListFull);
+  //console.log(_commentRawIdList);
+
+  let currentNoId = _commentRawIdList[newNo];
+  //console.log(currentNoId);
+
+  var kotehanElement = document.createElement("span");
+  var kotehanContent = "";
+  var kotehan = "";
+
+  let hitKotehan = _kotehanList.filter(function (x) { return x.id == currentNoId });
+  //console.log("hitKotehanは下記");
+  //console.log(hitKotehan);
+
+  if(hitKotehan[0]){
+
+    //kotehan = _kotehanList[currentNoId];
+    kotehan = hitKotehan[0].kotehan;
+    kotehanElement.setAttribute("class", "user_name_by_extention viewKotehan kotehan");
+    
+  } else {
+    kotehan = _commentList[newNo]
+    if (_183UserList[newNo]) {
+      kotehanElement.setAttribute("class", "user_name_by_extention viewKotehan user184");
+    } else {
+      kotehanElement.setAttribute("class", "user_name_by_extention viewKotehan");
+    }
+  }
+
+  kotehanContent = document.createTextNode(kotehan);
+  kotehanElement.appendChild(kotehanContent);
+
+  kotehanElement.setAttribute("title", kotehan);
+
+
+  // 作成したDOMの挿入
+  comment.parentNode.insertBefore(kotehanElement, comment);
+
+
+}
+
+
+function InsertPremium(currentNode) {
+  // 追加するDOMを作成
+  var newElement = document.createElement("span");
+  var newContent = document.createTextNode("P");
+  newElement.appendChild(newContent);
+  newElement.setAttribute("class", "premium_by_extention");
+  newElement.setAttribute("title", "プレミアムアカウント");
+
+  // 作成したDOMの挿入
+  //var comment = currentNode.querySelector(".___comment-text___1pM9h"); // コメントテキストのDOM
+  var comment = currentNode.querySelector("[class^=___comment-text___]"); // コメントテキストのDOM
+  comment.parentNode.insertBefore(newElement, comment);
+}
+
+
+
 // 現在の再生時間(秒数)を取得
 function getStartPlayTime() {
 
@@ -378,225 +811,13 @@ function recvEvent(event) {
       }, false);
     }
 
-
-    
   }
 
 }
 
-function InsertUserName(currentNode, newNo) {
-  // 追加する名前のDOMを作成
-  var newElement = document.createElement("span");
-  var newContent = document.createTextNode(_commentList[newNo]);
-  newElement.appendChild(newContent);
-
-  if (_183UserList[newNo]) {
-    newElement.setAttribute("class", "user_name_by_extention user184");
-  } else {
-    newElement.setAttribute("class", "user_name_by_extention");
-  }
-  newElement.setAttribute("title", _commentListFull[newNo]);
-
-  // 作成したDOMの挿入
-  var comment = currentNode.querySelector("[class^=___comment-text___]"); // コメントテキストのDOM
-  comment.parentNode.insertBefore(newElement, comment);
-
-
-  //console.log(_kotehanList);
-  //console.log(_commentListFull);
-  //console.log(_commentRawIdList);
-
-  let currentNoId = _commentRawIdList[newNo];
-  //console.log(currentNoId);
-
-  var kotehanElement = document.createElement("span");
-  var kotehanContent = "";
-  var kotehan = "";
-
-  let hitKotehan = _kotehanList.filter(function (x) { return x.id == currentNoId });
-  //console.log("hitKotehanは下記");
-  //console.log(hitKotehan);
-
-  if(hitKotehan[0]){
-
-    //kotehan = _kotehanList[currentNoId];
-    kotehan = hitKotehan[0].kotehan;
-    kotehanElement.setAttribute("class", "user_name_by_extention viewKotehan kotehan");
-    
-  } else {
-    kotehan = _commentList[newNo]
-    if (_183UserList[newNo]) {
-      kotehanElement.setAttribute("class", "user_name_by_extention viewKotehan user184");
-    } else {
-      kotehanElement.setAttribute("class", "user_name_by_extention viewKotehan");
-    }
-  }
-
-  kotehanContent = document.createTextNode(kotehan);
-  kotehanElement.appendChild(kotehanContent);
-
-  kotehanElement.setAttribute("title", kotehan);
-
-
-  // 作成したDOMの挿入
-  comment.parentNode.insertBefore(kotehanElement, comment);
-
-
-}
-
-
-function InsertPremium(currentNode) {
-  // 追加するDOMを作成
-  var newElement = document.createElement("span");
-  var newContent = document.createTextNode("P");
-  newElement.appendChild(newContent);
-  newElement.setAttribute("class", "premium_by_extention");
-  newElement.setAttribute("title", "プレミアムアカウント");
-
-  // 作成したDOMの挿入
-  //var comment = currentNode.querySelector(".___comment-text___1pM9h"); // コメントテキストのDOM
-  var comment = currentNode.querySelector("[class^=___comment-text___]"); // コメントテキストのDOM
-  comment.parentNode.insertBefore(newElement, comment);
-}
-
-function watchCommentDOM(mutationsList, observer) {
-
-  for (const mutation of mutationsList) {
-
-    for (var i = 0; i < mutation.target.childNodes.length; i++) {
-      var currentNode = mutation.target.childNodes[i];
-      //if(currentNode.querySelector('.___comment-number___i8gp1')){ // コメント番号のDOM
-      if (currentNode.querySelector("[class^=___comment-number___]")) { // コメント番号のDOM
-        //var newNo = currentNode.querySelector('.___comment-number___i8gp1').outerText;
-        var newNo = currentNode.querySelector("[class^=___comment-number___]").outerText;
-
-        if (newNo.length > 0 && !currentNode.querySelector(".user_name_by_extention")) {
-
-
-          // プレ垢のDOMを挿入
-          if (_premiumList[newNo] === true) {
-            InsertPremium(currentNode);
-          }
-
-          // 名前のDOMを挿入
-          if (_commentList[newNo]) {
-
-            InsertUserName(currentNode, newNo);
-
-          } else {
-            //console.log(`${newNo} に対応する名前がありません。取得失敗さんにします。`);
-            _commentList[newNo] = "取得失敗";
-            InsertUserName(currentNode, newNo);
-          }
-
-          /*
-          if(newNo % 2 === 0){
-            currentNode.classList.add('odd_by_extention');
-          } else {
-            currentNode.classList.add('even_by_extention');
-          }
-          */
-
-
-        }
-      }
-
-      // コメントに行送りを対応させるためクラスを付与
-      //currentNode.classList.add('wordbreak');
-      if (currentNode.querySelector("[class^=___comment-text___]").clientHeight > 28) {
-        //console.log("YES  " + currentNode.querySelector("[class^=___comment-text___]").textContent + "  " + currentNode.querySelector("[class^=___comment-text___]").clientHeight);
-        currentNode.querySelector("[class^=___comment-text___]").classList.add('multiple-line');
-      } else {
-        //console.log("NO  " + currentNode.querySelector("[class^=___comment-text___]").textContent + "  " + currentNode.querySelector("[class^=___comment-text___]").clientHeight);
-        currentNode.querySelector("[class^=___comment-text___]").classList.add('one-line');
-      }
-    }
-
-  }
-}
-
-
-//監視オプション
-const options = {
-  childList: true,  //直接の子の変更を監視
-  characterData: true,  //文字の変化を監視
-  characterDataOldValue: false, //属性の変化前を記録
-  attributes: true,  //属性の変化を監視
-  subtree: false, //全ての子要素を監視
-}
-
-function startWathCommentDOM() {
-  //const target = document.querySelector(".___table___2e1QA"); // コメントDOMの直上の親DOMを指定
-  const target = document.querySelector("[class^=___table___]"); // コメントDOMの直上の親DOMを指定
-  if (target) {
-    const obs = new MutationObserver(watchCommentDOM);
-    obs.observe(target, options);
-    // 監視をスタートしたら直後に再描画させる
-    var now = new Date();
-    target.setAttribute("byExtention", now.getSeconds());
-  }
-}
-
-function watchParentDOM(mutationsList, observer) {
-  // コメントDOMの監視を開始
-  startWathCommentDOM();
-}
-
-window.addEventListener('load', function () {
-
-  // コメントDOMの監視を開始
-  startWathCommentDOM();
-
-  // コメントDOMの親DOMの監視を開始(フルスクリーン解除時、放送ネタ画面の表示時に対応するため)
-  //const target_parent = document.querySelector(".___contents-area___wNY_j"); // コメントDOMの大元の親DOMを指定
-  const target_parent = document.querySelector("[class^=___contents-area___]"); // コメントDOMの大元の親DOMを指定
-  if (target_parent) {
-    const obs = new MutationObserver(watchParentDOM);
-    obs.observe(target_parent, options);
-  }
 
 
 
-
-
-
-  // 拡張機能の初期化処理
-  initialize(function (ret) {
-
-    if (ret) {
-
-      const logOption = {
-        childList: true,  //直接の子の変更を監視
-        characterData: true,  //文字の変化を監視
-        attributes: true,  //属性の変化を監視
-        subtree: true, //全ての子要素を監視
-      };
-      const targetTimeDom = document.querySelector("[class^=___time-score___] span");
-      const obsTimeBox = new MutationObserver(watchTime);
-      obsTimeBox.observe(targetTimeDom, logOption);
-
-      /*
-      const targetKotehanDom = document.querySelector("#ext_kotehanToInjectBox");
-      console.log(targetKotehanDom);
-      const obsKotehanBox = new MutationObserver(watchKotehan);
-      obsKotehanBox.observe(targetKotehanDom, logOption);
-      */
-
-      const kotehanJson = document.querySelector("#ext_kotehanToInjectBox p");
-      if(kotehanJson && kotehanJson.outerText){
-        _kotehanList = JSON.parse(kotehanJson.outerText);
-        console.log("▼inject側で受け取ったコテハン2");
-        console.log(_kotehanList);  
-      }
-
-    }
-
-  }, 6000 * 10 * 5); // 5分
-
-
-
-
-});
 
 function watchTime(mutationRecords, observer){ 
   // 一度に2つ以上のDOM追加にも対応
@@ -622,38 +843,3 @@ function watchKotehan(mutationRecords, observer){
 
 };
 
-function initialize(callback, timeoutMiliSec) {
-
-  let domList = [
-      "[class^=___time-score___] span[class^=___value___]",
-      "#ext_kotehanToInjectBox"
-  ];
-
-  const startMiliSec= Date.now();
-  searchDoms();
-
-  function searchDoms() {
-
-      let bFindAllDom = true;
-      for(const selector of domList) {
-          if(!document.querySelector(selector)){
-              console.log(selector + " が存在しません。待機します。");
-              bFindAllDom = false;
-              break;
-          }
-      }
-
-      if (bFindAllDom) {
-          callback(true);
-          return;
-      } else {
-          setTimeout(() => {
-              if (Date.now() - startMiliSec >= timeoutMiliSec) {
-                  callback(false);
-                  return;
-              }
-              searchDoms();
-          }, 100);
-      }
-  }
-}

@@ -130,6 +130,9 @@ window.addEventListener('load', function() {
 
 function onExitPip() {
 
+    // ショートカットを非アクティブ状態
+    document.querySelector('#ext_shortcut .item.picture').removeAttribute("active");
+
     // ニコ生の映像を表示
     _pip_video.style.visibility = "visible";
     
@@ -259,8 +262,7 @@ async function pip() {
             document.exitPictureInPicture();
         }
 
-        // ショートカットを非アクティブ状態
-        document.querySelector('#ext_shortcut .item.picture').removeAttribute("active");
+        // PIP終了時の処理はすべてonExitPip()内に記載する
 
     } else {
 

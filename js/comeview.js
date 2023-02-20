@@ -8,7 +8,7 @@ function comeview(){
     // ショートカットを非アクティブ状態
     document.querySelector('#ext_shortcut .item.comeview').removeAttribute("active");
 
-    document.querySelector("[class^=___contents-area___]").removeAttribute("ext-master-comeview");
+    document.querySelector("#ext_chat_log").removeAttribute("ext-master-comeview");
 
   } else {
     chrome.storage.local.set({"ext_comeview": "ON"}, function() {});
@@ -16,7 +16,7 @@ function comeview(){
     // ショートカットをアクティブ状態
     document.querySelector('#ext_shortcut .item.comeview').setAttribute("active", "ON");
 
-    document.querySelector("[class^=___contents-area___]").setAttribute("ext-master-comeview", "ON");
+    document.querySelector("#ext_chat_log").setAttribute("ext-master-comeview", "ON");
   }
 }
 
@@ -27,11 +27,11 @@ function comeview_option_name(){
   // トグル
   if(input.checked) {  // 注意　クリックされて変化後の値が入っている
     chrome.storage.local.set({"ext_comeview_opt_name": "ON"}, function() {});
-    document.querySelector("[class^=___contents-area___]").setAttribute("ext-opt-name", "ON");
+    document.querySelector("#ext_chat_log").setAttribute("ext-opt-name", "ON");
 
   } else {
     chrome.storage.local.set({"ext_comeview_opt_name": "OFF"}, function() {});
-    document.querySelector("[class^=___contents-area___]").removeAttribute("ext-opt-name");
+    document.querySelector("#ext_chat_log").removeAttribute("ext-opt-name");
   }
 }
 
@@ -41,11 +41,11 @@ function comeview_option_orikaeshi(){
   // トグル
   if(input.checked) {  // 注意　クリックされて変化後の値が入っている
     chrome.storage.local.set({"ext_comeview_opt_orikaeshi": "ON"}, function() {});
-    document.querySelector("[class^=___contents-area___]").setAttribute("ext-opt-orikaeshi", "ON");
+    document.querySelector("#ext_chat_log").setAttribute("ext-opt-orikaeshi", "ON");
 
   } else {
     chrome.storage.local.set({"ext_comeview_opt_orikaeshi": "OFF"}, function() {});
-    document.querySelector("[class^=___contents-area___]").removeAttribute("ext-opt-orikaeshi");
+    document.querySelector("#ext_chat_log").removeAttribute("ext-opt-orikaeshi");
   }
 }
 
@@ -55,11 +55,11 @@ function comeview_option_premium(){
   // トグル
   if(input.checked) {  // 注意　クリックされて変化後の値が入っている
     chrome.storage.local.set({"ext_comeview_opt_premium": "ON"}, function() {});
-    document.querySelector("[class^=___contents-area___]").setAttribute("ext-opt-premium", "ON");
+    document.querySelector("#ext_chat_log").setAttribute("ext-opt-premium", "ON");
 
   } else {
     chrome.storage.local.set({"ext_comeview_opt_premium": "OFF"}, function() {});
-    document.querySelector("[class^=___contents-area___]").removeAttribute("ext-opt-premium");
+    document.querySelector("#ext_chat_log").removeAttribute("ext-opt-premium");
   }
 }
 
@@ -69,11 +69,11 @@ function comeview_option_kotehan(){
   // トグル
   if(input.checked) {  // 注意　クリックされて変化後の値が入っている
     chrome.storage.local.set({"ext_comeview_opt_kotehan": "ON"}, function() {});
-    document.querySelector("[class^=___contents-area___]").setAttribute("ext-opt-kotehan", "ON");
+    document.querySelector("#ext_chat_log").setAttribute("ext-opt-kotehan", "ON");
 
   } else {
     chrome.storage.local.set({"ext_comeview_opt_kotehan": "OFF"}, function() {});
-    document.querySelector("[class^=___contents-area___]").removeAttribute("ext-opt-kotehan");
+    document.querySelector("#ext_chat_log").removeAttribute("ext-opt-kotehan");
   }
 }
 
@@ -158,6 +158,46 @@ function kotehanInitialize(){
 
 
 
+window.addEventListener('resize', function(){
+
+  syncLogBoxSize();
+
+});
+
+function syncLogBoxSize() {
+  let myChatLog = document.querySelector('#ext_chat_log');
+  let logBox = document.querySelector('[class^=___comment-panel___]');
+
+  if(myChatLog && logBox) {
+
+    myChatLog.style.width = logBox.clientWidth + "px";
+    myChatLog.style.height = (logBox.clientHeight - 300) + "px";
+  
+    var clientRect = logBox.getBoundingClientRect();
+    // ページ内の位置
+    var py = window.pageYOffset + clientRect.top ;
+    var px = window.pageXOffset + clientRect.left ;
+    myChatLog.style.top = py + "px";
+    myChatLog.style.left = (px - 500) + "px"; 
+
+  }
+}
+
+window.addEventListener('load', function () {
+  
+  // ニコ生の再生画面でのみ追加
+  if(document.querySelector('[class^=___player-status-panel___]')){
+    let myChatLog = document.createElement("div");
+    myChatLog.id = "ext_chat_log";
+    document.querySelector('#root').after(myChatLog);
+    syncLogBoxSize();  
+  }
+
+});
+
+
+
+
 
 
 
@@ -165,24 +205,12 @@ function kotehanInitialize(){
 if(location.href.startsWith("https://live.nicovideo.jp/")){
 
   // 前回起動時のボタンのON/OFF状態を読み込みONならばボタンをON状態にする
-/*
-  chrome.storage.local.get("ext_comeview", function (value) {
-    if(value.ext_comeview == "ON") {
-*/
-      function injectScript(file, node) {
-        var th = document.getElementsByTagName(node)[0];
-        var s = document.createElement('script');
-        s.setAttribute('type', 'text/javascript');
-        s.setAttribute('src', file);
-        th.appendChild(s);
-      }
-      injectScript( chrome.runtime.getURL('/js/comeview-inject.js'), 'body');
-/*
-    }
-  });
-*/
+  function injectScript(file, node) {
+    var th = document.getElementsByTagName(node)[0];
+    var s = document.createElement('script');
+    s.setAttribute('type', 'text/javascript');
+    s.setAttribute('src', file);
+    th.appendChild(s);
+  }
+  injectScript( chrome.runtime.getURL('/js/comeview-inject.js'), 'body');
 };
-
-
-
-
