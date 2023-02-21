@@ -15,7 +15,6 @@ WebSocket = new Proxy(WebSocket, {
 
 
 
-
 // injection先でloadイベント待機
 window.addEventListener('load', function () {
 
@@ -45,7 +44,7 @@ window.addEventListener('load', function () {
             var py = window.pageYOffset + clientRect.top ;
             var px = window.pageXOffset + clientRect.left ;
             myChatLog.style.top = py + "px";
-            myChatLog.style.left = (px - 500) + "px"; 
+            myChatLog.style.left = (px - 500) + "px";
         
           }
     
@@ -282,15 +281,30 @@ function watchCommentDOM(mutationsList, observer) {
       
       console.log("強制的にリロードします");
       
+      // チャットDOMを空っぽにする
       while( _masterFrag.firstChild ){
         _masterFrag.removeChild( _masterFrag.firstChild );
       }
 
+      // チャットDOMにtargetから全コメントを追加する
       mutation.target.childNodes.forEach((node)=>{   
 
         buildComment(node);
 
       });
+
+    }
+
+
+    // DOMを消す前に現在のスクロールが一番下かどうか判定
+    const clientHeight = chatDom.clientHeight;
+    const scrollHeight = chatDom.scrollHeight;
+    const scrollTop = chatDom.scrollTop;
+    let bIsMostBottom = false;
+    // 一番下までスクロールされたか判定
+    if (Math.abs(scrollHeight - clientHeight - scrollTop) < 1) {
+      console.log('いちばんしたまでスクロールされているよ');
+      bIsMostBottom = true;
     }
 
     // コメントBOXを空にする方法１
@@ -311,6 +325,12 @@ function watchCommentDOM(mutationsList, observer) {
     // マスターフラグメントをコメントBOXに貼り付ける
     chatDom.append(_masterFrag.cloneNode(true));
     
+
+    // スクロールが一番下の状態であったならば引き続き一番下にスクロールしておく
+    if(bIsMostBottom) {
+      chatDom.scrollTop = chatDom.scrollHeight;
+    }
+
 
   });
 
