@@ -240,11 +240,11 @@ function watchCommentDOM(mutationsList, observer) {
   console.log("START -------");
   //console.log(mutationsList);
 
+  let chatDom = document.getElementById('ext_chat_log');
 
   mutationsList.forEach((mutation)=> {
     //console.log("FOR 1-------");
 
-    let chatDom = document.getElementById('ext_chat_log');
 
 
 
@@ -296,6 +296,30 @@ function watchCommentDOM(mutationsList, observer) {
     }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  });
+
+
+
+
+
+
     // DOMを消す前に現在のスクロールが一番下かどうか判定
     const clientHeight = chatDom.clientHeight;
     const scrollHeight = chatDom.scrollHeight;
@@ -330,9 +354,6 @@ function watchCommentDOM(mutationsList, observer) {
     if(bIsMostBottom) {
       chatDom.scrollTop = chatDom.scrollHeight;
     }
-
-
-  });
 
 
 }
