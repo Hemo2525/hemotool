@@ -612,6 +612,10 @@ div#ext_dom_message {
     border: 1px solid #0034a3; 
 }
 
+.user_id_by_extention {
+    display: none; 
+}
+
 #ext_chat_log[ext-master-comeview][ext-opt-name] .user_name_by_extention {
     display: inline-block;
 }
@@ -690,6 +694,9 @@ div#ext_dom_message {
 [ext-master-comeview] [class^=___table-row___]:nth-child(odd) {
     background-color: #f1f1f1;
 }
+[ext-master-comeview] [class^=___table-row___]:hover {
+    background-color: #e1e1e1;
+}
 /* コメントの行の背景がDark ReaderというChrome拡張機能を入れているときにダークモードにならないと指摘があったので対応 */
 html[data-darkreader-scheme] [ext-master-comeview] [class^=___table-row___]:nth-child(odd) {
     background-color: inherit;
@@ -720,7 +727,105 @@ html[data-darkreader-scheme] [ext-master-comeview] [class^=___table-row___]:nth-
     display: none;
 }
 
+#ext_chat_menu{
+    display: none;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 192px;
+    z-index: 1000;
+    border-radius: 7px;
+    box-shadow: 0px 0px 10px #bfbfbf;
+    padding: 4px 4px;
+    background-color:#fff;
+}
+#ext_chat_menu .item {
+    padding: 7px 10px;
+    font-size: 13px;
+    cursor:pointer;
+    user-select: none;
+}
+#ext_chat_menu .item:hover {
+    background-color: #ededed;
+}
 
+#ext_chat_menu .info {
+    user-select: none;
+    padding: 10px 10px;
+    font-size: 12px;
+    border-radius: 4px;
+    cursor: default;
+}
+#ext_chat_menu .info .id {
+    position: relative;
+    font-size: 11px;
+    height: 1rem;
+    padding-left: 33px;
+    overflow: hidden;
+    margin-bottom: 3px;
+    color: #939393;
+    word-break: break-all;
+}
+#ext_chat_menu .info .id:before {
+    position: absolute;
+    left: 0;
+    top: 0;
+    content: "ID";
+    padding: 0px 7px;
+    border-radius: 3px;
+    background-color: #a99595 !important;
+    color: white;
+    font-size: 10px;
+}
+#ext_chat_menu .info .name {
+    position: relative;
+    font-size: 11px;
+    height: 1rem;
+    padding-left: 49px;
+    overflow: hidden;
+    margin-bottom: 3px;
+    color: #939393;
+    word-break: break-all;
+}
+#ext_chat_menu .info .name:before {
+    position: absolute;
+    left: 0;
+    top: 0;
+    content: "NAME";
+    padding: 0px 7px;
+    border-radius: 3px;
+    background-color: #a99595 !important;
+    color: white;
+    font-size: 10px;
+}
+#ext_chat_menu .info .comment {
+    position: relative;
+    word-break: keep-all;
+    overflow: hidden;
+    height: 1rem;
+    padding-left: 59px;
+    color: #939393;
+}
+#ext_chat_menu .info .comment:before {
+    position: absolute;
+    left: 0;
+    top: 0;
+    content: "コメント";
+    padding: 0px 7px;
+    border-radius: 3px;
+    background-color: #a99595 !important;
+    color: white;
+    font-size: 10px;
+}
+#ext_chat_menu hr {
+    margin: 3px 0px;
+    opacity: 0.4;
+}
+
+/* 一般会員の広告が隠れないように全面表示 */
+[class^=___player-ad-panel___] {
+    z-index: 10000;
+}
 
 
 /*オリジナルのチャットボックス　ここまで--------*/

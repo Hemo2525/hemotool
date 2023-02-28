@@ -171,14 +171,14 @@ function syncLogBoxSize() {
   if(myChatLog && logBox) {
 
     myChatLog.style.width = logBox.clientWidth + "px";
-    myChatLog.style.height = (logBox.clientHeight - 300) + "px";
+    myChatLog.style.height = logBox.clientHeight + "px";
   
     var clientRect = logBox.getBoundingClientRect();
     // ページ内の位置
     var py = window.pageYOffset + clientRect.top ;
     var px = window.pageXOffset + clientRect.left ;
     myChatLog.style.top = py + "px";
-    myChatLog.style.left = (px - 500) + "px"; 
+    myChatLog.style.left = px + "px"; 
 
   }
 }

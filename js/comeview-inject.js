@@ -13,7 +13,10 @@ WebSocket = new Proxy(WebSocket, {
   }
 });
 
-
+let _comment_for_clip;
+let _userID_for_clip;
+let _userName_for_clip;
+let _commentTime;
 
 // injection先でloadイベント待機
 window.addEventListener('load', function () {
@@ -37,14 +40,14 @@ window.addEventListener('load', function () {
           if(myChatLog && logBox) {
         
             myChatLog.style.width = logBox.clientWidth + "px";
-            myChatLog.style.height = (logBox.clientHeight - 300) + "px";
+            myChatLog.style.height = logBox.clientHeight + "px";
           
             var clientRect = logBox.getBoundingClientRect();
             // ページ内の位置
             var py = window.pageYOffset + clientRect.top ;
             var px = window.pageXOffset + clientRect.left ;
             myChatLog.style.top = py + "px";
-            myChatLog.style.left = (px - 500) + "px";
+            myChatLog.style.left = px + "px";
         
           }
     
@@ -92,6 +95,88 @@ window.addEventListener('load', function () {
             console.log(_kotehanList);  
           }
 
+
+          let contextMenu = document.createElement("div");
+          contextMenu.id = "ext_chat_menu";
+          contextMenu.innerHTML = 
+                                    '<div class="info">'+
+                                      '<div class="id"></div>'+
+                                      '<div class="name"></div>'+
+                                      '<div class="comment"></div>'+
+                                    '</div>'+
+                                    '<hr>'+
+                                    '<div class="item comment_copy" onclick="ext_comment_copy();">コメントをコピー</div>'+
+                                    '<div class="item userid_copy" onclick="ext_userID_copy();">ユーザーIDをコピー</div>'+
+                                    '<div class="item userid_copy" onclick="ext_userName_copy();">ユーザー名をコピー</div>'+
+                                    '<div class="item seek" onclick="ext_commentTime();">コメントの時点から視聴</div>'+
+                                    '<hr>'+
+                                    '<div class="item comment_ng" onclick="ext_commentNG();">コメントをNGに追加</div>'+
+                                    '<div class="item userid_ng" onclick="ext_userNG();">ユーザーIDをNGに追加</div>';
+          myChatLog.after(contextMenu);
+
+          myChatLog.addEventListener('contextmenu',function(e){
+
+            // コメビュ機能が有効
+            //if(document.querySelector('.ext-setting-menu .ext-comeview').getAttribute("ext-attr-on")) {
+
+              console.log("コンテキストメニューだよ");
+
+              // ユーザー名（184のIDがでもOK）が取得できない場合はシステムメッセージだと判断してメニューは表示しない
+              let userNameDom = e.target.parentNode.querySelector('[class^=user_name_by_extention]');
+              if(userNameDom) {
+
+                let menuDom = document.getElementById('ext_chat_menu');
+  
+                console.log("ユーザー名 : " + userNameDom.getAttribute('title'));
+                _userName_for_clip = userNameDom.getAttribute('title');
+                menuDom.querySelector('.info .name').innerText = _userName_for_clip;
+
+                
+                let userIdDom = e.target.parentNode.querySelector('[class^=user_id_by_extention]');
+                if(userIdDom) {
+                  console.log("ユーザーID : " + userIdDom.innerText);
+                  _userID_for_clip =  userIdDom.innerText;
+                  menuDom.querySelector('.info .id').innerText = _userID_for_clip;
+                }
+                  
+                let commentDom = e.target.parentNode.querySelector('[class^=___comment-text___]');
+                if(commentDom) {
+                  console.log("コメント内容 : " + commentDom.innerText);
+                  _comment_for_clip =  commentDom.innerText;
+                  menuDom.querySelector('.info .comment').innerText = _comment_for_clip;
+                }
+  
+                let commentNumDom = e.target.parentNode.querySelector('[class^=___comment-number___]');
+                if(commentNumDom) {
+                  console.log("コメント番号 : " + commentNumDom.innerText);
+                }
+  
+                let commentTimeDom = e.target.parentNode.querySelector('[class^=___comment-time___]');
+                if(commentTimeDom) {
+                  _commentTime = commentTimeDom.innerText;
+                  console.log("コメントタイム : " + _commentTime);
+                }
+
+                
+                menuDom.style.left = e.pageX+"px";
+                menuDom.style.top = e.pageY+"px";
+
+                menuDom.style.display = "block";
+  
+              }
+  
+              // デフォルトのメニューは非表示
+              e.preventDefault();
+            //}
+
+          });
+          
+          //クリックで非表示に変更
+          document.body.addEventListener('click', (e) => {
+            document.getElementById('ext_chat_menu').style.display = "none";
+          });
+          
+
         }
 
       }, 6000 * 10 * 5); // 5分
@@ -100,6 +185,165 @@ window.addEventListener('load', function () {
   }
 
 });
+
+function ext_comment_copy() {
+  if(_comment_for_clip) {
+    navigator.clipboard.writeText(_comment_for_clip);
+    _comment_for_clip = "";
+  }
+}
+
+function ext_userID_copy() {
+  if(_userID_for_clip) {
+    navigator.clipboard.writeText(_userID_for_clip);
+    _userID_for_clip = "";
+  }
+}
+
+function ext_userName_copy() {
+  if(_userName_for_clip) {
+    navigator.clipboard.writeText(_userName_for_clip);
+    _userName_for_clip = "";
+  }
+}
+function ext_commentTime() {
+  if(_commentTime) {
+    console.log(location.href + "#" + _commentTime);
+    location.href = location.href + "#" + _commentTime;
+    _commentTime = "";
+  }
+}
+
+const NG_TYPE_WORD = "word";
+const NG_TYPE_ID = "id";
+
+function ext_commentNG() {
+
+  setNG(NG_TYPE_WORD, _comment_for_clip);
+
+  return;
+
+  let json = localStorage.getItem('LeoPlayer_NgStore_list');
+  if(json) {
+    //console.log(json);
+
+    let ngLimit = 500;
+    if(document.querySelector('[class^=___premium-merit-appeal-banner___]')) {
+      ngLimit = 40;
+    }
+
+    let ng_array = JSON.parse(json);
+    if(ng_array.length < ngLimit) {  // 一般ユーザーの場合40、有料会員の場合は500
+
+      // すでに登録済みか調査する
+      let bIsAlready = false;
+      ng_array.forEach((ngItem) => {
+        if(ngItem.type === "word" && ngItem.value === _comment_for_clip){
+          console.log("すでにNG登録されています");
+          bIsAlready = true;
+        }
+      });
+      if(bIsAlready === false) {
+        // ローカルストレージにNG登録する
+        var obj = {
+          'value': _comment_for_clip,
+          'type': 'word'
+        };
+        ng_array.push(obj);
+        localStorage.setItem('LeoPlayer_NgStore_list', JSON.stringify(ng_array));
+        
+        //--------------------------------------------------------------
+        //[##このコメントは表示されません##]に差し替える
+        let chatDom = document.getElementById('ext_chat_log');
+        _masterFrag.childNodes.forEach((node)=> { 
+          let nodeText = node.querySelector('[class^=___comment-text___]');
+          if(nodeText.innerText === _comment_for_clip) {
+            nodeText.innerText = "##このコメントは表示されません##";
+          }
+        });
+        // コメントBOXを空に
+        while( chatDom.firstChild ){
+          chatDom.removeChild( chatDom.firstChild );
+        }
+        // マスターフラグメントをコメントBOXに貼り付ける
+        chatDom.append(_masterFrag.cloneNode(true));
+        //--------------------------------------------------------------
+
+      }
+    }
+  }
+}
+
+function ext_userNG() {
+  setNG(NG_TYPE_ID, _userID_for_clip);
+}
+
+function setNG(type, value) {
+  let json = localStorage.getItem('LeoPlayer_NgStore_list');
+  if(json) {
+    //console.log(json);
+
+    let ngLimit = 500;
+    if(document.querySelector('[class^=___premium-merit-appeal-banner___]')) {
+      ngLimit = 40;
+    }
+
+    let ng_array = JSON.parse(json);
+    if(ng_array.length < ngLimit) {  // 一般ユーザーの場合40、有料会員の場合は500
+
+      // すでに登録済みか調査する
+      let bIsAlready = false;
+      ng_array.forEach((ngItem) => {
+        if(ngItem.type === type && ngItem.value === value){
+          console.log("すでにNG登録されています");
+          bIsAlready = true;
+        }
+      });
+
+      if(bIsAlready === false) {
+        // ローカルストレージにNG登録する
+        var obj = {
+          'value': value,
+          'type': type
+        };
+        ng_array.push(obj);
+        localStorage.setItem('LeoPlayer_NgStore_list', JSON.stringify(ng_array));
+        
+        //--------------------------------------------------------------
+        //[##このコメントは表示されません##]に差し替える
+        let chatDom = document.getElementById('ext_chat_log');
+        
+        
+        if(type === NG_TYPE_WORD) {
+          _masterFrag.childNodes.forEach((node)=> { 
+            let nodeText = node.querySelector('[class^=___comment-text___]');
+            if(nodeText && nodeText.innerText === value) {
+              nodeText.innerText = "##このコメントは表示されません##";
+            }
+          });
+        } else if(type === NG_TYPE_ID) {
+          _masterFrag.childNodes.forEach((node)=> { 
+            let nodeText = node.querySelector('[class^=___comment-text___]');
+            let nodeID = node.querySelector('.user_id_by_extention');
+            if(nodeID && nodeID.innerText === value) {
+              nodeText.innerText = "##このコメントは表示されません##";
+            }
+          });
+        }
+
+        // コメントBOXを空に
+        while( chatDom.firstChild ){
+          chatDom.removeChild( chatDom.firstChild );
+        }
+        // マスターフラグメントをコメントBOXに貼り付ける
+        chatDom.append(_masterFrag.cloneNode(true));
+        //--------------------------------------------------------------
+
+      }
+    }
+  }
+}
+
 
 
 // コメビュ機能に必要なDOMが作成されるまで待機
@@ -237,7 +481,7 @@ let _masterFrag = document.createDocumentFragment();
 // コメント監視関数
 function watchCommentDOM(mutationsList, observer) {
 
-  console.log("START -------");
+  //console.log("START -------");
   //console.log(mutationsList);
 
   let chatDom = document.getElementById('ext_chat_log');
@@ -265,7 +509,8 @@ function watchCommentDOM(mutationsList, observer) {
       });
       */
 
-      while(_masterFrag.childNodes.length > 60){
+      // 最大コメント数以下になるように古いコメントから削除していく
+      while(_masterFrag.childNodes.length > 100){
         _masterFrag.firstChild.remove();
       }
       
@@ -295,65 +540,42 @@ function watchCommentDOM(mutationsList, observer) {
 
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   });
 
+  // DOMを消す前に現在のスクロールが一番下かどうか判定
+  const clientHeight = chatDom.clientHeight;
+  const scrollHeight = chatDom.scrollHeight;
+  const scrollTop = chatDom.scrollTop;
+  let bIsMostBottom = false;
+  // 一番下までスクロールされたか判定
+  if (Math.abs(scrollHeight - clientHeight - scrollTop) < 1) {
+    //console.log('いちばんしたまでスクロールされているよ');
+    bIsMostBottom = true;
+  }
 
+  // コメントBOXを空にする方法１
+  //chatDom.innerHTML = "";
 
+  // コメントBOXを空にする方法２
+  while( chatDom.firstChild ){
+    chatDom.removeChild( chatDom.firstChild );
+  }
+  
 
+  // コメントBOXを空にする方法３
+  /*
+  var clone = chatDom.cloneNode( false ); //ガワだけ複製して…
+  chatDom.parentNode.replaceChild( clone , chatDom ); //すげ替え。
+  */
+  
+  // マスターフラグメントをコメントBOXに貼り付ける
+  chatDom.append(_masterFrag.cloneNode(true));
+  
 
-
-    // DOMを消す前に現在のスクロールが一番下かどうか判定
-    const clientHeight = chatDom.clientHeight;
-    const scrollHeight = chatDom.scrollHeight;
-    const scrollTop = chatDom.scrollTop;
-    let bIsMostBottom = false;
-    // 一番下までスクロールされたか判定
-    if (Math.abs(scrollHeight - clientHeight - scrollTop) < 1) {
-      console.log('いちばんしたまでスクロールされているよ');
-      bIsMostBottom = true;
-    }
-
-    // コメントBOXを空にする方法１
-    //chatDom.innerHTML = "";
-
-    // コメントBOXを空にする方法２
-    while( chatDom.firstChild ){
-      chatDom.removeChild( chatDom.firstChild );
-    }
-    
-
-    // コメントBOXを空にする方法３
-    /*
-    var clone = chatDom.cloneNode( false ); //ガワだけ複製して…
-    chatDom.parentNode.replaceChild( clone , chatDom ); //すげ替え。
-    */
-    
-    // マスターフラグメントをコメントBOXに貼り付ける
-    chatDom.append(_masterFrag.cloneNode(true));
-    
-
-    // スクロールが一番下の状態であったならば引き続き一番下にスクロールしておく
-    if(bIsMostBottom) {
-      chatDom.scrollTop = chatDom.scrollHeight;
-    }
+  // スクロールが一番下の状態であったならば引き続き一番下にスクロールしておく
+  if(bIsMostBottom) {
+    chatDom.scrollTop = chatDom.scrollHeight;
+  }
 
 
 }
@@ -375,22 +597,28 @@ function buildComment(node) {
   
       if (newNo.length > 0 && !copyNode.querySelector(".user_name_by_extention")) {
   
+        //　パフォーマンス向上のためFragment内に仮想DOMとしてDOMを追加してから表示側のDOMに追加する
+        let fragment = document.createDocumentFragment();
   
         // プレ垢のDOMを挿入
         if (_premiumList[newNo] === true) {
-          InsertPremium(copyNode);
+          InsertPremium(fragment);
         }
   
         // 名前のDOMを挿入
         if (_commentList[newNo]) {
   
-          InsertUserName(copyNode, newNo);
+          InsertUserName(fragment, newNo);
   
         } else {
           //console.log(`${newNo} に対応する名前がありません。取得失敗さんにします。`);
           _commentList[newNo] = "取得失敗";
-          InsertUserName(copyNode, newNo);
+          InsertUserName(fragment, newNo);
         }
+
+        // 作成したDOMの挿入
+        var comment = copyNode.querySelector("[class^=___comment-text___]"); // コメントテキストのDOM
+        comment.parentNode.insertBefore(fragment, comment);
   
       }
     }
@@ -409,69 +637,93 @@ function buildComment(node) {
 }
 
 
+/**
+ * DOM要素を移動させます。
+ * @param {HTMLElement} fragment 作成したDOMを追加する仮想DOM（呼び出し元で使用する）
+ * @param {number} newNo 対象コメントのコメント番号です
+ */
+function InsertUserName(fragment, newNo) {
 
-function InsertUserName(currentNode, newNo) {
-  // 追加する名前のDOMを作成
-  var newElement = document.createElement("span");
+  // 生ID or 184ハッシュ値のDOMを作成-------------------
+  // 右クリックメニューの[ユーザーIDをコピー] に使うだけで表示はしない
+  let idElement = document.createElement("span");
+  var idContent = document.createTextNode(_commentRawIdList[newNo]);
+  idElement.appendChild(idContent);
+  idElement.setAttribute("class", "user_id_by_extention");
+
+  fragment.appendChild(idElement);
+
+
+  // ユーザー名 or 184ハッシュ値のDOMを作成-------------------
+  
+  let userNameElement = document.createElement("span");
   var newContent = document.createTextNode(_commentList[newNo]);
-  newElement.appendChild(newContent);
+  userNameElement.appendChild(newContent);
 
   if (_183UserList[newNo]) {
-    newElement.setAttribute("class", "user_name_by_extention user184");
+    userNameElement.setAttribute("class", "user_name_by_extention user184");
   } else {
-    newElement.setAttribute("class", "user_name_by_extention");
+    userNameElement.setAttribute("class", "user_name_by_extention");
   }
-  newElement.setAttribute("title", _commentListFull[newNo]);
+  userNameElement.setAttribute("title", _commentListFull[newNo]);
 
-  // 作成したDOMの挿入
-  var comment = currentNode.querySelector("[class^=___comment-text___]"); // コメントテキストのDOM
-  comment.parentNode.insertBefore(newElement, comment);
+  fragment.appendChild(userNameElement);
 
 
-  //console.log(_kotehanList);
-  //console.log(_commentListFull);
-  //console.log(_commentRawIdList);
-
+  // コテハンのDOMを作成-------------------------------
   let currentNoId = _commentRawIdList[newNo];
-  //console.log(currentNoId);
 
-  var kotehanElement = document.createElement("span");
-  var kotehanContent = "";
-  var kotehan = "";
-
+  var kotehanElement = document.createElement("span");  
   let hitKotehan = _kotehanList.filter(function (x) { return x.id == currentNoId });
-  //console.log("hitKotehanは下記");
-  //console.log(hitKotehan);
 
   if(hitKotehan[0]){
 
-    //kotehan = _kotehanList[currentNoId];
-    kotehan = hitKotehan[0].kotehan;
+    // コテハンがHITした場合---------------
+
+    let kotehanFull = hitKotehan[0].kotehan;
+    let kotehan     = hitKotehan[0].kotehan;
+    
+
+    // 8文字より長い場合は省略
+    if (kotehan.length > 7) {
+      kotehan = kotehan.substring(0, 7) + "･･";
+    }
+
     kotehanElement.setAttribute("class", "user_name_by_extention viewKotehan kotehan");
+
+    let kotehanContent = document.createTextNode(kotehan);
+    kotehanElement.appendChild(kotehanContent);
+    kotehanElement.setAttribute("title", kotehanFull); 
     
   } else {
-    kotehan = _commentList[newNo]
+
+    // コテハンがHITしなかった場合---------
+
+    let userName = _commentList[newNo];
+    let fullUserName = _commentListFull[newNo];
+
     if (_183UserList[newNo]) {
       kotehanElement.setAttribute("class", "user_name_by_extention viewKotehan user184");
     } else {
       kotehanElement.setAttribute("class", "user_name_by_extention viewKotehan");
     }
+
+    let kotehanContent = document.createTextNode(userName);
+    kotehanElement.appendChild(kotehanContent);
+    kotehanElement.setAttribute("title", fullUserName);
+
   }
 
-  kotehanContent = document.createTextNode(kotehan);
-  kotehanElement.appendChild(kotehanContent);
+  fragment.appendChild(kotehanElement);
 
-  kotehanElement.setAttribute("title", kotehan);
+  
 
-
-  // 作成したDOMの挿入
-  comment.parentNode.insertBefore(kotehanElement, comment);
 
 
 }
 
 
-function InsertPremium(currentNode) {
+function InsertPremium(fragment) {
   // 追加するDOMを作成
   var newElement = document.createElement("span");
   var newContent = document.createTextNode("P");
@@ -479,10 +731,8 @@ function InsertPremium(currentNode) {
   newElement.setAttribute("class", "premium_by_extention");
   newElement.setAttribute("title", "プレミアムアカウント");
 
-  // 作成したDOMの挿入
-  //var comment = currentNode.querySelector(".___comment-text___1pM9h"); // コメントテキストのDOM
-  var comment = currentNode.querySelector("[class^=___comment-text___]"); // コメントテキストのDOM
-  comment.parentNode.insertBefore(newElement, comment);
+  fragment.appendChild(newElement);
+
 }
 
 
@@ -535,8 +785,8 @@ function getStartPlayTime() {
 var _startTime;
 var _currentVoiceName = "";
 
-var _commentList = {};      // KEY:コメント番号, VALUE:対応するユーザー名(最大7文字)
-var _commentListFull = {};  // KEY:コメント番号, VALUE:対応するユーザー名(フルネーム)
+var _commentList = {};      // KEY:コメント番号, VALUE:対応するユーザー名(最大7文字)（184さんなら省略型のハッシュ値、生IDさんなら省略形のユーザー名）
+var _commentListFull = {};  // KEY:コメント番号, VALUE:対応するユーザー名(フルネーム)（184さんならFullハッシュ値、生IDさんならFullユーザー名）
 var _183UserList = {};      // KEY:コメント番号, VALUE:184ユーザーID
 var _newUserList = {};      // KEY:コメント番号, VALUE:初めて書き込むユーザーID 
 var _premiumList = {};      // KEY:コメント番号, VALUE:何でもいい値
@@ -544,7 +794,7 @@ var _rawUserList = {};      // KEY:ユーザーID,   VALUE:GETしてきたユー
 var _rawUserListFull = {};  // KEY:ユーザーID,   VALUE:GETしてきたユーザー名(フルネーム)
 var _gettingList = {};      // KEY:ユーザーID,   VALUE:何でもいい値
 
-var _commentRawIdList = {}; // KEY:コメント番号   VALUE:ユーザーID
+var _commentRawIdList = {}; // KEY:コメント番号   VALUE:ユーザーID（184さんならハッシュ値、生IDさんなら生IDが入る）
 var _kotehanList = [];      // KEY:ユーザーID,    VALUE:コテハン
 
 
@@ -563,24 +813,21 @@ function recvEvent(event) {
   // chatメッセージのみ解析
   if (message.chat) {
 
+
+    /*--------------------------------------------------------------
+    //  読み上げ処理
+    --------------------------------------------------------------*/
     if (_startTime === undefined || isNaN(_startTime)) {
       //_startTime = getStartPlayTime();
       //console.log("再生開始秒数(vpos) : " + _startTime);
     }
 
-
-
-    
-    // 再生開始時
     if (_startTime !== undefined && (message.chat.vpos + 10) > _startTime) {  // startTimeは常に更新してるので10秒?の足を履かせる
       
-      //console.log("再生開始秒数(vpos)　これは呼ばれる？ : " + _startTime);
-
       //console.log(message);
 
       let yomiage_text = message.chat.content;
       let isSystemComment = false;
-
       
       if (message.chat.content.startsWith('/gift', 0)) {
         isSystemComment = true;
@@ -596,8 +843,7 @@ function recvEvent(event) {
           yomiage_text = "";
         }
       }
-
-      
+     
       if (message.chat.content.startsWith('/nicoad', 0)) {
         isSystemComment = true;
         if (document.querySelector('.ext-yomiage .option.koukoku input').checked ){
@@ -611,7 +857,6 @@ function recvEvent(event) {
           yomiage_text = "";
         }
       }
-
       
       if (message.chat.content.startsWith('/info', 0)) {
         isSystemComment = true;
@@ -628,7 +873,6 @@ function recvEvent(event) {
         }
       }
 
-      
       if (message.chat.content.startsWith('/spi', 0)) {
         isSystemComment = true;
         if (document.querySelector('.ext-yomiage .option.request input').checked ){
@@ -642,7 +886,6 @@ function recvEvent(event) {
         }
       }
 
-
       if (message.chat.content.startsWith('/emotion', 0)) {
         isSystemComment = true;
         if (document.querySelector('.ext-yomiage .option.emotion input').checked ){
@@ -655,7 +898,6 @@ function recvEvent(event) {
           yomiage_text = "";
         }
       }
-
 
       yomiage_text = yomiage_text.replace(/wwww/g, 'ワラワラ');
       yomiage_text = yomiage_text.replace(/ww/g, 'ワラワラ');
@@ -673,8 +915,6 @@ function recvEvent(event) {
 
       if ( yomiage_text.match(/http/)) yomiage_text = "URL省略";
       
-
-
       // オプションの省略機能が有効ならば
       if (yomiage_text.length > 0 && document.querySelector('.ext-yomiage .option.syoryaku input').value ){
         let syouryaku = document.querySelector('.ext-yomiage .option.syoryaku input').value;
@@ -685,10 +925,6 @@ function recvEvent(event) {
           }
         }
       }
-
-
-
-
 
       // オプションの名前の読み上げ機能がONならば
       if (isSystemComment === false && document.querySelector('.ext-yomiage .option.nameyomiage input').checked ){
@@ -719,7 +955,9 @@ function recvEvent(event) {
     }
 
 
-
+    /*--------------------------------------------------------------
+    //  コテハン処理
+    --------------------------------------------------------------*/
     let kotehanAt = message.chat.content.indexOf('@');
     if(kotehanAt === -1){
       kotehanAt = message.chat.content.indexOf('＠');
@@ -730,54 +968,48 @@ function recvEvent(event) {
         kotehan = kotehan.substr( 0, 16 ); // 最大16文字(公式の仕様にあわせる)
         let kotehanItem = {id: message.chat.user_id, kotehan: kotehan};
         // 既に同じIDの人が登録されていれば削除してから追加
-        _kotehanList = _kotehanList.filter(function (x) { return x.id !== message.chat.user_id });
+        _kotehanList = _kotehanList.filter(function (x) { return x.id !== message.chat.user_id }); // 削除
+        _kotehanList.push(kotehanItem); // 追加
 
-        _kotehanList.push(kotehanItem);
-        //_kotehanList[message.chat.user_id] = kotehan;
-      }
-
-      // コテハン保存用のDOMにコテハンをテキストを挿入（結果、読み上げられる）
-      if(kotehan.length > 0 && document.querySelector("#ext_kotehanBox")) {
-        let item = { id : message.chat.user_id, kotehan : kotehan};
-        var newYomiCommentDom = document.createElement('p');
-        var newYomiCommentText = document.createTextNode(JSON.stringify(item));
-        newYomiCommentDom.appendChild(newYomiCommentText);
-        document.querySelector("#ext_kotehanBox").appendChild(newYomiCommentDom);
+        // コテハン保存用のDOMにコテハンをテキストを挿入（結果、読み上げられる）
+        let kotehanBox = document.getElementById("ext_kotehanBox");
+        if(kotehanBox) {
+          let item = { id : message.chat.user_id, kotehan : kotehan};
+          var newYomiCommentDom = document.createElement('p');
+          var newYomiCommentText = document.createTextNode(JSON.stringify(item));
+          newYomiCommentDom.appendChild(newYomiCommentText);
+          kotehanBox.appendChild(newYomiCommentDom);
+        }
       }
     }
 
 
 
-
-
-
-
-
-
+    /*--------------------------------------------------------------
+    //  プレ垢処理
+    --------------------------------------------------------------*/
     // プレ垢の判定
     if (message.chat && message.chat.no && message.chat.premium && message.chat.premium === 1) {
       _premiumList[message.chat.no] = true;
     }
 
-    //console.log(message.chat);
 
+    /*--------------------------------------------------------------
+    //  ユーザー名の取得処理
+    --------------------------------------------------------------*/
+    //console.log(message.chat);
     //console.log(message.chat.no + ", " + message.chat.content + ", " + message.chat.user_id);
 
     if (isNaN(message.chat.user_id)) {
       // 184さんの処理----------------------------
-      _commentRawIdList[message.chat.no] = message.chat.user_id;
 
-      _commentList[message.chat.no] = message.chat.user_id.substring(0, 4) + "･･";
-      _commentListFull[message.chat.no] = message.chat.user_id;
-      _183UserList[message.chat.no] = message.chat.user_id;
+
+      _commentRawIdList[message.chat.no]  = message.chat.user_id;
+      _commentList[message.chat.no]       = message.chat.user_id.substring(0, 4) + "･･";
+      _commentListFull[message.chat.no]   = message.chat.user_id;
+      _183UserList[message.chat.no]       = message.chat.user_id;
       
-      /*
-      if(_kotehanList[message.chat.user_id]){
-        _commentkotehanList[message.chat.no] = _kotehanList[message.chat.user_id];
-      } else {
-        _commentkotehanList[message.chat.no] = message.chat.user_id.substring(0, 4) + "･･";
-      }
-      */
+
 
     } else {
       // 生IDさんの処理----------------------------
