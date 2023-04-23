@@ -616,6 +616,9 @@ div#ext_dom_message {
     display: none; 
 }
 
+#ext_chat_log {
+    display: none;
+}
 #ext_chat_log[ext-master-comeview][ext-opt-name] .user_name_by_extention {
     display: inline-block;
 }
@@ -740,7 +743,7 @@ html[data-darkreader-scheme] [ext-master-comeview] [class^=___table-row___]:nth-
     background-color:#fff;
 }
 #ext_chat_menu .item {
-    padding: 7px 10px;
+    padding: 5px 10px;
     font-size: 13px;
     cursor:pointer;
     user-select: none;

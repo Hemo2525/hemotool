@@ -21,7 +21,7 @@ let _commentTime;
 // injection先でloadイベント待機
 window.addEventListener('load', function () {
 
-  console.log("★injectionのload発生");
+  console.log("-----injectionのload発生");
 
   // ニコ生URLであり、かつニコ生プレイヤーがあれば。
   if (location.href.startsWith("https://live.nicovideo.jp/")) {
@@ -34,22 +34,8 @@ window.addEventListener('load', function () {
         // コメビュ機能に必要なDOMが作成されていればtrue
         if (ret) {
 
-          let myChatLog = document.querySelector('#ext_chat_log');
-          let logBox = document.querySelector('[class^=___comment-panel___]');
-        
-          if(myChatLog && logBox) {
-        
-            myChatLog.style.width = logBox.clientWidth + "px";
-            myChatLog.style.height = logBox.clientHeight + "px";
-          
-            var clientRect = logBox.getBoundingClientRect();
-            // ページ内の位置
-            var py = window.pageYOffset + clientRect.top ;
-            var px = window.pageXOffset + clientRect.left ;
-            myChatLog.style.top = py + "px";
-            myChatLog.style.left = px + "px";
-        
-          }
+          // コメントDOMのサイズ同期
+          syncChatLog();
     
           // コメントDOMの監視を開始
           console.log("☆☆☆コメントDOMの親監視が発生");
@@ -72,6 +58,26 @@ window.addEventListener('load', function () {
             const obs = new MutationObserver(watchParentDOM);
             obs.observe(target_parent, parentDomOption);
           }
+
+          // プレイヤーDOMの監視を開始
+          // (シアターモードの切り替え時にコメントDOMのサイズ同期をさせるため)
+          const player = document.querySelector("[class^=___player-display-screen___]"); // コメントDOMの大元の親DOMを指定
+          if (player) {
+    
+            //監視オプション
+            const playerDomOption = {
+              childList:              false,  //直接の子の変更を監視
+              characterData:          false,  //文字の変化を監視
+              characterDataOldValue:  false,  //属性の変化前を記録
+              attributes:             true,   //属性の変化を監視
+              subtree:                false,  //全ての子要素を監視
+            }
+    
+            const obs = new MutationObserver(watchPlayerDOM);
+            obs.observe(player, playerDomOption);
+          }
+          
+
 
           // [コメント]タブ、[おすすめ生放送]タブにクリックイベントを設定
           setCommentBtnEvent();
@@ -112,6 +118,8 @@ window.addEventListener('load', function () {
                                     '<hr>'+
                                     '<div class="item comment_ng" onclick="ext_commentNG();">コメントをNGに追加</div>'+
                                     '<div class="item userid_ng" onclick="ext_userNG();">ユーザーIDをNGに追加</div>';
+
+          let myChatLog = document.getElementById('ext_chat_log');
           myChatLog.after(contextMenu);
 
           myChatLog.addEventListener('contextmenu',function(e){
@@ -218,60 +226,7 @@ const NG_TYPE_WORD = "word";
 const NG_TYPE_ID = "id";
 
 function ext_commentNG() {
-
   setNG(NG_TYPE_WORD, _comment_for_clip);
-
-  return;
-
-  let json = localStorage.getItem('LeoPlayer_NgStore_list');
-  if(json) {
-    //console.log(json);
-
-    let ngLimit = 500;
-    if(document.querySelector('[class^=___premium-merit-appeal-banner___]')) {
-      ngLimit = 40;
-    }
-
-    let ng_array = JSON.parse(json);
-    if(ng_array.length < ngLimit) {  // 一般ユーザーの場合40、有料会員の場合は500
-
-      // すでに登録済みか調査する
-      let bIsAlready = false;
-      ng_array.forEach((ngItem) => {
-        if(ngItem.type === "word" && ngItem.value === _comment_for_clip){
-          console.log("すでにNG登録されています");
-          bIsAlready = true;
-        }
-      });
-      if(bIsAlready === false) {
-        // ローカルストレージにNG登録する
-        var obj = {
-          'value': _comment_for_clip,
-          'type': 'word'
-        };
-        ng_array.push(obj);
-        localStorage.setItem('LeoPlayer_NgStore_list', JSON.stringify(ng_array));
-        
-        //--------------------------------------------------------------
-        //[##このコメントは表示されません##]に差し替える
-        let chatDom = document.getElementById('ext_chat_log');
-        _masterFrag.childNodes.forEach((node)=> { 
-          let nodeText = node.querySelector('[class^=___comment-text___]');
-          if(nodeText.innerText === _comment_for_clip) {
-            nodeText.innerText = "##このコメントは表示されません##";
-          }
-        });
-        // コメントBOXを空に
-        while( chatDom.firstChild ){
-          chatDom.removeChild( chatDom.firstChild );
-        }
-        // マスターフラグメントをコメントBOXに貼り付ける
-        chatDom.append(_masterFrag.cloneNode(true));
-        //--------------------------------------------------------------
-
-      }
-    }
-  }
 }
 
 function ext_userNG() {
@@ -301,6 +256,7 @@ function setNG(type, value) {
       });
 
       if(bIsAlready === false) {
+
         // ローカルストレージにNG登録する
         var obj = {
           'value': value,
@@ -401,7 +357,8 @@ function watchParentDOM(mutationsList, observer) {
           if(_domObs) {
             console.log("コメントDOMの監視を解除");
             _domObs.disconnect();
-            document.getElementById('ext_chat_log').classList.add('hide');
+            //document.getElementById('ext_chat_log').classList.add('hide');
+            document.getElementById('ext_chat_log').style.display = "none";
           }
         }
 
@@ -412,7 +369,8 @@ function watchParentDOM(mutationsList, observer) {
         if(addNode.querySelector('[class^=___comment-panel___]')) {
           console.log("コメントDOMの監視を開始");
           startWatchCommentDOM();
-          document.getElementById('ext_chat_log').classList.remove('hide');
+          //document.getElementById('ext_chat_log').classList.remove('hide');
+          document.getElementById('ext_chat_log').style.display = "block";
           // [コメント]タブ、[おすすめ生放送]タブにクリックイベントを再設定（DOMごと消えているので再設定が必要）
           setCommentBtnEvent();
         }
@@ -424,15 +382,42 @@ function watchParentDOM(mutationsList, observer) {
   });
 }
 
+function watchPlayerDOM(mutationsList, observer) {
+  syncChatLog();
+}
+
+function syncChatLog() {
+  let myChatLog = document.getElementById('ext_chat_log');
+  let logBox = document.querySelector('[class^=___comment-panel___]');
+
+  if(myChatLog && logBox) {
+
+    myChatLog.style.width = logBox.clientWidth + "px";
+    myChatLog.style.height = logBox.clientHeight + "px";
+  
+    var clientRect = logBox.getBoundingClientRect();
+    // ページ内の位置
+    var py = window.pageYOffset + clientRect.top ;
+    var px = window.pageXOffset + clientRect.left ;
+    myChatLog.style.top = py + "px";
+    myChatLog.style.left = px + "px";
+
+  }
+}
+
 
 function setCommentBtnEvent(){
+  console.log('タブ切り替え');
+
   // [コメント]タブ
   document.querySelector('[class^=___comment-tab___]').addEventListener('click', function(){
-    document.getElementById('ext_chat_log').classList.remove('hide');
+    //document.getElementById('ext_chat_log').classList.remove('hide');
+    document.getElementById('ext_chat_log').style.display = "block";
   });
   // [おすすめ生放送]タブ
   document.querySelector('[class^=___program-recommend-tab___]').addEventListener('click', function(){
-    document.getElementById('ext_chat_log').classList.add('hide');
+    //document.getElementById('ext_chat_log').classList.add('hide');
+    document.getElementById('ext_chat_log').style.display = "none";
   });  
 }
 
@@ -737,7 +722,7 @@ function InsertPremium(fragment) {
 
 
 
-// 現在の再生時間(秒数)を取得
+// 現在の再生時間(10ミリ秒単位)を取得
 function getStartPlayTime() {
 
   var currentPlayPos;
@@ -759,9 +744,9 @@ function getStartPlayTime() {
         // ニコ生プレイヤーの読み込み中で正確な時間が取得できないケースはundefinedにしておく
         totalSec = undefined;
       } else {
-        minits = posArray[0] * 60;
-        second = posArray[1];
-        totalSec = minits + second;
+        minits = Number(posArray[0]) * 60;
+        second = Number(posArray[1]);
+        totalSec = (minits + second) * 100; // 秒単位から10ミリ秒単位に変換
       }
 
       //console.log(posArray);
@@ -769,9 +754,9 @@ function getStartPlayTime() {
     } else if (posArray.length == 3) {
       // 時間:分:秒　の場合
       hour = Number(posArray[0]) * 60 * 60;
-      minits = posArray[1] * 60;
-      second = posArray[2];
-      totalSec = hour + minits + second;
+      minits = Number(posArray[1]) * 60;
+      second = Number(posArray[2]);
+      totalSec = (hour + minits + second) * 100; // 秒単位から10ミリ秒に変換
 
       //console.log(posArray);
 
@@ -810,6 +795,8 @@ function recvEvent(event) {
     return;
   }
 
+  //console.log(message);
+
   // chatメッセージのみ解析
   if (message.chat) {
 
@@ -819,14 +806,15 @@ function recvEvent(event) {
     --------------------------------------------------------------*/
     if (_startTime === undefined || isNaN(_startTime)) {
       //_startTime = getStartPlayTime();
-      //console.log("再生開始秒数(vpos) : " + _startTime);
+      //console.log("再生開始ミリ秒数(vpos) : " + _startTime);
     }
 
-    if (_startTime !== undefined && (message.chat.vpos + 10) > _startTime) {  // startTimeは常に更新してるので10秒?の足を履かせる
+    if (_startTime !== undefined && (Number(message.chat.vpos) + (10 * 100)) > _startTime) {  // startTimeは常に更新してるので10秒の足を履かせる(vposは10ミリ秒単位なので+100すると1秒プラスと同じ)
+    //if (_startTime !== undefined){
       
       //console.log(message);
 
-      let yomiage_text = message.chat.content;
+      let yomiage_text = message.chat.content.toLowerCase();
       let isSystemComment = false;
       
       if (message.chat.content.startsWith('/gift', 0)) {
@@ -899,6 +887,9 @@ function recvEvent(event) {
         }
       }
 
+      yomiage_text = yomiage_text.replace(/youtuber/g, 'ユーチューバー');
+      yomiage_text = yomiage_text.replace(/youtube/g, 'ユーチューブ');
+      yomiage_text = yomiage_text.replace(/twitch/g, 'ツイッチ');
       yomiage_text = yomiage_text.replace(/wwww/g, 'ワラワラ');
       yomiage_text = yomiage_text.replace(/ww/g, 'ワラワラ');
       yomiage_text = yomiage_text.replace(/w/g, 'ワラ');
@@ -940,18 +931,22 @@ function recvEvent(event) {
       if(document.querySelector('.ext-setting-menu .ext-yomiage').getAttribute("ext-attr-on")) {
         
         // 読み上げ用のDOMに読み上げテキストを挿入（結果、読み上げられる）
-        if(yomiage_text.length > 0 && document.querySelector("#ext_logBox")){
+        if(yomiage_text.length > 0 && document.getElementById("ext_logBox")){
+          console.log("正常系：comeview-inject.js : " + yomiage_text);
           var newYomiCommentDom = document.createElement('p');
           var newYomiCommentText = document.createTextNode(yomiage_text);
           newYomiCommentDom.appendChild(newYomiCommentText);
-          document.querySelector("#ext_logBox").appendChild(newYomiCommentDom);
+          document.getElementById("ext_logBox").appendChild(newYomiCommentDom);
+        } else {
+          console.error("異常系：comeview-inject.js : " + yomiage_text);
         }
 
       }
 
       //console.log("読み上げます → [" + message.chat.no + "] " + yomiage_text);
     } else {
-      //console.log('message.chat.vpos: ' + message.chat.vpos + ', _startTime: ' + _startTime);
+      console.log('message.chat.vpos: ' + message.chat.vpos + ', _startTime: ' + _startTime);
+      console.error('読み上げスキップしてる');
     }
 
 
@@ -997,7 +992,7 @@ function recvEvent(event) {
     /*--------------------------------------------------------------
     //  ユーザー名の取得処理
     --------------------------------------------------------------*/
-    //console.log(message.chat);
+    console.log(message.chat);
     //console.log(message.chat.no + ", " + message.chat.content + ", " + message.chat.user_id);
 
     if (isNaN(message.chat.user_id)) {
@@ -1096,7 +1091,7 @@ function watchTime(mutationRecords, observer){
   // 一度に2つ以上のDOM追加にも対応
   mutationRecords.forEach(item => {
       _startTime = getStartPlayTime();
-      //console.log("再生開始秒数(vpos) : " + _startTime);
+      //console.log("再生してから現在までの時間(10ミリ秒単位) : " + _startTime);
   });
 };
 

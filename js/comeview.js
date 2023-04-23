@@ -1,6 +1,11 @@
 function comeview(){
-  let menu = document.querySelector('.ext-setting-menu .ext-comeview');
   
+  let menu = document.querySelector('.ext-setting-menu .ext-comeview');
+
+  console.log("------comeview();");
+
+  
+
   // トグル
   if(menu.getAttribute("ext-attr-on")) {  
     chrome.storage.local.set({"ext_comeview": "OFF"}, function() {});
@@ -8,7 +13,8 @@ function comeview(){
     // ショートカットを非アクティブ状態
     document.querySelector('#ext_shortcut .item.comeview').removeAttribute("active");
 
-    document.querySelector("#ext_chat_log").removeAttribute("ext-master-comeview");
+    document.getElementById("ext_chat_log").removeAttribute("ext-master-comeview");
+    document.getElementById('ext_chat_log').style.display = "none";
 
   } else {
     chrome.storage.local.set({"ext_comeview": "ON"}, function() {});
@@ -16,7 +22,8 @@ function comeview(){
     // ショートカットをアクティブ状態
     document.querySelector('#ext_shortcut .item.comeview').setAttribute("active", "ON");
 
-    document.querySelector("#ext_chat_log").setAttribute("ext-master-comeview", "ON");
+    document.getElementById("ext_chat_log").setAttribute("ext-master-comeview", "ON");
+    document.getElementById('ext_chat_log').style.display = "block";
   }
 }
 
@@ -164,8 +171,9 @@ window.addEventListener('resize', function(){
 
 });
 
+
 function syncLogBoxSize() {
-  let myChatLog = document.querySelector('#ext_chat_log');
+  let myChatLog = document.getElementById('ext_chat_log');
   let logBox = document.querySelector('[class^=___comment-panel___]');
 
   if(myChatLog && logBox) {
@@ -180,17 +188,32 @@ function syncLogBoxSize() {
     myChatLog.style.top = py + "px";
     myChatLog.style.left = px + "px"; 
 
+    // 一番下にスクロールしとく
+    myChatLog.scrollTop = myChatLog.scrollHeight;
+
   }
 }
+
 
 window.addEventListener('load', function () {
   
   // ニコ生の再生画面でのみ追加
   if(document.querySelector('[class^=___player-status-panel___]')){
+    console.log("------comeview.js load();");
+
     let myChatLog = document.createElement("div");
     myChatLog.id = "ext_chat_log";
+
+    chrome.storage.local.get("ext_comeview", function (value) {
+      if (value.ext_comeview == "ON") {
+        myChatLog.style.display = "block";
+      }
+    });
+
+
     document.querySelector('#root').after(myChatLog);
     syncLogBoxSize();  
+
   }
 
 });

@@ -5,7 +5,8 @@
   "description": "ニコ生にいろいろな拡張機能を追加します",
   "permissions": [
     "storage",
-    "tts"
+    "tts",
+    "tabs"
   ],
   "background": {
     "service_worker": "background.js"
