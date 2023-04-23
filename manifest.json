@@ -1,12 +1,11 @@
 {
   "name": "ニコ生拡張機能 へもツール",
   "manifest_version": 3,
-  "version": "0.31.0",
+  "version": "0.29.3",
   "description": "ニコ生にいろいろな拡張機能を追加します",
   "permissions": [
     "storage",
-    "tts",
-    "tabs"
+    "tts"
   ],
   "background": {
     "service_worker": "background.js"
@@ -42,7 +41,6 @@
         "/js/video.js",
         "/js/game.js",
         "/js/rightClick.js",
-        "/js/lib/EBML.js",
         "/js/pip.js",
         "/js/akashic.js"
       ],

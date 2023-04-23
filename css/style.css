@@ -177,11 +177,6 @@
     margin-left: 13px;
     cursor: pointer;
 }
-.ext-setting-menu .item .pin.blank {
-    cursor: default;
-    width: 11px;
-    height: 11px;
-}
 .ext-setting-menu .item .pin svg {
     width: 11px;
     height: 11px;
@@ -239,10 +234,6 @@
 .ext-setting-menu .option-box .option:hover {
     background: rgba(255, 255, 255, 0.2);
 }
-.ext-setting-menu .option-box .option.desc:hover {
-    background: none;
-}
-
 .ext-setting-menu .option-box .option .value * {
     cursor: pointer;
 }
@@ -456,37 +447,12 @@ div#ext_dom_message {
     border: 1px solid #858585;
 }
 #ext_shortcut .item[active] {
-    color: white;
-    border: 2px solid rgb(0 61 147);
-    background-color: rgb(0 61 147);
+    color: #056dff;
+    border: 2px solid #056dff;
     padding: 1px 9px;
 }
 
-#ext_shortcut .item.rec {
-    border: none;
-    margin-left: 10px;
-    font-size: 12px;
-}
-#ext_shortcut .item.rec .status {
-    color: rgb(88, 88, 88);
-    margin-right: 10px;
-}
-#ext_shortcut .item.rec .status[rec] {
-    color: rgb(204, 0, 0);
-    animation: recFlash 1.5s linear infinite;
-}
-#ext_shortcut .item.rec .recBtn {
-    cursor: pointer;
-}
-@keyframes recFlash {
-    0%,100% {
-      opacity: 1;
-    }
-  
-    50% {
-      opacity: 0;
-    }
-  }
+
 
 #ext_volume_overlay {
     display: none;
@@ -612,23 +578,16 @@ div#ext_dom_message {
     border: 1px solid #0034a3; 
 }
 
-.user_id_by_extention {
-    display: none; 
-}
-
-#ext_chat_log {
-    display: none;
-}
-#ext_chat_log[ext-master-comeview][ext-opt-name] .user_name_by_extention {
+[class^=___contents-area___][ext-master-comeview][ext-opt-name] .user_name_by_extention {
     display: inline-block;
 }
-#ext_chat_log[ext-master-comeview][ext-opt-name][ext-opt-kotehan] .user_name_by_extention {
+[class^=___contents-area___][ext-master-comeview][ext-opt-name][ext-opt-kotehan] .user_name_by_extention {
     display: none;
 }
-#ext_chat_log[ext-master-comeview][ext-opt-name] .user_name_by_extention.viewKotehan {
+[class^=___contents-area___][ext-master-comeview][ext-opt-name] .user_name_by_extention.viewKotehan {
     display: none;
 }
-#ext_chat_log[ext-master-comeview][ext-opt-name][ext-opt-kotehan] .user_name_by_extention.viewKotehan {
+[class^=___contents-area___][ext-master-comeview][ext-opt-name][ext-opt-kotehan] .user_name_by_extention.viewKotehan {
     display: inline-block;
 }
 .premium_by_extention { 
@@ -640,7 +599,7 @@ div#ext_dom_message {
     padding: 0px 2px;
     font-size: 9px !important;    
 }
-#ext_chat_log[ext-master-comeview][ext-opt-premium] .premium_by_extention {
+[class^=___contents-area___][ext-master-comeview][ext-opt-premium] .premium_by_extention {
     display: inline-block;
 }
 
@@ -657,18 +616,16 @@ div#ext_dom_message {
     padding-right: 10px !important;
     padding: 5px 0px !important;
     line-height: 1.5 !important;
-    word-break: break-all;
+    font-size: 9px !important;
 }
 
 
 [ext-master-comeview][ext-opt-orikaeshi] [class^=___comment-text___].one-line {
-/*
     font-size: 12px !important;
     line-height: 1.3 !important;
-*/
 }
 [ext-master-comeview][ext-opt-orikaeshi] [class^=___comment-text___].multiple-line {
-    /*
+    /*font-size: 9px;*/
     height: 30px;    
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -677,28 +634,20 @@ div#ext_dom_message {
     line-height: 1.5 !important;
     overflow: hidden !important;
     font-size: 9px !important;
-    
     padding: 0 !important;
-    */
 }
-/* コメント量に応じて高さを可変にするとうまくいかないのでコメントアウト*/
+/* コメント量に応じて高さを可変にするとうまくいかないのでコメントアウト
 [class^=___table-row___] {
     height: auto !important;
     min-height: 32px !important;
-
-    font-size: 12px !important;
-    line-height: 1.3 !important;
 }
-
+*/
 
 /*ここまで------------------------------------------*/
 
 /* コメントの背景を行ごとに色付けして読みやすく */
 [ext-master-comeview] [class^=___table-row___]:nth-child(odd) {
     background-color: #f1f1f1;
-}
-[ext-master-comeview] [class^=___table-row___]:hover {
-    background-color: #e1e1e1;
 }
 /* コメントの行の背景がDark ReaderというChrome拡張機能を入れているときにダークモードにならないと指摘があったので対応 */
 html[data-darkreader-scheme] [ext-master-comeview] [class^=___table-row___]:nth-child(odd) {
@@ -712,123 +661,3 @@ html[data-darkreader-scheme] [ext-master-comeview] [class^=___table-row___]:nth-
 [ext-master-videoeffect][ext-opt-reverse] {
     transform: scale(-1, 1);
 }
-
-
-
-/*オリジナルのチャットボックス　ここから--------*/
-
-#ext_chat_log {
-    top: 100px;
-    left: 100px;
-    position: absolute;
-    background-color: white;
-    overflow-y: scroll;
-    width: 100%;
-    height: 100%;
-}
-#ext_chat_log.hide {
-    display: none;
-}
-
-#ext_chat_menu{
-    display: none;
-    position: absolute;
-    left: 0px;
-    top: 0px;
-    width: 192px;
-    z-index: 1000;
-    border-radius: 7px;
-    box-shadow: 0px 0px 10px #bfbfbf;
-    padding: 4px 4px;
-    background-color:#fff;
-}
-#ext_chat_menu .item {
-    padding: 5px 10px;
-    font-size: 13px;
-    cursor:pointer;
-    user-select: none;
-}
-#ext_chat_menu .item:hover {
-    background-color: #ededed;
-}
-
-#ext_chat_menu .info {
-    user-select: none;
-    padding: 10px 10px;
-    font-size: 12px;
-    border-radius: 4px;
-    cursor: default;
-}
-#ext_chat_menu .info .id {
-    position: relative;
-    font-size: 11px;
-    height: 1rem;
-    padding-left: 33px;
-    overflow: hidden;
-    margin-bottom: 3px;
-    color: #939393;
-    word-break: break-all;
-}
-#ext_chat_menu .info .id:before {
-    position: absolute;
-    left: 0;
-    top: 0;
-    content: "ID";
-    padding: 0px 7px;
-    border-radius: 3px;
-    background-color: #a99595 !important;
-    color: white;
-    font-size: 10px;
-}
-#ext_chat_menu .info .name {
-    position: relative;
-    font-size: 11px;
-    height: 1rem;
-    padding-left: 49px;
-    overflow: hidden;
-    margin-bottom: 3px;
-    color: #939393;
-    word-break: break-all;
-}
-#ext_chat_menu .info .name:before {
-    position: absolute;
-    left: 0;
-    top: 0;
-    content: "NAME";
-    padding: 0px 7px;
-    border-radius: 3px;
-    background-color: #a99595 !important;
-    color: white;
-    font-size: 10px;
-}
-#ext_chat_menu .info .comment {
-    position: relative;
-    word-break: keep-all;
-    overflow: hidden;
-    height: 1rem;
-    padding-left: 59px;
-    color: #939393;
-}
-#ext_chat_menu .info .comment:before {
-    position: absolute;
-    left: 0;
-    top: 0;
-    content: "コメント";
-    padding: 0px 7px;
-    border-radius: 3px;
-    background-color: #a99595 !important;
-    color: white;
-    font-size: 10px;
-}
-#ext_chat_menu hr {
-    margin: 3px 0px;
-    opacity: 0.4;
-}
-
-/* 一般会員の広告が隠れないように全面表示 */
-[class^=___player-ad-panel___] {
-    z-index: 10000;
-}
-
-
-/*オリジナルのチャットボックス　ここまで--------*/
