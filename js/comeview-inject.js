@@ -35,9 +35,9 @@ function getStartPlayTime() {
         // ニコ生プレイヤーの読み込み中で正確な時間が取得できないケースはundefinedにしておく
         totalSec = undefined;
       } else {
-        minits = posArray[0] * 60;
-        second = posArray[1];
-        totalSec = minits + second;
+        minits = Number(posArray[0]) * 60;
+        second = Number(posArray[1]);
+        totalSec = (minits + second) * 100; // 秒単位から10ミリ秒単位に変換
       }
 
       //console.log(posArray);
@@ -45,9 +45,9 @@ function getStartPlayTime() {
     } else if (posArray.length == 3) {
       // 時間:分:秒　の場合
       hour = Number(posArray[0]) * 60 * 60;
-      minits = posArray[1] * 60;
-      second = posArray[2];
-      totalSec = hour + minits + second;
+      minits = Number(posArray[1]) * 60;
+      second = Number(posArray[2]);
+      totalSec = (hour + minits + second) * 100; // 秒単位から10ミリ秒に変換
 
       //console.log(posArray);
 
@@ -61,8 +61,8 @@ function getStartPlayTime() {
 var _startTime;
 var _currentVoiceName = "";
 
-var _commentList = {};      // KEY:コメント番号, VALUE:対応するユーザー名(最大7文字)
-var _commentListFull = {};  // KEY:コメント番号, VALUE:対応するユーザー名(フルネーム)
+var _commentList = {};      // KEY:コメント番号, VALUE:対応するユーザー名(最大7文字)（184さんなら省略型のハッシュ値、生IDさんなら省略形のユーザー名）
+var _commentListFull = {};  // KEY:コメント番号, VALUE:対応するユーザー名(フルネーム)（184さんならFullハッシュ値、生IDさんならFullユーザー名）
 var _183UserList = {};      // KEY:コメント番号, VALUE:184ユーザーID
 var _newUserList = {};      // KEY:コメント番号, VALUE:初めて書き込むユーザーID 
 var _premiumList = {};      // KEY:コメント番号, VALUE:何でもいい値
@@ -70,7 +70,7 @@ var _rawUserList = {};      // KEY:ユーザーID,   VALUE:GETしてきたユー
 var _rawUserListFull = {};  // KEY:ユーザーID,   VALUE:GETしてきたユーザー名(フルネーム)
 var _gettingList = {};      // KEY:ユーザーID,   VALUE:何でもいい値
 
-var _commentRawIdList = {}; // KEY:コメント番号   VALUE:ユーザーID
+var _commentRawIdList = {}; // KEY:コメント番号   VALUE:ユーザーID（184さんならハッシュ値、生IDさんなら生IDが入る）
 var _kotehanList = [];      // KEY:ユーザーID,    VALUE:コテハン
 
 
@@ -86,27 +86,26 @@ function recvEvent(event) {
     return;
   }
 
+  
   // chatメッセージのみ解析
   if (message.chat) {
 
+
+    /*--------------------------------------------------------------
+    //  読み上げ処理
+    --------------------------------------------------------------*/
     if (_startTime === undefined || isNaN(_startTime)) {
       //_startTime = getStartPlayTime();
-      //console.log("再生開始秒数(vpos) : " + _startTime);
+      //console.log("再生開始ミリ秒数(vpos) : " + _startTime);
     }
 
-
-
-    
-    // 再生開始時
-    if (_startTime !== undefined && (message.chat.vpos + 10) > _startTime) {  // startTimeは常に更新してるので10秒?の足を履かせる
+    if (_startTime !== undefined && (Number(message.chat.vpos) + (10 * 100)) > _startTime) {  // startTimeは常に更新してるので10秒の足を履かせる(vposは10ミリ秒単位なので+100すると1秒プラスと同じ)
+    //if (_startTime !== undefined){
       
-      //console.log("再生開始秒数(vpos)　これは呼ばれる？ : " + _startTime);
-
       //console.log(message);
 
-      let yomiage_text = message.chat.content;
+      let yomiage_text = message.chat.content.toLowerCase();
       let isSystemComment = false;
-
       
       if (message.chat.content.startsWith('/gift', 0)) {
         isSystemComment = true;
@@ -122,8 +121,7 @@ function recvEvent(event) {
           yomiage_text = "";
         }
       }
-
-      
+     
       if (message.chat.content.startsWith('/nicoad', 0)) {
         isSystemComment = true;
         if (document.querySelector('.ext-yomiage .option.koukoku input').checked ){
@@ -137,7 +135,6 @@ function recvEvent(event) {
           yomiage_text = "";
         }
       }
-
       
       if (message.chat.content.startsWith('/info', 0)) {
         isSystemComment = true;
@@ -154,7 +151,6 @@ function recvEvent(event) {
         }
       }
 
-      
       if (message.chat.content.startsWith('/spi', 0)) {
         isSystemComment = true;
         if (document.querySelector('.ext-yomiage .option.request input').checked ){
@@ -167,7 +163,6 @@ function recvEvent(event) {
           yomiage_text = "";
         }
       }
-
 
       if (message.chat.content.startsWith('/emotion', 0)) {
         isSystemComment = true;
@@ -182,7 +177,9 @@ function recvEvent(event) {
         }
       }
 
-
+      yomiage_text = yomiage_text.replace(/youtuber/g, 'ユーチューバー');
+      yomiage_text = yomiage_text.replace(/youtube/g, 'ユーチューブ');
+      yomiage_text = yomiage_text.replace(/twitch/g, 'ツイッチ');
       yomiage_text = yomiage_text.replace(/wwww/g, 'ワラワラ');
       yomiage_text = yomiage_text.replace(/ww/g, 'ワラワラ');
       yomiage_text = yomiage_text.replace(/w/g, 'ワラ');
@@ -230,22 +227,30 @@ function recvEvent(event) {
       if(document.querySelector('.ext-setting-menu .ext-yomiage').getAttribute("ext-attr-on")) {
         
         // 読み上げ用のDOMに読み上げテキストを挿入（結果、読み上げられる）
-        if(yomiage_text.length > 0 && document.querySelector("#ext_logBox")){
+        if(yomiage_text.length > 0 && document.getElementById("ext_logBox")){
+          //console.log("正常系：comeview-inject.js : " + yomiage_text);
           var newYomiCommentDom = document.createElement('p');
           var newYomiCommentText = document.createTextNode(yomiage_text);
           newYomiCommentDom.appendChild(newYomiCommentText);
-          document.querySelector("#ext_logBox").appendChild(newYomiCommentDom);
+          document.getElementById("ext_logBox").appendChild(newYomiCommentDom);
+        } else {
+          //console.error("異常系：comeview-inject.js : " + yomiage_text);
         }
 
       }
 
       //console.log("読み上げます → [" + message.chat.no + "] " + yomiage_text);
     } else {
-      //console.log('message.chat.vpos: ' + message.chat.vpos + ', _startTime: ' + _startTime);
+      /*
+      console.log('message.chat.vpos: ' + message.chat.vpos + ', _startTime: ' + _startTime);
+      console.error('読み上げスキップしてる');
+      */
     }
 
 
-
+    /*--------------------------------------------------------------
+    //  コテハン処理
+    --------------------------------------------------------------*/
     let kotehanAt = message.chat.content.indexOf('@');
     if(kotehanAt === -1){
       kotehanAt = message.chat.content.indexOf('＠');
@@ -256,54 +261,48 @@ function recvEvent(event) {
         kotehan = kotehan.substr( 0, 16 ); // 最大16文字(公式の仕様にあわせる)
         let kotehanItem = {id: message.chat.user_id, kotehan: kotehan};
         // 既に同じIDの人が登録されていれば削除してから追加
-        _kotehanList = _kotehanList.filter(function (x) { return x.id !== message.chat.user_id });
+        _kotehanList = _kotehanList.filter(function (x) { return x.id !== message.chat.user_id }); // 削除
+        _kotehanList.push(kotehanItem); // 追加
 
-        _kotehanList.push(kotehanItem);
-        //_kotehanList[message.chat.user_id] = kotehan;
-      }
-
-      // コテハン保存用のDOMにコテハンをテキストを挿入（結果、読み上げられる）
-      if(kotehan.length > 0 && document.querySelector("#ext_kotehanBox")) {
-        let item = { id : message.chat.user_id, kotehan : kotehan};
-        var newYomiCommentDom = document.createElement('p');
-        var newYomiCommentText = document.createTextNode(JSON.stringify(item));
-        newYomiCommentDom.appendChild(newYomiCommentText);
-        document.querySelector("#ext_kotehanBox").appendChild(newYomiCommentDom);
+        // コテハン保存用のDOMにコテハンをテキストを挿入（結果、読み上げられる）
+        let kotehanBox = document.getElementById("ext_kotehanBox");
+        if(kotehanBox) {
+          let item = { id : message.chat.user_id, kotehan : kotehan};
+          var newYomiCommentDom = document.createElement('p');
+          var newYomiCommentText = document.createTextNode(JSON.stringify(item));
+          newYomiCommentDom.appendChild(newYomiCommentText);
+          kotehanBox.appendChild(newYomiCommentDom);
+        }
       }
     }
 
 
 
-
-
-
-
-
-
+    /*--------------------------------------------------------------
+    //  プレ垢処理
+    --------------------------------------------------------------*/
     // プレ垢の判定
     if (message.chat && message.chat.no && message.chat.premium && message.chat.premium === 1) {
       _premiumList[message.chat.no] = true;
     }
 
-    //console.log(message.chat);
 
+    /*--------------------------------------------------------------
+    //  ユーザー名の取得処理
+    --------------------------------------------------------------*/
+    //console.log(message.chat);
     //console.log(message.chat.no + ", " + message.chat.content + ", " + message.chat.user_id);
 
     if (isNaN(message.chat.user_id)) {
       // 184さんの処理----------------------------
-      _commentRawIdList[message.chat.no] = message.chat.user_id;
 
-      _commentList[message.chat.no] = message.chat.user_id.substring(0, 4) + "･･";
-      _commentListFull[message.chat.no] = message.chat.user_id;
-      _183UserList[message.chat.no] = message.chat.user_id;
+
+      _commentRawIdList[message.chat.no]  = message.chat.user_id;
+      _commentList[message.chat.no]       = message.chat.user_id.substring(0, 4) + "･･";
+      _commentListFull[message.chat.no]   = message.chat.user_id;
+      _183UserList[message.chat.no]       = message.chat.user_id;
       
-      /*
-      if(_kotehanList[message.chat.user_id]){
-        _commentkotehanList[message.chat.no] = _kotehanList[message.chat.user_id];
-      } else {
-        _commentkotehanList[message.chat.no] = message.chat.user_id.substring(0, 4) + "･･";
-      }
-      */
+
 
     } else {
       // 生IDさんの処理----------------------------
@@ -378,8 +377,6 @@ function recvEvent(event) {
       }, false);
     }
 
-
-    
   }
 
 }
@@ -419,23 +416,45 @@ function InsertUserName(currentNode, newNo) {
 
   if(hitKotehan[0]){
 
-    //kotehan = _kotehanList[currentNoId];
-    kotehan = hitKotehan[0].kotehan;
-    kotehanElement.setAttribute("class", "user_name_by_extention viewKotehan kotehan");
+    // コテハンがHITした場合---------------
+
+    let kotehanFull = hitKotehan[0].kotehan;
+    let kotehan     = hitKotehan[0].kotehan;
     
+
+    // 8文字より長い場合は省略
+    if (kotehan.length > 7) {
+      kotehan = kotehan.substring(0, 7) + "･･";
+    }
+
+    //kotehan = _kotehanList[currentNoId];
+    //kotehan = hitKotehan[0].kotehan;
+    kotehanElement.setAttribute("class", "user_name_by_extention viewKotehan kotehan");
+
+    kotehanContent = document.createTextNode(kotehan);
+    kotehanElement.appendChild(kotehanContent);
+    kotehanElement.setAttribute("title", kotehanFull);
+
   } else {
+
+    // コテハンがHITしなかった場合---------
+
+    let userName = _commentList[newNo];
+    let fullUserName = _commentListFull[newNo];
+    
     kotehan = _commentList[newNo]
     if (_183UserList[newNo]) {
       kotehanElement.setAttribute("class", "user_name_by_extention viewKotehan user184");
     } else {
       kotehanElement.setAttribute("class", "user_name_by_extention viewKotehan");
     }
+
+    kotehanContent = document.createTextNode(kotehan);
+    kotehanElement.appendChild(kotehanContent);  
+    kotehanElement.setAttribute("title", fullUserName);
+
   }
 
-  kotehanContent = document.createTextNode(kotehan);
-  kotehanElement.appendChild(kotehanContent);
-
-  kotehanElement.setAttribute("title", kotehan);
 
 
   // 作成したDOMの挿入
@@ -461,7 +480,11 @@ function InsertPremium(currentNode) {
 
 function watchCommentDOM(mutationsList, observer) {
 
+console.log("watchCommentDOMが呼ばれました。");
+
   for (const mutation of mutationsList) {
+
+    //console.log(mutation);
 
     for (var i = 0; i < mutation.target.childNodes.length; i++) {
       var currentNode = mutation.target.childNodes[i];
@@ -488,15 +511,6 @@ function watchCommentDOM(mutationsList, observer) {
             _commentList[newNo] = "取得失敗";
             InsertUserName(currentNode, newNo);
           }
-
-          /*
-          if(newNo % 2 === 0){
-            currentNode.classList.add('odd_by_extention');
-          } else {
-            currentNode.classList.add('even_by_extention');
-          }
-          */
-
 
         }
       }
@@ -602,7 +616,7 @@ function watchTime(mutationRecords, observer){
   // 一度に2つ以上のDOM追加にも対応
   mutationRecords.forEach(item => {
       _startTime = getStartPlayTime();
-      //console.log("再生開始秒数(vpos) : " + _startTime);
+      //console.log("再生してから現在までの時間(10ミリ秒単位) : " + _startTime);
   });
 };
 

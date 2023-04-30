@@ -1,6 +1,10 @@
 function comeview(){
   let menu = document.querySelector('.ext-setting-menu .ext-comeview');
+
+  console.log("------comeview();");
+
   
+
   // トグル
   if(menu.getAttribute("ext-attr-on")) {  
     chrome.storage.local.set({"ext_comeview": "OFF"}, function() {});

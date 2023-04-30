@@ -1,3 +1,32 @@
+/*
+
+利用させていただいているMITライセンスの著作権表示
+
+< ts-ebml >---------------------------------------------------------------------
+
+Copyright (c) 2017 legokichi
+
+
+< node-ebml >---------------------------------------------------------------------
+
+Copyright (c) 2013-2018 Mark Schmale and contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
+*/
 
 let _obsLogBox;
 
@@ -58,10 +87,9 @@ window.addEventListener('load', function () {
 
     
     window.addEventListener('beforeunload', function(e) {
-        if(chrome.runtime && chrome.runtime.sendMessage) {
-            chrome.runtime.sendMessage({stop: "stop"});
-        }
+        chrome.runtime.postMessage({stop: "stop"});
     }, false);
+    
 
 
 });
@@ -183,9 +211,54 @@ function insertBtnToPlayer(parts_data) {
         '<div class="item game" aria-label="ニコ生ゲームの映像を非表示にします">ニコ生ゲーム画面OFF</div>'+
         '<div class="item game-mute" aria-label="ニコ生ゲームの音をミュートします">ニコ生ゲーム音ミュート</div>'+
         '<div class="item video-effect" aria-label="配信映像を加工します">映像加工</div>'+
-        '<div class="item picture" aria-label="映像＋コメントを小窓で表示します">小窓表示</div>';
+        '<div class="item picture" aria-label="映像＋コメントを小窓で表示します">小窓表示</div>'+
+        '<div class="item rec" aria-label="録画を開始します"><span class="status">●</span><span class="recBtn">録画開始</span></div>';
     document.querySelector('[class^=___player-controller___]').append(shortcut);
     
+
+    
+
+
+    // 簡易録画機能
+    document.querySelector('.ext-setting-menu .ext-rec .item .value').addEventListener('click', function(){
+        
+        if(document.querySelector('#ext_shortcut .item.rec').getAttribute("ext-pin-on")) {
+            // ON → OFF
+            document.querySelector('.ext-setting-menu .ext-rec').removeAttribute("ext-attr-on");
+            document.querySelector('#ext_shortcut .item.rec').removeAttribute("ext-pin-on");
+            chrome.storage.local.set({"ext_rec_pin": "OFF"}, function() {});
+        } else {
+            // OFF → ON
+            document.querySelector('.ext-setting-menu .ext-rec').setAttribute("ext-attr-on", "on");
+            document.querySelector('#ext_shortcut .item.rec').setAttribute("ext-pin-on", "ON");
+            chrome.storage.local.set({"ext_rec_pin": "ON"}, function() {});
+        }
+        //pipRec();
+    });
+
+    // 録画開始、録画停止
+    document.querySelector('#ext_shortcut .item.rec').addEventListener('click', function(){
+        if(document.querySelector('#ext_shortcut .item.rec').getAttribute("recording")) {
+            // ON → OFF
+            recStop();
+            document.querySelector('#ext_shortcut .item.rec').removeAttribute("recording");
+            document.querySelector('#ext_shortcut .item.rec .recBtn').textContent = "録画開始";
+            document.querySelector('#ext_shortcut .item.rec .status').removeAttribute("rec");
+            document.querySelector('#ext_shortcut .item.rec').setAttribute("aria-label", "録画を開始します");
+
+        } else {
+            // OFF → ON
+            recStart();
+            document.querySelector('#ext_shortcut .item.rec').setAttribute("recording", "ON");
+            document.querySelector('#ext_shortcut .item.rec .recBtn').textContent = "録画停止";
+            document.querySelector('#ext_shortcut .item.rec .status').setAttribute("rec", "on");
+            document.querySelector('#ext_shortcut .item.rec').setAttribute("aria-label", "録画を停止します");
+        }
+    });
+
+
+
+
 
     // コメビュ
     let comeviewBtn = document.querySelector('.ext-setting-menu .ext-comeview .item .value');
@@ -411,12 +484,13 @@ function insertBtnToPlayer(parts_data) {
             chrome.storage.local.set({"ext_game_volume_mute": "OFF"}, function() {});
             // スピーカーのアイコン表示
             document.querySelector('#ext_volume_overlay').innerHTML = `<svg width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="fill-rule: evenodd; clip-rule: evenodd; stroke-linejoin: round; stroke-miterlimit: 1.41421;"><path d="M24.122,24l21.106,-22.748c1.155,-1.246 2.863,-1.598 4.339,-0.894c1.475,0.705 2.433,2.328 2.433,4.126c0,21.38 0,69.652 0,91.032c0,1.798 -0.958,3.421 -2.433,4.126c-1.476,0.704 -3.184,0.352 -4.339,-0.894l-21.106,-22.748l-16.122,0c-2.122,0 -4.157,-0.843 -5.657,-2.343c-1.5,-1.5 -2.343,-3.535 -2.343,-5.657c0,-9.777 0,-26.223 0,-36c0,-2.122 0.843,-4.157 2.343,-5.657c1.5,-1.5 3.535,-2.343 5.657,-2.343l16.122,0ZM75.486,14.675c0.155,-0.244 0.338,-0.473 0.546,-0.681c0.468,-0.494 0.959,-0.985 1.425,-1.451c1.48,-1.481 3.853,-1.569 5.439,-0.202c10.477,9.178 17.104,22.651 17.104,37.659c0,0 0,0 0,0c0,15.008 -6.627,28.481 -17.112,37.649c-1.582,1.363 -3.946,1.275 -5.422,-0.201c-0.299,-0.288 -0.604,-0.589 -0.909,-0.893c-0.18,-0.178 -0.36,-0.358 -0.538,-0.536c-0.787,-0.787 -1.21,-1.866 -1.169,-2.978c0.042,-1.112 0.545,-2.156 1.388,-2.882c2.768,-2.402 5.201,-5.179 7.221,-8.252c0.137,-0.208 0.271,-0.417 0.404,-0.628c0.148,-0.234 0.293,-0.469 0.436,-0.706c0.115,-0.192 0.229,-0.384 0.34,-0.577c0.065,-0.11 0.128,-0.221 0.191,-0.333c0.11,-0.192 0.217,-0.386 0.323,-0.581l0.061,-0.11l0.113,-0.212c0.095,-0.179 0.189,-0.358 0.281,-0.538c0.256,-0.497 0.502,-1.001 0.737,-1.511c0.13,-0.282 0.257,-0.566 0.381,-0.851c0.511,-1.179 0.966,-2.388 1.363,-3.623c0.198,-0.613 0.38,-1.232 0.548,-1.857c0.062,-0.231 0.122,-0.463 0.18,-0.696c0.04,-0.158 0.078,-0.316 0.115,-0.475c0.059,-0.249 0.116,-0.499 0.17,-0.751c0.264,-1.224 0.472,-2.47 0.621,-3.733l0.032,-0.274c0.162,-1.461 0.245,-2.946 0.245,-4.451c0,0 0,0 0,0c0,-10.566 -4.106,-20.181 -10.808,-27.335l-0.112,-0.12l-0.064,-0.067c-0.289,-0.304 -0.583,-0.604 -0.881,-0.9l-0.155,-0.153l-0.119,-0.115c-0.173,-0.168 -0.346,-0.334 -0.522,-0.498c-0.357,-0.335 -0.72,-0.663 -1.09,-0.985c-0.104,-0.09 -0.204,-0.185 -0.298,-0.285c-0.207,-0.219 -0.386,-0.459 -0.537,-0.715c-0.025,-0.043 -0.05,-0.087 -0.073,-0.131l-0.013,-0.023l-0.01,-0.019l-0.013,-0.026l-0.004,-0.007c-0.03,-0.059 -0.058,-0.119 -0.086,-0.179c-0.208,-0.463 -0.328,-0.966 -0.347,-1.484c-0.029,-0.772 0.168,-1.528 0.555,-2.181c0.012,-0.02 0.024,-0.039 0.036,-0.059l0.027,-0.043ZM62.189,27.828c0.363,-0.38 0.73,-0.747 1.079,-1.096c1.427,-1.427 3.693,-1.568 5.286,-0.329c0.879,0.697 1.719,1.441 2.516,2.229c5.508,5.453 8.93,13.014 8.93,21.368c0,0 0,0 0,0c0,9.562 -4.483,18.084 -11.46,23.579c-0.049,0.039 -0.099,0.076 -0.15,0.112l-0.077,0.053c-0.642,0.431 -1.375,0.654 -2.11,0.673l-0.089,0.001c-1.029,0.005 -2.055,-0.389 -2.831,-1.165c-0.307,-0.288 -0.621,-0.595 -0.938,-0.909c-0.178,-0.177 -0.357,-0.356 -0.536,-0.535c-0.184,-0.184 -0.347,-0.383 -0.49,-0.595c-0.036,-0.053 -0.07,-0.107 -0.103,-0.161c-0.02,-0.034 -0.039,-0.067 -0.058,-0.101l-0.018,-0.031l-0.006,-0.01c-0.022,-0.04 -0.043,-0.081 -0.064,-0.122c-0.319,-0.628 -0.469,-1.337 -0.424,-2.055c0.07,-1.144 0.628,-2.203 1.533,-2.908c3.013,-2.301 5.345,-5.445 6.651,-9.077c0.176,-0.489 0.333,-0.987 0.471,-1.493c0.456,-1.675 0.699,-3.437 0.699,-5.256c0,0 0,0 0,0c0,-6.449 -3.059,-12.19 -7.804,-15.848c-0.898,-0.7 -1.453,-1.752 -1.523,-2.888c-0.07,-1.136 0.351,-2.248 1.156,-3.053c0.059,-0.064 0.119,-0.128 0.179,-0.192l0.181,-0.191Z"></path></svg>`;
-                        
+            document.querySelector('#ext_volume_overlay').setAttribute('muted', 'OFF');  
         } else {
             video.muted = true;
             chrome.storage.local.set({"ext_game_volume_mute": "ON"}, function() {});
             // ミュートスピーカーのアイコン表示
             document.querySelector('#ext_volume_overlay').innerHTML = `<svg width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="fill-rule: evenodd; clip-rule: evenodd; stroke-linejoin: round; stroke-miterlimit: 1.41421;"><path d="M24.122,24l21.106,-22.748c1.155,-1.246 2.863,-1.598 4.339,-0.894c1.475,0.705 2.433,2.328 2.433,4.126c0,21.38 0,69.652 0,91.032c0,1.798 -0.958,3.421 -2.433,4.126c-1.476,0.704 -3.184,0.352 -4.339,-0.894l-21.106,-22.748l-16.122,0c-2.122,0 -4.157,-0.843 -5.657,-2.343c-1.5,-1.5 -2.343,-3.535 -2.343,-5.657c0,-9.777 0,-26.223 0,-36c0,-2.122 0.843,-4.157 2.343,-5.657c1.5,-1.5 3.535,-2.343 5.657,-2.343l16.122,0ZM80,42.731c0,0 7.186,-7.186 11.454,-11.454c1.703,-1.703 4.464,-1.703 6.168,0c0.364,0.365 0.736,0.737 1.101,1.101c1.703,1.704 1.703,4.465 0,6.168c-4.268,4.268 -11.454,11.454 -11.454,11.454c0,0 7.186,7.186 11.454,11.454c1.703,1.703 1.703,4.464 0,6.168c-0.365,0.364 -0.737,0.736 -1.101,1.101c-1.704,1.703 -4.465,1.703 -6.168,0c-4.268,-4.268 -11.454,-11.454 -11.454,-11.454c0,0 -7.186,7.186 -11.454,11.454c-1.703,1.703 -4.464,1.703 -6.168,0c-0.364,-0.365 -0.736,-0.737 -1.101,-1.101c-1.703,-1.704 -1.703,-4.465 0,-6.168c4.268,-4.268 11.454,-11.454 11.454,-11.454c0,0 -7.186,-7.186 -11.454,-11.454c-1.703,-1.703 -1.703,-4.464 0,-6.168c0.365,-0.364 0.737,-0.736 1.101,-1.101c1.704,-1.703 4.465,-1.703 6.168,0c4.268,4.268 11.454,11.454 11.454,11.454Z"></path></svg>`;            
+            document.querySelector('#ext_volume_overlay').setAttribute('muted', 'ON');
         }
     });
 
@@ -526,6 +600,12 @@ function insertBtnToPlayer(parts_data) {
         el.classList.toggle('show');
     }
 
+    // [録画機能]の詳細設定ボタン
+    document.querySelector('.ext-setting-menu .ext-rec .setting').addEventListener('click', (e) => {
+        changeElement(document.querySelector('.ext-setting-menu .ext-rec .option-box'));
+        document.querySelector('.ext-setting-menu .ext-rec .setting').classList.toggle('active')
+    }, false);
+
     // [コメビュ]の詳細設定ボタン
     document.querySelector('.ext-setting-menu .ext-comeview .setting').addEventListener('click', (e) => {
         changeElement(document.querySelector('.ext-setting-menu .ext-comeview .option-box'));
@@ -553,6 +633,42 @@ function insertBtnToPlayer(parts_data) {
         const height = (items.length * 41) + (borders.length * 10) + 10;
         el.style.setProperty("--max-height", height + "px");
         
+    });
+
+
+
+
+    // [録画機能] FPS
+    document.querySelector('.ext-setting-menu .ext-rec .option.fps select').addEventListener('change', (e) => {
+        if(e.isTrusted){
+
+            setRecFps(document.querySelector('.ext-setting-menu .ext-rec .option.fps select').value);
+            
+            chrome.storage.local.set({"ext_rec_opt_fps": document.querySelector('.ext-setting-menu .ext-rec .option.fps select').value}, function() {});
+
+        }
+    });
+
+    // [録画機能] 画質
+    document.querySelector('.ext-setting-menu .ext-rec .option.size select').addEventListener('change', (e) => {
+        if(e.isTrusted){
+
+            apllyRecSize(document.querySelector('.ext-setting-menu .ext-rec .option.size select').value);
+            
+            chrome.storage.local.set({"ext_rec_opt_size": document.querySelector('.ext-setting-menu .ext-rec .option.size select').value}, function() {});
+
+        }
+    });
+
+    // [録画機能] 拡張子
+    document.querySelector('.ext-setting-menu .ext-rec .option.kaku select').addEventListener('change', (e) => {
+        if(e.isTrusted){
+
+            setRecKaku(document.querySelector('.ext-setting-menu .ext-rec .option.kaku select').value);
+            
+            chrome.storage.local.set({"ext_rec_opt_kaku": document.querySelector('.ext-setting-menu .ext-rec .option.kaku select').value}, function() {});
+
+        }
     });
 
     // [コメント] 名前の表示
@@ -767,7 +883,7 @@ function insertBtnToPlayer(parts_data) {
     const logOption = {
         childList:  true,  //直接の子の変更を監視
     };
-    let targetLogDom = document.querySelector('#ext_logBox');
+    let targetLogDom = document.getElementById('ext_logBox');
 
     _obsLogBox = new MutationObserver(wathLogBox);
     _obsLogBox.observe(targetLogDom, logOption);
@@ -832,12 +948,114 @@ function insertBtnToPlayer(parts_data) {
     
     });
 
+
+    // 右クリックOFF機能のピン状態
+    chrome.storage.local.get("ext_dev_mode", function (value) {
+        if (value.ext_dev_mode == "ON") {
+            document.querySelector('.ext-setting-menu .dev-mode').classList.add('show');
+        }
+    });
+
+    /*
+    document.querySelector('.ext-setting-menu .item.info .hemotool .ver').addEventListener('click', function(){
+
+        let count = document.querySelector('.ext-setting-menu .item.info .hemotool .ver').getAttribute('data-click-count');
+        if(!count) { 
+            count = 0;
+        }
+
+        document.querySelector('.ext-setting-menu .item.info .hemotool .ver').setAttribute('data-click-count', ++count);
+
+        if(count % 3 === 0) {
+            
+            chrome.storage.local.set({"ext_dev_mode": "ON"}, function() {});
+
+        }
+    });
+    */
 }
 
 
 let ___first_run = true; // ★拡張機能の更新後にブラウザを更新すると動かなくなる不具合の暫定対処★
 
 function wathLogBox(mutationRecords, observer){
+
+
+
+    mutationRecords.forEach((mutation)=> {
+
+        // 子ノードの増減
+        if (mutation.type === "childList") {
+
+
+
+            // ADD ----------------------------------------------------------------
+            mutation.addedNodes.forEach((addNode) => {
+
+                let logBox = document.getElementById('ext_logBox');
+
+                let yomiage_text = addNode.outerText;
+
+                // 教育機能が有効ならば
+                if (document.querySelector('.ext-setting-menu .ext-yomiage .option.kyoiku input').checked) {
+                    let kyoikuRet = kyoiku(yomiage_text, false);
+                    if (kyoikuRet.bIsSuccess) {
+                        yomiage_text = kyoikuRet.leftWord + "、は、" + kyoikuRet.rightWord + "、を覚えました";
+                        setKyoiku(kyoikuRet.leftWord, kyoikuRet.rightWord);
+                    }
+
+                    let boukyakuRet = boukyaku(yomiage_text, false);
+                    if (boukyakuRet.bIsSuccess) {
+                        yomiage_text = boukyakuRet.word + "、を忘れました";
+                        deleteKyoiku(boukyakuRet.word);
+                    }
+
+                    // 教育コマンドや忘却コマンドではないときに限り置換
+                    if (kyoikuRet.bIsSuccess === false && boukyakuRet.bIsSuccess === false) {
+                        yomiage_text = replaceKyoiku(yomiage_text);
+                    }
+                }
+
+                if(___first_run) {
+                    ___first_run = false;
+                    chrome.runtime.sendMessage({setVoiceName: document.querySelector('.ext-setting-menu .ext-yomiage .option.voices select').value});
+                }
+    
+                chrome.runtime.sendMessage({toSay: yomiage_text });
+                console.log("読み上げ : " + yomiage_text)
+
+                logBox.removeChild( logBox.firstChild );
+                        
+            });
+
+            // pタグの削除
+            // document.getElementById('ext_logBox').innerHTML = "";
+
+            // pタグの削除
+            /*
+            let logBox = document.getElementById('ext_logBox');
+            while( logBox.firstChild ){
+                logBox.removeChild( logBox.firstChild );
+            }
+            */
+        }
+    });
+
+
+    return;
+
+
+
+
+
+
+
+
+
+
+
+
+
     if(mutationRecords && mutationRecords.length > 0 && mutationRecords[0].addedNodes && mutationRecords[0].addedNodes.length > 0){
         
         // 一度に2つ以上のDOM追加にも対応
@@ -887,15 +1105,16 @@ function wathLogBox(mutationRecords, observer){
             }
 
             chrome.runtime.sendMessage({toSay: yomiage_text });
+            console.log("読み上げ : " + yomiage_text)
         
             /** DOM変化の監視を一時停止 */
             _obsLogBox.disconnect();
     
             /* pタグの削除 */
-            document.querySelector('#ext_logBox').innerHTML = "";
+            document.getElementById('ext_logBox').innerHTML = "";
     
             /** DOM変化の監視を再開 */
-            let targetLogDom = document.querySelector('#ext_logBox');
+            let targetLogDom = document.getElementById('ext_logBox');
             const logOption = {
                 childList:  true,  //直接の子の変更を監視
             };
@@ -927,6 +1146,49 @@ function setSpeech() {
 function setSettingValue() {
 
     if (chrome.storage.local) {
+
+        // 録画機能
+        chrome.storage.local.get("ext_rec_pin", function (value) {
+            if (value.ext_rec_pin == "ON") {
+
+                // ONマークをアクティブ状態
+                document.querySelector('.ext-setting-menu .ext-rec').setAttribute("ext-attr-on", "on");
+  
+                // ショートカットエリアにプレイヤーを表示
+                document.querySelector('#ext_shortcut .item.rec').setAttribute("ext-pin-on", "ON");
+            }
+        });
+        // 録画機能のFPS
+        chrome.storage.local.get("ext_rec_opt_fps", function (value) {
+            if (value.ext_rec_opt_fps) {
+                document.querySelector('.ext-setting-menu .ext-rec .option.fps select').value = value.ext_rec_opt_fps;
+                setRecFps(value.ext_rec_opt_fps);
+            } else {
+                document.querySelector('.ext-setting-menu .ext-rec .option.fps select').value = "60fps";
+                setRecFps("60fps");
+            }
+
+        });
+        // 録画機能の画質
+         chrome.storage.local.get("ext_rec_opt_size", function (value) {
+            if (value.ext_rec_opt_size) {
+                document.querySelector('.ext-setting-menu .ext-rec .option.size select').value = value.ext_rec_opt_size;
+                apllyRecSize(value.ext_rec_opt_size);
+            } else {
+                document.querySelector('.ext-setting-menu .ext-rec .option.size select').value = "HD";
+                apllyRecSize("HD");
+            }
+        });
+        // 録画機能の拡張子
+        chrome.storage.local.get("ext_rec_opt_kaku", function (value) {
+            if (value.ext_rec_opt_kaku) {
+                document.querySelector('.ext-setting-menu .ext-rec .option.kaku select').value = value.ext_rec_opt_kaku;
+                setRecKaku(value.ext_rec_opt_kaku);
+            } else {
+                document.querySelector('.ext-setting-menu .ext-rec .option.kaku select').value = "webm";
+                setRecKaku("webm");
+            }
+        });
 
         // コメビュ機能
         chrome.storage.local.get("ext_comeview", function (value) {

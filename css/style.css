@@ -100,6 +100,16 @@
     max-height: 310px;
     height: 310px;
 }
+
+/*
+.ext-setting-menu .dev-mode {
+    display: none;
+}
+.ext-setting-menu .dev-mode.show {
+    display: block;
+}
+*/
+
 .ext-setting-menu::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -177,6 +187,11 @@
     margin-left: 13px;
     cursor: pointer;
 }
+.ext-setting-menu .item .pin.blank {
+    cursor: default;
+    width: 11px;
+    height: 11px;
+}
 .ext-setting-menu .item .pin svg {
     width: 11px;
     height: 11px;
@@ -234,6 +249,10 @@
 .ext-setting-menu .option-box .option:hover {
     background: rgba(255, 255, 255, 0.2);
 }
+.ext-setting-menu .option-box .option.desc:hover {
+    background: none;
+}
+
 .ext-setting-menu .option-box .option .value * {
     cursor: pointer;
 }
@@ -447,12 +466,37 @@ div#ext_dom_message {
     border: 1px solid #858585;
 }
 #ext_shortcut .item[active] {
-    color: #056dff;
-    border: 2px solid #056dff;
+    color: white;
+    border: 2px solid rgb(0 61 147);
+    background-color: rgb(0 61 147);
     padding: 1px 9px;
 }
 
-
+#ext_shortcut .item.rec {
+    border: none;
+    margin-left: 10px;
+    font-size: 12px;
+}
+#ext_shortcut .item.rec .status {
+    color: rgb(88, 88, 88);
+    margin-right: 10px;
+}
+#ext_shortcut .item.rec .status[rec] {
+    color: rgb(204, 0, 0);
+    animation: recFlash 1.5s linear infinite;
+}
+#ext_shortcut .item.rec .recBtn {
+    cursor: pointer;
+}
+@keyframes recFlash {
+    0%,100% {
+      opacity: 1;
+    }
+  
+    50% {
+      opacity: 0;
+    }
+  }
 
 #ext_volume_overlay {
     display: none;
@@ -564,14 +608,14 @@ div#ext_dom_message {
     margin-right: 9px; 
     border-radius: 10px; 
     font-size: 12px; 
-    background-color: white;
+/*    background-color: white;*/
 }
 .user_name_by_extention.user184 { 
     color: #424242; 
     border: 1px solid #424242; 
     padding: 2px 10px 1px 10px; 
     font-size: 11px;
-    background-color: white;
+/*    background-color: white;*/
 }
 .user_name_by_extention.kotehan { 
     color: #0034a3; 
@@ -581,6 +625,64 @@ div#ext_dom_message {
 [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user_name_by_extention {
     display: inline-block;
 }
+
+/* 
+公式生放送ではコメント番号がDOMにないのでへもツール独自のユーザー名を表示できない。
+公式生放送の場合は標準でユーザー名がDOMに入っているユーザー名を使う方式にするため、display:block;で表示させる。
+ */
+[class^=___contents-area___][ext-master-comeview][ext-opt-name] [class^=___comment-author-name___] {
+    display: block;
+    color: #424242;
+    border: 1px solid #424242; 
+    padding: 2px 7px 1px 7px; 
+    margin-right: 9px; 
+    border-radius: 10px; 
+    font-size: 12px; 
+    background-color: white;
+
+    /* 長い名前はCSSで省略(省略記号...表示) */
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 100px;
+    text-align: center;
+}
+[class^=___contents-area___][ext-master-comeview][ext-opt-name] [class^=___comment-author-name___]:empty {
+    border: inherit;
+    padding: 0;
+    margin-right: inherit;
+    width: 0px;
+}
+
+/*
+公式生放送では184の場合は184IDがわからないので184と表示
+*/
+/*
+
+→ 自分のコメントはユーザー名が入っていないので、184としか表示できないが、それだと紛らわしいので、184も自分も名前は非表示にする。
+　→ つまり、公式放送の場合は自分以外でユーザー名が入っている人の名前のみ表示。
+　→ そのため下記はコメントアウトしとく。
+
+[class^=___contents-area___][ext-master-comeview][ext-opt-name] [class^=___comment-author-name___]:empty:before {
+    content: "184";
+    color: #424242;
+    border: 1px solid #424242; 
+    padding: 2px 10px 1px 10px; 
+    margin-right: 9px; 
+    border-radius: 10px; 
+    font-size: 12px; 
+    background-color: white;
+}
+*/
+
+/*
+コメント番号がある場合は名前を非表示にする(コメント番号のDOMがある場合はユーザー放送なので、へもツールで取得した名前を表示させるため)
+*/
+[class^=___contents-area___][ext-master-comeview][ext-opt-name] [class^=___comment-number___]+[class^=___comment-author-name___] {
+    display: none !important;
+}
+
+
 [class^=___contents-area___][ext-master-comeview][ext-opt-name][ext-opt-kotehan] .user_name_by_extention {
     display: none;
 }
@@ -646,15 +748,34 @@ div#ext_dom_message {
 /*ここまで------------------------------------------*/
 
 /* コメントの背景を行ごとに色付けして読みやすく */
+/*
 [ext-master-comeview] [class^=___table-row___]:nth-child(odd) {
     background-color: #f1f1f1;
 }
+*/
 /* コメントの行の背景がDark ReaderというChrome拡張機能を入れているときにダークモードにならないと指摘があったので対応 */
+/*
 html[data-darkreader-scheme] [ext-master-comeview] [class^=___table-row___]:nth-child(odd) {
     background-color: inherit;
 }
+*/
 
+/**
+コメントの行の背景色に色をつけると色がうまくいかないので背景色ではなくボーダーでコメントの区切りをわかりやすくする
+*/
+[ext-master-comeview] [class^=___table-row___] {
+    border-top: 1px dashed #dadada;
+}
 
+/**
+コメントのカーソルのホバー時にコメントの内容がツールチップ表示されるが、それがニコ生プレイヤーの後ろに隠れてしまうのを解消する
+*/
+[class^=___player-status-panel___] {
+    z-index: 1;
+}
+[class^=___tooltip___] {
+    z-index: 100000;
+}
 
 
 
