@@ -382,6 +382,34 @@ function recvEvent(event) {
 }
 
 function InsertUserName(currentNode, newNo) {
+
+  // 追加するアイコンのDOMを作成
+  var iconElement = document.createElement("div");
+  if (_183UserList[newNo]) {
+
+  } else {
+    let userId = _commentRawIdList[newNo];
+    let iconPath = 0;
+    if(userId.length > 4) {
+      iconPath = userId.substring(0, userId.length - 4);
+    } else {
+      iconPath = "0";
+    }
+
+    iconElement.setAttribute("class", "user_icon_by_extention");
+    iconElement.setAttribute("style", "background-image: url(https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/" + iconPath + "/" + userId + ".jpg), url(https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/defaults/blank.jpg);");
+
+    var hoverElement = document.createElement("div");
+    hoverElement.setAttribute("class", "user_iconHover_by_extention");
+    hoverElement.setAttribute("style", "background-image: url(https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/" + iconPath + "/" + userId + ".jpg), url(https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/defaults/blank.jpg);");
+
+    iconElement.appendChild(hoverElement);
+
+    // 作成したDOMの挿入
+    var comment = currentNode.querySelector("[class^=___comment-text___]"); // コメントテキストのDOM
+    comment.parentNode.insertBefore(iconElement, comment);
+  }
+
   // 追加する名前のDOMを作成
   var newElement = document.createElement("span");
   var newContent = document.createTextNode(_commentList[newNo]);

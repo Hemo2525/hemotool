@@ -61,6 +61,9 @@ window.addEventListener('load', function () {
                         // 設定を読み込む
                         setSettingValue();
 
+                        // イベント設定
+                        setEvents();
+
                     });                    
 
 
@@ -92,7 +95,71 @@ window.addEventListener('load', function () {
     
 
 
+
 });
+
+
+function setEvents() {
+    
+    /* メニューの高さを調整 */
+    window.addEventListener('resize', function(e){
+        setExtSettingMenuHeight();
+    });
+
+
+    /* スプリットバーの設定 */
+
+    var splitElement = document.createElement("div");
+    splitElement.id = "split_by_extention";
+
+    var playerElement = document.querySelector("[class^=___player-status-panel___]");
+    playerElement.parentNode.insertBefore(splitElement, playerElement);
+
+    const parentElement = document.querySelector('[class^=___player-display___]');
+
+    const splitter = document.getElementById("split_by_extention");
+
+    let bActive = false;
+
+    splitter.addEventListener("mousedown", (event) => {
+        bActive = true;
+        document.body.style.userSelect = 'none'; // テキスト選択を禁止するCSSを適用
+    });
+
+    const statusPanel = document.querySelector("[class^=___player-status-panel___]");
+    const parent = document.querySelector('[class^=___player-section___]');
+    parent.addEventListener("mousemove", (event) => {
+        if(bActive) {
+            const parentRect = document.querySelector('[class^=___player-display___]').getClientRects();                
+            const size = event.clientX - parentRect[0].x;
+            const parentWidth = document.querySelector('[class^=___player-section___]').clientWidth;
+    
+            statusPanel.style.width = parentWidth - size + "px";
+            parentElement.style.width = size + "px";
+        };
+    }, false);
+
+    document.addEventListener("mouseup", (event) => {
+        bActive = false;
+        document.body.style.userSelect = ''; // テキスト選択を許可するCSSを解除
+
+    }, false);
+
+
+
+}
+
+function setExtSettingMenuHeight() {
+
+    let height = document.querySelector('[class^=___player-display-screen___').clientHeight * 0.9;
+    document.querySelector('.ext-setting-menu').style.height = height + "px";
+
+    const ITEM_HEIGHT = 34;
+
+    let maxHeight = document.querySelectorAll('.ext-setting-menu > div').length * ITEM_HEIGHT;
+    document.querySelector('.ext-setting-menu').style.maxHeight  = maxHeight + "px";
+
+}
 
 
 // へもツールで使用するニコ生のDOMがちゃんと存在しているか確認
@@ -167,6 +234,10 @@ function insertBtnToPlayer(parts_data) {
     let overlay = document.createElement('div');
     overlay.id = "ext_overlay";
     document.querySelector('[class^=___player-display-screen]').prepend(overlay);
+
+
+    // メニューの高さを設定
+    setExtSettingMenuHeight();
 
 
     // 拡張機能ボタンのメニュー表示
@@ -670,7 +741,10 @@ function insertBtnToPlayer(parts_data) {
 
         }
     });
-
+    // [コメント] アイコンの表示
+    document.querySelector('.ext-setting-menu .ext-comeview .option.icon input').addEventListener('change', () => {
+        comeview_option_icon();
+    });
     // [コメント] 名前の表示
     document.querySelector('.ext-setting-menu .ext-comeview .option.name input').addEventListener('change', () => {
         comeview_option_name();
@@ -1208,6 +1282,13 @@ function setSettingValue() {
                 document.querySelector('#ext_shortcut .item.comeview').setAttribute("ext-pin-on", "ON");                
             }
         });
+        // コメビュ機能のアイコン表示オプション
+        chrome.storage.local.get("ext_comeview_opt_icon", function (value) {
+            if (value.ext_comeview_opt_icon == "ON") {
+                document.querySelector('.ext-setting-menu .ext-comeview .option.icon input').checked = true;
+                comeview_option_icon();
+            }
+        });
         // コメビュ機能の名前表示オプション
         chrome.storage.local.get("ext_comeview_opt_name", function (value) {
             if (value.ext_comeview_opt_name == "ON") {
@@ -1535,3 +1616,5 @@ function setSettingValue() {
 
     }
 }
+
+

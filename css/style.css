@@ -97,7 +97,7 @@
     z-index: 2;
 
     overflow-y: scroll; /* スクロールの有無で表示がズレるので常に表示 */
-    max-height: 310px;
+    /*max-height: 310px;*/
     height: 310px;
 }
 
@@ -706,7 +706,6 @@ div#ext_dom_message {
 }
 
 
-
 /* コメント折り返しここから ------------------------------------ */
 
 [ext-master-comeview][ext-opt-orikaeshi] [class^=___table-cell___] {
@@ -781,4 +780,75 @@ html[data-darkreader-scheme] [ext-master-comeview] [class^=___table-row___]:nth-
 
 [ext-master-videoeffect][ext-opt-reverse] {
     transform: scale(-1, 1);
+}
+
+
+/*
+アイコン関係
+*/
+[ext-master-comeview][ext-opt-icon] [class^=___table-cell___] {
+    position: relative;
+    overflow: inherit;
+}
+[ext-master-comeview][ext-opt-icon] [class^=___comment-context-menu___] {
+    z-index: 1;
+}
+[ext-master-comeview][ext-opt-icon] .user_icon_by_extention {
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    width: 45px;
+    height: 25px;
+    border-radius: 100px;
+    margin-right: 5px;
+
+    max-width: 24px;
+    flex-basis: auto;
+    flex-shrink: 1;
+    min-width: 24px;
+    border-radius: 100%;
+
+    position: relative;
+}
+
+[ext-master-comeview][ext-opt-icon] .user_iconHover_by_extention {
+    display: none;
+}
+[ext-master-comeview][ext-opt-icon] .user_icon_by_extention:hover .user_iconHover_by_extention {
+    display: block;
+    background-position: center;
+    background-size: contain;
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    z-index: 111111111;
+    left: calc(50% - 40px);
+    top: calc(50% - 40px);
+    
+    box-shadow: 4px 4px 10px #76767652;
+}
+
+
+
+
+
+#split_by_extention {
+    width: 0px;
+    background-color: #c5c5c5;
+    cursor: col-resize;
+    z-index: 1;
+}
+[aria-expanded="false"] + #split_by_extention {
+    width: 8px;
+}
+[class^=___table-cell___],
+[class^=___table___] {
+    width: inherit !important;
+}
+
+[data-layout-mode="full"] #split_by_extention {
+    width: 0px;
+}
+[data-layout-mode="full"] [class^=___player-display___] {
+    width: inherit;
 }

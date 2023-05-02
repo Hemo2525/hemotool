@@ -1,9 +1,6 @@
 function comeview(){
   let menu = document.querySelector('.ext-setting-menu .ext-comeview');
-
-  console.log("------comeview();");
-
-  
+ 
 
   // トグル
   if(menu.getAttribute("ext-attr-on")) {  
@@ -21,6 +18,20 @@ function comeview(){
     document.querySelector('#ext_shortcut .item.comeview').setAttribute("active", "ON");
 
     document.querySelector("[class^=___contents-area___]").setAttribute("ext-master-comeview", "ON");
+  }
+}
+
+function comeview_option_icon(){
+  let input = document.querySelector('.ext-setting-menu .ext-comeview .option.icon input');
+  
+  // トグル
+  if(input.checked) {  // 注意　クリックされて変化後の値が入っている
+    chrome.storage.local.set({"ext_comeview_opt_icon": "ON"}, function() {});
+    document.querySelector("[class^=___contents-area___]").setAttribute("ext-opt-icon", "ON");
+
+  } else {
+    chrome.storage.local.set({"ext_comeview_opt_icon": "OFF"}, function() {});
+    document.querySelector("[class^=___contents-area___]").removeAttribute("ext-opt-icon");
   }
 }
 
