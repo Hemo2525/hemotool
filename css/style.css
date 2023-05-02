@@ -832,6 +832,9 @@ html[data-darkreader-scheme] [ext-master-comeview] [class^=___table-row___]:nth-
 
 
 
+/*
+セパレーター関係
+*/
 #split_by_extention {
     width: 0px;
     background-color: #c5c5c5;

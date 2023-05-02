@@ -381,13 +381,22 @@ function recvEvent(event) {
 
 }
 
-function InsertUserName(currentNode, newNo) {
+function InsertUserName(fragment, newNo) {
 
   // 追加するアイコンのDOMを作成
   var iconElement = document.createElement("div");
+  let hoverElement = document.createElement("div");
+
   if (_183UserList[newNo]) {
+    // 184さんの処理----------------------------
+    iconElement.setAttribute("class", "user_icon_by_extention");
+    iconElement.setAttribute("style", "background-image: url(https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/defaults/blank.jpg);");
+
+    hoverElement.setAttribute("class", "user_iconHover_by_extention");
+    hoverElement.setAttribute("style", "background-image: url(https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/defaults/blank.jpg);");
 
   } else {
+    // 生IDさんの処理----------------------------
     let userId = _commentRawIdList[newNo];
     let iconPath = 0;
     if(userId.length > 4) {
@@ -399,16 +408,14 @@ function InsertUserName(currentNode, newNo) {
     iconElement.setAttribute("class", "user_icon_by_extention");
     iconElement.setAttribute("style", "background-image: url(https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/" + iconPath + "/" + userId + ".jpg), url(https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/defaults/blank.jpg);");
 
-    var hoverElement = document.createElement("div");
     hoverElement.setAttribute("class", "user_iconHover_by_extention");
     hoverElement.setAttribute("style", "background-image: url(https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/" + iconPath + "/" + userId + ".jpg), url(https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/defaults/blank.jpg);");
-
-    iconElement.appendChild(hoverElement);
-
-    // 作成したDOMの挿入
-    var comment = currentNode.querySelector("[class^=___comment-text___]"); // コメントテキストのDOM
-    comment.parentNode.insertBefore(iconElement, comment);
   }
+
+  iconElement.appendChild(hoverElement);
+
+  // 作成したDOMの挿入
+  fragment.appendChild(iconElement);
 
   // 追加する名前のDOMを作成
   var newElement = document.createElement("span");
@@ -423,8 +430,7 @@ function InsertUserName(currentNode, newNo) {
   newElement.setAttribute("title", _commentListFull[newNo]);
 
   // 作成したDOMの挿入
-  var comment = currentNode.querySelector("[class^=___comment-text___]"); // コメントテキストのDOM
-  comment.parentNode.insertBefore(newElement, comment);
+  fragment.appendChild(newElement);
 
 
   //console.log(_kotehanList);
@@ -484,15 +490,14 @@ function InsertUserName(currentNode, newNo) {
   }
 
 
-
   // 作成したDOMの挿入
-  comment.parentNode.insertBefore(kotehanElement, comment);
-
-
+  fragment.appendChild(kotehanElement);
+  
+  return fragment;
 }
 
 
-function InsertPremium(currentNode) {
+function InsertPremium(fragment) {
   // 追加するDOMを作成
   var newElement = document.createElement("span");
   var newContent = document.createTextNode("P");
@@ -501,15 +506,17 @@ function InsertPremium(currentNode) {
   newElement.setAttribute("title", "プレミアムアカウント");
 
   // 作成したDOMの挿入
-  //var comment = currentNode.querySelector(".___comment-text___1pM9h"); // コメントテキストのDOM
-  var comment = currentNode.querySelector("[class^=___comment-text___]"); // コメントテキストのDOM
-  comment.parentNode.insertBefore(newElement, comment);
+  fragment.appendChild(newElement);
+
+  return fragment;
 }
 
 function watchCommentDOM(mutationsList, observer) {
 
-console.log("watchCommentDOMが呼ばれました。");
-
+  //console.log("watchCommentDOMが呼ばれました。");
+  
+  
+  
   for (const mutation of mutationsList) {
 
     //console.log(mutation);
@@ -523,23 +530,28 @@ console.log("watchCommentDOMが呼ばれました。");
 
         if (newNo.length > 0 && !currentNode.querySelector(".user_name_by_extention")) {
 
+          // フラグメント作成
+          let fragment = document.createDocumentFragment();
 
           // プレ垢のDOMを挿入
           if (_premiumList[newNo] === true) {
-            InsertPremium(currentNode);
+            fragment = InsertPremium(fragment);
           }
 
           // 名前のDOMを挿入
           if (_commentList[newNo]) {
 
-            InsertUserName(currentNode, newNo);
+            fragment = InsertUserName(fragment, newNo);
 
           } else {
             //console.log(`${newNo} に対応する名前がありません。取得失敗さんにします。`);
             _commentList[newNo] = "取得失敗";
-            InsertUserName(currentNode, newNo);
+            fragment = InsertUserName(fragment, newNo);
           }
 
+          // フラグメントを実DOMに挿入
+          let comment = currentNode.querySelector("[class^=___comment-text___]"); // コメントテキストのDOM
+          comment.parentNode.insertBefore(fragment, comment);
         }
       }
 
