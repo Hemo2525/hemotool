@@ -10,6 +10,7 @@ function comeview(){
     document.querySelector('#ext_shortcut .item.comeview').removeAttribute("active");
 
     document.querySelector("[class^=___contents-area___]").removeAttribute("ext-master-comeview");
+    document.querySelector("body").removeAttribute("ext-master-comeview");
 
   } else {
     chrome.storage.local.set({"ext_comeview": "ON"}, function() {});
@@ -18,6 +19,7 @@ function comeview(){
     document.querySelector('#ext_shortcut .item.comeview').setAttribute("active", "ON");
 
     document.querySelector("[class^=___contents-area___]").setAttribute("ext-master-comeview", "ON");
+    document.querySelector("body").setAttribute("ext-master-comeview", "ON");
   }
 }
 

@@ -248,7 +248,9 @@
     user-select: none;
     transition: all 0.3s ease 0s;
 }
-
+.ext-setting-menu .option-box .option.desc a {
+    color: white;
+}
 .ext-setting-menu .option-box .option:first-child {
     /*padding-top: 5px;*/
 }
@@ -861,10 +863,10 @@ html[data-darkreader-scheme] [ext-master-comeview] [class^=___table-row___]:nth-
     cursor: col-resize;
     z-index: 1;
 }
-[ext-opt-wide] [aria-expanded="false"] + #split_by_extention {
+body[ext-master-comeview][ext-opt-wide] [aria-expanded="false"] + #split_by_extention {
     width: 8px;
 }
-[ext-opt-wide] [data-layout-mode="full"] #split_by_extention {
+body[ext-master-comeview][ext-opt-wide] [data-layout-mode="full"] #split_by_extention {
     width: 0px;
 }
 [class^=___table-cell___],
@@ -872,5 +874,5 @@ html[data-darkreader-scheme] [ext-master-comeview] [class^=___table-row___]:nth-
     width: inherit !important;
 }
 [data-layout-mode="full"] [class^=___player-display___] {
-    width: inherit;
+    width: inherit !important;
 }

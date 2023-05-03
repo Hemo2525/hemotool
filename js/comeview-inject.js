@@ -511,64 +511,116 @@ function InsertPremium(fragment) {
   return fragment;
 }
 
+let _AddedNode = false;
+let _bWhieelUp = false;
+let _bIsMostBottom = false;
+
+/*
+document.querySelector("[class^=___comment-panel___] [class^=___body___]").addEventListener('wheel', function (e) {
+  if(e.wheelDelta > 0) {
+    //上スクロール
+    _bWhieelUp = true;
+  }
+});
+*/
+
+let lastScrollPosition = 0;
+
+
 function watchCommentDOM(mutationsList, observer) {
 
-  
-  //console.log("watchCommentDOMが呼ばれました。");
-  
-  
-  
+  let chatDom = document.querySelector("[class^=___comment-panel___] [class^=___body___]");
+
+  // 現在のスクロールが一番下かどうか判定
+  const clientHeight = chatDom.clientHeight;
+  const scrollHeight = chatDom.scrollHeight;
+  const scrollTop = chatDom.scrollTop;
+
+  // 一番下までスクロールされたか判定
+  if (Math.abs(scrollHeight - clientHeight - scrollTop) < 1) {
+    // いちばんしたまでスクロールされている
+    _bIsMostBottom = true;
+    _bWhieelUp = false;
+  }
+    
   for (const mutation of mutationsList) {
 
-    console.log(mutation);
+    if(mutation.type === "childList"){
 
-    for (var i = 0; i < mutation.target.childNodes.length; i++) {
-      
-      var currentNode = mutation.target.childNodes[i];
-      //if(currentNode.querySelector('.___comment-number___i8gp1')){ // コメント番号のDOM
-      if (currentNode.querySelector("[class^=___comment-number___]")) { // コメント番号のDOM
-        //var newNo = currentNode.querySelector('.___comment-number___i8gp1').outerText;
-        var newNo = currentNode.querySelector("[class^=___comment-number___]").outerText;
+      console.log(mutation);
 
-        if (newNo.length > 0 && !currentNode.querySelector(".user_name_by_extention")) {
-
-          // フラグメント作成
-          let fragment = document.createDocumentFragment();
-
-          // プレ垢のDOMを挿入
-          if (_premiumList[newNo] === true) {
-            fragment = InsertPremium(fragment);
-          }
-
-          // 名前のDOMを挿入
-          if (_commentList[newNo]) {
-
-            fragment = InsertUserName(fragment, newNo);
-
-          } else {
-            //console.log(`${newNo} に対応する名前がありません。取得失敗さんにします。`);
-            _commentList[newNo] = "取得失敗";
-            fragment = InsertUserName(fragment, newNo);
-          }
-
-          // フラグメントを実DOMに挿入
-          let comment = currentNode.querySelector("[class^=___comment-text___]"); // コメントテキストのDOM
-          comment.parentNode.insertBefore(fragment, comment);
+      if(_AddedNode === false){
+        for (var i = 0; i < mutation.target.childNodes.length; i++) {
+          var currentNode = mutation.target.childNodes[i];
+          editComment(currentNode);
         }
+        chatDom.scrollTop = scrollTop;
       }
 
-      // コメントに行送りを対応させるためクラスを付与
-      //currentNode.classList.add('wordbreak');
-      if (currentNode.querySelector("[class^=___comment-text___]").clientHeight > 28) {
-        //console.log("YES  " + currentNode.querySelector("[class^=___comment-text___]").textContent + "  " + currentNode.querySelector("[class^=___comment-text___]").clientHeight);
-        currentNode.querySelector("[class^=___comment-text___]").classList.add('multiple-line');
+      mutation.addedNodes.forEach((currentNode) => {
+        
+        _AddedNode = true;
+
+        editComment(currentNode);
+
+      });
+
+
+      
+      if(_bIsMostBottom === false || _bWhieelUp === true){
+
       } else {
-        //console.log("NO  " + currentNode.querySelector("[class^=___comment-text___]").textContent + "  " + currentNode.querySelector("[class^=___comment-text___]").clientHeight);
-        currentNode.querySelector("[class^=___comment-text___]").classList.add('one-line');
+        // 最下部にスクロール
+        chatDom.scrollTop = scrollHeight;
       }
+
     }
 
   }
+}
+
+function editComment(currentNode) {
+
+  if (currentNode.querySelector("[class^=___comment-number___]")) { // コメント番号のDOM
+    //var newNo = currentNode.querySelector('.___comment-number___i8gp1').outerText;
+    var newNo = currentNode.querySelector("[class^=___comment-number___]").outerText;
+
+    if (newNo.length > 0 && !currentNode.querySelector(".user_name_by_extention")) {
+
+      // フラグメント作成
+      let fragment = document.createDocumentFragment();
+
+      // プレ垢のDOMを挿入
+      if (_premiumList[newNo] === true) {
+        fragment = InsertPremium(fragment);
+      }
+
+      // 名前のDOMを挿入
+      if (_commentList[newNo]) {
+
+        fragment = InsertUserName(fragment, newNo);
+
+      } else {
+        //console.log(`${newNo} に対応する名前がありません。取得失敗さんにします。`);
+        _commentList[newNo] = "取得失敗";
+        fragment = InsertUserName(fragment, newNo);
+      }
+
+      // フラグメントを実DOMに挿入
+      let comment = currentNode.querySelector("[class^=___comment-text___]"); // コメントテキストのDOM
+      comment.parentNode.insertBefore(fragment, comment);
+    }
+  }
+
+  // コメントに行送りを対応させるためクラスを付与
+  //currentNode.classList.add('wordbreak');
+  if (currentNode.querySelector("[class^=___comment-text___]").clientHeight > 28) {
+    //console.log("YES  " + currentNode.querySelector("[class^=___comment-text___]").textContent + "  " + currentNode.querySelector("[class^=___comment-text___]").clientHeight);
+    currentNode.querySelector("[class^=___comment-text___]").classList.add('multiple-line');
+  } else {
+    //console.log("NO  " + currentNode.querySelector("[class^=___comment-text___]").textContent + "  " + currentNode.querySelector("[class^=___comment-text___]").clientHeight);
+    currentNode.querySelector("[class^=___comment-text___]").classList.add('one-line');
+  }  
 }
 
 
@@ -581,8 +633,33 @@ const options = {
   subtree: false, //全ての子要素を監視
 }
 
-function startWathCommentDOM() {
-  //const target = document.querySelector(".___table___2e1QA"); // コメントDOMの直上の親DOMを指定
+function startWatchCommentDOM() {
+
+  startWatchGridDOM();
+
+  // ギフト画面を表示 → ギフト画面を非表示　をした場合にここでイベントを再設定できるようにしておく
+  let commentBox = document.querySelector("[class^=___comment-panel___] [class^=___body___]");
+  if(commentBox) {
+    commentBox.addEventListener('scroll', function (e) {
+      const currentScrollPosition = e.target.scrollTop;
+      if (currentScrollPosition < lastScrollPosition) {
+        _bWhieelUp = true;
+      }
+      lastScrollPosition = currentScrollPosition;
+    });  
+  }
+  // ギフト画面を表示 → ギフト画面を非表示　をした場合には既存のコメントは裸のままになるのでここでeditComment()しておく
+  const tableDom = document.querySelector("[class^=___table___]"); // コメントDOMの直上の親DOMを指定
+  if (tableDom) {
+    tableDom.childNodes.forEach((currentNode)=>{   
+
+      editComment(currentNode);
+
+    });
+  }
+
+
+
   const target = document.querySelector("[class^=___table___]"); // コメントDOMの直上の親DOMを指定
   if (target) {
     const obs = new MutationObserver(watchCommentDOM);
@@ -595,14 +672,46 @@ function startWathCommentDOM() {
 
 function watchParentDOM(mutationsList, observer) {
   // コメントDOMの監視を開始
-  startWathCommentDOM();
+  startWatchCommentDOM();
 }
+
+//監視オプション
+const optionsForGrid = {
+  childList: true,  //直接の子の変更を監視
+  characterData: false,  //文字の変化を監視
+  characterDataOldValue: false, //属性の変化前を記録
+  attributes: false,  //属性の変化を監視
+  subtree: false, //全ての子要素を監視
+}
+
+function startWatchGridDOM() {
+  const target = document.querySelector("[class^=___comment-data-grid___]");
+  if (target) {
+    const obs = new MutationObserver(function(){
+      if(document.querySelector("[class^=___indicator___]")) {
+        
+        document.querySelector("[class^=___indicator___]").addEventListener('click', function (e) {
+
+          let chatDom = document.querySelector("[class^=___comment-panel___] [class^=___body___]");
+          const scrollHeight = chatDom.scrollHeight;
+          window.requestAnimationFrame(() => {
+            chatDom.scrollTop = scrollHeight;
+          });
+          //chatDom.scrollTop = scrollHeight;
+        });  
+      }
+    });
+    obs.observe(target, optionsForGrid);
+  }
+}
+
 
 window.addEventListener('load', function () {
   
+  
 
   // コメントDOMの監視を開始
-  startWathCommentDOM();
+  startWatchCommentDOM();
 
   // コメントDOMの親DOMの監視を開始(フルスクリーン解除時、放送ネタ画面の表示時に対応するため)
   const target_parent = document.querySelector("[class^=___contents-area___]"); // コメントDOMの大元の親DOMを指定
