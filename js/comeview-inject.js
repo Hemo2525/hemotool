@@ -513,15 +513,17 @@ function InsertPremium(fragment) {
 
 function watchCommentDOM(mutationsList, observer) {
 
+  
   //console.log("watchCommentDOMが呼ばれました。");
   
   
   
   for (const mutation of mutationsList) {
 
-    //console.log(mutation);
+    console.log(mutation);
 
     for (var i = 0; i < mutation.target.childNodes.length; i++) {
+      
       var currentNode = mutation.target.childNodes[i];
       //if(currentNode.querySelector('.___comment-number___i8gp1')){ // コメント番号のDOM
       if (currentNode.querySelector("[class^=___comment-number___]")) { // コメント番号のDOM
@@ -597,22 +599,17 @@ function watchParentDOM(mutationsList, observer) {
 }
 
 window.addEventListener('load', function () {
+  
 
   // コメントDOMの監視を開始
   startWathCommentDOM();
 
   // コメントDOMの親DOMの監視を開始(フルスクリーン解除時、放送ネタ画面の表示時に対応するため)
-  //const target_parent = document.querySelector(".___contents-area___wNY_j"); // コメントDOMの大元の親DOMを指定
   const target_parent = document.querySelector("[class^=___contents-area___]"); // コメントDOMの大元の親DOMを指定
   if (target_parent) {
     const obs = new MutationObserver(watchParentDOM);
     obs.observe(target_parent, options);
   }
-
-
-
-
-
 
   // 拡張機能の初期化処理
   initialize(function (ret) {

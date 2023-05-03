@@ -164,6 +164,14 @@
     right: -30px;
     font-size: 12px;    
 }
+.ext-setting-menu .item .name.update::after {
+    content: "update";
+    color: #ff4242;
+    position: absolute;
+    top: -1px;
+    right: -50px;
+    font-size: 12px;    
+}
 .ext-setting-menu .item .name .mini {
     color: #ff6767;
     font-size: 11px;
@@ -240,6 +248,7 @@
     user-select: none;
     transition: all 0.3s ease 0s;
 }
+
 .ext-setting-menu .option-box .option:first-child {
     /*padding-top: 5px;*/
 }
@@ -257,8 +266,19 @@
     cursor: pointer;
 }
 .ext-setting-menu .option-box .option .name {
-    flex-basis: 200px;
+    position: relative;
+    /*flex-basis: 200px;*/
 }
+
+.ext-setting-menu .option-box .option .name.new::after {
+    content: "new";
+    color: #ff4242;
+    position: absolute;
+    top: -1px;
+    right: -30px;
+    font-size: 12px;    
+}
+
 .ext-setting-menu .option-box .option .value {
     flex-basis: calc(100% - 220px);
 }
@@ -841,16 +861,15 @@ html[data-darkreader-scheme] [ext-master-comeview] [class^=___table-row___]:nth-
     cursor: col-resize;
     z-index: 1;
 }
-[aria-expanded="false"] + #split_by_extention {
+[ext-opt-wide] [aria-expanded="false"] + #split_by_extention {
     width: 8px;
+}
+[ext-opt-wide] [data-layout-mode="full"] #split_by_extention {
+    width: 0px;
 }
 [class^=___table-cell___],
 [class^=___table___] {
     width: inherit !important;
-}
-
-[data-layout-mode="full"] #split_by_extention {
-    width: 0px;
 }
 [data-layout-mode="full"] [class^=___player-display___] {
     width: inherit;

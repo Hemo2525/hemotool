@@ -35,6 +35,19 @@ function comeview_option_icon(){
   }
 }
 
+function comeview_option_wide(){
+  let input = document.querySelector('.ext-setting-menu .ext-comeview .option.wide input');
+  
+  // トグル
+  if(input.checked) {  // 注意　クリックされて変化後の値が入っている
+    chrome.storage.local.set({"ext_comeview_opt_wide": "ON"}, function() {});
+    document.querySelector("body").setAttribute("ext-opt-wide", "ON");
+
+  } else {
+    chrome.storage.local.set({"ext_comeview_opt_wide": "OFF"}, function() {});
+    document.querySelector("body").removeAttribute("ext-opt-wide");
+  }
+}
 
 function comeview_option_name(){
   let input = document.querySelector('.ext-setting-menu .ext-comeview .option.name input');

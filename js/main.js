@@ -101,13 +101,16 @@ window.addEventListener('load', function () {
 
 function setEvents() {
     
-    /* メニューの高さを調整 */
+    
     window.addEventListener('resize', function(e){
+
+        /* メニューの高さを調整 */
         setExtSettingMenuHeight();
+
     });
 
 
-    /* スプリットバーの設定 */
+    /* コメビュ幅の調整バーの設定 */
 
     var splitElement = document.createElement("div");
     splitElement.id = "split_by_extention";
@@ -115,7 +118,7 @@ function setEvents() {
     var playerElement = document.querySelector("[class^=___player-status-panel___]");
     playerElement.parentNode.insertBefore(splitElement, playerElement);
 
-    const parentElement = document.querySelector('[class^=___player-display___]');
+    const displayElement = document.querySelector('[class^=___player-display___]');
 
     const splitter = document.getElementById("split_by_extention");
 
@@ -126,7 +129,7 @@ function setEvents() {
         document.body.style.userSelect = 'none'; // テキスト選択を禁止するCSSを適用
     });
 
-    const statusPanel = document.querySelector("[class^=___player-status-panel___]");
+    const panelElement = document.querySelector("[class^=___player-status-panel___]");
     const parent = document.querySelector('[class^=___player-section___]');
     parent.addEventListener("mousemove", (event) => {
         if(bActive) {
@@ -134,15 +137,16 @@ function setEvents() {
             const size = event.clientX - parentRect[0].x;
             const parentWidth = document.querySelector('[class^=___player-section___]').clientWidth;
     
-            statusPanel.style.width = parentWidth - size + "px";
-            parentElement.style.width = size + "px";
+            panelElement.style.width = parentWidth - size + "px";
+            displayElement.style.width = size + "px";
         };
     }, false);
 
     document.addEventListener("mouseup", (event) => {
         bActive = false;
         document.body.style.userSelect = ''; // テキスト選択を許可するCSSを解除
-
+        chrome.storage.local.set({"ext_comeview_opt_wide_panelWidth": panelElement.style.width}, function() {});
+        chrome.storage.local.set({"ext_comeview_opt_wide_displayWidth": displayElement.style.width}, function() {});
     }, false);
 
 
@@ -745,6 +749,10 @@ function insertBtnToPlayer(parts_data) {
     document.querySelector('.ext-setting-menu .ext-comeview .option.icon input').addEventListener('change', () => {
         comeview_option_icon();
     });
+    // [コメント] コメビュ幅の調整バー表示
+    document.querySelector('.ext-setting-menu .ext-comeview .option.wide input').addEventListener('change', () => {
+        comeview_option_wide();
+    });
     // [コメント] 名前の表示
     document.querySelector('.ext-setting-menu .ext-comeview .option.name input').addEventListener('change', () => {
         comeview_option_name();
@@ -1281,6 +1289,13 @@ function setSettingValue() {
                 // ショートカットを表示
                 document.querySelector('#ext_shortcut .item.comeview').setAttribute("ext-pin-on", "ON");                
             }
+        });       
+        // コメビュ機能の名前表示オプション
+        chrome.storage.local.get("ext_comeview_opt_name", function (value) {
+            if (value.ext_comeview_opt_name == "ON") {
+                document.querySelector('.ext-setting-menu .ext-comeview .option.name input').checked = true;
+                comeview_option_name();
+            }
         });
         // コメビュ機能のアイコン表示オプション
         chrome.storage.local.get("ext_comeview_opt_icon", function (value) {
@@ -1289,13 +1304,24 @@ function setSettingValue() {
                 comeview_option_icon();
             }
         });
-        // コメビュ機能の名前表示オプション
-        chrome.storage.local.get("ext_comeview_opt_name", function (value) {
-            if (value.ext_comeview_opt_name == "ON") {
-                document.querySelector('.ext-setting-menu .ext-comeview .option.name input').checked = true;
-                comeview_option_name();
+        // コメビュ機能の『コメビュ幅の調整バー表示』オプション
+        chrome.storage.local.get("ext_comeview_opt_wide", function (value) {
+            if (value.ext_comeview_opt_wide == "ON") {
+                document.querySelector('.ext-setting-menu .ext-comeview .option.wide input').checked = true;
+                comeview_option_wide();
             }
         });
+        chrome.storage.local.get("ext_comeview_opt_wide_panelWidth", function (value) {
+            if (value.ext_comeview_opt_wide_panelWidth) {
+                document.querySelector("[class^=___player-status-panel___]").style.width = value.ext_comeview_opt_wide_panelWidth;
+            }
+        });
+        chrome.storage.local.get("ext_comeview_opt_wide_displayWidth", function (value) {
+            if (value.ext_comeview_opt_wide_displayWidth) {
+                document.querySelector('[class^=___player-display___]').style.width = value.ext_comeview_opt_wide_displayWidth;
+            }
+        });
+    
         // コメビュ機能の折り返しオプション
         chrome.storage.local.get("ext_comeview_opt_orikaeshi", function (value) {
             if (value.ext_comeview_opt_orikaeshi == "ON") {
