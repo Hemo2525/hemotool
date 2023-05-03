@@ -547,7 +547,7 @@ function watchCommentDOM(mutationsList, observer) {
 
     if(mutation.type === "childList"){
 
-      console.log(mutation);
+      //console.log(mutation);
 
       if(_AddedNode === false){
         for (var i = 0; i < mutation.target.childNodes.length; i++) {
