@@ -497,13 +497,25 @@ function InsertUserName(fragment, newNo) {
 }
 
 
-function InsertPremium(fragment) {
+function InsertPremium(fragment, newNo) {
+
   // 追加するDOMを作成
   var newElement = document.createElement("span");
-  var newContent = document.createTextNode("P");
-  newElement.appendChild(newContent);
-  newElement.setAttribute("class", "premium_by_extention");
-  newElement.setAttribute("title", "プレミアムアカウント");
+  var newContent;
+
+  if (_premiumList[newNo] === true) {
+    newContent = document.createTextNode("P");
+    newElement.appendChild(newContent);
+    newElement.setAttribute("class", "premium_by_extention");
+    newElement.setAttribute("title", "プレミアムアカウント");   
+  } else {
+    newContent = document.createTextNode("");
+    newElement.appendChild(newContent);
+    newElement.setAttribute("class", "noPremium_by_extention");
+    newElement.setAttribute("title", "一般アカウント");
+  }
+
+
 
   // 作成したDOMの挿入
   fragment.appendChild(newElement);
@@ -591,9 +603,8 @@ function editComment(currentNode) {
       let fragment = document.createDocumentFragment();
 
       // プレ垢のDOMを挿入
-      if (_premiumList[newNo] === true) {
-        fragment = InsertPremium(fragment);
-      }
+      fragment = InsertPremium(fragment, newNo);
+      
 
       // 名前のDOMを挿入
       if (_commentList[newNo]) {

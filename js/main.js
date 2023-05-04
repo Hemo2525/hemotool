@@ -98,25 +98,11 @@ window.addEventListener('load', function () {
 
 });
 
+function watchCommentParentDOM(mutationRecords, observer) {
 
-function setEvents() {
-    
-    
-    window.addEventListener('resize', function(e){
-
-        /* メニューの高さを調整 */
-        setExtSettingMenuHeight();
-
-    });
-
+    console.log("イベントを設定し直します");
 
     /* コメビュ幅の調整バーの設定 */
-
-    var splitElement = document.createElement("div");
-    splitElement.id = "split_by_extention";
-
-    var playerElement = document.querySelector("[class^=___player-status-panel___]");
-    playerElement.parentNode.insertBefore(splitElement, playerElement);
 
     const displayElement = document.querySelector('[class^=___player-display___]');
 
@@ -147,7 +133,78 @@ function setEvents() {
         document.body.style.userSelect = ''; // テキスト選択を許可するCSSを解除
         chrome.storage.local.set({"ext_comeview_opt_wide_panelWidth": panelElement.style.width}, function() {});
         chrome.storage.local.set({"ext_comeview_opt_wide_displayWidth": displayElement.style.width}, function() {});
+
+        // コメビュは最下部にスクロール
+        let chatDom = document.querySelector("[class^=___comment-panel___] [class^=___body___]");
+        if(chatDom) {
+            const scrollHeight = chatDom.scrollHeight;
+            window.requestAnimationFrame(() => {
+              chatDom.scrollTop = scrollHeight;
+            });    
+        }
+
     }, false);
+
+}
+
+function setEvents() {
+
+    
+    window.addEventListener('resize', function(e){
+
+        /* メニューの高さを調整 */
+        setExtSettingMenuHeight();
+
+
+        /* 画面幅を調整 */
+        const displayElement = document.querySelector('[class^=___player-display___]');
+        const panelElement = document.querySelector("[class^=___player-status-panel___]");
+        const playerSection = document.querySelector('[class^=___player-section___]');
+        const parentWidth = playerSection.clientWidth;
+
+        displayElement.style.width = parentWidth - panelElement.clientWidth + "px";
+
+        chrome.storage.local.set({"ext_comeview_opt_wide_panelWidth": panelElement.clientWidth + "px"}, function() {});
+        chrome.storage.local.set({"ext_comeview_opt_wide_displayWidth": displayElement.style.width}, function() {});
+
+
+        // コメビュは最下部にスクロール
+        let chatDom = document.querySelector("[class^=___comment-panel___] [class^=___body___]");
+        if(chatDom) {
+            const scrollHeight = chatDom.scrollHeight;
+            window.requestAnimationFrame(() => {
+                chatDom.scrollTop = scrollHeight;
+            });
+        }
+    });
+
+
+    var splitElement = document.createElement("div");
+    splitElement.id = "split_by_extention";
+
+    var playerElement = document.querySelector("[class^=___player-status-panel___]");
+    playerElement.parentNode.insertBefore(splitElement, playerElement);
+
+
+    //監視オプション
+    const options = {
+        childList: true,  //直接の子の変更を監視
+        characterData: true,  //文字の変化を監視
+        characterDataOldValue: false, //属性の変化前を記録
+        attributes: true,  //属性の変化を監視
+        subtree: false, //全ての子要素を監視
+    }
+
+    // コメントDOMの親DOMの監視を開始(フルスクリーン解除時、放送ネタ画面の表示時に対応するため)
+    const target_parent = document.querySelector("[class^=___contents-area___]"); // コメントDOMの大元の親DOMを指定
+    if (target_parent) {
+        const obs = new MutationObserver(watchCommentParentDOM);
+        obs.observe(target_parent, options);
+    }
+
+    watchCommentParentDOM();
+
+
 
 
 
@@ -1311,16 +1368,32 @@ function setSettingValue() {
                 comeview_option_wide();
             }
         });
-        chrome.storage.local.get("ext_comeview_opt_wide_panelWidth", function (value) {
-            if (value.ext_comeview_opt_wide_panelWidth) {
-                document.querySelector("[class^=___player-status-panel___]").style.width = value.ext_comeview_opt_wide_panelWidth;
+        
+        chrome.storage.local.get(["ext_comeview_opt_wide_panelWidth", "ext_comeview_opt_wide_displayWidth"], function (value) {
+            if (value.ext_comeview_opt_wide_panelWidth && value.ext_comeview_opt_wide_displayWidth) {
+                
+                //document.querySelector("[class^=___player-status-panel___]").style.width = value.ext_comeview_opt_wide_panelWidth;
+                //document.querySelector('[class^=___player-display___]').style.width = value.ext_comeview_opt_wide_displayWidth;
+
+                //console.log("px確認", value.ext_comeview_opt_wide_panelWidth , value.ext_comeview_opt_wide_displayWidth);
+
+                const getPanelWidth = Number(value.ext_comeview_opt_wide_panelWidth.replace("px", ""));
+
+                /* 画面幅を調整 */
+                const displayElement = document.querySelector('[class^=___player-display___]');
+                const panelElement = document.querySelector("[class^=___player-status-panel___]");
+                const playerSection = document.querySelector('[class^=___player-section___]');
+                const parentWidth = playerSection.clientWidth;
+
+                displayElement.style.width = parentWidth - getPanelWidth + "px";
+                panelElement.style.width = getPanelWidth + "px";
+
             }
         });
-        chrome.storage.local.get("ext_comeview_opt_wide_displayWidth", function (value) {
-            if (value.ext_comeview_opt_wide_displayWidth) {
-                document.querySelector('[class^=___player-display___]').style.width = value.ext_comeview_opt_wide_displayWidth;
-            }
-        });
+
+
+
+        
     
         // コメビュ機能の折り返しオプション
         chrome.storage.local.get("ext_comeview_opt_orikaeshi", function (value) {

@@ -727,6 +727,18 @@ div#ext_dom_message {
     display: inline-block;
 }
 
+.noPremium_by_extention { 
+    display: none;
+    margin-right: 6px;
+    width: 16px;
+    padding: 0;
+    height: 11px;
+    background-color: #e9e9e9;
+    border-radius: 100%;
+}
+[class^=___contents-area___][ext-master-comeview][ext-opt-premium] .noPremium_by_extention {
+    display: inline-block;
+}
 
 /* コメント折り返しここから ------------------------------------ */
 
@@ -865,6 +877,7 @@ html[data-darkreader-scheme] [ext-master-comeview] [class^=___table-row___]:nth-
 }
 body[ext-master-comeview][ext-opt-wide] [aria-expanded="false"] + #split_by_extention {
     width: 8px;
+    min-width: 8px;
 }
 body[ext-master-comeview][ext-opt-wide] [data-layout-mode="full"] #split_by_extention {
     width: 0px;
