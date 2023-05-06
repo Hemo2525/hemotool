@@ -881,6 +881,7 @@ body[ext-master-comeview][ext-opt-wide] [aria-expanded="false"] + #split_by_exte
 }
 body[ext-master-comeview][ext-opt-wide] [data-layout-mode="full"] #split_by_extention {
     width: 0px;
+    min-width: 0px;
 }
 [class^=___table-cell___],
 [class^=___table___] {
@@ -888,4 +889,39 @@ body[ext-master-comeview][ext-opt-wide] [data-layout-mode="full"] #split_by_exte
 }
 [data-layout-mode="full"] [class^=___player-display___] {
     width: inherit !important;
+}
+
+
+
+/*
+色選択
+*/
+[class^=___comment-context-menu___] .setColor {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-bottom: 1px solid #e5e5e5;
+
+    overflow: hidden;
+}
+
+[class^=___comment-context-menu___] .setColor label {
+    background-color: #fff;
+    border-style: none;
+    color: #000;
+    display: block;
+    padding: 8px 16px;
+    text-align: left;
+    text-decoration: none;
+    width: 100%;
+}
+[class^=___comment-context-menu___] .setColor label:hover {
+    background-color: #e5e5e5;
+    cursor: pointer;
+}
+[class^=___comment-context-menu___] .setColor input {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: none;
 }

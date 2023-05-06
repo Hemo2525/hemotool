@@ -73,7 +73,7 @@ var _gettingList = {};      // KEY:ユーザーID,   VALUE:何でもいい値
 var _commentRawIdList = {}; // KEY:コメント番号   VALUE:ユーザーID（184さんならハッシュ値、生IDさんなら生IDが入る）
 var _kotehanList = [];      // KEY:ユーザーID,    VALUE:コテハン
 
-
+let _styleList = {};        // KEY:ユーザーID（184さんならハッシュ値、生IDさんなら生IDが入る）, VALUE: スタイルのindex番号(insertRule()した戻り値)
 
 // WebSocketの受信イベントハンドラ
 function recvEvent(event) {
@@ -468,7 +468,7 @@ function InsertUserName(fragment, newNo) {
     kotehanContent = document.createTextNode(kotehan);
     kotehanElement.appendChild(kotehanContent);
     kotehanElement.setAttribute("title", kotehanFull);
-
+    kotehanElement.setAttribute("data-extension-userid", _commentRawIdList[newNo]);
   } else {
 
     // コテハンがHITしなかった場合---------
@@ -486,7 +486,7 @@ function InsertUserName(fragment, newNo) {
     kotehanContent = document.createTextNode(kotehan);
     kotehanElement.appendChild(kotehanContent);  
     kotehanElement.setAttribute("title", fullUserName);
-
+    kotehanElement.setAttribute("data-extension-userid", _commentRawIdList[newNo]);
   }
 
 
@@ -696,23 +696,107 @@ const optionsForGrid = {
 }
 
 function startWatchGridDOM() {
+  
   const target = document.querySelector("[class^=___comment-data-grid___]");
-  if (target) {
-    const obs = new MutationObserver(function(){
-      if(document.querySelector("[class^=___indicator___]")) {
-        
-        document.querySelector("[class^=___indicator___]").addEventListener('click', function (e) {
+  
+  let currentUserID = 0;
 
-          let chatDom = document.querySelector("[class^=___comment-panel___] [class^=___body___]");
-          const scrollHeight = chatDom.scrollHeight;
-          window.requestAnimationFrame(() => {
-            chatDom.scrollTop = scrollHeight;
-          });
-          //chatDom.scrollTop = scrollHeight;
-        });  
+  if (target) {
+    const obs = new MutationObserver(function(mutationsList, observer){
+
+      for (const mutation of mutationsList) {
+        if(mutation.addedNodes){
+
+          //console.log(mutation);
+
+          if(document.querySelector("[class^=___indicator___]")) {
+
+            // 最下部にスクロールを強化
+            document.querySelector("[class^=___indicator___]").addEventListener('click', function (e) {
+
+              let chatDom = document.querySelector("[class^=___comment-panel___] [class^=___body___]");
+              const scrollHeight = chatDom.scrollHeight;
+              window.requestAnimationFrame(() => {
+                chatDom.scrollTop = scrollHeight;
+              });
+              //chatDom.scrollTop = scrollHeight;
+            }); 
+          }
+
+          /*
+          // 色関係
+          if(document.querySelector("[class^=___comment-context-menu___]")) {
+
+            if( !document.querySelector("[class^=___comment-context-menu___] .setColor") && currentUserID !== 0 ) {
+
+              // 追加するメニューのDOMを作成
+              var ulElement = document.createElement("ul");
+              var liElement = document.createElement("li");
+              let labelElement = document.createElement("label");
+              let inputElement = document.createElement("input");
+
+              ulElement.setAttribute("class", "setColor");
+              inputElement.setAttribute("class", "extention");
+              inputElement.setAttribute("type", "color");
+              inputElement.addEventListener('change', function(e) {
+                console.log("色をつけます" , currentUserID, this.value);
+
+                //スタイルシートの設定
+                let style = document.getElementById('extension_style');
+                if(_styleList[currentUserID]) {
+                  // 追加済みなら削除
+                  style.sheet.deleteRule(_styleList[currentUserID]);
+                }
+                let index = style.sheet.insertRule('span.user_name_by_extention.viewKotehan[data-extension-userid="'+ currentUserID + '"] + span {color: ' + this.value + ';}', style.sheet.cssRules.length);               
+                _styleList[currentUserID] = index;
+                console.log("index", style.sheet.cssRules);
+              
+              });
+              labelElement.innerText = "色を設定";
+
+              labelElement.appendChild(inputElement);
+              liElement.appendChild(labelElement);
+              ulElement.appendChild(liElement);
+
+              
+
+              observer.disconnect();
+              
+              let commentContext = document.querySelector("[class^=___comment-menu___]"); // コメント関係のメニューDOMを指定
+              if(commentContext && commentContext.parentNode){
+                commentContext.parentNode.insertBefore(ulElement, commentContext);    
+              }
+
+              const target = document.querySelector("[class^=___comment-data-grid___]");
+              observer.observe(target, optionsForGrid);
+            }
+            
+          }
+          */
+
+
+
+        }
+      }
+
+    });
+    
+    obs.observe(target, optionsForGrid);
+
+    /*
+    // 色関係
+    document.querySelector("[class^=___comment-data-grid___]").addEventListener("mousedown", function(e) {
+      
+      if (e.button == 2 && e.target.parentNode) { // right click for mouse
+        let commentDom = e.target.parentNode.querySelector("[class^=___comment-number___]");
+        if(commentDom && commentDom.innerText) {
+
+          currentUserID = _commentRawIdList[commentDom.innerText];
+          
+        }
       }
     });
-    obs.observe(target, optionsForGrid);
+    */
   }
 }
 

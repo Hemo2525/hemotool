@@ -292,16 +292,20 @@ function observeSeekbar(mutationRecords, observer) {
     let nicoVideo = document.querySelector('div[data-layer-name="videoLayer"] video');
 
     // ニコ生ゲーム音ミュート時に、ニコ生プレイヤーのリロードボタン押下時や、画質が切り替わったとき、ビデオの音声が消える不具合の対処
-    chrome.storage.local.get("ext_game_volume", function (value) {
-        if (value.ext_game_volume) {
-            const extMuteBtn = document.getElementById('ext_volume_overlay');
-            if(extMuteBtn) {
-                const isMuted = extMuteBtn.getAttribute('muted');
-                if(isMuted && isMuted === "OFF") {
-                    nicoVideo.muted = false;
+    chrome.storage.local.get("ext_game_mute", function (value) {
+        if (value.ext_game_mute == "ON") {
+            chrome.storage.local.get("ext_game_volume", function (value) {
+                if (value.ext_game_volume) {
+                    const extMuteBtn = document.getElementById('ext_volume_overlay');
+                    if(extMuteBtn) {
+                        const isMuted = extMuteBtn.getAttribute('muted');
+                        if(isMuted && isMuted === "OFF") {
+                            nicoVideo.muted = false;
+                        }
+                    }
+                    nicoVideo.volume =  value.ext_game_volume / 100;
                 }
-            }
-            nicoVideo.volume =  value.ext_game_volume / 100;
+            });
         }
     });
 

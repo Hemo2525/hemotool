@@ -129,18 +129,20 @@ function watchCommentParentDOM(mutationRecords, observer) {
     }, false);
 
     document.addEventListener("mouseup", (event) => {
-        bActive = false;
-        document.body.style.userSelect = ''; // テキスト選択を許可するCSSを解除
-        chrome.storage.local.set({"ext_comeview_opt_wide_panelWidth": panelElement.style.width}, function() {});
-        chrome.storage.local.set({"ext_comeview_opt_wide_displayWidth": displayElement.style.width}, function() {});
+        if(bActive) {
+            bActive = false;
+            document.body.style.userSelect = ''; // テキスト選択を許可するCSSを解除
+            chrome.storage.local.set({"ext_comeview_opt_wide_panelWidth": panelElement.style.width}, function() {});
+            chrome.storage.local.set({"ext_comeview_opt_wide_displayWidth": displayElement.style.width}, function() {});
 
-        // コメビュは最下部にスクロール
-        let chatDom = document.querySelector("[class^=___comment-panel___] [class^=___body___]");
-        if(chatDom) {
-            const scrollHeight = chatDom.scrollHeight;
-            window.requestAnimationFrame(() => {
-              chatDom.scrollTop = scrollHeight;
-            });    
+            // コメビュは最下部にスクロール
+            let chatDom = document.querySelector("[class^=___comment-panel___] [class^=___body___]");
+            if(chatDom) {
+                const scrollHeight = chatDom.scrollHeight;
+                window.requestAnimationFrame(() => {
+                chatDom.scrollTop = scrollHeight;
+                });    
+            }
         }
 
     }, false);
@@ -299,6 +301,13 @@ function insertBtnToPlayer(parts_data) {
 
     // メニューの高さを設定
     setExtSettingMenuHeight();
+
+
+    //スタイル エレメントを作成
+    let style = document.createElement("style");
+    style.id = "extension_style";
+    //スタイルをヘッダに入れる
+    document.head.appendChild(style);
 
 
     // 拡張機能ボタンのメニュー表示
