@@ -299,8 +299,7 @@ function insertBtnToPlayer(parts_data) {
     document.querySelector('[class^=___player-display-screen]').prepend(overlay);
 
 
-    // メニューの高さを設定
-    setExtSettingMenuHeight();
+
 
 
     //スタイル エレメントを作成
@@ -674,12 +673,6 @@ function insertBtnToPlayer(parts_data) {
         */
     });
 
-    /*
-        // 録画開始
-        let recBtn = document.querySelector('.ext-setting-menu .ext-pip-rec');
-        recBtn.addEventListener('click', pipRec);
-    */
-
 
     // 映像加工
     document.querySelector('.ext-setting-menu .ext-video-effect .item .value').addEventListener('click', videoEffect);
@@ -830,6 +823,10 @@ function insertBtnToPlayer(parts_data) {
     // [コメント] プレミアム表示
     document.querySelector('.ext-setting-menu .ext-comeview .option.premium input').addEventListener('change', () => {
         comeview_option_premium();
+    });
+    // [コメント] コメ色変更
+    document.querySelector('.ext-setting-menu .ext-comeview .option.color input').addEventListener('change', () => {
+        comeview_option_color();
     });
     // [コメント] コテハン表示
     document.querySelector('.ext-setting-menu .ext-comeview .option.kotehan input').addEventListener('change', () => {
@@ -1058,6 +1055,35 @@ function insertBtnToPlayer(parts_data) {
 
 
 
+
+
+    // 新しいHTML要素を作成
+    var colorElement = document.createElement('div');
+    colorElement.id = "ext_colorBox";
+
+    // 指定した要素の中の末尾に挿入
+    targeteElement.appendChild(colorElement);
+
+
+    // 新しいHTML要素を作成
+    var colorToInject = document.createElement('div');
+    colorToInject.id = "ext_colorToInjectBox";
+
+    // 指定した要素の中の末尾に挿入
+    targeteElement.appendChild(colorToInject);
+
+    colorInitialize();
+    getColor();
+
+
+
+
+
+
+
+
+
+
     // ニコニコ動画のフロントエンドバージョンを取得
     let nicoData = document.querySelector('#embedded-data');
     if(nicoData){
@@ -1082,6 +1108,34 @@ function insertBtnToPlayer(parts_data) {
 
     // 「へもツールが更新されました」のポップアップ表示判定
     chrome.storage.local.get("ext_current_version", function (value) {
+
+        if(!value.ext_current_version) {
+            console.log("初期インストールです");
+            
+            comeview();
+            
+            document.querySelector('.ext-setting-menu .ext-comeview .option.name input').checked = true;
+            comeview_option_name();
+            
+            document.querySelector('.ext-setting-menu .ext-comeview .option.icon input').checked = true;
+            comeview_option_icon();
+            
+            document.querySelector('.ext-setting-menu .ext-comeview .option.wide input').checked = true;
+            comeview_option_wide();
+            
+            document.querySelector('.ext-setting-menu .ext-comeview .option.orikaeshi input').checked = true;
+            comeview_option_orikaeshi();
+
+            document.querySelector('.ext-setting-menu .ext-comeview .option.premium input').checked = true;
+            comeview_option_premium();
+
+            document.querySelector('.ext-setting-menu .ext-comeview .option.color input').checked = true;
+            comeview_option_color();
+
+            document.querySelector('.ext-setting-menu .ext-comeview .option.kotehan input').checked = true;
+            comeview_option_kotehan();
+        }
+
         // ストレージに保存されたバージョン情報とマニフェストのバージョン情報が異なる場合にポップアップを表示
         if(value && value.ext_current_version !== manifestData.version) {
             document.querySelector('.ext-popup').classList.add('show');
@@ -1103,6 +1157,10 @@ function insertBtnToPlayer(parts_data) {
             document.querySelector('.ext-setting-menu .dev-mode').classList.add('show');
         }
     });
+
+
+    // メニューの高さを設定
+    setExtSettingMenuHeight();
 
     /*
     document.querySelector('.ext-setting-menu .item.info .hemotool .ver').addEventListener('click', function(){
@@ -1416,6 +1474,13 @@ function setSettingValue() {
             if (value.ext_comeview_opt_premium == "ON") {
                 document.querySelector('.ext-setting-menu .ext-comeview .option.premium input').checked = true;
                 comeview_option_premium();
+            }
+        });
+        // コメビュ機能のコメ色変更オプション
+        chrome.storage.local.get("ext_comeview_opt_color", function (value) {
+            if (value.ext_comeview_opt_color == "ON") {
+                document.querySelector('.ext-setting-menu .ext-comeview .option.color input').checked = true;
+                comeview_option_color();
             }
         });
         // コメビュ機能のコテハン表示オプション

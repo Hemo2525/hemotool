@@ -93,6 +93,20 @@ function comeview_option_premium(){
   }
 }
 
+function comeview_option_color(){
+  let input = document.querySelector('.ext-setting-menu .ext-comeview .option.color input');
+  
+  // トグル
+  if(input.checked) {  // 注意　クリックされて変化後の値が入っている
+    chrome.storage.local.set({"ext_comeview_opt_color": "ON"}, function() {});
+    document.querySelector("[class^=___contents-area___]").setAttribute("ext-opt-color", "ON");
+
+  } else {
+    chrome.storage.local.set({"ext_comeview_opt_color": "OFF"}, function() {});
+    document.querySelector("[class^=___contents-area___]").removeAttribute("ext-opt-color");
+  }
+}
+
 function comeview_option_kotehan(){
   let input = document.querySelector('.ext-setting-menu .ext-comeview .option.kotehan input');
   
@@ -165,14 +179,14 @@ function kotehanInitialize(){
       obsKotehan.disconnect();
 
       /* pタグの削除 */
-      document.querySelector('#ext_kotehanBox').innerHTML = "";
+      let kotehanBox = document.getElementById('ext_kotehanBox');
+      kotehanBox.innerHTML = "";
 
       /** DOM変化の監視を再開 */
-      let targetLogDom = document.querySelector('#ext_kotehanBox');
       const logOption = {
           childList:  true,  //直接の子の変更を監視
       };
-      obsKotehan.observe(targetLogDom, logOption);
+      obsKotehan.observe(kotehanBox, logOption);
 
     });
   }
@@ -180,7 +194,7 @@ function kotehanInitialize(){
   const logOption = {
     childList:  true,  //直接の子の変更を監視
   };
-  const targetLogDom = document.querySelector('#ext_kotehanBox');
+  const targetLogDom = document.getElementById('ext_kotehanBox');
   const obsKotehan = new MutationObserver(watchKotehanBox);
   obsKotehan.observe(targetLogDom, logOption);
 
@@ -189,6 +203,100 @@ function kotehanInitialize(){
 
 
 
+
+let _Color_comeview = [];
+
+function getColor() {
+
+
+  chrome.storage.local.get("color", function (value) {
+      if(value && value.color && Array.isArray(value.color)) {
+        _Color_comeview = value.color;
+
+        console.log("▼localに保存されているカラー設定");
+        console.log(_Color_comeview);
+
+        let colorToInjuectBoxDom = document.getElementById("ext_colorToInjectBox");
+
+        if(_Color_comeview.length > 0 && colorToInjuectBoxDom) {
+          
+          var dom = document.createElement('p');
+          var domText = document.createTextNode(JSON.stringify(_Color_comeview));
+          dom.appendChild(domText);
+          colorToInjuectBoxDom.appendChild(dom);
+
+          console.log("inject側のDOMにカラー設定を追加");
+
+        }
+
+      }
+  });
+}
+
+function setColor(user_id, textColor, bgColor, date) {
+
+    // 既に同じIDの人が登録されていれば削除してから追加
+    _Color_comeview = _Color_comeview.filter(function (x) { return x.id !== user_id });
+
+    let item = { 
+      id : user_id,
+      textColor : textColor,
+      bgColor : bgColor,
+      createDate : date
+    };
+    _Color_comeview.push(item);
+    chrome.storage.local.set({ "color": _Color_comeview }, function () { });
+}
+function deleteColor(user_id) {
+
+  // IDの人を削除
+  _Color_comeview = _Color_comeview.filter(function (x) { return x.id !== user_id });
+
+  // IDの人を削除した構造体を保存
+  chrome.storage.local.set({ "color": _Color_comeview }, function () { });
+}
+
+
+function colorInitialize(){
+
+  function watchColorBox(mutationRecords, observer){
+    mutationRecords.forEach(item => {
+      //console.debug(item.addedNodes[0].outerText);
+      let colorJson = item.addedNodes[0].outerText;
+      let color = JSON.parse(colorJson);
+
+      if(color.deleteFlag) {
+        deleteColor(color.id);
+      } else {
+        setColor(color.id, color.textColor, color.bgColor, color.date);
+      }
+
+      /** DOM変化の監視を一時停止 */
+      obsColor.disconnect();
+
+      /* pタグの削除 */
+      let colorBox = document.getElementById('ext_colorBox');
+      while( colorBox.firstChild ){
+        colorBox.removeChild( colorBox.firstChild );
+      }      
+
+      /** DOM変化の監視を再開 */
+      const logOption = {
+          childList:  true,  //直接の子の変更を監視
+      };
+      obsColor.observe(colorBox, logOption);
+
+    });
+  }
+
+  const logOption = {
+    childList:  true,  //直接の子の変更を監視
+  };
+  const targetLogDom = document.getElementById('ext_colorBox');
+  const obsColor = new MutationObserver(watchColorBox);
+  obsColor.observe(targetLogDom, logOption);
+
+};
 
 
 

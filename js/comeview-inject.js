@@ -723,56 +723,229 @@ function startWatchGridDOM() {
             }); 
           }
 
-          /*
+          
           // 色関係
-          if(document.querySelector("[class^=___comment-context-menu___]")) {
+          if(document.querySelector("[class^=___comment-context-menu___]") && !document.querySelector("[class^=___comment-context-menu___]:empty")) {
+            // 上記、:empty は、ニコ生のDOMが「へもさんが100ptニコニコ広告しました」などのシステムメッセージを右クリックした場合、コンテキストメニューのDOMが表示されていないのにDOM上は存在している状態になってしまう仕様があり、それを回避するためのもの。
 
-            if( !document.querySelector("[class^=___comment-context-menu___] .setColor") && currentUserID !== 0 ) {
+            if( !document.querySelector("[class^=___comment-context-menu___] .ext-menu") && currentUserID !== 0 ) {
+
+              let style = document.getElementById('extension_style');
+              let _tempCurrentUserID;
+
+              console.log("▼色オブジェクトリスト");
+              console.log(_styleList);
+              console.log("▼CSSルール");
+              console.log(style.sheet.cssRules);
 
               // 追加するメニューのDOMを作成
-              var ulElement = document.createElement("ul");
-              var liElement = document.createElement("li");
+              let ulElement = document.createElement("ul");
+              let liElement = document.createElement("li");
               let labelElement = document.createElement("label");
               let inputElement = document.createElement("input");
 
-              ulElement.setAttribute("class", "setColor");
+              // 追加するメニューのDOMの属性やイベントの設定
+              ulElement.setAttribute("class", "ext-menu");
+              //liElement.setAttribute("class", "setColor");
               inputElement.setAttribute("class", "extention");
               inputElement.setAttribute("type", "color");
-              inputElement.addEventListener('change', function(e) {
-                console.log("色をつけます" , currentUserID, this.value);
+              labelElement.innerText = "文字色を設定";
+
+
+              if(_styleList[currentUserID] && _styleList[currentUserID].textColor !== -1) {
+                inputElement.value = _styleList[currentUserID].textColor;
+              } else {
+                inputElement.value = "#000000";
+              }
+              
+              // カラーピッカーの色を動かしたときのイベント
+              inputElement.addEventListener('input', function(e) {
+                //console.log("色をつけます" , currentUserID, this.value);
+
+                if(!_styleList[currentUserID]) {
+                  let objct = {textIndex : -1, textColor: -1, bgIndex : -1, bgColor: -1};
+                  _styleList[currentUserID] = objct;
+                }
 
                 //スタイルシートの設定
-                let style = document.getElementById('extension_style');
-                if(_styleList[currentUserID]) {
-                  // 追加済みなら削除
-                  style.sheet.deleteRule(_styleList[currentUserID]);
+                if(_styleList[currentUserID].textIndex !== -1) {
+                  // 追加済みなら置換
+                  style.sheet.deleteRule(_styleList[currentUserID].textIndex);
+                  style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span.user_name_by_extention.viewKotehan[data-extension-userid="'+ currentUserID + '"] + span {color: ' + this.value + ';}', _styleList[currentUserID].textIndex);
+                } else {
+                  let index = style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span.user_name_by_extention.viewKotehan[data-extension-userid="'+ currentUserID + '"] + span {color: ' + this.value + ';}', style.sheet.cssRules.length);
+                  _styleList[currentUserID].textIndex = index;  
                 }
-                let index = style.sheet.insertRule('span.user_name_by_extention.viewKotehan[data-extension-userid="'+ currentUserID + '"] + span {color: ' + this.value + ';}', style.sheet.cssRules.length);               
-                _styleList[currentUserID] = index;
-                console.log("index", style.sheet.cssRules);
+                //console.log("index", style.sheet.cssRules);
+
+                // 色を選択しているユーザーIDを保存しておく
+                _tempCurrentUserID = currentUserID;
               
               });
-              labelElement.innerText = "色を設定";
+              // カラーピッカーの色変更を確定したときのイベント
+              inputElement.addEventListener('change', function(e) {
+                console.log("色を保存します" , _tempCurrentUserID, this.value);
+                _styleList[_tempCurrentUserID].textColor = this.value;
 
+
+                // カラー情報を保存するDOMに保存
+                let colorBox = document.getElementById("ext_colorBox");
+                if(colorBox) {
+                  let item = { 
+                    id : _tempCurrentUserID,
+                    textColor : _styleList[_tempCurrentUserID].textColor,
+                    bgColor : _styleList[_tempCurrentUserID].bgColor,
+                    deleteFlag : false,
+                    createDate : new Date().toUTCString()
+                  };
+                  var colorItemDom = document.createElement('p');
+                  var newYomiCommentText = document.createTextNode(JSON.stringify(item));
+                  colorItemDom.appendChild(newYomiCommentText);
+                  colorBox.appendChild(colorItemDom);
+                }
+
+              });
+
+
+              
+
+              let liBgColorElement = document.createElement("li");
+              let labelBgColorElement = document.createElement("label");
+              let inputBgColorElement = document.createElement("input");
+              inputBgColorElement.setAttribute("class", "extention");
+              inputBgColorElement.setAttribute("type", "color");
+              labelBgColorElement.innerText = "背景色を設定";
+
+
+              if(_styleList[currentUserID] && _styleList[currentUserID].bgColor !== -1) {
+                inputBgColorElement.value = _styleList[currentUserID].bgColor;
+              } else {
+                inputBgColorElement.value = "#ffffff";
+              }
+
+              // カラーピッカーの色を動かしたときのイベント
+              inputBgColorElement.addEventListener('input', function(e) {
+                // console.log("背景色をつけます" , currentUserID, this.value, _styleList);
+
+                if(!_styleList[currentUserID]) {
+                  let objct = {textIndex : -1, textColor: -1, bgIndex : -1, bgColor: -1};
+                  _styleList[currentUserID] = objct;
+                }
+
+                //スタイルシートの設定
+                if(_styleList[currentUserID].bgIndex !== -1) {
+                  // 追加済みなら置換
+                  style.sheet.deleteRule(_styleList[currentUserID].bgIndex);
+                  style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span:has( > [data-extension-userid="'+ currentUserID + '"] ) { background-color: ' + this.value + ';}', _styleList[currentUserID].bgIndex);               
+                } else {
+                  // 未追加なら追加
+                  let index = style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span:has( > [data-extension-userid="'+ currentUserID + '"] ) { background-color: ' + this.value + ';}', style.sheet.cssRules.length);
+                  _styleList[currentUserID].bgIndex = index;  
+                }
+                // console.log("index", style.sheet.cssRules);
+
+                // 色を選択しているユーザーIDを保存しておく
+                _tempCurrentUserID = currentUserID;
+              
+              });
+              // カラーピッカーの色変更を確定したときのイベント
+              inputBgColorElement.addEventListener('change', function(e) {
+
+                console.log("背景色を保存します" , _tempCurrentUserID, this.value);
+                _styleList[_tempCurrentUserID].bgColor = this.value;
+
+                // カラー情報を保存するDOMに保存
+                let colorBox = document.getElementById("ext_colorBox");
+                if(colorBox) {
+                  let item = { 
+                    id : _tempCurrentUserID,
+                    textColor : _styleList[_tempCurrentUserID].textColor,
+                    bgColor : _styleList[_tempCurrentUserID].bgColor,
+                    deleteFlag : false,
+                    createDate : new Date().toUTCString()
+                  };
+                  var colorItemDom = document.createElement('p');
+                  var newYomiCommentText = document.createTextNode(JSON.stringify(item));
+                  colorItemDom.appendChild(newYomiCommentText);
+                  colorBox.appendChild(colorItemDom);
+                }
+              });
+
+
+
+              let liResetColorElement = document.createElement("li");
+              let labelResetColorElement = document.createElement("label");
+              labelResetColorElement.innerText = "色設定をクリア";
+
+              // 色設定をクリアするボタンのイベント              
+              liResetColorElement.addEventListener('click', function(e) {
+                console.log("色設定を削除します", currentUserID, _styleList);
+
+                if(_styleList[currentUserID] && _styleList[currentUserID].textIndex !== -1) {
+                  // 追加済みなら置換
+                  style.sheet.deleteRule(_styleList[currentUserID].textIndex);
+                  style.sheet.insertRule('span.user_name_by_extention.viewKotehan[data-extension-userid="'+ currentUserID + '"] + span {color: #000000;}', _styleList[currentUserID].textIndex);
+                  _styleList[currentUserID].textColor = "#000000";
+                }
+
+                if(_styleList[currentUserID] && _styleList[currentUserID].bgIndex !== -1) {
+                  // 追加済みなら置換
+                  style.sheet.deleteRule(_styleList[currentUserID].bgIndex);
+                  style.sheet.insertRule('span:has( > [data-extension-userid="'+ currentUserID + '"] ) { background-color: #ffffff;}', _styleList[currentUserID].bgIndex);
+                  _styleList[currentUserID].bgColor = "#ffffff";
+                }
+
+                // コンテキストメニューを閉じる
+                document.querySelector('[class^=___comment-context-menu___]').style.display = "none"
+
+
+                // カラー情報を保存するDOMに保存
+                let colorBox = document.getElementById("ext_colorBox");
+                if(colorBox) {
+                  let item = { 
+                    id : currentUserID,
+                    deleteFlag : true
+                  };
+                  var colorItemDom = document.createElement('p');
+                  var newYomiCommentText = document.createTextNode(JSON.stringify(item));
+                  colorItemDom.appendChild(newYomiCommentText);
+                  colorBox.appendChild(colorItemDom);
+                }
+
+              });
+
+
+
+              // 追加するメニューを1つにまとめる
               labelElement.appendChild(inputElement);
               liElement.appendChild(labelElement);
               ulElement.appendChild(liElement);
 
-              
+              labelBgColorElement.appendChild(inputBgColorElement);
+              liBgColorElement.appendChild(labelBgColorElement);
+              ulElement.appendChild(liBgColorElement);
 
+              //labelResetColorElement.appendChild(inputResetElement);
+              liResetColorElement.appendChild(labelResetColorElement);
+              ulElement.appendChild(liResetColorElement);
+
+
+              // コンテキストメニューの監視を解除
               observer.disconnect();
-              
+
+              // コンテキストメニューに追加メニュー項目を挿入
               let commentContext = document.querySelector("[class^=___comment-menu___]"); // コメント関係のメニューDOMを指定
               if(commentContext && commentContext.parentNode){
                 commentContext.parentNode.insertBefore(ulElement, commentContext);    
               }
 
+              // コンテキストメニューの監視を再開
               const target = document.querySelector("[class^=___comment-data-grid___]");
               observer.observe(target, optionsForGrid);
             }
             
           }
-          */
+          
 
 
 
@@ -783,7 +956,7 @@ function startWatchGridDOM() {
     
     obs.observe(target, optionsForGrid);
 
-    /*
+    
     // 色関係
     document.querySelector("[class^=___comment-data-grid___]").addEventListener("mousedown", function(e) {
       
@@ -792,11 +965,14 @@ function startWatchGridDOM() {
         if(commentDom && commentDom.innerText) {
 
           currentUserID = _commentRawIdList[commentDom.innerText];
+
+          console.log("★currentUserID" + currentUserID);
+          
           
         }
       }
     });
-    */
+    
   }
 }
 
@@ -844,6 +1020,56 @@ window.addEventListener('load', function () {
         console.log(_kotehanList);  
       }
 
+
+      const colorJson = document.querySelector("#ext_colorToInjectBox p");
+      if(colorJson && colorJson.outerText){
+        const styleList = JSON.parse(colorJson.outerText);
+        console.log("▼inject側で受け取ったカラー情報");
+        console.log(styleList);
+
+        styleList.forEach(function(item, index) {
+          let objct = {
+            textIndex : -1,
+            textColor: item.textColor ? item.textColor : -1,
+            bgIndex : -1,
+            bgColor: item.bgColor ? item.bgColor : -1,
+            createDate : item.createDate ? item.createDate : new Date().toUTCString()
+          };
+          _styleList[item.id] = objct;
+        });
+
+        //console.log(_styleList);
+
+        let style = document.getElementById('extension_style');
+        Object.keys(_styleList).forEach(function(key) {
+          var val = this[key]; // this は obj
+          //console.log(key, val);
+          if(val.bgColor && val.bgColor !== -1) {
+            _styleList[key].bgIndex = style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span:has( > [data-extension-userid="'+ key + '"] ) { background-color: ' + val.bgColor + ';}', style.sheet.cssRules.length);        
+          }
+          if(val.textColor && val.textColor !== -1) {
+            _styleList[key].textIndex = style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span.user_name_by_extention.viewKotehan[data-extension-userid="'+ key + '"] + span {color: ' + val.textColor + ';}', style.sheet.cssRules.length);
+          }
+        }, _styleList);
+
+        console.log("最終カラー情報");
+        console.log(_styleList);
+
+        /*
+        let style = document.getElementById('extension_style');
+        _styleList.forEach(function(item, index) {
+
+          if(item.bgColor) {
+            let insertIndex = style.sheet.insertRule('[ext-master-comeview] span:has( > [data-extension-userid="'+ item + '"] ) { background-color: ' + item.bgColor + ';}', style.sheet.cssRules.length);
+            _styleList[currentUserID].bgIndex = insertIndex;              
+          }
+
+        });
+        */
+
+      }
+
+
     }
 
   }, 6000 * 10 * 5); // 5分
@@ -881,7 +1107,9 @@ function initialize(callback, timeoutMiliSec) {
 
   let domList = [
       "[class^=___time-score___] span[class^=___value___]",
-      "#ext_kotehanToInjectBox"
+      "#ext_kotehanToInjectBox",
+      "#ext_colorToInjectBox",
+      "#extension_style"
   ];
 
   const startMiliSec= Date.now();
