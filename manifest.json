@@ -1,7 +1,7 @@
 {
   "name": "ニコ生拡張機能 へもツール",
   "manifest_version": 3,
-  "version": "0.29.9",
+  "version": "0.30.0",
   "description": "ニコ生にいろいろな拡張機能を追加します",
   "permissions": [
     "storage",
@@ -44,7 +44,8 @@
         "/js/rightClick.js",
         "/js/lib/EBML.js",
         "/js/pip.js",
-        "/js/akashic.js"
+        "/js/akashic.js",
+        "/js/other.js"
       ],
       "css": ["/css/style.css"]
     }

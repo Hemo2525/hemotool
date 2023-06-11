@@ -967,3 +967,20 @@ html[data-darkreader-scheme] [class^=___comment-context-menu___] .ext-menu label
 #ext_colorToInjectBox {
     display: none;
 }
+
+
+
+
+
+
+[class^=___seek-information___] #ext_thumb {
+    width: 100%;
+    margin-top: 10px;    
+}
+
+
+[class^=___comment-text-box___] {
+    padding-left: 37px !important;
+    background-size: contain;
+    background-repeat: no-repeat;
+}

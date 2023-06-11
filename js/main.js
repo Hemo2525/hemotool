@@ -1162,6 +1162,9 @@ function insertBtnToPlayer(parts_data) {
     // メニューの高さを設定
     setExtSettingMenuHeight();
 
+
+    //initOthers();
+
     /*
     document.querySelector('.ext-setting-menu .item.info .hemotool .ver').addEventListener('click', function(){
 
@@ -1179,6 +1182,77 @@ function insertBtnToPlayer(parts_data) {
         }
     });
     */
+
+    //監視オプション
+    const optionsTools = {
+        childList: true,  //直接の子の変更を監視
+        characterData: false,  //文字の変化を監視
+        characterDataOldValue: false, //属性の変化前を記録
+        attributes: false,  //属性の変化を監視
+        subtree: false, //全ての子要素を監視
+    }
+    const commandToolDom = document.querySelector("[class^=___command-tool___]");
+  
+    if (commandToolDom) {
+        // コマンドのツールのDOMは、クリックされないと生成されないので、生成されることを監視する
+        const obs = new MutationObserver(function(mutationsList, observer){
+            
+            for (const mutation of mutationsList) {
+                if(mutation.addedNodes){
+                    // コマンドツールのDOMの「匿名で投稿する」のボタンのクリックイベントを監視する
+                    const commandPalleteDom = document.querySelector('[class^=___anonymous-comment-post-toggle-button-field___] button');
+                    if(commandPalleteDom){
+                        commandPalleteDom.addEventListener('click', function(){
+                            
+                            if(commandPalleteDom.getAttribute('data-toggle-state') === "false"){
+                                setCommentMode(false); // 生IDコメントモード 
+                            } else if(commandPalleteDom.getAttribute('data-toggle-state') === "true"){
+                                setCommentMode(true);  // 匿名コメントモード
+                            }
+                        });
+                    }
+                }
+            }
+        });
+        // 監視を開始
+        obs.observe(commandToolDom, optionsTools);
+    }
+
+    function setCommentMode(bIs184Mode) {
+        
+        const sendBtn = document.querySelector('[class^=___submit-button___]');
+        const textBox = document.querySelector('[class^=___comment-text-box___]');
+        if(bIs184Mode === true) {
+            // 184モード
+            textBox.setAttribute('placeholder', '匿名でコメントする');
+            sendBtn.textContent = '匿名コメント';
+            // デフォルトアイコンを設定
+            textBox.style.backgroundImage = 'url("https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/defaults/blank.jpg")';
+            console.log('匿名コメントモード');
+
+        } else if(bIs184Mode === false) {
+            // 生IDモード
+            textBox.setAttribute('placeholder', '生IDでコメントする');
+            sendBtn.textContent = 'IDコメント';
+            // 自分のユーザーアイコンを設定
+            const userIcon = document.querySelector('[class^=common-header-] img');
+            if(userIcon) {
+                textBox.style.backgroundImage = 'url("'+ userIcon.getAttribute('src')  +'")';    
+            }
+        
+            console.log('生IDコメントモード');
+        } 
+    }
+
+    // 起動時はニコ生のプレイヤーがローカルストレージに保存している現在のモード設定を読み込んでコメントモードを設定する
+    const bIs184Mode = localStorage.getItem('LeoPlayer_AnonymousCommentPostSettingStore_isAnonymousPost');
+    if(bIs184Mode === "true") {
+        setCommentMode(true);  // 匿名コメントモード
+    } else if(bIs184Mode === "false") {
+        setCommentMode(false); // 生IDコメントモード
+    } else {
+        // nullのときはローカルストレージの仕様変更があったときと判定して何もしない
+    }    
 }
 
 

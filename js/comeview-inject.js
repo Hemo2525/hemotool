@@ -407,9 +407,11 @@ function InsertUserName(fragment, newNo) {
 
     iconElement.setAttribute("class", "user_icon_by_extention");
     iconElement.setAttribute("style", "background-image: url(https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/" + iconPath + "/" + userId + ".jpg), url(https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/defaults/blank.jpg);");
-
+    hoverElement = document.createElement("a");
     hoverElement.setAttribute("class", "user_iconHover_by_extention");
     hoverElement.setAttribute("style", "background-image: url(https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/" + iconPath + "/" + userId + ".jpg), url(https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/defaults/blank.jpg);");
+    hoverElement.setAttribute("href", "https://www.nicovideo.jp/user/" + userId);
+    hoverElement.setAttribute("target", "_blank");
   }
 
   iconElement.appendChild(hoverElement);
@@ -716,13 +718,18 @@ function startWatchGridDOM() {
 
               let chatDom = document.querySelector("[class^=___comment-panel___] [class^=___body___]");
               const scrollHeight = chatDom.scrollHeight;
+              /*
               window.requestAnimationFrame(() => {
                 chatDom.scrollTop = scrollHeight;
               });
-              //chatDom.scrollTop = scrollHeight;
-            }); 
+              */
+              chatDom.scrollTop = scrollHeight;
+              e.stopPropagation();
+            });
+            
           }
 
+          
           
           // 色関係
           if(document.querySelector("[class^=___comment-context-menu___]") && !document.querySelector("[class^=___comment-context-menu___]:empty")) {
