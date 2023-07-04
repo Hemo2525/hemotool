@@ -250,6 +250,95 @@ function recStart() {
 
 async function pip() {
 
+/* COMMENT OUT 20230704
+
+  // Picture-in-Picture ウインドウに表示したい要素を取得
+  const player = document.querySelector("[class^=___player-display-screen___]");
+  const header = document.querySelector("[class^=___player-display-header___]");
+  const display = document.querySelector("[class^=___player-display___]");
+  display.classList.add("pipMode");
+
+  let commentBox = document.createElement("input");
+  commentBox.setAttribute('id', 'pipCommentBox');
+  commentBox.setAttribute('maxlength', 75);
+  commentBox.setAttribute('minlength', 0);
+  commentBox.setAttribute('type', 'text');
+  commentBox.setAttribute('style', 'width: calc(100% - 20px);margin: 10px;padding: 10px;');
+  commentBox.addEventListener("keyup", (e) => { 
+    console.log("keyup--------------")
+
+    if(e.keyCode !== 13) {
+        const nicoInputBox = document.querySelector("[class^=___comment-text-box___]");
+  
+        // inputイベントの作成（キー入力をシミュレーションする）
+        var event = new Event('input', { bubbles: true }); // inputイベントの作成
+        nicoInputBox.value = pipWindow.document.getElementById("pipCommentBox").value; // 値を設定
+        nicoInputBox.dispatchEvent(event); // inputイベントの送信
+    
+    
+    }
+  });
+  commentBox.addEventListener("keypress", (e) => { 
+    if (e.keyCode === 13 && pipWindow.document.getElementById("pipCommentBox").value.length > 0) {
+        document.querySelector("[class^=___submit-button___]").click();
+        pipWindow.document.getElementById("pipCommentBox").value = "";
+    }
+  });
+  // Picture-in-Picture ウインドウのインスタンスをrequestWindow()の返り値として取得
+  const pipWindow = await documentPictureInPicture.requestWindow({
+    width: player.clientWidth,
+    height: player.clientHeight + 80,
+    });
+
+// Copy style sheets over from the initial document
+  // so that the player looks the same.
+  const allCSS = [...document.styleSheets]
+    .map((styleSheet) => {
+      try {
+        return [...styleSheet.cssRules].map((r) => r.cssText).join("");
+      } catch (e) {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.type = styleSheet.type;
+        link.media = styleSheet.media;
+        link.href = styleSheet.href;
+        pipWindow.document.head.appendChild(link);
+      }
+    })
+    .filter(Boolean)
+    .join("\n");
+  const style = document.createElement("style");
+  style.textContent = allCSS;
+  pipWindow.document.head.appendChild(style);
+
+
+  const myStyle = document.createElement("style");
+  myStyle.textContent = "body { background-color: #000000;}";
+  pipWindow.document.head.appendChild(myStyle);
+
+  // Move the player to the Picture-in-Picture window.
+  pipWindow.document.body.append(header);
+  pipWindow.document.body.append(player);
+  pipWindow.document.body.append(commentBox);
+
+  // Move the player back when the Picture-in-Picture window closes.
+  pipWindow.addEventListener("unload", (event) => {
+    console.log(event);
+    const playerContainer = document.querySelector("[class^=___player-display___]");
+    const pipPlayer = event.target.querySelector("[class^=___player-display-screen___]");
+    const pipHeader = event.target.querySelector("[class^=___player-display-header___]");
+    playerContainer.prepend(pipPlayer);
+    playerContainer.prepend(pipHeader);
+    display.classList.remove("pipMode");
+  
+  });
+
+    return;
+*/
+
+
+
+
     let menu = document.querySelector('.ext-setting-menu .ext-pip');
 
     // 拡張機能の設定メニューを閉じる

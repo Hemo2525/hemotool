@@ -984,3 +984,11 @@ html[data-darkreader-scheme] [class^=___comment-context-menu___] .ext-menu label
     background-size: contain;
     background-repeat: no-repeat;
 }
+
+
+/* COMMENT OUT 20230704 */
+/*
+[class^=___player-display___].pipMode {
+    padding-top: 600px;
+}
+*/
