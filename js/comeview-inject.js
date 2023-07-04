@@ -778,9 +778,9 @@ function startWatchGridDOM() {
                 if(_styleList[currentUserID].textIndex !== -1) {
                   // 追加済みなら置換
                   style.sheet.deleteRule(_styleList[currentUserID].textIndex);
-                  style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span.user_name_by_extention.viewKotehan[data-extension-userid="'+ currentUserID + '"] + span {color: ' + this.value + ';}', _styleList[currentUserID].textIndex);
+                  style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span.user_name_by_extention.viewKotehan[data-extension-userid="'+ currentUserID + '"] + span {color: ' + this.value + '!important;}', _styleList[currentUserID].textIndex);
                 } else {
-                  let index = style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span.user_name_by_extention.viewKotehan[data-extension-userid="'+ currentUserID + '"] + span {color: ' + this.value + ';}', style.sheet.cssRules.length);
+                  let index = style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span.user_name_by_extention.viewKotehan[data-extension-userid="'+ currentUserID + '"] + span {color: ' + this.value + '!important;}', style.sheet.cssRules.length);
                   _styleList[currentUserID].textIndex = index;  
                 }
                 //console.log("index", style.sheet.cssRules);
@@ -843,10 +843,10 @@ function startWatchGridDOM() {
                 if(_styleList[currentUserID].bgIndex !== -1) {
                   // 追加済みなら置換
                   style.sheet.deleteRule(_styleList[currentUserID].bgIndex);
-                  style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span:has( > [data-extension-userid="'+ currentUserID + '"] ) { background-color: ' + this.value + ';}', _styleList[currentUserID].bgIndex);               
+                  style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span:has([data-extension-userid="'+ currentUserID + '"] ) { background-color: ' + this.value + ';}', _styleList[currentUserID].bgIndex);
                 } else {
                   // 未追加なら追加
-                  let index = style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span:has( > [data-extension-userid="'+ currentUserID + '"] ) { background-color: ' + this.value + ';}', style.sheet.cssRules.length);
+                  let index = style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span:has([data-extension-userid="'+ currentUserID + '"] ) { background-color: ' + this.value + ';}', style.sheet.cssRules.length);
                   _styleList[currentUserID].bgIndex = index;  
                 }
                 // console.log("index", style.sheet.cssRules);
@@ -898,7 +898,7 @@ function startWatchGridDOM() {
                 if(_styleList[currentUserID] && _styleList[currentUserID].bgIndex !== -1) {
                   // 追加済みなら置換
                   style.sheet.deleteRule(_styleList[currentUserID].bgIndex);
-                  style.sheet.insertRule('span:has( > [data-extension-userid="'+ currentUserID + '"] ) { background-color: #ffffff;}', _styleList[currentUserID].bgIndex);
+                  style.sheet.insertRule('span:has([data-extension-userid="'+ currentUserID + '"] ) { background-color: #ffffff;}', _styleList[currentUserID].bgIndex);
                   _styleList[currentUserID].bgColor = "#ffffff";
                 }
 
@@ -967,15 +967,16 @@ function startWatchGridDOM() {
     // 色関係
     document.querySelector("[class^=___comment-data-grid___]").addEventListener("mousedown", function(e) {
       
+      //console.log("★mousedown", e.button, e.target);
+
       if (e.button == 2 && e.target.parentNode) { // right click for mouse
-        let commentDom = e.target.parentNode.querySelector("[class^=___comment-number___]");
+        let commentDom = e.target.closest("[class^=___table-cell___]").querySelector("[class^=___comment-number___]");
         if(commentDom && commentDom.innerText) {
 
           currentUserID = _commentRawIdList[commentDom.innerText];
 
           console.log("★currentUserID" + currentUserID);
-          
-          
+                    
         }
       }
     });
@@ -1052,27 +1053,16 @@ window.addEventListener('load', function () {
           var val = this[key]; // this は obj
           //console.log(key, val);
           if(val.bgColor && val.bgColor !== -1) {
-            _styleList[key].bgIndex = style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span:has( > [data-extension-userid="'+ key + '"] ) { background-color: ' + val.bgColor + ';}', style.sheet.cssRules.length);        
+            _styleList[key].bgIndex = style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span:has([data-extension-userid="'+ key + '"] ) { background-color: ' + val.bgColor + ';}', style.sheet.cssRules.length);
           }
           if(val.textColor && val.textColor !== -1) {
-            _styleList[key].textIndex = style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span.user_name_by_extention.viewKotehan[data-extension-userid="'+ key + '"] + span {color: ' + val.textColor + ';}', style.sheet.cssRules.length);
+            _styleList[key].textIndex = style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span.user_name_by_extention.viewKotehan[data-extension-userid="'+ key + '"] + span {color: ' + val.textColor + '!important;}', style.sheet.cssRules.length);
           }
         }, _styleList);
 
         console.log("最終カラー情報");
         console.log(_styleList);
 
-        /*
-        let style = document.getElementById('extension_style');
-        _styleList.forEach(function(item, index) {
-
-          if(item.bgColor) {
-            let insertIndex = style.sheet.insertRule('[ext-master-comeview] span:has( > [data-extension-userid="'+ item + '"] ) { background-color: ' + item.bgColor + ';}', style.sheet.cssRules.length);
-            _styleList[currentUserID].bgIndex = insertIndex;              
-          }
-
-        });
-        */
 
       }
 
