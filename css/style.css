@@ -749,9 +749,12 @@ html[data-darkreader-scheme] [class^=___player-area___] {
 .noPremium_by_extention { 
     display: none;
     margin-right: 6px;
-    width: 14px;
     padding: 0;
-    height: 11px;
+    flex-basis: 11px;
+    max-width: 11px;
+    width: 100%;
+    height: 13px;
+    flex-shrink: 0;
     background-color: #e9e9e9;
     border-radius: 100%;
 }
@@ -843,7 +846,7 @@ html[data-darkreader-scheme] [ext-master-comeview] [class^=___table-row___]:nth-
 */
 [ext-master-comeview][ext-opt-icon] [class^=___table-cell___] {
     position: relative;
-    overflow: inherit;
+    overflow: inherit !important;
 }
 [ext-master-comeview][ext-opt-icon] [class^=___comment-context-menu___] {
     z-index: 1;
