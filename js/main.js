@@ -1205,9 +1205,9 @@ function insertBtnToPlayer(parts_data) {
                         commandPalleteDom.addEventListener('click', function(){
                             
                             if(commandPalleteDom.getAttribute('data-toggle-state') === "false"){
-                                setCommentMode(false); // 生IDコメントモード 
+                                setCommentMode(false); // 生IDコメントモード 　→　なふだOFF（匿名）コメント
                             } else if(commandPalleteDom.getAttribute('data-toggle-state') === "true"){
-                                setCommentMode(true);  // 匿名コメントモード
+                                setCommentMode(true);  // 匿名コメントモード　→　なふだON（生ID）コメント
                             }
                         });
                     }
@@ -1218,41 +1218,61 @@ function insertBtnToPlayer(parts_data) {
         obs.observe(commandToolDom, optionsTools);
     }
 
-    function setCommentMode(bIs184Mode) {
+    function setCommentMode(bIsRowIDMode) {
         
         const sendBtn = document.querySelector('[class^=___submit-button___]');
         const textBox = document.querySelector('[class^=___comment-text-box___]');
-        if(bIs184Mode === true) {
-            // 184モード
+        if(bIsRowIDMode === true) {
+            
+            // なふだON（生ID）コメント
+            textBox.style.backgroundImage = 'none';
+            sendBtn.textContent = 'なふだコメント';
+
+            /*
             textBox.setAttribute('placeholder', '匿名でコメントする');
             sendBtn.textContent = '匿名コメント';
+            
             // デフォルトアイコンを設定
             textBox.style.backgroundImage = 'url("https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/defaults/blank.jpg")';
-            console.log('匿名コメントモード');
-
-        } else if(bIs184Mode === false) {
-            // 生IDモード
-            textBox.setAttribute('placeholder', '生IDでコメントする');
-            sendBtn.textContent = 'IDコメント';
+            console.log('なふだON（生ID）コメント');
+            */
+        } else if(bIsRowIDMode === false) {
+            // なふだOFF（匿名）コメント
+            textBox.setAttribute('placeholder', '匿名でコメントする');
+            sendBtn.textContent = '匿名コメント';
             // 自分のユーザーアイコンを設定
+            textBox.style.backgroundImage = 'url("https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/defaults/blank.jpg")';
+
+            /*
             const userIcon = document.querySelector('[class^=common-header-] img');
             if(userIcon) {
                 textBox.style.backgroundImage = 'url("'+ userIcon.getAttribute('src')  +'")';    
             }
-        
-            console.log('生IDコメントモード');
+            */
+            console.log('なふだOFF（匿名）コメント');
         } 
     }
 
-    // 起動時はニコ生のプレイヤーがローカルストレージに保存している現在のモード設定を読み込んでコメントモードを設定する
-    const bIs184Mode = localStorage.getItem('LeoPlayer_AnonymousCommentPostSettingStore_isAnonymousPost');
-    if(bIs184Mode === "true") {
-        setCommentMode(true);  // 匿名コメントモード
-    } else if(bIs184Mode === "false") {
-        setCommentMode(false); // 生IDコメントモード
+    // 放送者とリスナーでコメントモードを切り替える
+    const broadvastTool = document.querySelector('[class^=___broadcaster-tool___]');
+    if(broadvastTool) {
+        // 放送者 -----------------------------
+        const textBox = document.querySelector('[class^=___comment-text-box___]');
+        const userIcon = document.querySelector('[class^=common-header-] img');
+        if(userIcon) {
+            textBox.style.backgroundImage = 'url("'+ userIcon.getAttribute('src')  +'")';    
+        }
     } else {
-        // nullのときはローカルストレージの仕様変更があったときと判定して何もしない
-    }    
+        // リスナー ---------------------------
+        // 起動時はニコ生のプレイヤーがローカルストレージに保存している現在のモード設定を読み込んでコメントモードを設定する
+        const nafudaInfo = localStorage.getItem('WatchPage_NafudaAudience_NafudaEnabledListKey');
+        if(nafudaInfo === "[]") {
+            setCommentMode(false); // 生IDコメントモード 　→　なふだOFF（匿名）コメント
+        } else {
+            setCommentMode(true);  // 匿名コメントモード　→　なふだON（生ID）コメント
+        }
+    }
+
 }
 
 
