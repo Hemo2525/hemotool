@@ -55,6 +55,9 @@ window.addEventListener('load', function () {
                     })
                     .then((data) => {
 
+                        // 自身が配信者かどうかのチェック
+                        ownerCheck();
+
                         // GUIを設定
                         insertBtnToPlayer(data);
 
@@ -97,6 +100,17 @@ window.addEventListener('load', function () {
 
 
 });
+
+
+function ownerCheck(){
+    const broadvastTool = document.querySelector('[class^=___broadcaster-tool___]');
+    if(broadvastTool) {
+        // 自分が配信者であることを示す属性を設定
+        document.querySelector('body').setAttribute("ext-attr-IamOwner", "true");
+    } else {
+        document.querySelector('body').setAttribute("ext-attr-IamOwner", "false");
+    }
+}
 
 function watchCommentParentDOM(mutationRecords, observer) {
 
@@ -1205,9 +1219,15 @@ function insertBtnToPlayer(parts_data) {
                         commandPalleteDom.addEventListener('click', function(){
                             
                             if(commandPalleteDom.getAttribute('data-toggle-state') === "false"){
+                                //console.log("匿名コメントモード B");
                                 setCommentMode(false); // 生IDコメントモード 　→　なふだOFF（匿名）コメント
                             } else if(commandPalleteDom.getAttribute('data-toggle-state') === "true"){
+                                //console.log("なふだコメントモード B");
                                 setCommentMode(true);  // 匿名コメントモード　→　なふだON（生ID）コメント
+                            } else {
+                                // ニコ生起動時は下記にくる
+                                //console.log("匿名コメントモード B");
+                                setCommentMode(false); // 生IDコメントモード 　→　なふだOFF（匿名）コメント
                             }
                         });
                     }
@@ -1249,7 +1269,7 @@ function insertBtnToPlayer(parts_data) {
                 textBox.style.backgroundImage = 'url("'+ userIcon.getAttribute('src')  +'")';    
             }
             */
-            console.log('なふだOFF（匿名）コメント');
+            //console.log('なふだOFF（匿名）コメント');
         } 
     }
 
@@ -1264,12 +1284,15 @@ function insertBtnToPlayer(parts_data) {
         }
     } else {
         // リスナー ---------------------------
-        // 起動時はニコ生のプレイヤーがローカルストレージに保存している現在のモード設定を読み込んでコメントモードを設定する
-        const nafudaInfo = localStorage.getItem('WatchPage_NafudaAudience_NafudaEnabledListKey');
-        if(nafudaInfo === "[]") {
-            setCommentMode(false); // 生IDコメントモード 　→　なふだOFF（匿名）コメント
-        } else {
+        const nafudaAttr = document.querySelector('[data-nafuda-comment-post-enabled]');
+        if(nafudaAttr) {
+            //console.log("なふだコメントモード A");
             setCommentMode(true);  // 匿名コメントモード　→　なふだON（生ID）コメント
+
+        } else {
+            //console.log("匿名コメントモード A");
+            setCommentMode(false); // 生IDコメントモード 　→　なふだOFF（匿名）コメント
+
         }
     }
 

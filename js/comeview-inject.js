@@ -75,6 +75,9 @@ var _kotehanList = [];      // KEY:ユーザーID,    VALUE:コテハン
 
 let _styleList = {};        // KEY:ユーザーID（184さんならハッシュ値、生IDさんなら生IDが入る）, VALUE: スタイルのindex番号(insertRule()した戻り値)
 
+let _bIsIamOwner = false;           // 自分が配信者かどうか
+let _bIsIamOwnerCheckOnce = false;  // 自分が配信者かどうか確認したかどうか
+
 // WebSocketの受信イベントハンドラ
 function recvEvent(event) {
 
@@ -381,7 +384,7 @@ function recvEvent(event) {
 
 }
 
-function InsertUserName(fragment, newNo) {
+function InsertUserName(fragment, newNo, bHide) {
 
   // 追加するアイコンのDOMを作成
   var iconElement = document.createElement("div");
@@ -397,6 +400,7 @@ function InsertUserName(fragment, newNo) {
 
   } else {
     // 生IDさんの処理----------------------------
+    
     let userId = _commentRawIdList[newNo];
     let iconPath = 0;
     if(userId.length > 4) {
@@ -416,6 +420,11 @@ function InsertUserName(fragment, newNo) {
 
   iconElement.appendChild(hoverElement);
 
+  // 自身が配信者なら非表示にする(DOMは残しておかないとカラー機能が使えなくなる)
+  if(bHide) {
+    iconElement.setAttribute("style", "display:none;");
+  } 
+
   // 作成したDOMの挿入
   fragment.appendChild(iconElement);
 
@@ -431,6 +440,11 @@ function InsertUserName(fragment, newNo) {
   }
   newElement.setAttribute("title", _commentListFull[newNo]);
 
+  // 自身が配信者なら非表示にする(DOMは残しておかないとカラー機能が使えなくなる)
+  if(bHide) {
+    newElement.setAttribute("style", "display:none;");
+  }
+  
   // 作成したDOMの挿入
   fragment.appendChild(newElement);
 
@@ -489,33 +503,52 @@ function InsertUserName(fragment, newNo) {
     kotehanElement.appendChild(kotehanContent);  
     kotehanElement.setAttribute("title", fullUserName);
     kotehanElement.setAttribute("data-extension-userid", _commentRawIdList[newNo]);
+
   }
 
+  // 自身が配信者なら非表示にする(DOMは残しておかないとカラー機能が使えなくなる)
+  if(bHide) {
+    kotehanElement.setAttribute("style", "display:none;");
+  }
 
   // 作成したDOMの挿入
   fragment.appendChild(kotehanElement);
+
+
   
   return fragment;
 }
 
 
-function InsertPremium(fragment, newNo) {
+function InsertPremium(fragment, newNo, bIsOwner) {
 
   // 追加するDOMを作成
   var newElement = document.createElement("span");
   var newContent;
 
-  if (_premiumList[newNo] === true) {
-    newContent = document.createTextNode("P");
+  if(bIsOwner) {
+    // 配信者のコメント ------------------
+    // 配信者はプレ垢かどうか関わらずpremium==3になってるので配信者は(主)と表示
+    newContent = document.createTextNode("主");
     newElement.appendChild(newContent);
-    newElement.setAttribute("class", "premium_by_extention");
-    newElement.setAttribute("title", "プレミアムアカウント");   
+    newElement.setAttribute("class", "owner_by_extention");
+    newElement.setAttribute("title", "配信者");
+
   } else {
-    newContent = document.createTextNode("");
-    newElement.appendChild(newContent);
-    newElement.setAttribute("class", "noPremium_by_extention");
-    newElement.setAttribute("title", "一般アカウント");
+    // リスナーのコメント ------------------
+    if (_premiumList[newNo] === true) {
+      newContent = document.createTextNode("P");
+      newElement.appendChild(newContent);
+      newElement.setAttribute("class", "premium_by_extention");
+      newElement.setAttribute("title", "プレミアムアカウント");   
+    } else {
+      newContent = document.createTextNode("");
+      newElement.appendChild(newContent);
+      newElement.setAttribute("class", "noPremium_by_extention");
+      newElement.setAttribute("title", "一般アカウント");
+    }  
   }
+
 
 
 
@@ -599,29 +632,115 @@ function editComment(currentNode) {
     //var newNo = currentNode.querySelector('.___comment-number___i8gp1').outerText;
     var newNo = currentNode.querySelector("[class^=___comment-number___]").outerText;
 
-    if (newNo.length > 0 && !currentNode.querySelector(".user_name_by_extention")) {
+    // 既にeditCommentしたコメントはスキップ
+    if (newNo.length > 0 && !currentNode.getAttribute("data-extension-edited")) {
 
-      // フラグメント作成
-      let fragment = document.createDocumentFragment();
+      // 自分のコメント かつ なふだコメント かどうかを判定
+      if(!currentNode.querySelector("[class^=___user-thumbnail-image___]"))
+      {
+        //----------------------------------------------------------------
+        //　匿名コメントの場合
+        //----------------------------------------------------------------
 
-      // プレ垢のDOMを挿入
-      fragment = InsertPremium(fragment, newNo);
-      
 
-      // 名前のDOMを挿入
-      if (_commentList[newNo]) {
+        // フラグメント作成
+        let fragment = document.createDocumentFragment();
 
-        fragment = InsertUserName(fragment, newNo);
+
+        // 初回だけ自身が配信者かどうか判定
+        if(_bIsIamOwnerCheckOnce === false) {
+          _bIsIamOwnerCheckOnce  = true;
+          const broadvastTool = document.querySelector('[class^=___broadcaster-tool___]');
+          if(broadvastTool) {
+            console.log("自分が配信者ですです");
+            _bIsIamOwner = true; // 配信者
+          }
+        }
+
+        // 自分が配信者であればDIVでWrapする
+        if(_bIsIamOwner) {
+          console.log("自分が配信者です");
+          let divElement = document.createElement("div");
+          divElement.setAttribute("class", "wrapComment_by_extention");
+          fragment.appendChild(divElement);
+          fragment = fragment.querySelector('.wrapComment_by_extention'); // wrapComment_by_extentionの中にDOMを追加するようにする
+        } else {
+          console.log("自分が配信者ではありません");
+        }
+
+
+        // プレ垢のDOMを挿入
+        let bIsOwner = false;
+        
+        if(currentNode.getAttribute("data-comment-type") === "operator") {
+          console.log("配信者のコメントです");
+          bIsOwner = true;
+        } else {
+          console.log("リスナーのコメントです");
+        }
+        fragment = InsertPremium(fragment, newNo, bIsOwner);
+        
+
+        // 名前のDOMを挿入
+        if (_commentList[newNo]) {
+          fragment = InsertUserName(fragment, newNo, false);
+        } else {
+          //console.log(`${newNo} に対応する名前がありません。取得失敗さんにします。`);
+          _commentList[newNo] = "取得失敗";
+          fragment = InsertUserName(fragment, newNo, false);
+        }
+
+
+        // フラグメントを実DOMに挿入
+        let comment = currentNode.querySelector("[class^=___comment-text___]"); // コメントテキストのDOM
+        comment.parentNode.insertBefore(fragment, comment);
+
+        // editCommentしたコメントの証拠を残しておく（次回やらなくて済むように）
+        currentNode.setAttribute("data-extension-edited", "true");
+        
 
       } else {
-        //console.log(`${newNo} に対応する名前がありません。取得失敗さんにします。`);
-        _commentList[newNo] = "取得失敗";
-        fragment = InsertUserName(fragment, newNo);
+
+        //----------------------------------------------------------------
+        //　なふだコメントの場合
+        //----------------------------------------------------------------
+
+        // フラグメント作成
+        let fragment = document.createDocumentFragment();
+
+        // プレ垢のDOMを挿入
+        let bIsOwner = false;
+        
+        if(currentNode.getAttribute("data-comment-type") === "operator") {
+          console.log("配信者のコメントです");
+          bIsOwner = true;
+        } else {
+          console.log("リスナーのコメントです");
+        }
+        fragment = InsertPremium(fragment, newNo, bIsOwner);
+
+
+        // 名前のDOMを挿入
+        if (_commentList[newNo]) {
+          fragment = InsertUserName(fragment, newNo , true);
+        } else {
+          //console.log(`${newNo} に対応する名前がありません。取得失敗さんにします。`);
+          _commentList[newNo] = "取得失敗";
+          fragment = InsertUserName(fragment, newNo, true);
+        }
+
+        // フラグメントを実DOMに挿入
+        let comment = currentNode.querySelector("[class^=___user-thumbnail-image___]"); // なふだ機能のアイコンと名前の親DOM
+        comment.parentNode.insertBefore(fragment, comment);
+
+        // editCommentしたコメントの証拠を残しておく（次回やらなくて済むように）
+        currentNode.setAttribute("data-extension-edited", "true");
+
       }
 
-      // フラグメントを実DOMに挿入
-      let comment = currentNode.querySelector("[class^=___comment-text___]"); // コメントテキストのDOM
-      comment.parentNode.insertBefore(fragment, comment);
+
+
+    
     }
   }
 
@@ -778,9 +897,11 @@ function startWatchGridDOM() {
                 if(_styleList[currentUserID].textIndex !== -1) {
                   // 追加済みなら置換
                   style.sheet.deleteRule(_styleList[currentUserID].textIndex);
-                  style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span.user_name_by_extention.viewKotehan[data-extension-userid="'+ currentUserID + '"] + span {color: ' + this.value + '!important;}', _styleList[currentUserID].textIndex);
+                  //style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span.user_name_by_extention.viewKotehan[data-extension-userid="'+ currentUserID + '"] + span {color: ' + this.value + '!important;}', _styleList[currentUserID].textIndex);
+                  style.sheet.insertRule('[ext-master-comeview][ext-opt-color] [class^=___content-area___]:has([data-extension-userid="'+ currentUserID + '"]) [class^=___comment-text___] {color: ' + this.value + '!important;}', _styleList[currentUserID].textIndex);
                 } else {
-                  let index = style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span.user_name_by_extention.viewKotehan[data-extension-userid="'+ currentUserID + '"] + span {color: ' + this.value + '!important;}', style.sheet.cssRules.length);
+                  //let index = style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span.user_name_by_extention.viewKotehan[data-extension-userid="'+ currentUserID + '"] + span {color: ' + this.value + '!important;}', style.sheet.cssRules.length);
+                  let index = style.sheet.insertRule('[ext-master-comeview][ext-opt-color] [class^=___content-area___]:has([data-extension-userid="'+ currentUserID + '"]) [class^=___comment-text___] {color: ' + this.value + '!important;}', style.sheet.cssRules.length);
                   _styleList[currentUserID].textIndex = index;  
                 }
                 //console.log("index", style.sheet.cssRules);
@@ -1053,10 +1174,13 @@ window.addEventListener('load', function () {
           var val = this[key]; // this は obj
           //console.log(key, val);
           if(val.bgColor && val.bgColor !== -1) {
+            // ▼背景カラー
             _styleList[key].bgIndex = style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span:has([data-extension-userid="'+ key + '"] ) { background-color: ' + val.bgColor + ';}', style.sheet.cssRules.length);
           }
           if(val.textColor && val.textColor !== -1) {
-            _styleList[key].textIndex = style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span.user_name_by_extention.viewKotehan[data-extension-userid="'+ key + '"] + span {color: ' + val.textColor + '!important;}', style.sheet.cssRules.length);
+            // ▼テキストカラー
+            //_styleList[key].textIndex = style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span.user_name_by_extention.viewKotehan[data-extension-userid="'+ key + '"] + span {color: ' + val.textColor + '!important;}', style.sheet.cssRules.length);
+            _styleList[key].textIndex = style.sheet.insertRule('[ext-master-comeview][ext-opt-color] [class^=___content-area___]:has([data-extension-userid="' + key + '"]) [class^=___comment-text___] {color: ' + val.textColor + '!important;}', style.sheet.cssRules.length);
           }
         }, _styleList);
 
@@ -1065,6 +1189,9 @@ window.addEventListener('load', function () {
 
 
       }
+
+
+
 
 
     }

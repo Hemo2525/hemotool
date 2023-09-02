@@ -649,6 +649,29 @@ div#ext_dom_message {
     display: inline-block;
 }
 
+/* なふだ機能による名前  */
+[class^=___contents-area___][ext-master-comeview][ext-opt-name] [class^=___user-name-button___] {
+    color: #b70000 !important;
+    border: 1px solid #b70000 !important;
+    padding: 0px 6px 0px 8px !important;
+    border-radius: 10px !important;
+    font-size: 12px !important;
+    background-color: white !important;
+
+    height: inherit !important;
+    margin-right: 1px !important;
+    margin-left: 9px !important;
+}
+
+[class^=___contents-area___][ext-master-comeview] .wrapComment_by_extention {
+    align-items: center;
+    display: flex;
+    font-size: 10px;
+    line-height: 15px;
+    width: var(--local-user-summary-area-width);
+}
+
+
 html[data-darkreader-scheme] .user_name_by_extention {
     background-color: inherit;
     color: #e54b4b;
@@ -667,6 +690,26 @@ html[data-darkreader-scheme] .user_name_by_extention.kotehan {
 html[data-darkreader-scheme] [class^=___player-area___] {
     background-image: none !important;
 }
+
+
+/* 自身が配信者の場合のコメント欄*/
+[ext-attr-IamOwner="true"] [class^=___contents-area___][ext-master-comeview] [class^=___comment-text___] {
+    padding: 0px !important;
+}
+[ext-attr-IamOwner="true"] [class^=___contents-area___][ext-master-comeview][ext-opt-name] [class^=___user-name-button___] {
+    border: none !important;
+    padding: 0px !important;
+    margin-left: 5px !important;
+    background-color: transparent !important;    
+}
+[ext-attr-IamOwner="true"] [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user_name_by_extention {
+    border: none !important;
+    padding: 0px !important;
+    margin-left: 0 !important;
+    background-color: transparent !important;
+}
+
+
 /* 
 公式生放送ではコメント番号がDOMにないのでへもツール独自のユーザー名を表示できない。
 公式生放送の場合は標準でユーザー名がDOMに入っているユーザー名を使う方式にするため、display:block;で表示させる。
@@ -761,6 +804,23 @@ html[data-darkreader-scheme] [class^=___player-area___] {
 [class^=___contents-area___][ext-master-comeview][ext-opt-premium] .noPremium_by_extention {
     display: inline-block;
 }
+
+
+.owner_by_extention { 
+    display: none;
+    margin-right: 6px;
+    color: #ffffff;
+    background-color: rgb(129, 1, 1);
+    border-radius: 25px;
+    padding: 0px 2px;
+    font-size: 9px !important;
+    width: 10px;
+    margin-left: -2px;
+}
+[class^=___contents-area___][ext-master-comeview][ext-opt-premium] .owner_by_extention {
+    display: inline-block;
+}
+
 
 /* コメント折り返しここから ------------------------------------ */
 
