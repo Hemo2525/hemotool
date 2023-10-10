@@ -591,6 +591,7 @@ function watchCommentDOM(mutationsList, observer) {
   }
     
   for (const mutation of mutationsList) {
+    
 
     if(mutation.type === "childList"){
 
@@ -601,6 +602,7 @@ function watchCommentDOM(mutationsList, observer) {
           var currentNode = mutation.target.childNodes[i];
           editComment(currentNode);
         }
+        //console.log("最下部にスクロール2");
         chatDom.scrollTop = scrollTop;
       }
 
@@ -612,18 +614,16 @@ function watchCommentDOM(mutationsList, observer) {
 
       });
 
-
-      
-      if(_bIsMostBottom === false || _bWhieelUp === true){
-
-      } else {
-        // 最下部にスクロール
-        chatDom.scrollTop = scrollHeight;
-      }
-
     }
-
   }
+
+
+  if (!(_bIsMostBottom === false || _bWhieelUp === true)) {
+    // 最下部にスクロール
+    //console.log("最下部にスクロール");
+    chatDom.scrollTop = scrollHeight;
+  }
+
 }
 
 function editComment(currentNode) {
