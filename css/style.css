@@ -671,6 +671,11 @@ div#ext_dom_message {
     width: var(--local-user-summary-area-width);
 }
 
+/* なふだ機能で自分の名前のPタグが縦に伸びてしまう現象を解消 */
+[class^=___contents-area___][ext-master-comeview] .content-area>.user-summary-area {
+    line-height: inherit !important;
+}
+
 
 html[data-darkreader-scheme] .user_name_by_extention {
     background-color: inherit;
@@ -908,7 +913,7 @@ html[data-darkreader-scheme] [ext-master-comeview] [class^=___table-row___]:nth-
     position: relative;
     overflow: inherit !important;
 }
-[ext-master-comeview][ext-opt-icon] [class^=___comment-context-menu___] {
+[ext-master-comeview][ext-opt-icon] [class^=___program-comment-context-menu___] {
     z-index: 1;
 }
 [ext-master-comeview][ext-opt-icon] .user_icon_by_extention {
@@ -980,10 +985,10 @@ body[ext-master-comeview][ext-opt-wide] [data-layout-mode="full"] #split_by_exte
 /*
 色選択
 */
-[class^=___comment-context-menu___] .ext-menu {
+[class^=___program-comment-context-menu___] .ext-menu {
     display: none;
 }
-[ext-master-comeview][ext-opt-color] [class^=___comment-context-menu___] .ext-menu {
+[ext-master-comeview][ext-opt-color] [class^=___program-comment-context-menu___] .ext-menu {
     display: block;
 
     list-style: none;
@@ -994,7 +999,7 @@ body[ext-master-comeview][ext-opt-wide] [data-layout-mode="full"] #split_by_exte
     overflow: hidden;
 }
 
-[class^=___comment-context-menu___] .ext-menu label {
+[class^=___program-comment-context-menu___] .ext-menu label {
     background-color: #fff;
     border-style: none;
     color: #000;
@@ -1005,16 +1010,16 @@ body[ext-master-comeview][ext-opt-wide] [data-layout-mode="full"] #split_by_exte
     width: 100%;
     user-select: none;
 }
-[class^=___comment-context-menu___] .ext-menu label:hover {
+[class^=___program-comment-context-menu___] .ext-menu label:hover {
     background-color: #e5e5e5;
     cursor: pointer;
 }
 
-html[data-darkreader-scheme] [class^=___comment-context-menu___] .ext-menu label {
+html[data-darkreader-scheme] [class^=___program-comment-context-menu___] .ext-menu label {
     background-color: inherit;
     color: inherit;
 }
-[class^=___comment-context-menu___] .ext-menu input {
+[class^=___program-comment-context-menu___] .ext-menu input {
     margin-left: 10px;
     width: 40px;
     height: 20px;

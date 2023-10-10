@@ -652,20 +652,20 @@ function editComment(currentNode) {
           _bIsIamOwnerCheckOnce  = true;
           const broadvastTool = document.querySelector('[class^=___broadcaster-tool___]');
           if(broadvastTool) {
-            console.log("自分が配信者ですです");
+            //console.log("自分が配信者ですです");
             _bIsIamOwner = true; // 配信者
           }
         }
 
         // 自分が配信者であればDIVでWrapする
         if(_bIsIamOwner) {
-          console.log("自分が配信者です");
+          //console.log("自分が配信者です");
           let divElement = document.createElement("div");
           divElement.setAttribute("class", "wrapComment_by_extention");
           fragment.appendChild(divElement);
           fragment = fragment.querySelector('.wrapComment_by_extention'); // wrapComment_by_extentionの中にDOMを追加するようにする
         } else {
-          console.log("自分が配信者ではありません");
+          //console.log("自分が配信者ではありません");
         }
 
 
@@ -673,10 +673,10 @@ function editComment(currentNode) {
         let bIsOwner = false;
         
         if(currentNode.getAttribute("data-comment-type") === "operator") {
-          console.log("配信者のコメントです");
+          //console.log("配信者のコメントです");
           bIsOwner = true;
         } else {
-          console.log("リスナーのコメントです");
+          //console.log("リスナーのコメントです");
         }
         fragment = InsertPremium(fragment, newNo, bIsOwner);
         
@@ -712,10 +712,10 @@ function editComment(currentNode) {
         let bIsOwner = false;
         
         if(currentNode.getAttribute("data-comment-type") === "operator") {
-          console.log("配信者のコメントです");
+          //console.log("配信者のコメントです");
           bIsOwner = true;
         } else {
-          console.log("リスナーのコメントです");
+          //console.log("リスナーのコメントです");
         }
         fragment = InsertPremium(fragment, newNo, bIsOwner);
 
@@ -851,10 +851,10 @@ function startWatchGridDOM() {
           
           
           // 色関係
-          if(document.querySelector("[class^=___comment-context-menu___]") && !document.querySelector("[class^=___comment-context-menu___]:empty")) {
+          if(document.querySelector("[class^=___program-comment-context-menu___]") && !document.querySelector("[class^=___program-comment-context-menu___]:empty")) {
             // 上記、:empty は、ニコ生のDOMが「へもさんが100ptニコニコ広告しました」などのシステムメッセージを右クリックした場合、コンテキストメニューのDOMが表示されていないのにDOM上は存在している状態になってしまう仕様があり、それを回避するためのもの。
 
-            if( !document.querySelector("[class^=___comment-context-menu___] .ext-menu") && currentUserID !== 0 ) {
+            if( !document.querySelector("[class^=___program-comment-context-menu___] .ext-menu") && currentUserID !== 0 ) {
 
               let style = document.getElementById('extension_style');
               let _tempCurrentUserID;
@@ -1024,7 +1024,7 @@ function startWatchGridDOM() {
                 }
 
                 // コンテキストメニューを閉じる
-                document.querySelector('[class^=___comment-context-menu___]').style.display = "none"
+                document.querySelector('[class^=___program-comment-context-menu___]').style.display = "none"
 
 
                 // カラー情報を保存するDOMに保存
