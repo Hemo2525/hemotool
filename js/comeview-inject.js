@@ -403,7 +403,7 @@ function InsertUserName(fragment, newNo, bHide) {
     
     let userId = _commentRawIdList[newNo];
     let iconPath = 0;
-    if(userId.length > 4) {
+    if(userId && userId.length > 4) {
       iconPath = userId.substring(0, userId.length - 4);
     } else {
       iconPath = "0";
