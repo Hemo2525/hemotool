@@ -154,6 +154,9 @@ function onExitPip() {
 
 let _recorder;
 let _videoBlob;
+let _bangumiUserName;
+let _bangumiTitle;
+let _startRecTime;
 
 function getSeekableBlob(inputBlob, callback) {
     // EBML.js copyrights goes to: https://github.com/legokichi/ts-ebml
@@ -187,6 +190,13 @@ function recStop() {
 
 function recStart() {
     _canvasUpdate();
+
+
+    // 配信者名、番組名、録画開始時間を取得
+    _bangumiUserName = escapeFileName(document.querySelector('[class^=___user-name-area___] .name').textContent);
+    _bangumiTitle = escapeFileName(document.querySelector('h1[class^=___program-title___] > span').textContent);
+    _startRecTime = getCurrentDateTimeFormatted();
+  
 
     var video = document.querySelector('div[data-layer-name="videoLayer"] video');
     video.setAttribute("crossorigin", "anonymous");
@@ -233,7 +243,8 @@ function recStart() {
 
         getSeekableBlob(_videoBlob, function(newBlob){
             let blobUrl = window.URL.createObjectURL(newBlob);
-            anchor.download = 'rec.' + getRecKaku();
+            //anchor.download = 'rec.' + getRecKaku();
+            anchor.download = `[${_bangumiUserName}]_${_startRecTime}_${_bangumiTitle}.` + getRecKaku();
             anchor.href = blobUrl;
             anchor.style.display = 'block';
             anchor.click();    
@@ -246,6 +257,33 @@ function recStart() {
 
 }
 
+function getCurrentDateTimeFormatted() {
+    const now = new Date();
+    
+    // 年、月、日、時、分、秒を取得
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0'); // 月は0から始まるため+1が必要
+    const day = now.getDate().toString().padStart(2, '0');
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+    
+    // フォーマットに合わせて文字列を組み立てる
+    const formattedDateTime = `${year}年${month}月${day}日_${hours}時${minutes}分${seconds}秒`;
+    
+    return formattedDateTime;
+  }
+  
+  function escapeFileName(fileName) {
+    // Windowsのファイル名に使用できない文字を置き換えるマップを作成
+    const invalidChars = /[\/:*?"<>|]/g;
+    const replacementChar = '_'; // 置き換える文字
+  
+    // 不適切な文字を置き換えてエスケープ
+    const escapedFileName = fileName.replace(invalidChars, replacementChar);
+    
+    return escapedFileName;
+  }
 
 
 async function pip() {
