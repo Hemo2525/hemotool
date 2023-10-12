@@ -193,8 +193,21 @@ function recStart() {
 
 
     // 配信者名、番組名、録画開始時間を取得
-    _bangumiUserName = escapeFileName(document.querySelector('[class^=___user-name-area___] .name').textContent);
-    _bangumiTitle = escapeFileName(document.querySelector('h1[class^=___program-title___] > span').textContent);
+    _bangumiUserName = "";
+    _bangumiTitle = "";
+    let bangumiUserDom = document.querySelector('[class^=___user-name-area___] .name');
+    if(bangumiUserDom) {
+        _bangumiUserName = escapeFileName(bangumiUserDom.textContent);
+    } else {
+        let bangumiChannelDom = document.querySelector('[class^=___channel-name-anchor___]');
+        if(bangumiChannelDom) {
+            _bangumiUserName = escapeFileName(bangumiChannelDom.textContent);
+        }
+    }
+    let bangumiTitleDom = document.querySelector('h1[class^=___program-title___] > span');
+    if(bangumiTitleDom) {
+        _bangumiTitle = escapeFileName(bangumiTitleDom.textContent);
+    }
     _startRecTime = getCurrentDateTimeFormatted();
   
 
