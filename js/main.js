@@ -1,10 +1,13 @@
 /*
 
-利用させていただいているMITライセンスの著作権表示
+▼▼▼▼ 利用させていただいているMITライセンスの著作権表示 ▼▼▼▼
+
+
 
 < ts-ebml >---------------------------------------------------------------------
 
 Copyright (c) 2017 legokichi
+
 
 
 < node-ebml >---------------------------------------------------------------------
@@ -26,6 +29,34 @@ FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
+
+
+
+< fix-webm-duration >-------------------------------------------------------------
+
+The MIT license
+
+Copyright (c) 2018 Yury Sitnikov
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+
 */
 
 let _obsLogBox;
@@ -392,13 +423,19 @@ function insertBtnToPlayer(parts_data) {
 
     // 録画開始、録画停止
     document.querySelector('#ext_shortcut .item.rec').addEventListener('click', function(){
-        if(document.querySelector('#ext_shortcut .item.rec').getAttribute("recording")) {
-            // ON → OFF
-            recStop();
+        let status = document.querySelector('#ext_shortcut .item.rec').getAttribute("recording");
+        if(status) {
+
+            if(status === "ON") {
+                // ON → OFF
+                recStop();
+            }
+            /*
             document.querySelector('#ext_shortcut .item.rec').removeAttribute("recording");
             document.querySelector('#ext_shortcut .item.rec .recBtn').textContent = "録画開始";
             document.querySelector('#ext_shortcut .item.rec .status').removeAttribute("rec");
             document.querySelector('#ext_shortcut .item.rec').setAttribute("aria-label", "録画を開始します");
+            */
 
         } else {
             // OFF → ON
@@ -407,6 +444,11 @@ function insertBtnToPlayer(parts_data) {
             document.querySelector('#ext_shortcut .item.rec .recBtn').textContent = "録画停止";
             document.querySelector('#ext_shortcut .item.rec .status').setAttribute("rec", "on");
             document.querySelector('#ext_shortcut .item.rec').setAttribute("aria-label", "録画を停止します");
+
+            // オプション操作を無効化しておく
+            document.querySelector('.option.fps select').setAttribute("disabled", 'on');
+            document.querySelector('.option.size select').setAttribute("disabled", 'on');
+            document.querySelector('.option.kaku select').setAttribute("disabled", 'on');
         }
     });
 

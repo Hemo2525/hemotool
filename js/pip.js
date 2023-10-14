@@ -157,33 +157,22 @@ let _videoBlob;
 let _bangumiUserName;
 let _bangumiTitle;
 let _startRecTime;
+var _mediaParts;
+var _recStartTime;
+let _recTimerId;
 
-function getSeekableBlob(inputBlob, callback) {
-    // EBML.js copyrights goes to: https://github.com/legokichi/ts-ebml
-    if (typeof EBML === 'undefined') {
-        throw new Error('Please link: https://cdn.webrtc-experiment.com/EBML.js');
-    }
-    var reader = new EBML.Reader();
-    var decoder = new EBML.Decoder();
-    var tools = EBML.tools;
-    var fileReader = new FileReader();
-    fileReader.onload = function(e) {
-        var ebmlElms = decoder.decode(this.result);
-        ebmlElms.forEach(function(element) {
-            reader.read(element);
-        });
-        reader.stop();
-        var refinedMetadataBuf = tools.makeMetadataSeekable(reader.metadatas, reader.duration, reader.cues);
-        var body = this.result.slice(reader.metadataSize);
-        var newBlob = new Blob([refinedMetadataBuf, body], {
-            type: 'video/webm'
-        });
-        callback(newBlob);
-    };
-    fileReader.readAsArrayBuffer(inputBlob);
-}
+
+
+
+
+
+
+
+
+
 
 function recStop() {
+    clearInterval(_recTimerId);
     _recorder.stop();
     cancelAnimationFrame(_callbackId);
 }
@@ -191,6 +180,7 @@ function recStop() {
 function recStart() {
     _canvasUpdate();
 
+    _mediaParts = [];
 
     // 配信者名、番組名、録画開始時間を取得
     _bangumiUserName = "";
@@ -239,36 +229,106 @@ function recStart() {
     });
 
 
-    _recorder = new MediaRecorder(videoOutputStream, {mimeType:'video/webm;codecs=vp9'});
-    //_recorder = new MediaRecorder(videoOutputStream, { mimeType: 'video/webm;codecs=h264,opus' });
+    // VP9 Codec
+    //_recorder = new MediaRecorder(videoOutputStream, {mimeType:'video/webm;codecs=vp9'});
 
-
-
-    //ダウンロード用のリンクを準備
-    var anchor = document.getElementById('downloadlink');
+    // H264 Codec
+    _recorder = new MediaRecorder(videoOutputStream, {mimeType:'video/webm\;codecs=h264'});
+    
 
     _recorder.ondataavailable = function(e) {
-        _videoBlob = new Blob([e.data], { type: e.data.type });
+
+        var data = e.data;
+        if (data && data.size > 0) {
+            _mediaParts.push(data);
+        }
+
     }
 
     //録画終了時に動画ファイルのダウンロードリンクを生成する処理
     _recorder.onstop = function (){
 
-        getSeekableBlob(_videoBlob, function(newBlob){
-            let blobUrl = window.URL.createObjectURL(newBlob);
-            //anchor.download = 'rec.' + getRecKaku();
-            anchor.download = `[${_bangumiUserName}]_${_startRecTime}_${_bangumiTitle}.` + getRecKaku();
-            anchor.href = blobUrl;
-            anchor.style.display = 'block';
-            anchor.click();    
-        })
+        var duration = Date.now() - _recStartTime;
+        var buggyBlob = new Blob(_mediaParts, { type: 'video/webm' });
 
+        document.querySelector('#ext_shortcut .item.rec').setAttribute("recording", "WAIT");
+        document.querySelector('#ext_shortcut .item.rec .recBtn').textContent = "処理中..";
+        document.querySelector('#ext_shortcut .item.rec .status').removeAttribute("rec");
+        document.querySelector('#ext_shortcut .item.rec').setAttribute("aria-label", "お待ち下さい...");
+
+        // 動画ファイルのシークを可能にする処理
+        ysFixWebmDuration(buggyBlob, duration, function(fixedBlob) {
+            
+            // 動画ファイルのダウンロード
+            let blobUrl = window.URL.createObjectURL(fixedBlob);
+            downloadURI(blobUrl, `[${_bangumiUserName}]_${_startRecTime}_${_bangumiTitle}.` + getRecKaku());
+
+        });
     }
+
+    _recStartTime = Date.now();
 
     //録画開始
     _recorder.start();
 
+    // タイマー開始        
+    _recTimerId = setInterval(function(){
+        const currentTime = Date.now();
+        const elapsedTimeInSeconds = Math.floor((currentTime - _recStartTime) / 1000); // 経過時間を秒単位で取得
+        const h = String(Math.floor(elapsedTimeInSeconds / 3600)).padStart(2, "0");
+        const m = String(Math.floor((elapsedTimeInSeconds % 3600) / 60)).padStart(2, "0");
+        const s = String(elapsedTimeInSeconds % 60).padStart(2, "0");
+        document.querySelector('#ext_shortcut .item.rec').setAttribute('aria-label', `${h}:${m}:${s}`);
+    }, 1000);
 }
+
+
+function downloadURI(uri, name) {
+    // <------------------------------------------       Do something (show loading)
+        fetch(uri)
+            .then(resp => resp.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.getElementById('downloadlink');
+                a.style.display = 'none';
+                a.href = url;
+                // the filename you want
+                a.download = name;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                // <----------------------------------------  Detect here (hide loading)
+
+                //alert('File detected');
+
+                document.querySelector('#ext_shortcut .item.rec').removeAttribute("recording");
+                document.querySelector('#ext_shortcut .item.rec .recBtn').textContent = "録画開始";
+                document.querySelector('#ext_shortcut .item.rec .status').removeAttribute("rec");
+                document.querySelector('#ext_shortcut .item.rec').setAttribute("aria-label", "録画を開始します");  
+
+                // オプション操作を有効化
+                document.querySelector('.option.fps select').removeAttribute("disabled");
+                document.querySelector('.option.size select').removeAttribute("disabled");
+                document.querySelector('.option.kaku select').removeAttribute("disabled");
+
+
+                //a.remove(); // remove element
+            })
+            .catch((error ) => {
+                alert('エラーが発生しました : ' + error);
+                console.error(error);
+                document.querySelector('#ext_shortcut .item.rec').removeAttribute("recording");
+                document.querySelector('#ext_shortcut .item.rec .recBtn').textContent = "録画開始";
+                document.querySelector('#ext_shortcut .item.rec .status').removeAttribute("rec");
+                document.querySelector('#ext_shortcut .item.rec').setAttribute("aria-label", "録画を開始します");  
+
+                // オプション操作を有効化
+                document.querySelector('.option.fps select').removeAttribute("disabled");
+                document.querySelector('.option.size select').removeAttribute("disabled");
+                document.querySelector('.option.kaku select').removeAttribute("disabled");
+
+            });
+    }
 
 function getCurrentDateTimeFormatted() {
     const now = new Date();

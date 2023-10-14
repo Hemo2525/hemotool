@@ -42,7 +42,7 @@
         "/js/video.js",
         "/js/game.js",
         "/js/rightClick.js",
-        "/js/lib/EBML.js",
+        "/js/lib/fix-webm-duration.js",
         "/js/pip.js",
         "/js/akashic.js",
         "/js/other.js"
