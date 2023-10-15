@@ -201,27 +201,53 @@ function recStart() {
     _startRecTime = getCurrentDateTimeFormatted();
   
 
+
+
+
+    // <video>からAudioTrackを取得
     var video = document.querySelector('div[data-layer-name="videoLayer"] video');
     video.setAttribute("crossorigin", "anonymous");
-
-    var videoOutputStream = _pip_Canvas.captureStream(60);
-
-    var ctx = new AudioContext();
-    
     let stream = video.captureStream();  
     let audioTrack = new MediaStream(stream.getAudioTracks());
+
+    // AudioTrackの出力先を作成したAudioContextに接続
+    var ctx = new AudioContext();
     var source = ctx.createMediaStreamSource(audioTrack);
-
-
-    // now a MediaStream destination node
-    var stream_dest = ctx.createMediaStreamDestination();
-    // connect the source to the MediaStream
+    var stream_dest = ctx.createMediaStreamDestination(); // 出力先を取得
     source.connect(stream_dest);
+
     // grab the real MediaStream
-    audioStream = stream_dest.stream;
+    let audioStream = stream_dest.stream;
 
 
-    var outputStream = new MediaStream();
+
+    /*
+    // AudioEncoderを作成
+    const audioEncoder = new AudioEncoder({
+        sampleRate: 44100,
+        numberOfChannels: 2,
+        codec: 'mp4a.*',
+        output: function (chunk) {
+            // --- エンコード後のデータを受け取る。ここでリモートに送ったりする ---
+            // ... 省略 ...
+          },
+          error: function () {
+            console.error(arguments)
+          }
+    });
+
+    // AudioTrackをエンコード
+    audioTrack.getTracks().forEach(track => {
+        audioEncoder.encode(track).then(encodedData => {
+            // エンコードされたデータを取得し、保存または再生できます
+            // ここにエンコード後の処理を追加
+        });
+    });
+    */
+
+
+
+    var videoOutputStream = _pip_Canvas.captureStream(60);
     [audioStream, videoOutputStream].forEach(function(s) {
         s.getTracks().forEach(function(t) {
             videoOutputStream.addTrack(t);

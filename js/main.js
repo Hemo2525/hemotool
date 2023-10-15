@@ -895,6 +895,15 @@ function insertBtnToPlayer(parts_data) {
     document.querySelector('.ext-setting-menu .ext-video-effect .option.reverse input').addEventListener('change', () => {
         videoeffect_option_reverse();
     });
+    // [映像加工] 回転
+    document.querySelector('.ext-setting-menu .ext-video-effect .option.rotate select').addEventListener('change', (e) => {
+        if(e.isTrusted){
+
+            videoeffect_option_rotate(document.querySelector('.ext-setting-menu .ext-video-effect .option.rotate select').value);
+            
+            chrome.storage.local.set({"ext_videoeffect_opt_rotate": document.querySelector('.ext-setting-menu .ext-video-effect .option.rotate select').value}, function() {});
+        }
+    });
     // [映像加工] 明るさ
     document.querySelector('.ext-setting-menu .ext-video-effect .option.brightness input').addEventListener('change', (e) => {
         if(e.isTrusted){
@@ -930,12 +939,18 @@ function insertBtnToPlayer(parts_data) {
     // [映像加工] リセット
     document.querySelector('.ext-setting-menu .ext-video-effect .option.reset input').addEventListener('click', (e) => {
         if(e.isTrusted){
+            document.querySelector('.ext-setting-menu .ext-video-effect .option.reverse input').checked = false;
+            document.querySelector('.ext-setting-menu .ext-video-effect .option.reverse input').value = "OFF";
+            document.querySelector('.ext-setting-menu .ext-video-effect .option.rotate select').value = "default";
             document.querySelector('.ext-setting-menu .ext-video-effect .option.brightness input').value = 1;
             document.querySelector('.ext-setting-menu .ext-video-effect .option.grayscale input').value = 0;
             document.querySelector('.ext-setting-menu .ext-video-effect .option.contrast input').value = 1;
             document.querySelector('.ext-setting-menu .ext-video-effect .option.opacity input').value = 1;
             videoeffect_set_default();
             videoeffect_aplly_options();
+            chrome.storage.local.set({"ext_videoeffect_opt_reverse": document.querySelector('.ext-setting-menu .ext-video-effect .option.reverse input').value}, function() {});
+            chrome.storage.local.set({"ext_videoeffect_opt_rotate": document.querySelector('.ext-setting-menu .ext-video-effect .option.rotate select').value}, function() {});
+
             chrome.storage.local.set({"ext_videoeffect_opt_brightness": document.querySelector('.ext-setting-menu .ext-video-effect .option.brightness input').value}, function() {});
             chrome.storage.local.set({"ext_videoeffect_opt_grayscale": document.querySelector('.ext-setting-menu .ext-video-effect .option.grayscale input').value}, function() {});
             chrome.storage.local.set({"ext_videoeffect_opt_contrast": document.querySelector('.ext-setting-menu .ext-video-effect .option.contrast input').value}, function() {});
@@ -1809,6 +1824,17 @@ function setSettingValue() {
                 videoeffect_option_reverse();
             }
         });
+        // [映像加工] 回転
+        chrome.storage.local.get("ext_videoeffect_opt_rotate", function (value) {
+            if (value.ext_videoeffect_opt_rotate) {
+                document.querySelector('.ext-setting-menu .ext-video-effect .option.rotate select').value = value.ext_videoeffect_opt_rotate;
+                videoeffect_option_rotate(value.ext_videoeffect_opt_rotate);
+            } else {
+                // default
+                document.querySelector('.ext-setting-menu .ext-video-effect .option.rotate select').value = "default";
+                videoeffect_option_rotate("default");
+            }
+        });
         // [映像加工] 明るさ
         chrome.storage.local.get("ext_videoeffect_opt_brightness", function (value) {
             if (value.ext_videoeffect_opt_brightness) {
@@ -1843,6 +1869,14 @@ function setSettingValue() {
                 videoEffect();
                 // ショートカットをアクティブ状態
                 document.querySelector('#ext_shortcut .item.video-effect').setAttribute("active", "ON");   
+            } else {
+                document.querySelector('.ext-setting-menu .ext-video-effect .option.reverse input').setAttribute("disabled", "true");
+                document.querySelector('.ext-setting-menu .ext-video-effect .option.rotate select').setAttribute("disabled", "true");
+                document.querySelector('.ext-setting-menu .ext-video-effect .option.brightness input').setAttribute("disabled", "true");
+                document.querySelector('.ext-setting-menu .ext-video-effect .option.grayscale input').setAttribute("disabled", "true");
+                document.querySelector('.ext-setting-menu .ext-video-effect .option.contrast input').setAttribute("disabled", "true");
+                document.querySelector('.ext-setting-menu .ext-video-effect .option.opacity input').setAttribute("disabled", "true");
+                document.querySelector('.ext-setting-menu .ext-video-effect .option.reset input').setAttribute("disabled", "true");
             }
         });
         // 映像加工のピン状態

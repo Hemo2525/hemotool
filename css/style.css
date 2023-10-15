@@ -314,6 +314,9 @@
     padding: 2px 10px;
     border: none;
 }
+.ext-setting-menu .option-box .option .value input[type="button"][disabled] {
+    background-color: gray;
+}
 
 
 
@@ -899,10 +902,9 @@ html[data-darkreader-scheme] [ext-master-comeview] [class^=___table-row___]:nth-
     z-index: 100000;
 }
 
-
-
-[ext-master-videoeffect][ext-opt-reverse] {
-    transform: scale(-1, 1);
+/* 映像加工 */
+div[data-layer-name="videoLayer"] video {
+    transition-duration: 0.3s;
 }
 
 
