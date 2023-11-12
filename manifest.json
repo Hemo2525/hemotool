@@ -1,7 +1,7 @@
 {
   "name": "ニコ生拡張機能 へもツール",
   "manifest_version": 3,
-  "version": "0.33.3",
+  "version": "0.34.0",
   "description": "ニコ生にいろいろな拡張機能を追加します",
   "permissions": [
     "storage",
@@ -16,6 +16,8 @@
       "resources": [
         "/js/comeview-inject.js",
         "/js/nicovideo-inject.js",
+        "/js/lib/encode-worker.js",
+        "/js/lib/mp4-muxer.min.js",
         "/html/parts-menu.html"
       ],
       "matches": ["https://live.nicovideo.jp/*"]
@@ -42,7 +44,8 @@
         "/js/video.js",
         "/js/game.js",
         "/js/rightClick.js",
-        "/js/lib/fix-webm-duration.js",
+        "/js/lib/encode-worker.js",
+        "/js/lib/mp4-muxer.min.js",
         "/js/pip.js",
         "/js/akashic.js",
         "/js/other.js"

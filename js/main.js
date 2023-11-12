@@ -4,39 +4,11 @@
 
 
 
-< ts-ebml >---------------------------------------------------------------------
+< mp4-muxer >---------------------------------------------------------------------
 
-Copyright (c) 2017 legokichi
+MIT License
 
-
-
-< node-ebml >---------------------------------------------------------------------
-
-Copyright (c) 2013-2018 Mark Schmale and contributors
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
-
-
-
-< fix-webm-duration >-------------------------------------------------------------
-
-The MIT license
-
-Copyright (c) 2018 Yury Sitnikov
+Copyright (c) 2023 Vanilagy
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -45,16 +17,17 @@ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
 
 
 */
@@ -440,15 +413,19 @@ function insertBtnToPlayer(parts_data) {
         } else {
             // OFF → ON
             recStart();
+            /*
             document.querySelector('#ext_shortcut .item.rec').setAttribute("recording", "ON");
             document.querySelector('#ext_shortcut .item.rec .recBtn').textContent = "録画停止";
             document.querySelector('#ext_shortcut .item.rec .status').setAttribute("rec", "on");
             document.querySelector('#ext_shortcut .item.rec').setAttribute("aria-label", "録画を停止します");
-
+            */
+           
             // オプション操作を無効化しておく
+            /*
             document.querySelector('.option.fps select').setAttribute("disabled", 'on');
             document.querySelector('.option.size select').setAttribute("disabled", 'on');
             document.querySelector('.option.kaku select').setAttribute("disabled", 'on');
+            */
         }
     });
 
@@ -828,6 +805,7 @@ function insertBtnToPlayer(parts_data) {
 
 
 
+    /*
     // [録画機能] FPS
     document.querySelector('.ext-setting-menu .ext-rec .option.fps select').addEventListener('change', (e) => {
         if(e.isTrusted){
@@ -860,6 +838,8 @@ function insertBtnToPlayer(parts_data) {
 
         }
     });
+    */
+
     // [コメント] アイコンの表示
     document.querySelector('.ext-setting-menu .ext-comeview .option.icon input').addEventListener('change', () => {
         comeview_option_icon();
@@ -1538,6 +1518,7 @@ function setSettingValue() {
                 document.querySelector('#ext_shortcut .item.rec').setAttribute("ext-pin-on", "ON");
             }
         });
+        /*
         // 録画機能のFPS
         chrome.storage.local.get("ext_rec_opt_fps", function (value) {
             if (value.ext_rec_opt_fps) {
@@ -1569,7 +1550,7 @@ function setSettingValue() {
                 setRecKaku("webm");
             }
         });
-
+        */
         // コメビュ機能
         chrome.storage.local.get("ext_comeview", function (value) {
             if (value.ext_comeview == "ON") {

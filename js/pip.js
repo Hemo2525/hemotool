@@ -1,4 +1,3 @@
-
 let _callbackId;
 let _canvasCtx;
 let _pip_comment;
@@ -7,9 +6,10 @@ let _pip_game;
 var _pip_Canvas;
 let _videoElementForPip;
 
-let _opt_fps;
-let _opt_kaku;
+//let _opt_fps;
+//let _opt_kaku;
 
+/*
 function setRecFps(value) {
     if(value === "60fps") {
         _opt_fps = 1000/60;
@@ -20,6 +20,7 @@ function setRecFps(value) {
         _opt_fps = 1000/60;
     }
 }
+
 function getRecFps() {
     return _opt_fps;
 }
@@ -37,6 +38,7 @@ function setRecKaku(value) {
 function getRecKaku() {
     return _opt_kaku;
 }
+
 function apllyRecSize(value) {
     if(value === "FULLHD") {
         _pip_Canvas.width  = 1920;
@@ -53,7 +55,7 @@ function apllyRecSize(value) {
         _pip_Canvas.height = 720;
     }
 }
-
+*/
 
 window.addEventListener('load', function() {
 
@@ -81,6 +83,9 @@ window.addEventListener('load', function() {
         _pip_Canvas = document.createElement('canvas');
         _pip_Canvas.id = 'hemo-canvas';
         _pip_Canvas.style.display = 'none';
+        
+        _pip_Canvas.width  = 1280;
+        _pip_Canvas.height = 720;
 
         //let playerArea =  document.querySelector('[class^=___player-display-screen]');
         //if(playerArea){
@@ -152,12 +157,12 @@ function onExitPip() {
 
 
 
-let _recorder;
-let _videoBlob;
+//let _recorder;
+//let _videoBlob;
 let _bangumiUserName;
 let _bangumiTitle;
 let _startRecTime;
-var _mediaParts;
+//var _mediaParts;
 var _recStartTime;
 let _recTimerId;
 
@@ -172,15 +177,96 @@ let _recTimerId;
 
 
 function recStop() {
+    
+    encodeWorker.postMessage({ type: 'stop'});
+    document.querySelector('#ext_shortcut .item.rec').removeAttribute("recording");
+    document.querySelector('#ext_shortcut .item.rec .recBtn').textContent = "録画開始";
+    document.querySelector('#ext_shortcut .item.rec .status').removeAttribute("rec");
+    document.querySelector('#ext_shortcut .item.rec').setAttribute("aria-label", "録画を開始します");  
+
+    // オプション操作を有効化
+    /*
+    document.querySelector('.option.fps select').removeAttribute("disabled");
+    document.querySelector('.option.size select').removeAttribute("disabled");
+    document.querySelector('.option.kaku select').removeAttribute("disabled");
+    */
+    
+
     clearInterval(_recTimerId);
-    _recorder.stop();
+    //_recorder.stop();
     cancelAnimationFrame(_callbackId);
+
+    return;
 }
 
-function recStart() {
-    _canvasUpdate();
 
-    _mediaParts = [];
+let encodeWorker = null;
+let stream = null;
+let videoTrack = null;
+
+async function startRecording(handle, videoOutputStream) {
+    console.assert("録画開始");
+
+    console.log("videoOutputStream.getTracks()", videoOutputStream.getTracks());
+
+    videoTrack = videoOutputStream.getTracks()[1];
+    console.log("★ビデオトラック", videoTrack);
+    let trackSettings = videoTrack.getSettings();
+    console.log("★セッティング", trackSettings);
+
+    let trackProcessor = new MediaStreamTrackProcessor(videoTrack);
+    let frameStream = trackProcessor.readable;
+
+    // エンコーダーのI/Oとファイルの書き込みは、UIの応答性を保つためにWorkerで行われる。
+    //encodeWorker = new Worker(chrome.runtime.getURL('/js/lib/encode-worker.js'));
+    
+    var newWorkerViaBlob = function(relativePath) {
+        var array = ['importScripts("' + relativePath + '");'];
+        var blob = new Blob(array, {type: 'text/javascript'});
+        var url = window.URL.createObjectURL(blob);
+        return new Worker(url);
+      };
+    encodeWorker = newWorkerViaBlob(chrome.runtime.getURL('/js/lib/encode-worker.js'));
+    
+    encodeWorker.addEventListener("message", (e) => {
+        console.log("parent received message:", e.data);
+        if(e.data === "finish") {
+            encodeWorker.terminate();
+        }
+      });
+
+   /*
+    const worker = await fetch(chrome.extension.getURL('encode-worker.js'));
+    const js = await worker.text();
+    const blob = new Blob([js], {type: "text/javascript"});
+    const url = URL.createObjectURL(blob)
+    const workerClass: any = comlink.wrap(new Worker(url));
+*/
+    //let audioTrackk = videoOutputStream.getAudioTracks();
+
+    //console.log(frameStream)
+    //console.log("audioTrackk", audioTrackk);
+
+    audioTrack = videoOutputStream.getTracks()[0];
+    let trackProcessor_audio = new MediaStreamTrackProcessor({ track: audioTrack });
+    let audioStream = trackProcessor_audio.readable;
+
+    // ワーカーに、フレームのエンコードとファイルの書き込みを開始するよう伝える。
+    // 注: ここで frameStream を読み込んで VideoFrames を個別に転送するよりも、frameStream を転送してワーカーで読み込む方が効率的です。
+    //これにより、 メイン（UI）スレッドでのフレーム処理を完全に回避できます。
+    encodeWorker.postMessage({
+      type: 'start',
+      fileHandle: handle,
+      frameStream: frameStream,
+      trackSettings: trackSettings,
+      importUrl : chrome.runtime.getURL('/js/lib/mp4-muxer.min.js'),
+      audioStream : audioStream
+    }, [frameStream, audioStream]);
+
+  }
+
+
+async function recStart() {
 
     // 配信者名、番組名、録画開始時間を取得
     _bangumiUserName = "";
@@ -201,8 +287,30 @@ function recStart() {
     _startRecTime = getCurrentDateTimeFormatted();
   
 
+    // 名前をつけて保存ダイアログを表示
+    let handle;
+    try {
+        handle = await window.showSaveFilePicker({
+            startIn: 'videos',
+            //suggestedName: 'myVideo.mp4',
+            suggestedName: `[${_bangumiUserName}]_${_startRecTime}_${_bangumiTitle}.mp4`,
+            types: [{
+              description: 'Video File',
+              accept: {'video/mp4' :['.mp4']}
+              }],
+        });
+    
+    } catch(e) {
+        // 名前をつけて保存ダイアログでキャンセルを押した場合
+        return;
+    }
+    
+    document.querySelector('#ext_shortcut .item.rec').setAttribute("recording", "ON");
+    document.querySelector('#ext_shortcut .item.rec .recBtn').textContent = "録画停止";
+    document.querySelector('#ext_shortcut .item.rec .status').setAttribute("rec", "on");
+    document.querySelector('#ext_shortcut .item.rec').setAttribute("aria-label", "録画を停止します");
 
-
+    _canvasUpdate();
 
     // <video>からAudioTrackを取得
     var video = document.querySelector('div[data-layer-name="videoLayer"] video');
@@ -221,32 +329,6 @@ function recStart() {
 
 
 
-    /*
-    // AudioEncoderを作成
-    const audioEncoder = new AudioEncoder({
-        sampleRate: 44100,
-        numberOfChannels: 2,
-        codec: 'mp4a.*',
-        output: function (chunk) {
-            // --- エンコード後のデータを受け取る。ここでリモートに送ったりする ---
-            // ... 省略 ...
-          },
-          error: function () {
-            console.error(arguments)
-          }
-    });
-
-    // AudioTrackをエンコード
-    audioTrack.getTracks().forEach(track => {
-        audioEncoder.encode(track).then(encodedData => {
-            // エンコードされたデータを取得し、保存または再生できます
-            // ここにエンコード後の処理を追加
-        });
-    });
-    */
-
-
-
     var videoOutputStream = _pip_Canvas.captureStream(60);
     [audioStream, videoOutputStream].forEach(function(s) {
         s.getTracks().forEach(function(t) {
@@ -254,7 +336,28 @@ function recStart() {
         });
     });
 
+    
+    //startRecording(_pip_Canvas.captureStream(60));
+    startRecording(handle, videoOutputStream);
 
+
+    _recStartTime = Date.now();
+
+    // タイマー開始        
+    _recTimerId = setInterval(function(){
+        const currentTime = Date.now();
+        const elapsedTimeInSeconds = Math.floor((currentTime - _recStartTime) / 1000); // 経過時間を秒単位で取得
+        const h = String(Math.floor(elapsedTimeInSeconds / 3600)).padStart(2, "0");
+        const m = String(Math.floor((elapsedTimeInSeconds % 3600) / 60)).padStart(2, "0");
+        const s = String(elapsedTimeInSeconds % 60).padStart(2, "0");
+        document.querySelector('#ext_shortcut .item.rec').setAttribute('aria-label', `${h}:${m}:${s}`);
+    }, 1000);
+    
+    
+    return;
+
+
+    /*
     // VP9 Codec
     //_recorder = new MediaRecorder(videoOutputStream, {mimeType:'video/webm;codecs=vp9'});
 
@@ -306,6 +409,7 @@ function recStart() {
         const s = String(elapsedTimeInSeconds % 60).padStart(2, "0");
         document.querySelector('#ext_shortcut .item.rec').setAttribute('aria-label', `${h}:${m}:${s}`);
     }, 1000);
+    */
 }
 
 
@@ -333,10 +437,11 @@ function downloadURI(uri, name) {
                 document.querySelector('#ext_shortcut .item.rec').setAttribute("aria-label", "録画を開始します");  
 
                 // オプション操作を有効化
+                /*
                 document.querySelector('.option.fps select').removeAttribute("disabled");
                 document.querySelector('.option.size select').removeAttribute("disabled");
                 document.querySelector('.option.kaku select').removeAttribute("disabled");
-
+                */
 
                 //a.remove(); // remove element
             })
@@ -349,10 +454,11 @@ function downloadURI(uri, name) {
                 document.querySelector('#ext_shortcut .item.rec').setAttribute("aria-label", "録画を開始します");  
 
                 // オプション操作を有効化
+                /*
                 document.querySelector('.option.fps select').removeAttribute("disabled");
                 document.querySelector('.option.size select').removeAttribute("disabled");
                 document.querySelector('.option.kaku select').removeAttribute("disabled");
-
+                */
             });
     }
 
@@ -520,6 +626,51 @@ async function pip() {
 
 function _canvasUpdate() {
 
+
+    // アニメーションの開始時刻を記録します。
+    let startTime = null;
+
+    // アニメーションループ関数を定義します。
+    function animate(timestamp) {
+    // アニメーションが初めて呼び出された場合、開始時刻を設定します。
+    if (!startTime) {
+        startTime = timestamp;
+    }
+
+    // 経過時間を計算します。
+    const elapsedTime = timestamp - startTime;
+
+    // 60fps（約16.67ミリ秒ごと）でアニメーションを更新します。
+    if (elapsedTime >= 8.33) {
+        // ここにアニメーションの描画コードを追加します。
+        
+        // 再描画処理
+        _canvasCtx.drawImage(_pip_video, 0, 0, _pip_Canvas.width, _pip_Canvas.height);  
+        
+        // コメント用に透過
+        _canvasCtx.globalAlpha = 0.6;
+      
+        // コメント貼り付け
+        _canvasCtx.drawImage(_pip_comment, 0, 0, _pip_Canvas.width, _pip_Canvas.height);
+
+        // コメント用の透過解除
+        _canvasCtx.globalAlpha = 1.0;
+
+
+        // アニメーションの開始時刻を更新します。
+        startTime = timestamp;
+    }
+
+    // requestAnimationFrame()を再度呼び出して次のフレームを予約します。
+    requestAnimationFrame(animate);
+    }
+
+    // アニメーションを開始します。
+    _callbackId = requestAnimationFrame(animate);
+
+
+    /*
+
     // 基準実行時間
     var basetime = Date.now();
 
@@ -527,7 +678,7 @@ function _canvasUpdate() {
     //var fps = 1000/60;
     var fps = getRecFps();
 
-    // setTimeoutを利用した場合は最初から30FPSで実行される
+
     function animate_handler() {
         var now   = Date.now();
         var check = now - basetime;
@@ -537,17 +688,26 @@ function _canvasUpdate() {
             draw();
         }
 
-        _callbackId = requestAnimationFrame( animate_handler, fps );
+        _callbackId = requestAnimationFrame( animate_handler);
     }
 
     function draw() {
         // 再描画処理
-        _canvasCtx.drawImage(_pip_video, 0, 0, _pip_Canvas.width, _pip_Canvas.height);        
+        _canvasCtx.drawImage(_pip_video, 0, 0, _pip_Canvas.width, _pip_Canvas.height);  
+        
+        // コメント用に透過
+        _canvasCtx.globalAlpha = 0.6;
+      
+        // コメント貼り付け
         _canvasCtx.drawImage(_pip_comment, 0, 0, _pip_Canvas.width, _pip_Canvas.height);
+
+        // コメント用の透過解除
+        _canvasCtx.globalAlpha = 1.0;
         
     }
 
     animate_handler();
+    */
 };
 
 function _canvasUpdate_forPip() {
@@ -558,7 +718,14 @@ function _canvasUpdate_forPip() {
         _canvasCtx.drawImage(_pip_game, 0, 0, _pip_Canvas.width, _pip_Canvas.height);
     }
     */
-    _canvasCtx.drawImage(_pip_comment, 0, 0, _pip_Canvas.width, _pip_Canvas.height);        
+    // コメント用に透過
+    _canvasCtx.globalAlpha = 0.6;
+    
+    _canvasCtx.drawImage(_pip_comment, 0, 0, _pip_Canvas.width, _pip_Canvas.height);
+    
+    // コメント用の透過解除
+    _canvasCtx.globalAlpha = 1.0;
+    
     _callbackId = requestAnimationFrame( _canvasUpdate_forPip );
     
 }
