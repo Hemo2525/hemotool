@@ -52,18 +52,20 @@ window.addEventListener('load', function () {
                 if(ret) {
 
                     const promise = fetch(chrome.runtime.getURL("/html/parts-menu.html"));
+                    const promise_info = fetch(chrome.runtime.getURL("/html/info.html"));
 
                     //fetch() のレスポンス（リクエストの結果）を then() メソッドで処理
-                    promise.then((response) => {
-                        return response.text();
+                    Promise.all([promise, promise_info])
+                    .then((responses) => {
+                        return Promise.all(responses.map(response => response.text()));
                     })
-                    .then((data) => {
+                    .then(([partsHtml, infoHtml]) => {
 
                         // 自身が配信者かどうかのチェック
                         ownerCheck();
 
                         // GUIを設定
-                        insertBtnToPlayer(data);
+                        insertBtnToPlayer(partsHtml, infoHtml);
 
                         // 設定を読み込む
                         setSettingValue();
@@ -175,6 +177,9 @@ function setEvents() {
         /* メニューの高さを調整 */
         setExtSettingMenuHeight();
 
+        /* ポップアップ画面の高さ調整 */
+        setExtPopupHeight();
+
 
         /* 画面幅を調整 */
         const displayElement = document.querySelector('[class^=___player-display___]');
@@ -226,6 +231,10 @@ function setEvents() {
 
 
 
+    document.querySelector('.ext-comeview .helpBtn').addEventListener('click', function(){
+        document.querySelector('.ext-comeview .help-page').classList.add("show");
+    });
+
 
 
 }
@@ -240,6 +249,13 @@ function setExtSettingMenuHeight() {
     let maxHeight = document.querySelectorAll('.ext-setting-menu > div').length * ITEM_HEIGHT;
     document.querySelector('.ext-setting-menu').style.maxHeight  = maxHeight + "px";
 
+}
+
+function setExtPopupHeight() {
+    let height = document.querySelector('[class^=___player-display-screen___').clientHeight * 0.9;
+    
+    document.querySelector('.ext-popup').style.height = height + "px";
+    document.querySelector('.ext-popup').style.top = -height - 30 + "px";
 }
 
 
@@ -303,13 +319,20 @@ function initialize(callback, timeoutMiliSec) {
 
 
 // ニコニコプレイヤーにボタンのDOMを挿入
-function insertBtnToPlayer(parts_data) {
+function insertBtnToPlayer(partsHtml, infoHtml) {
 
     // 拡張機能ボタンの挿入
     let settingMenu = document.querySelector("[class^=___comment-button___]");
 
     let p1 = document.createElement('div');
-    p1.innerHTML = parts_data;
+
+
+    // "sample.jpg" を "/拡張機能PATH/img/sample.jpg" に置換
+    partsHtml = partsHtml.replace(/src="([^"]+)"/g, 'src="' + chrome.runtime.getURL("/img/$1") + '"');
+
+    //partsHtml = partsHtml.replace("sample.jpg", chrome.runtime.getURL("/img/sample.jpg"));
+
+    p1.innerHTML = partsHtml;
     settingMenu.parentNode.prepend(p1);
 
     let overlay = document.createElement('div');
@@ -318,7 +341,20 @@ function insertBtnToPlayer(parts_data) {
 
 
 
+/*
+    const infoPage = infoHtml.replace("sample.jpg", chrome.runtime.getURL("/img/sample.jpg"));
+    console.log(infoPage);
+    // 新しい要素を作成
+    const infoPageElement = document.createElement('div');
+    infoPageElement.id = "ext_info_page";
+    infoPageElement.innerHTML = infoPage;
 
+    // 貼り付け先の要素を取得
+    const plyaerDom = document.querySelector('[class^=___player-display___]');
+
+    // 新しい要素を追加
+    plyaerDom.appendChild(infoPageElement);
+*/
 
     //スタイル エレメントを作成
     let style = document.createElement("style");
@@ -337,10 +373,16 @@ function insertBtnToPlayer(parts_data) {
             menu.removeAttribute("ext-attr-show");
 
         } else {
-
+            setExtSettingMenuHeight();
             document.querySelector("#ext_overlay").style.display = "block";
             menu.setAttribute("ext-attr-show", "ON");
         }
+
+        // お知らせポップアップを非表示
+        document.querySelector('.ext-popup').classList.remove('show');
+        // ストレージに現在のマニフェストのバージョン情報を保存
+        var manifestData = chrome.runtime.getManifest();
+        chrome.storage.local.set({"ext_current_version": manifestData.version});        
     });
 
     //let overlay = document.querySelector('#ext_overlay');
@@ -712,6 +754,7 @@ function insertBtnToPlayer(parts_data) {
     let effectPin = document.querySelector('.ext-setting-menu .ext-video-effect .item .pin');
     effectPin.addEventListener('click', function() {
         if(effectPin.getAttribute("ext-pin-on")){
+
             // 設定画面のピンのアイコンをOFF表示
             effectPin.removeAttribute("ext-pin-on");
             // ショートカットを非表示
@@ -757,7 +800,12 @@ function insertBtnToPlayer(parts_data) {
         pip();
     });
 
-
+    // お知らせ表示
+    document.querySelector('.ext-setting-menu .ext-info').addEventListener('click', function() {
+        setExtPopupHeight()
+        document.querySelector('.ext-setting-menu').removeAttribute("ext-attr-show");
+        document.querySelector('.ext-popup').classList.add('show');
+    });
 
 
     // 設定画面のイベントリスナ
@@ -1189,10 +1237,12 @@ function insertBtnToPlayer(parts_data) {
 
         // ストレージに保存されたバージョン情報とマニフェストのバージョン情報が異なる場合にポップアップを表示
         if(value && value.ext_current_version !== manifestData.version) {
+
+            setExtPopupHeight();
             document.querySelector('.ext-popup').classList.add('show');
         }
     });
-    document.querySelector('.ext-popup').addEventListener('click', function () {
+    document.querySelector('.ext-popup .close').addEventListener('click', function () {
         // ポップアップを非表示
         document.querySelector('.ext-popup').classList.remove('show');
         // ストレージに現在のマニフェストのバージョン情報を保存
