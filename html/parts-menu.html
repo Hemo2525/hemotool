@@ -33,7 +33,11 @@
     </svg>
 </button>
 <div class="ext-setting-menu">
-
+    <div class="item info">
+        <div id="ext-info" class="ext-info-item">お知らせ</div>
+        <div id="ext-gift" class="ext-info-item">開発を応援</div>
+        <a href="https://chromewebstore.google.com/detail/bakmgoejpahphkdcgeembmbkklggiocc/support" target="_blank" class="ext-info-item">要望･不具合報告</a>
+    </div>
     <div class="ext-comeview ext-on-off">
         <div class="item">
             <div class="name">コメビュ
@@ -118,7 +122,7 @@
             </div>
         </div>
     </div>
-    <div class="ext-yomiage ext-on-off">
+    <div class="ext-yomiage ext-on-off border-bottom">
         <div class="item">
             <div class="name">コメント読み上げ</div>
             <div class="btn-group">
@@ -246,7 +250,7 @@
             </div>
         </div>
     </div>
-    <div class="item ext-seekbar">
+    <div class="item ext-seekbar border-bottom">
         <div class="name">シークバーOFF</div>
         <div class="btn-group">
             <div class="value">ON</div>
@@ -326,8 +330,28 @@
             </div>
         </div>
     </div>
-    <div class="item ext-game-mute">
+    <div class="item ext-game-mute border-bottom">
         <div class="name">ニコ生ゲーム音ミュート</div>
+        <div class="btn-group">
+            <div class="value">ON</div>
+            <div class="pin">
+                <svg version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512"
+                    xml:space="preserve">
+                    <g>
+                        <path class="st0"
+                            d="M98.715,369.376l-97.028,97.02L0,512l45.603-1.688l97.02-97.02c-7.614-6.725-15.196-13.783-22.665-21.252 C112.49,384.572,105.425,376.991,98.715,369.376z">
+                        </path>
+                        <path class="st0"
+                            d="M446.021,65.979C387.878,7.853,317.914-16.443,289.735,11.744c-15.688,15.672-15.074,44.312-1.477,76.625 l-88.3,76.56c-55.728-31.15-107.774-37.642-133.911-11.506c-39.168,39.168-5.426,136.398,75.349,217.18 c80.782,80.775,178.013,114.517,217.173,75.357c26.144-26.144,19.653-78.19-11.498-133.911l76.576-88.3 c32.305,13.589,60.936,14.194,76.608-1.478C528.442,194.085,504.155,124.121,446.021,65.979z">
+                        </path>
+                    </g>
+                </svg>
+            </div>
+        </div>
+    </div>
+    <div class="item ext-video-wipe">
+        <div class="name new">ニコ生ゲーム自動ワイプ</div>
         <div class="btn-group">
             <div class="value">ON</div>
             <div class="pin">
@@ -348,7 +372,7 @@
     </div>
     <div class="ext-video-effect ext-on-off">
         <div class="item">
-            <div class="name update">映像加工</div>
+            <div class="name">映像加工</div>
             <div class="btn-group">
                 <div class="value">ON</div>
                 <div class="pin">
@@ -429,7 +453,7 @@
     </div>
     <div class="ext-rec ext-on-off dev-mode">
         <div class="item">
-            <div class="name update">録画機能</div>
+            <div class="name">録画機能</div>
             <div class="btn-group">
                 <div class="value">OK</div>
                 <div class="pin blank">
@@ -501,24 +525,55 @@
         </div>
     </div>
 
-    <div class="item info">
-        <div class="niconico">NicoNico ver.<div class="ver"></div></div>
-        <div class="hemotool"><a href="https://chromewebstore.google.com/detail/bakmgoejpahphkdcgeembmbkklggiocc" target="_blank">HemoTool</a> ver.<div class="ver"></div></div>
-        <div class="ext-info">NEWS</div>
-    </div>
+
 </div>
 
 
 <div class="ext-popup">
     <span class="close">✕</span>
-    <h2>へもツールからお知らせ</h2>
+    <h2>へもツール ニュース</h2>
 
     <div id="ext-info-box">
-        <h2>お知らせが表示できるようになりました。</h2>
-        <div class="time">2023.12.12</div>
-        <p>あああああああああああああああああああああああああああああああああああああ</p>
-        <img src="sample.jpg" alt="">
-    </div>
+        
+        <div class="item">
+            <div class="time">2023.12.27</div>
+            <img src="20231227.png">
+        </div>
 
+        <div class="item">
+            <div class="time">2023.12.26</div>
+            <h2>お知らせ表示機能</h2>
+            <p>へもツールからの機能紹介などは下記をクリックしてください。</p>
+            <img src="20231226.png">
+        </div>
+
+    </div>
+    <!-- /ext-info-box -->
+    
+    <div id="ext-info-gift">
+        <div class="item no-border">
+            <br>
+            <h2>へもツールの開発を応援<img src="icon-1.png" style="width:32px;"></h2>
+            <p>
+                へもツールの開発を応援してくださる方は、下記の方法でご支援いただけます。<br>
+            </p>
+            <br>
+            <h3><img src="icon-4.png" class="icon">Amazon欲しい物リスト</h3>
+            <a href="https://www.amazon.jp/hz/wishlist/ls/1XL3HM6ZK6OWO?ref_=wl_share" target="_blank">欲しい物リスト</a><br>
+            <br>
+            <h3><img src="icon-5.png" class="icon">Amazonギフト</h3>
+            <a href="https://www.amazon.co.jp/dp/B004N3APGO" target="_blank">Amazonギフトカード(Eメールタイプ)</a><br>
+            宛先：hemo2525cat@gmail.com
+            <br>
+            <br>
+            <p>
+                ご支援くださった方は、ご希望の場合へもツールの<a href="https://chromewebstore.google.com/detail/bakmgoejpahphkdcgeembmbkklggiocc" target="_blank">ストアページ</a>に＜Special Thanks!＞としてお名前を掲載いたします。ご希望の方はギフトメッセージに「掲載希望」の旨と「掲載するニックネーム」もあわせてご記載ください。
+            </p>
+            <br>
+            <p class="note">
+                12月10日にギフトカードを送ってくださった方、ありがとうございました!!!
+            </p>
+        </div>
+    </div>
     
 </div>

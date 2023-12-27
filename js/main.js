@@ -230,11 +230,11 @@ function setEvents() {
     watchCommentParentDOM();
 
 
-
+/*
     document.querySelector('.ext-comeview .helpBtn').addEventListener('click', function(){
         document.querySelector('.ext-comeview .help-page').classList.add("show");
     });
-
+*/
 
 
 }
@@ -410,6 +410,7 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
         '<div class="item video-mute" aria-label="配信音をミュートにします">配信音ミュート</div>'+
         '<div class="item game" aria-label="ニコ生ゲームの映像を非表示にします">ニコ生ゲーム画面OFF</div>'+
         '<div class="item game-mute" aria-label="ニコ生ゲームの音をミュートします">ニコ生ゲーム音ミュート</div>'+
+        '<div class="item video-wipe" aria-label="ニコ生ゲーム起動時に配信映像をワイプします">ワイプ</div>'+
         '<div class="item video-effect" aria-label="配信映像を加工します">映像加工</div>'+
         '<div class="item picture" aria-label="映像＋コメントを小窓で表示します">小窓表示</div>'+
         '<div class="item rec" aria-label="録画を開始します"><span class="status">●</span><span class="recBtn">録画開始</span></div>';
@@ -676,8 +677,31 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
         }
     });
     document.querySelector('#ext_shortcut .game-mute').addEventListener('click', function() {
-
         gameMute();
+    });
+
+    // ニコ生ゲーム自動ワイプ
+    document.querySelector('.ext-setting-menu .ext-video-wipe .value').addEventListener('click', autoWipe);
+    let gameWipePin = document.querySelector('.ext-setting-menu .ext-video-wipe .pin');
+    gameWipePin.addEventListener('click', function() {
+        if(gameWipePin.getAttribute("ext-pin-on")){
+            // 設定画面のピンのアイコンをOFF表示
+            gameWipePin.removeAttribute("ext-pin-on");
+            // ショートカットを非表示
+            document.querySelector('#ext_shortcut .item.video-wipe').removeAttribute("ext-pin-on");
+            // 拡張機能の設定に保存
+            chrome.storage.local.set({"ext_wipe_pin": "OFF"}, function() {});
+        } else {
+            // 設定画面のピンのアイコンをON表示
+            gameWipePin.setAttribute("ext-pin-on", "ON");
+            // ショートカットを表示
+            document.querySelector('#ext_shortcut .item.video-wipe').setAttribute("ext-pin-on", "ON");
+            // 拡張機能の設定に保存
+            chrome.storage.local.set({"ext_wipe_pin": "ON"}, function() {});
+        }
+    });
+    document.querySelector('#ext_shortcut .video-wipe').addEventListener('click', function() {
+        autoWipe();
     });
 
     // ニコ生プレイヤーのミュートボタンを操作できないようにする用のDOMを作成しておく
@@ -801,12 +825,21 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
     });
 
     // お知らせ表示
-    document.querySelector('.ext-setting-menu .ext-info').addEventListener('click', function() {
+    document.querySelector('.ext-setting-menu #ext-info').addEventListener('click', function() {
         setExtPopupHeight()
         document.querySelector('.ext-setting-menu').removeAttribute("ext-attr-show");
+        document.querySelector('.ext-popup #ext-info-box').classList.add('show');
+        document.querySelector('.ext-popup #ext-info-gift').classList.remove('show');
         document.querySelector('.ext-popup').classList.add('show');
     });
-
+    // 開発を応援を表示
+    document.querySelector('.ext-setting-menu #ext-gift').addEventListener('click', function() {
+        setExtPopupHeight()
+        document.querySelector('.ext-setting-menu').removeAttribute("ext-attr-show");
+        document.querySelector('.ext-popup #ext-info-box').classList.remove('show');
+        document.querySelector('.ext-popup #ext-info-gift').classList.add('show');
+        document.querySelector('.ext-popup').classList.add('show');
+    });
 
     // 設定画面のイベントリスナ
 
@@ -1184,6 +1217,7 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
 
 
     // ニコニコ動画のフロントエンドバージョンを取得
+    /*
     let nicoData = document.querySelector('#embedded-data');
     if(nicoData){
         let dataProps = nicoData.getAttribute("data-props");
@@ -1199,10 +1233,11 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
         
         }
     }
+    */
 
     // へもツールのバージョン情報を取得
     var manifestData = chrome.runtime.getManifest();
-    document.querySelector('.ext-setting-menu .item.info .hemotool .ver').textContent = manifestData.version;
+    //document.querySelector('.ext-setting-menu .item.info .hemotool .ver').textContent = manifestData.version;
 
 
     // 「へもツールが更新されました」のポップアップ表示判定
@@ -1239,6 +1274,7 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
         if(value && value.ext_current_version !== manifestData.version) {
 
             setExtPopupHeight();
+            document.querySelector('.ext-popup #ext-info-box').classList.add('show');
             document.querySelector('.ext-popup').classList.add('show');
         }
     });
@@ -1954,9 +1990,11 @@ function setSettingValue() {
             }
         });
 
+        initGame();
+
         // ゲーム音楽ミュート
         chrome.storage.local.get("ext_game_mute", function (value) {
-            initGame();
+
             if (value.ext_game_mute == "ON") {
                 console.log("前回ゲーム音ミュートが有効でした");
                 //document.querySelector('.ext-setting-menu .ext-game-mute').setAttribute("ext-attr-on", "true"); 
@@ -1995,6 +2033,22 @@ function setSettingValue() {
                 document.querySelector('.ext-setting-menu .ext-game-mute .pin').setAttribute("ext-pin-on", "ON");
                 // ショートカットを表示
                 document.querySelector('#ext_shortcut .item.game-mute').setAttribute("ext-pin-on", "ON");                
+            }
+        });
+
+        // ワイプ機能
+        chrome.storage.local.get("ext_wipe", function (value) {
+            if (value.ext_wipe == "ON") {
+                autoWipe();
+            }
+        });        
+        // ワイプ機能のピン状態
+        chrome.storage.local.get("ext_wipe_pin", function (value) {
+            if (value.ext_wipe_pin == "ON") {
+                // 設定画面のピンのアイコンをON表示
+                document.querySelector('.ext-setting-menu .ext-video-wipe .pin').setAttribute("ext-pin-on", "ON");
+                // ショートカットを表示
+                document.querySelector('#ext_shortcut .item.video-wipe').setAttribute("ext-pin-on", "ON");                
             }
         });
 

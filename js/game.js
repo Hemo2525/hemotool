@@ -281,8 +281,26 @@ function initGame() {
     } else {
         console.error("videoがありません");
     }
-   
 
+
+
+    // プレイヤー下の起動中アイテムのエリアを監視
+    //監視オプション
+    const optionsLockItem = {
+        childList: true,        //直接の子の変更を監視
+    }
+
+    let lockItemArea = document.querySelector('[class^=___lock-item-area___]');
+    if(lockItemArea){
+        let watchLockItem = new MutationObserver(observeLockItemArea);
+        watchLockItem.observe(lockItemArea, optionsLockItem);
+
+        // 起動時にすでにニコ生ゲームが起動している場合はワイプをONにする
+        CheckAndWipe(document.querySelector('[class^=___launch-item-area___] button'));
+
+    } else {
+        console.error("lock-item-area がありません");
+    }
 }
 
 function observeSeekbar(mutationRecords, observer) {
@@ -312,4 +330,92 @@ function observeSeekbar(mutationRecords, observer) {
     if(chrome.runtime && chrome.runtime.sendMessage) {
         chrome.runtime.sendMessage({stop: "stop"});
     }    
+}
+
+
+
+
+function autoWipe() {
+    
+    let menu = document.querySelector('.ext-setting-menu .ext-video-wipe');
+    
+    if(menu.getAttribute("ext-attr-on")) {
+       
+        // ボタンをOFF状態に
+        menu.removeAttribute("ext-attr-on");
+
+        // ストレージにボタンの状態を保存
+        chrome.storage.local.set({"ext_wipe": "OFF"}, function() {});
+        // ショートカットを非アクティブ状態
+        document.querySelector('#ext_shortcut .item.video-wipe').removeAttribute("active");
+
+        document.querySelector('body').removeAttribute('ext-master-wipe');
+
+    } else {
+
+        // ON状態に
+        menu.setAttribute("ext-attr-on", "ON");
+
+        // ストレージにボタンの状態を保存
+        chrome.storage.local.set({"ext_wipe": "ON"}, function() {});
+        // ショートカットをアクティブ状態
+        document.querySelector('#ext_shortcut .item.video-wipe').setAttribute("active", "ON");
+
+        // ON時にすでにニコ生ゲームが起動している場合はワイプをONにする
+        CheckAndWipe(document.querySelector('[class^=___launch-item-area___] button'));        
+    }
+    
+}
+function CheckAndWipe(launchItem) {
+    //let launchItem = currentNode.querySelector('[class^=___launch-item-area___] button');
+    if(launchItem) {
+        let gameName = launchItem.getAttribute('aria-label');
+        console.log(gameName);
+
+        if(gameName.startsWith('美白フィルター') == false
+        && gameName.startsWith('部分コピー') == false
+        && gameName.startsWith('Twitterユーザー名表示ツール') == false
+        && gameName.startsWith('放送者フォローボタン') == false
+        && gameName.startsWith('岩時計') == false
+        && gameName.startsWith('【放送者用】岩時計') == false
+        && gameName.startsWith('【ツール系】') == false
+        && gameName.startsWith('アクティブユーザー') == false
+        && gameName.startsWith('マルチカメラ') == false
+        ) {
+            if(document.querySelector('.ext-setting-menu .ext-video-wipe').getAttribute("ext-attr-on"))
+            {
+                document.querySelector('body').setAttribute('ext-master-wipe', "ON");
+            }
+        }                    
+    }
+}
+function observeLockItemArea(mutationRecords, observer) {
+
+    console.log("ロックアイテムエリアの変化を検知");
+    for (const mutation of mutationRecords) {
+
+        if(mutation.addedNodes){
+            //console.log("追加ノードがあります");
+            mutation.addedNodes.forEach((currentNode) => {
+        
+                //console.log(currentNode);
+
+                CheckAndWipe(currentNode.querySelector('[class^=___launch-item-area___] button'));
+                
+            
+            });
+        }
+
+        if(mutation.removedNodes){
+            //console.log("削除ノードがあります");
+            //console.log(mutation.removedNodes);
+            mutation.removedNodes.forEach((currentNode) => {
+
+                // (querySelectorはDOMが削除されているので使えないのでclassNameで判定)
+                if(currentNode.className.startsWith('___launch-item-area___')){
+                    document.querySelector('body').removeAttribute('ext-master-wipe');   
+                }
+            });
+        }
+    }
 }
