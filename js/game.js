@@ -382,9 +382,14 @@ function CheckAndWipe(launchItem) {
         && gameName.startsWith('アクティブユーザー') == false
         && gameName.startsWith('マルチカメラ') == false
         ) {
+            // ワイプ機能がONかどうか
             if(document.querySelector('.ext-setting-menu .ext-video-wipe').getAttribute("ext-attr-on"))
             {
-                document.querySelector('body').setAttribute('ext-master-wipe', "ON");
+                // 起動中のアイテムが"引用(quotation)"ではないか？
+                let dataContentType = launchItem.getAttribute('data-content-type');
+                if(dataContentType !== "quotation") {
+                    document.querySelector('body').setAttribute('ext-master-wipe', "ON");
+                }
             }
         }                    
     }
