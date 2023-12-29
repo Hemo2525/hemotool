@@ -38,7 +38,7 @@
         <div id="ext-gift" class="ext-info-item">開発を応援</div>
         <a href="https://chromewebstore.google.com/detail/bakmgoejpahphkdcgeembmbkklggiocc/support" target="_blank" class="ext-info-item">要望･不具合報告</a>
     </div>
-    <div class="ext-comeview ext-on-off">
+    <div class="ext-comeview ext-on-off" title="コメントの名前やアイコンなどが表示されます">
         <div class="item">
             <div class="name">コメビュ
                 <!--
@@ -122,7 +122,7 @@
             </div>
         </div>
     </div>
-    <div class="ext-yomiage ext-on-off border-bottom">
+    <div class="ext-yomiage ext-on-off border-bottom" title="コメントを機械音声で読み上げます">
         <div class="item">
             <div class="name">コメント読み上げ</div>
             <div class="btn-group">
@@ -250,7 +250,7 @@
             </div>
         </div>
     </div>
-    <div class="item ext-seekbar border-bottom">
+    <div class="item ext-seekbar border-bottom" title="ニコ生ゲームプレイ中の誤クリックを防ぎます">
         <div class="name">シークバーOFF</div>
         <div class="btn-group">
             <div class="value">ON</div>
@@ -270,7 +270,7 @@
             </div>
         </div>
     </div>
-    <div class="item ext-video">
+    <div class="item ext-video" title="ニコ生ゲームの画面はそのままに、配信映像のみを非表示にします">
         <div class="name">配信映像OFF</div>
         <div class="btn-group">
             <div class="value">ON</div>
@@ -290,7 +290,7 @@
             </div>
         </div>
     </div>
-    <div class="item ext-video-mute">
+    <div class="item ext-video-mute" title="ニコ生ゲームの音はそのままに、配信映像の音のみをミュートにします">
         <div class="name">配信音ミュート</div>
         <div class="btn-group">
             <div class="value">ON</div>
@@ -310,7 +310,7 @@
             </div>
         </div>
     </div>
-    <div class="item ext-game">
+    <div class="item ext-game" title="配信映像はそのままに、ニコ生ゲーム画面のみを非表示にします">
         <div class="name">ニコ生ゲーム画面OFF</div>
         <div class="btn-group">
             <div class="value">ON</div>
@@ -330,7 +330,7 @@
             </div>
         </div>
     </div>
-    <div class="item ext-game-mute border-bottom">
+    <div class="item ext-game-mute border-bottom" title="配信映像の音はそのままに、ニコ生ゲームの音のみミュートにします">
         <div class="name">ニコ生ゲーム音ミュート</div>
         <div class="btn-group">
             <div class="value">ON</div>
@@ -350,7 +350,7 @@
             </div>
         </div>
     </div>
-    <div class="item ext-video-wipe">
+    <div class="item ext-video-wipe" title="ニコ生ゲームが起動すると配信映像をワイプにします">
         <div class="name new">ニコ生ゲーム自動ワイプ</div>
         <div class="btn-group">
             <div class="value">ON</div>
@@ -370,7 +370,7 @@
             </div>
         </div>
     </div>
-    <div class="ext-video-effect ext-on-off">
+    <div class="ext-video-effect ext-on-off" title="配信映像の表示を加工します">
         <div class="item">
             <div class="name">映像加工</div>
             <div class="btn-group">
@@ -451,7 +451,7 @@
             </div>
         </div>
     </div>
-    <div class="ext-rec ext-on-off dev-mode">
+    <div class="ext-rec ext-on-off dev-mode" title="配信映像をコメント付きで簡易録画します">
         <div class="item">
             <div class="name">録画機能</div>
             <div class="btn-group">
@@ -504,7 +504,7 @@
             -->
         </div>
     </div>
-    <div class="item ext-pip">
+    <div class="item ext-pip" title="配信映像をコメント付きでPIP表示します">
         <div class="name">小窓表示</div>
         <div class="btn-group">
             <div class="value">ON</div>
@@ -531,14 +531,14 @@
 
 <div class="ext-popup">
     <span class="close">✕</span>
-    <h2>へもツール ニュース</h2>
+    <h2 id="ext-info-box-title">お知らせ</h2>
 
     <div id="ext-info-box">
         
         <div class="item">
             <div class="time">2023.12.28</div>
-            <h2>不具合修正</h2>
-            <p>＜ワイプ機能＞ ニコ生ゲーム以外が起動されてもワイプになってしまう不具合を修正</p>
+            <h2>へもツールが更新されました</h2>
+            <p>＜不具合修正＞ ニコ生ゲーム以外が起動されてもワイプになってしまう不具合を修正</p>
         </div>
 
         <div class="item">
@@ -548,18 +548,17 @@
 
         <div class="item">
             <div class="time">2023.12.26</div>
-            <h2>お知らせ表示機能</h2>
+            <h2>へもツールが更新されました</h2>
             <p>へもツールからの機能紹介などは下記をクリックしてください。</p>
             <img src="20231226.png">
         </div>
 
     </div>
     <!-- /ext-info-box -->
-    
+    <h2 id="ext-info-gift-title">開発を応援</h2>
     <div id="ext-info-gift">
         <div class="item no-border">
-
-            <h2>へもツールの開発を応援　<img src="icon-1.png" style="width:32px;"></h2>
+            <h3>へもツールの開発を応援　<img src="icon-1.png" style="width:20px;"></h3>
             <p>
                 へもツールの開発を応援してくださる方は、下記の方法でご支援いただけます。<br>
             </p>
@@ -568,7 +567,7 @@
             <a href="https://www.amazon.jp/hz/wishlist/ls/1XL3HM6ZK6OWO?ref_=wl_share" target="_blank">欲しい物リスト</a><br>
             <br>
             <h3><img src="icon-5.png" class="icon">Amazonギフト</h3>
-            <a href="https://www.amazon.co.jp/dp/B004N3APGO" target="_blank">Amazonギフトカード(Eメールタイプ)</a><br>
+            <a href="https://www.amazon.co.jp/dp/B004N3APGO" target="_blank">Amazonギフトカード</a><br>
             宛先：hemo2525cat@gmail.com
             <br>
             <br>

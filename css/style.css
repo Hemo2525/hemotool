@@ -145,6 +145,7 @@
     padding: 5px 10px;
     
     .ext-info-item {
+        user-select: none;
         font-size: 11px;
         margin-left: 10px;
         text-decoration: none;
@@ -355,16 +356,37 @@
     /*top: -274px;*/
     top: attr(data-topposition)"";
     left: -45px;
-    padding: 10px 10px;
+    padding: 34px 10px 10px 10px;
     text-align: center;
     border-radius: 8px;
     box-shadow: 0px 0px 10px #00000087;
 
     /*top: -691%;*/
+    /*
     width: 300px;
     left: -143px;
-
+    */
+    width: 265px;
+    left: -126px;
+    opacity: 0.94;
     
+    #ext-info-box-title,
+    #ext-info-gift-title {
+        display: none;
+        position: absolute;
+        
+        top: 8px;
+        left: 0;
+        right: 0;
+        
+        color: gray;
+        letter-spacing: 4px;
+        
+        &.show {
+            display: inline-block;
+        }
+    }
+
     #ext-info-box,
     #ext-info-gift {
         display: none;
@@ -393,7 +415,7 @@
             }
             & h2 {
                 font-weight: bold;
-                font-size: 18px;
+                font-size: 16px;
                 line-height: 1.2;
                 margin: 0;
                 padding: 0;
@@ -411,7 +433,7 @@
             & p {
                 font-size: 13px;
                 text-align: justify;
-                line-height: 1.8;
+                line-height: 1.5;
                 padding: 0px;
                 margin: 0;
                 &.note {
@@ -434,6 +456,7 @@
     span.close {
         cursor: pointer;
         position: absolute;
+        z-index: 10;
         right: 8px;
         top: 6px;
         font-size: 10px;

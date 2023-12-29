@@ -254,8 +254,12 @@ function setExtSettingMenuHeight() {
 function setExtPopupHeight() {
     let height = document.querySelector('[class^=___player-display-screen___').clientHeight * 0.8;
     
+    if(height > 320) {
+        height = 320;
+    }
+    
     document.querySelector('.ext-popup').style.height = height + "px";
-    document.querySelector('.ext-popup').style.top = -height - 30 + "px";
+    document.querySelector('.ext-popup').style.top = -height - 60 + "px";
 }
 
 
@@ -389,6 +393,13 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
     overlay.addEventListener('click', function () {
         document.querySelector("#ext_overlay").style.display = "none";
         document.querySelector('.ext-setting-menu').removeAttribute("ext-attr-show");
+
+        
+        // お知らせポップアップを非表示
+        document.querySelector('.ext-popup').classList.remove('show');
+        // ストレージに現在のマニフェストのバージョン情報を保存
+        var manifestData = chrome.runtime.getManifest();
+        chrome.storage.local.set({"ext_current_version": manifestData.version});             
     });
 
     let settingBtn = document.querySelector("[class^=___setting-popup-control___]");
@@ -829,16 +840,22 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
         setExtPopupHeight()
         document.querySelector('.ext-setting-menu').removeAttribute("ext-attr-show");
         document.querySelector('.ext-popup #ext-info-box').classList.add('show');
+        document.querySelector('.ext-popup #ext-info-box-title').classList.add('show');
         document.querySelector('.ext-popup #ext-info-gift').classList.remove('show');
+        document.querySelector('.ext-popup #ext-info-gift-title').classList.remove('show');
         document.querySelector('.ext-popup').classList.add('show');
+        document.querySelector("#ext_overlay").style.display = "block";
     });
     // 開発を応援を表示
     document.querySelector('.ext-setting-menu #ext-gift').addEventListener('click', function() {
         setExtPopupHeight()
         document.querySelector('.ext-setting-menu').removeAttribute("ext-attr-show");
         document.querySelector('.ext-popup #ext-info-box').classList.remove('show');
+        document.querySelector('.ext-popup #ext-info-box-title').classList.remove('show');
         document.querySelector('.ext-popup #ext-info-gift').classList.add('show');
+        document.querySelector('.ext-popup #ext-info-gift-title').classList.add('show');
         document.querySelector('.ext-popup').classList.add('show');
+        document.querySelector("#ext_overlay").style.display = "block";
     });
 
     // 設定画面のイベントリスナ
@@ -1274,8 +1291,20 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
         if(value && value.ext_current_version !== manifestData.version) {
 
             setExtPopupHeight();
+
+            /* Ver 0.35.2 では表示しない。
+           //---------------------------------------------------------------------
+
+            // ポップアップを表示
             document.querySelector('.ext-popup #ext-info-box').classList.add('show');
             document.querySelector('.ext-popup').classList.add('show');
+           
+            // 画面クリックでポップアップを消せるようにオーバーレイを表示
+            document.querySelector("#ext_overlay").style.display = "block";
+
+            //---------------------------------------------------------------------
+            */
+
         }
     });
     document.querySelector('.ext-popup .close').addEventListener('click', function () {
@@ -1284,7 +1313,8 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
         // ストレージに現在のマニフェストのバージョン情報を保存
         var manifestData = chrome.runtime.getManifest();
         chrome.storage.local.set({"ext_current_version": manifestData.version});
-    
+        
+        document.querySelector("#ext_overlay").style.display = "none";
     });
 
 
