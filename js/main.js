@@ -1292,10 +1292,11 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
 
             setExtPopupHeight();
 
-            /* Ver 0.35.2 では表示しない。
+        
            //---------------------------------------------------------------------
 
             // ポップアップを表示
+            document.querySelector('.ext-popup #ext-info-box-title').classList.add('show');
             document.querySelector('.ext-popup #ext-info-box').classList.add('show');
             document.querySelector('.ext-popup').classList.add('show');
            
@@ -1303,7 +1304,7 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
             document.querySelector("#ext_overlay").style.display = "block";
 
             //---------------------------------------------------------------------
-            */
+            
 
         }
     });

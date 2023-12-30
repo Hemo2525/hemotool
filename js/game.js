@@ -379,6 +379,7 @@ function CheckAndWipe(launchItem) {
         && gameName.startsWith('岩時計') == false
         && gameName.startsWith('【放送者用】岩時計') == false
         && gameName.startsWith('【ツール系】') == false
+        && gameName.startsWith('公式生放送実況') == false
         && gameName.startsWith('アクティブユーザー') == false
         && gameName.startsWith('マルチカメラ') == false
         ) {
