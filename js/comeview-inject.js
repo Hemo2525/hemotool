@@ -575,7 +575,10 @@ let lastScrollPosition = 0;
 
 
 function watchCommentDOM(mutationsList, observer) {
-
+  //console.time("loop time");
+  //console.log("-----------------------------------------");
+  
+  //console.time("height time");
   let chatDom = document.querySelector("[class^=___comment-panel___] [class^=___body___]");
 
   // 現在のスクロールが一番下かどうか判定
@@ -589,14 +592,16 @@ function watchCommentDOM(mutationsList, observer) {
     _bIsMostBottom = true;
     _bWhieelUp = false;
   }
-    
+  //console.timeEnd("height time");
+  
+  //console.log(mutationsList);
+  
   for (const mutation of mutationsList) {
     
 
     if(mutation.type === "childList"){
 
-      //console.log(mutation);
-
+      // 初回動作
       if(_AddedNode === false){
         for (var i = 0; i < mutation.target.childNodes.length; i++) {
           var currentNode = mutation.target.childNodes[i];
@@ -606,42 +611,58 @@ function watchCommentDOM(mutationsList, observer) {
         chatDom.scrollTop = scrollTop;
       }
 
+      // 初回動作以外
       mutation.addedNodes.forEach((currentNode) => {
         
         _AddedNode = true;
-
+        //console.time("editComment time");
         editComment(currentNode);
-
+        //console.timeEnd("editComment time");
       });
 
     }
   }
 
-
+  //console.time("scroll time");
   if (!(_bIsMostBottom === false || _bWhieelUp === true)) {
     // 最下部にスクロール
     //console.log("最下部にスクロール");
-    chatDom.scrollTop = scrollHeight;
+    //chatDom.scrollTop = scrollHeight;
   }
+  //console.timeEnd("scroll time");
 
+  //console.timeEnd("loop time");
 }
 
 function editComment(currentNode) {
-
-  if (currentNode.querySelector("[class^=___comment-number___]")) { // コメント番号のDOM
-    //var newNo = currentNode.querySelector('.___comment-number___i8gp1').outerText;
-    var newNo = currentNode.querySelector("[class^=___comment-number___]").outerText;
+  //console.time("  mmmm time");
+  //console.time("  ccc time");
+  var commentTextElement = currentNode.querySelector("[class^=___comment-text___]");
+  let commentNumberDom = currentNode.querySelector("[class^=___comment-number___]"); // コメント番号のDOM
+  //console.timeEnd("  ccc time");
+  if (commentNumberDom) { 
+    //console.time("  bbb time");
+    var newNo = commentNumberDom.textContent;
+    //console.timeEnd("  bbb time");
+    
+    //console.time("  getAttribute time");
+    let bIsEdited = currentNode.getAttribute("data-extension-edited");
+    //console.timeEnd("  getAttribute time");
 
     // 既にeditCommentしたコメントはスキップ
-    if (newNo.length > 0 && !currentNode.getAttribute("data-extension-edited")) {
+    if (newNo.length > 0 && !bIsEdited) {
 
       // 自分のコメント かつ なふだコメント かどうかを判定
-      if(!currentNode.querySelector("[class^=___user-thumbnail-image___]"))
+      //console.time("  querySelector time");
+      let bIsMyComment = currentNode.querySelector("[class^=___user-thumbnail-image___]");
+      //console.timeEnd("  querySelector time");
+
+      if(!bIsMyComment)
       {
         //----------------------------------------------------------------
         //　匿名コメントの場合
         //----------------------------------------------------------------
-
+        //console.time("  aaa time");
 
         // フラグメント作成
         let fragment = document.createDocumentFragment();
@@ -678,9 +699,14 @@ function editComment(currentNode) {
         } else {
           //console.log("リスナーのコメントです");
         }
-        fragment = InsertPremium(fragment, newNo, bIsOwner);
-        
 
+        //console.timeEnd("  aaa time");
+
+        //console.time("  InsertPremium time");
+        fragment = InsertPremium(fragment, newNo, bIsOwner);
+        //console.timeEnd("  InsertPremium time");
+
+        //console.time("  InsertUserName time");
         // 名前のDOMを挿入
         if (_commentList[newNo]) {
           fragment = InsertUserName(fragment, newNo, false);
@@ -689,15 +715,18 @@ function editComment(currentNode) {
           _commentList[newNo] = "取得失敗";
           fragment = InsertUserName(fragment, newNo, false);
         }
-
+        //console.timeEnd("  InsertUserName time");
 
         // フラグメントを実DOMに挿入
-        let comment = currentNode.querySelector("[class^=___comment-text___]"); // コメントテキストのDOM
-        comment.parentNode.insertBefore(fragment, comment);
+        //let comment = currentNode.querySelector("[class^=___comment-text___]"); // コメントテキストのDOM
+        //console.time("  insertBefore time");
+        commentTextElement.parentNode.insertBefore(fragment, commentTextElement);
+        //console.timeEnd("  insertBefore time");
 
+        //console.time("  setAttribute time");
         // editCommentしたコメントの証拠を残しておく（次回やらなくて済むように）
         currentNode.setAttribute("data-extension-edited", "true");
-        
+        //console.timeEnd("  setAttribute time");
 
       } else {
 
@@ -738,30 +767,31 @@ function editComment(currentNode) {
 
       }
 
-
-
-    
     }
   }
-
+  //console.time("  commentTextElement time");
   // コメントに行送りを対応させるためクラスを付与
-  //currentNode.classList.add('wordbreak');
-  if (currentNode.querySelector("[class^=___comment-text___]").clientHeight > 28) {
-    //console.log("YES  " + currentNode.querySelector("[class^=___comment-text___]").textContent + "  " + currentNode.querySelector("[class^=___comment-text___]").clientHeight);
-    currentNode.querySelector("[class^=___comment-text___]").classList.add('multiple-line');
+  //var commentTextElement = currentNode.querySelector("[class^=___comment-text___]");
+  /*
+  if (commentTextElement.offsetHeight > 28) {
+    commentTextElement.classList.add('multiple-line');
+    //commentTextElement.setAttribute('multiple-line', "true");
   } else {
-    //console.log("NO  " + currentNode.querySelector("[class^=___comment-text___]").textContent + "  " + currentNode.querySelector("[class^=___comment-text___]").clientHeight);
-    currentNode.querySelector("[class^=___comment-text___]").classList.add('one-line');
-  }  
+    commentTextElement.classList.add('one-line');
+    //commentTextElement.setAttribute('one-line', "true");
+  }
+  */
+  //console.timeEnd("  commentTextElement time");
+  //console.timeEnd("  mmmm time");
 }
 
 
 //監視オプション
 const options = {
   childList: true,  //直接の子の変更を監視
-  characterData: true,  //文字の変化を監視
+  characterData: false,  //文字の変化を監視
   characterDataOldValue: false, //属性の変化前を記録
-  attributes: true,  //属性の変化を監視
+  attributes: false,  //属性の変化を監視
   subtree: false, //全ての子要素を監視
 }
 

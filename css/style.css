@@ -965,13 +965,12 @@ html[data-darkreader-scheme] [class^=___player-area___] {
     font-size: 9px !important;
 }
 
-
+/*
 [ext-master-comeview][ext-opt-orikaeshi] [class^=___comment-text___].one-line {
     font-size: 12px !important;
     line-height: 1.3 !important;
 }
 [ext-master-comeview][ext-opt-orikaeshi] [class^=___comment-text___].multiple-line {
-    /*font-size: 9px;*/
     height: 30px;    
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -982,6 +981,31 @@ html[data-darkreader-scheme] [class^=___player-area___] {
     font-size: 9px !important;
     padding: 0 !important;
 }
+*/
+
+[ext-master-comeview][ext-opt-orikaeshi] [class^=___comment-text___] {
+    height: auto;    
+    text-overflow: ellipsis;
+    /*display: -webkit-box;*/
+    display: inline-block;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-height: 1.1 !important;
+    overflow: hidden !important;
+    font-size: 12px !important;
+    padding: 0 !important;
+    max-height: 30px !important;
+    
+    /*
+    下記みたいなコメントがあると、コメントの高さが壊れるので、その対策
+    ███████████████████████████████████████████████████████
+    */
+    word-wrap: normal;
+
+
+}
+
+
 /* コメント量に応じて高さを可変にするとうまくいかないのでコメントアウト
 [class^=___table-row___] {
     height: auto !important;

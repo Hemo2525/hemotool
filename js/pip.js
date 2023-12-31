@@ -216,16 +216,16 @@ async function startRecording(handle, videoOutputStream) {
 
     let trackProcessor = new MediaStreamTrackProcessor(videoTrack);
     let frameStream = trackProcessor.readable;
-
-    // エンコーダーのI/Oとファイルの書き込みは、UIの応答性を保つためにWorkerで行われる。
-    //encodeWorker = new Worker(chrome.runtime.getURL('/js/lib/encode-worker.js'));
     
     var newWorkerViaBlob = function(relativePath) {
         var array = ['importScripts("' + relativePath + '");'];
         var blob = new Blob(array, {type: 'text/javascript'});
         var url = window.URL.createObjectURL(blob);
+
+        // エンコーダーのI/Oとファイルの書き込みは、UIの応答性を保つためにWorkerで行われる。
         return new Worker(url);
-      };
+    };
+    
     encodeWorker = newWorkerViaBlob(chrome.runtime.getURL('/js/lib/encode-worker.js'));
     
     encodeWorker.addEventListener("message", (e) => {
@@ -234,18 +234,6 @@ async function startRecording(handle, videoOutputStream) {
             encodeWorker.terminate();
         }
       });
-
-   /*
-    const worker = await fetch(chrome.extension.getURL('encode-worker.js'));
-    const js = await worker.text();
-    const blob = new Blob([js], {type: "text/javascript"});
-    const url = URL.createObjectURL(blob)
-    const workerClass: any = comlink.wrap(new Worker(url));
-*/
-    //let audioTrackk = videoOutputStream.getAudioTracks();
-
-    //console.log(frameStream)
-    //console.log("audioTrackk", audioTrackk);
 
     audioTrack = videoOutputStream.getTracks()[0];
     let trackProcessor_audio = new MediaStreamTrackProcessor({ track: audioTrack });
@@ -355,61 +343,6 @@ async function recStart() {
     
     
     return;
-
-
-    /*
-    // VP9 Codec
-    //_recorder = new MediaRecorder(videoOutputStream, {mimeType:'video/webm;codecs=vp9'});
-
-    // H264 Codec
-    _recorder = new MediaRecorder(videoOutputStream, {mimeType:'video/webm\;codecs=h264'});
-    
-
-    _recorder.ondataavailable = function(e) {
-
-        var data = e.data;
-        if (data && data.size > 0) {
-            _mediaParts.push(data);
-        }
-
-    }
-
-    //録画終了時に動画ファイルのダウンロードリンクを生成する処理
-    _recorder.onstop = function (){
-
-        var duration = Date.now() - _recStartTime;
-        var buggyBlob = new Blob(_mediaParts, { type: 'video/webm' });
-
-        document.querySelector('#ext_shortcut .item.rec').setAttribute("recording", "WAIT");
-        document.querySelector('#ext_shortcut .item.rec .recBtn').textContent = "処理中..";
-        document.querySelector('#ext_shortcut .item.rec .status').removeAttribute("rec");
-        document.querySelector('#ext_shortcut .item.rec').setAttribute("aria-label", "お待ち下さい...");
-
-        // 動画ファイルのシークを可能にする処理
-        ysFixWebmDuration(buggyBlob, duration, function(fixedBlob) {
-            
-            // 動画ファイルのダウンロード
-            let blobUrl = window.URL.createObjectURL(fixedBlob);
-            downloadURI(blobUrl, `[${_bangumiUserName}]_${_startRecTime}_${_bangumiTitle}.` + getRecKaku());
-
-        });
-    }
-
-    _recStartTime = Date.now();
-
-    //録画開始
-    _recorder.start();
-
-    // タイマー開始        
-    _recTimerId = setInterval(function(){
-        const currentTime = Date.now();
-        const elapsedTimeInSeconds = Math.floor((currentTime - _recStartTime) / 1000); // 経過時間を秒単位で取得
-        const h = String(Math.floor(elapsedTimeInSeconds / 3600)).padStart(2, "0");
-        const m = String(Math.floor((elapsedTimeInSeconds % 3600) / 60)).padStart(2, "0");
-        const s = String(elapsedTimeInSeconds % 60).padStart(2, "0");
-        document.querySelector('#ext_shortcut .item.rec').setAttribute('aria-label', `${h}:${m}:${s}`);
-    }, 1000);
-    */
 }
 
 
