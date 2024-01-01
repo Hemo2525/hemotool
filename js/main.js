@@ -133,6 +133,9 @@ function watchCommentParentDOM(mutationRecords, observer) {
     splitter.addEventListener("mousedown", (event) => {
         bActive = true;
         document.body.style.userSelect = 'none'; // テキスト選択を禁止するCSSを適用
+
+        // アクティブ表示ツールやニコ生ゲームなどが起動しているとマウス移動のイベントが取れないので、オーバーレイを表示
+        document.querySelector("#ext_overlay").style.display = "block";
     });
 
     const panelElement = document.querySelector("[class^=___player-status-panel___]");
@@ -154,16 +157,15 @@ function watchCommentParentDOM(mutationRecords, observer) {
             document.body.style.userSelect = ''; // テキスト選択を許可するCSSを解除
             chrome.storage.local.set({"ext_comeview_opt_wide_panelWidth": panelElement.style.width}, function() {});
             chrome.storage.local.set({"ext_comeview_opt_wide_displayWidth": displayElement.style.width}, function() {});
-
-            // コメビュは最下部にスクロール
-            let chatDom = document.querySelector("[class^=___comment-panel___] [class^=___body___]");
-            if(chatDom) {
-                const scrollHeight = chatDom.scrollHeight;
-                window.requestAnimationFrame(() => {
-                chatDom.scrollTop = scrollHeight;
-                });    
+        
+            // アクティブ表示ツールやニコ生ゲームなどが起動しているとマウス移動のイベントが取れないので、オーバーレイを表示したので解除しとく
+            if(!document.querySelector('.ext-setting-menu').getAttribute("ext-attr-show")){
+                // メニューもオーバーレイを利用するので、メニューが表示されているならオーバーレイを消さない
+                document.querySelector("#ext_overlay").style.display = "none";
             }
         }
+
+
 
     }, false);
 
@@ -192,15 +194,6 @@ function setEvents() {
         chrome.storage.local.set({"ext_comeview_opt_wide_panelWidth": panelElement.clientWidth + "px"}, function() {});
         chrome.storage.local.set({"ext_comeview_opt_wide_displayWidth": displayElement.style.width}, function() {});
 
-
-        // コメビュは最下部にスクロール
-        let chatDom = document.querySelector("[class^=___comment-panel___] [class^=___body___]");
-        if(chatDom) {
-            const scrollHeight = chatDom.scrollHeight;
-            window.requestAnimationFrame(() => {
-                chatDom.scrollTop = scrollHeight;
-            });
-        }
     });
 
 
@@ -1272,7 +1265,8 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
             comeview_option_icon();
             
             document.querySelector('.ext-setting-menu .ext-comeview .option.wide input').checked = true;
-            comeview_option_wide();
+            // 5秒後にコメビュ幅の調整バーを表示（起動直後にバーを表示するとコメント欄のスクロールバーが発生するため）
+            setTimeout(comeview_option_wide, 3000);
             
             document.querySelector('.ext-setting-menu .ext-comeview .option.orikaeshi input').checked = true;
             comeview_option_orikaeshi();
@@ -1704,7 +1698,10 @@ function setSettingValue() {
         chrome.storage.local.get("ext_comeview_opt_wide", function (value) {
             if (value.ext_comeview_opt_wide == "ON") {
                 document.querySelector('.ext-setting-menu .ext-comeview .option.wide input').checked = true;
-                comeview_option_wide();
+                
+                // 5秒後にコメビュ幅の調整バーを表示（起動直後にバーを表示するとコメント欄のスクロールバーが発生するため）
+                setTimeout(comeview_option_wide, 3000);
+                //comeview_option_wide();
             }
         });
         

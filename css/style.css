@@ -415,7 +415,7 @@
             }
             & h2 {
                 font-weight: bold;
-                font-size: 16px;
+                font-size: 15px;
                 line-height: 1.2;
                 margin: 0;
                 padding: 0;
@@ -441,6 +441,20 @@
                     color: gray;
                 }
             }
+            & ul {
+                padding: 0px;
+                margin: 0;
+                margin-left: 20px;
+                & li {
+                    font-size: 13px;
+                    text-align: justify;
+                    line-height: 1.5;    
+                    margin-bottom: 3px;
+                    &:last-child {
+                        margin-bottom: 0px;
+                    }
+                }
+            }
             & img {
                 width: 100%;
             }
@@ -448,6 +462,17 @@
                 width:20px;
                 margin-right:5px;
                 vertical-align: sub;
+            }
+
+            & span.update {
+                color: #b50000;
+                font-size: 9px;
+                font-weight: bold;
+                margin-left: 6px;
+                vertical-align: -webkit-baseline-middle;
+                line-height: 1;
+                margin-bottom: 11px;
+                display: inline-block;                
             }
         }
 
@@ -795,9 +820,11 @@ div#ext_dom_message {
     width: var(--local-user-summary-area-width);
 }
 
+
 /* なふだ機能で自分の名前のPタグが縦に伸びてしまう現象を解消 */
 [class^=___contents-area___][ext-master-comeview] .content-area>.user-summary-area {
     line-height: inherit !important;
+
 }
 
 
@@ -1110,6 +1137,7 @@ div[data-layer-name="videoLayer"] video {
     background-color: #c5c5c5;
     cursor: col-resize;
     z-index: 1;
+    transition: 0.3s;
 }
 body[ext-master-comeview][ext-opt-wide] [aria-expanded="false"] + #split_by_extention {
     width: 8px;

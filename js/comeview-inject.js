@@ -559,40 +559,11 @@ function InsertPremium(fragment, newNo, bIsOwner) {
 }
 
 let _AddedNode = false;
-let _bWhieelUp = false;
-let _bIsMostBottom = false;
-
-/*
-document.querySelector("[class^=___comment-panel___] [class^=___body___]").addEventListener('wheel', function (e) {
-  if(e.wheelDelta > 0) {
-    //上スクロール
-    _bWhieelUp = true;
-  }
-});
-*/
-
-let lastScrollPosition = 0;
 
 
 function watchCommentDOM(mutationsList, observer) {
   //console.time("loop time");
   //console.log("-----------------------------------------");
-  
-  //console.time("height time");
-  let chatDom = document.querySelector("[class^=___comment-panel___] [class^=___body___]");
-
-  // 現在のスクロールが一番下かどうか判定
-  const clientHeight = chatDom.clientHeight;
-  const scrollHeight = chatDom.scrollHeight;
-  const scrollTop = chatDom.scrollTop;
-
-  // 一番下までスクロールされたか判定
-  if (Math.abs(scrollHeight - clientHeight - scrollTop) < 1) {
-    // いちばんしたまでスクロールされている
-    _bIsMostBottom = true;
-    _bWhieelUp = false;
-  }
-  //console.timeEnd("height time");
   
   //console.log(mutationsList);
   
@@ -602,19 +573,21 @@ function watchCommentDOM(mutationsList, observer) {
     if(mutation.type === "childList"){
 
       // 初回動作
-      if(_AddedNode === false){
+      /*
+      if(_AddedNode == false){
+
         for (var i = 0; i < mutation.target.childNodes.length; i++) {
           var currentNode = mutation.target.childNodes[i];
           editComment(currentNode);
         }
-        //console.log("最下部にスクロール2");
-        chatDom.scrollTop = scrollTop;
       }
+      */
 
       // 初回動作以外
       mutation.addedNodes.forEach((currentNode) => {
-        
+
         _AddedNode = true;
+        
         //console.time("editComment time");
         editComment(currentNode);
         //console.timeEnd("editComment time");
@@ -622,14 +595,6 @@ function watchCommentDOM(mutationsList, observer) {
 
     }
   }
-
-  //console.time("scroll time");
-  if (!(_bIsMostBottom === false || _bWhieelUp === true)) {
-    // 最下部にスクロール
-    //console.log("最下部にスクロール");
-    //chatDom.scrollTop = scrollHeight;
-  }
-  //console.timeEnd("scroll time");
 
   //console.timeEnd("loop time");
 }
@@ -799,25 +764,16 @@ function startWatchCommentDOM() {
 
   startWatchGridDOM();
 
-  // ギフト画面を表示 → ギフト画面を非表示　をした場合にここでイベントを再設定できるようにしておく
-  let commentBox = document.querySelector("[class^=___comment-panel___] [class^=___body___]");
-  if(commentBox) {
-    commentBox.addEventListener('scroll', function (e) {
-      const currentScrollPosition = e.target.scrollTop;
-      if (currentScrollPosition < lastScrollPosition) {
-        _bWhieelUp = true;
-      }
-      lastScrollPosition = currentScrollPosition;
-    });  
-  }
   // ギフト画面を表示 → ギフト画面を非表示　をした場合には既存のコメントは裸のままになるのでここでeditComment()しておく
   const tableDom = document.querySelector("[class^=___table___]"); // コメントDOMの直上の親DOMを指定
   if (tableDom) {
+      
     tableDom.childNodes.forEach((currentNode)=>{   
-
+  
       editComment(currentNode);
 
     });
+
   }
 
 
@@ -858,27 +814,7 @@ function startWatchGridDOM() {
       for (const mutation of mutationsList) {
         if(mutation.addedNodes){
 
-          //console.log(mutation);
-
-          if(document.querySelector("[class^=___indicator___]")) {
-
-            // 最下部にスクロールを強化
-            document.querySelector("[class^=___indicator___]").addEventListener('click', function (e) {
-
-              let chatDom = document.querySelector("[class^=___comment-panel___] [class^=___body___]");
-              const scrollHeight = chatDom.scrollHeight;
-              /*
-              window.requestAnimationFrame(() => {
-                chatDom.scrollTop = scrollHeight;
-              });
-              */
-              chatDom.scrollTop = scrollHeight;
-              e.stopPropagation();
-            });
-            
-          }
-
-          
+          //console.log(mutation);        
           
           // 色関係
           if(document.querySelector("[class^=___program-comment-context-menu___]") && !document.querySelector("[class^=___program-comment-context-menu___]:empty")) {
