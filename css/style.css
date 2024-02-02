@@ -808,8 +808,17 @@ div#ext_dom_message {
     background-color: white !important;
 
     height: inherit !important;
-    margin-right: 1px !important;
+    margin-right: 12px !important;
     margin-left: 9px !important;
+
+    & span {
+        color: #b70000 !important;
+        max-width: 94px !important;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        color: inherit;
+    }
 }
 
 [class^=___contents-area___][ext-master-comeview] .wrapComment_by_extention {
@@ -856,7 +865,10 @@ html[data-darkreader-scheme] [class^=___player-area___] {
     border: none !important;
     padding: 0px !important;
     margin-left: 5px !important;
-    background-color: transparent !important;    
+    background-color: transparent !important;
+    & span {
+        max-width: inherit !important;
+    }
 }
 [ext-attr-IamOwner="true"] [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user_name_by_extention {
     border: none !important;
