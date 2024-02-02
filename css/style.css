@@ -1268,3 +1268,9 @@ html[data-darkreader-scheme] [class^=___program-comment-context-menu___] .ext-me
     transform: translate(35%, 35%) scale(0.3);
     background-color: rgba(255, 255, 255, 0.315);
 }
+
+
+/* 2024年2月あたりにNG設定画面がコメビュに隠れる問題の修正 */
+[class^=___ng-setting-panel___] {
+    z-index: 1;
+}
