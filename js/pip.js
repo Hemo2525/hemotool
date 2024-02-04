@@ -6,25 +6,18 @@ let _pip_game;
 var _pip_Canvas;
 let _videoElementForPip;
 
-//let _opt_fps;
+let _videoBitrate;
 //let _opt_kaku;
 
+
+function setRecBitrato(value) {
+    _videoBitrate = value;
+}
+
+function getRecBitrato() {
+    return _videoBitrate;
+}
 /*
-function setRecFps(value) {
-    if(value === "60fps") {
-        _opt_fps = 1000/60;
-    } else if(value === "30fps") {
-        _opt_fps = 1000/30;
-    } else {
-        // Default
-        _opt_fps = 1000/60;
-    }
-}
-
-function getRecFps() {
-    return _opt_fps;
-}
-
 function setRecKaku(value) {
     if(value === "webm") {
         _opt_kaku = "webm";
@@ -185,8 +178,8 @@ function recStop() {
     document.querySelector('#ext_shortcut .item.rec').setAttribute("aria-label", "録画を開始します");  
 
     // オプション操作を有効化
+    document.querySelector('.option.videoBitrato select').removeAttribute("disabled");
     /*
-    document.querySelector('.option.fps select').removeAttribute("disabled");
     document.querySelector('.option.size select').removeAttribute("disabled");
     document.querySelector('.option.kaku select').removeAttribute("disabled");
     */
@@ -248,7 +241,8 @@ async function startRecording(handle, videoOutputStream) {
       frameStream: frameStream,
       trackSettings: trackSettings,
       importUrl : chrome.runtime.getURL('/js/lib/mp4-muxer.min.js'),
-      audioStream : audioStream
+      audioStream : audioStream,
+      videoBitrate: getRecBitrato()
     }, [frameStream, audioStream]);
 
   }
@@ -370,8 +364,9 @@ function downloadURI(uri, name) {
                 document.querySelector('#ext_shortcut .item.rec').setAttribute("aria-label", "録画を開始します");  
 
                 // オプション操作を有効化
+                
+                document.querySelector('.option.videoBitrato select').removeAttribute("disabled");
                 /*
-                document.querySelector('.option.fps select').removeAttribute("disabled");
                 document.querySelector('.option.size select').removeAttribute("disabled");
                 document.querySelector('.option.kaku select').removeAttribute("disabled");
                 */
@@ -387,8 +382,8 @@ function downloadURI(uri, name) {
                 document.querySelector('#ext_shortcut .item.rec').setAttribute("aria-label", "録画を開始します");  
 
                 // オプション操作を有効化
+                document.querySelector('.option.videoBitrato select').removeAttribute("disabled");
                 /*
-                document.querySelector('.option.fps select').removeAttribute("disabled");
                 document.querySelector('.option.size select').removeAttribute("disabled");
                 document.querySelector('.option.kaku select').removeAttribute("disabled");
                 */

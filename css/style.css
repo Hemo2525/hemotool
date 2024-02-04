@@ -274,6 +274,11 @@
     cursor: default;
     user-select: none;
     transition: all 0.3s ease 0s;
+
+    &.desc {
+        line-height: 1.2;
+        padding: 6px 20px;
+    }
 }
 .ext-setting-menu .option-box .option.desc a {
     color: white;

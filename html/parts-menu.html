@@ -470,18 +470,28 @@
             </div>
         </div>
         <div class="option-box">
-            <div class="option desc">ニコ生ゲームの録画は非対応です。この機能はPCにとって高負荷なのでご注意ください。</div>
-            <div class="option desc">※うまく録画されない場合 <a href="https://sites.google.com/view/hemo2525/extension/qa#h.zhte8tcjrsbw" target="_blank">Q&Aを読む</a></div>
-            <!--
-            <div class="option fps">
-                <div class="name">FPS</div>
+            <div class="option desc">※この録画機能はPCにとって高負荷なのでご注意ください。</div>
+            <div class="option desc">※映像ビットレートを上げると画質が上がりますがファイルサイズも巨大化します</div>
+            <div class="option desc">※録画中はChromeのタブを切り替えてしまうと録画映像が黒くなります</div>
+            <div class="option desc">※録画できない場合はChromeのハードウェアアクセラレーションを有効にしてください</div>
+            <div class="option videoBitrato">
+                <div class="name">映像ビットレート</div>
                 <div class="value">
                     <select>
-                        <option value="60fps">60fps</option>
-                        <option value="30fps">30fps</option>
+                        <option value="1_000_000">1 Mbps</option>
+                        <option value="2_000_000">2 Mbps</option>
+                        <option value="3_000_000">3 Mbps</option>
+                        <option value="4_000_000">4 Mbps</option>
+                        <option value="5_000_000">5 Mbps</option>
+                        <option value="6_000_000">6 Mbps</option>
+                        <option value="7_000_000">7 Mbps</option>
+                        <option value="8_000_000">8 Mbps</option>
+                        <option value="9_000_000">9 Mbps</option>
+                        <option value="10_000_000">10 Mbps</option>
                     </select>
                 </div>
             </div>
+            <!--
             <div class="option size">
                 <div class="name">画質</div>
                 <div class="value">
@@ -535,8 +545,17 @@
 
     <div id="ext-info-box">
         <div class="item">
+            <div class="time">2024.2.5</div>
+            <img src="20240205.png">
+            <ul>
+                <li>録画に失敗する方はChromeの設定でハードウェアアクセラレーションを有効にしてください。</li>
+                <li>録画中はタブを切り替えてしまうと映像が録画されません。</li>
+                <li>映像ビットレートを上げるとファイルサイズも巨大化します。</li>
+            </ul>
+        </div>
+        <div class="item">
             <div class="time">2024.2.3</div>
-            <h2>不具合修正<span class="update">UPDATE!</span></h2>
+            <h2>不具合修正<!-- <span class="update">UPDATE!</span> --></h2>
             <ul>
                 <li>ニコ生アップデートによりNG設定画面が表示されなくなった問題を修正</li>
                 <li>ニコ生アップデートにより自分のなふだコメントの名前の表示が崩れる問題を修正</li>

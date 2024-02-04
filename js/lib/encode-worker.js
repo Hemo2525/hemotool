@@ -8,7 +8,7 @@ let audioEncoder = null;
 let recording = false;
 
 
-async function startRecording(fileHandle, frameStream, trackSettings, importUrl, audioStream) {
+async function startRecording(fileHandle, frameStream, trackSettings, importUrl, audioStream, videoBitrate) {
 
   let frameCounter = 0;
   importScripts(importUrl);
@@ -20,7 +20,7 @@ async function startRecording(fileHandle, frameStream, trackSettings, importUrl,
   //let audioSampleRate = audioTrack?.getCapabilities().sampleRate.max;
 
 
-
+console.log("映像ビットレート：" + videoBitrate);
   
   
 
@@ -75,7 +75,9 @@ async function startRecording(fileHandle, frameStream, trackSettings, importUrl,
     width: trackSettings.width,
     height: trackSettings.height,
 		//bitrate: 1e6,
-    bitrate: 2_000_000, // 2 Mbps
+    //bitrate: 2_000_000, // 2 Mbps
+    //bitrate: 5_000_000, // 5 Mbps
+    bitrate: Number(videoBitrate.replace(/_/g, '')), // 文字列の"X_0000_000" を X000000 に変換
     //bitrate: 1_000_000, // 1 Mbps
     framerate: 60,
 	});
@@ -218,7 +220,7 @@ async function stopRecording() {
 self.addEventListener('message', function (e) {
   switch (e.data.type) {
     case "start":
-      startRecording(e.data.fileHandle, e.data.frameStream, e.data.trackSettings, e.data.importUrl, e.data.audioStream);
+      startRecording(e.data.fileHandle, e.data.frameStream, e.data.trackSettings, e.data.importUrl, e.data.audioStream, e.data.videoBitrate);
       //startRecording(e.data.fileHandle, e.data.frameStream, e.data.trackSettings, e.data.importUrl);
       break;
     case "stop":

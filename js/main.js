@@ -468,8 +468,9 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
             */
            
             // オプション操作を無効化しておく
+            
+            document.querySelector('.option.videoBitrato select').setAttribute("disabled", 'on');
             /*
-            document.querySelector('.option.fps select').setAttribute("disabled", 'on');
             document.querySelector('.option.size select').setAttribute("disabled", 'on');
             document.querySelector('.option.kaku select').setAttribute("disabled", 'on');
             */
@@ -888,26 +889,26 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
         let items = el.querySelectorAll('.option');
         let borders = el.querySelectorAll('.border');
         
-        const height = (items.length * 41) + (borders.length * 10) + 10;
+        const height = (items.length * 43) + (borders.length * 10) + 10;
         el.style.setProperty("--max-height", height + "px");
-        
+        console.log(items.length);
     });
 
 
 
 
-    /*
-    // [録画機能] FPS
-    document.querySelector('.ext-setting-menu .ext-rec .option.fps select').addEventListener('change', (e) => {
+    
+    // [録画機能] 映像ビットレート
+    document.querySelector('.ext-setting-menu .ext-rec .option.videoBitrato select').addEventListener('change', (e) => {
         if(e.isTrusted){
 
-            setRecFps(document.querySelector('.ext-setting-menu .ext-rec .option.fps select').value);
+            setRecBitrato(document.querySelector('.ext-setting-menu .ext-rec .option.videoBitrato select').value);
             
-            chrome.storage.local.set({"ext_rec_opt_fps": document.querySelector('.ext-setting-menu .ext-rec .option.fps select').value}, function() {});
+            chrome.storage.local.set({"ext_rec_opt_videoBitrato": document.querySelector('.ext-setting-menu .ext-rec .option.videoBitrato select').value}, function() {});
 
         }
     });
-
+    /*
     // [録画機能] 画質
     document.querySelector('.ext-setting-menu .ext-rec .option.size select').addEventListener('change', (e) => {
         if(e.isTrusted){
@@ -1629,18 +1630,19 @@ function setSettingValue() {
                 document.querySelector('#ext_shortcut .item.rec').setAttribute("ext-pin-on", "ON");
             }
         });
-        /*
-        // 録画機能のFPS
-        chrome.storage.local.get("ext_rec_opt_fps", function (value) {
-            if (value.ext_rec_opt_fps) {
-                document.querySelector('.ext-setting-menu .ext-rec .option.fps select').value = value.ext_rec_opt_fps;
-                setRecFps(value.ext_rec_opt_fps);
+        
+        // 録画機能の映像ビットレート
+        chrome.storage.local.get("ext_rec_opt_videoBitrato", function (value) {
+            if (value.ext_rec_opt_videoBitrato) {
+                document.querySelector('.ext-setting-menu .ext-rec .option.videoBitrato select').value = value.ext_rec_opt_videoBitrato;
+                setRecBitrato(value.ext_rec_opt_videoBitrato);
             } else {
-                document.querySelector('.ext-setting-menu .ext-rec .option.fps select').value = "60fps";
-                setRecFps("60fps");
+                document.querySelector('.ext-setting-menu .ext-rec .option.videoBitrato select').value = "2_000_000";
+                setRecBitrato("2_000_000");
             }
 
         });
+        /*
         // 録画機能の画質
          chrome.storage.local.get("ext_rec_opt_size", function (value) {
             if (value.ext_rec_opt_size) {
