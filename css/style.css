@@ -744,6 +744,37 @@ div#ext_dom_message {
     outline: none;
     height: 7px;
     border-radius: 12px;
+    position: relative;
+
+    &::before {
+        background-color: #252525;
+        border-radius: 2px;
+        box-shadow: 0 0 2px 0 rgba(0,0,0,.5);
+        box-sizing: border-box;
+        color: #fff;
+        content: attr(aria-label);
+        display: block;
+        font-size: 12px;
+        top: -40px;
+        left: 50%;
+        letter-spacing: normal;
+        line-height: 1;
+        opacity: 0;
+        padding: 6px 8px;
+        pointer-events: none;
+        position: absolute;
+        text-align: center;
+        transform: translateX(-50%);
+        transition: opacity .12s ease;
+        white-space: nowrap;
+        z-index: 10000;
+    }
+
+    &.mouseOver {
+        &::before {
+            opacity: 1;
+        }
+    }
 }
 
 #ext_videoVolumeSlider::-webkit-slider-thumb {
@@ -1291,3 +1322,5 @@ html[data-darkreader-scheme] [class^=___program-comment-context-menu___] .ext-me
 [class^=___ng-setting-panel___] {
     z-index: 1;
 }
+
+
