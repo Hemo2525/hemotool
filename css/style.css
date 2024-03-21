@@ -1324,3 +1324,12 @@ html[data-darkreader-scheme] [class^=___program-comment-context-menu___] .ext-me
 }
 
 
+/* コメントのコンテキストメニューが下のエリアの背面に隠れる問題の対応 */
+[class^=___player-area___] {
+    position: relative;
+    z-index: 2;
+}
+[class^=___program-information-area___] {
+    position: relative;
+    z-index: 1;
+}
