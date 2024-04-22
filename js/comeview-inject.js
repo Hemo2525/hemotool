@@ -817,10 +817,10 @@ function startWatchGridDOM() {
           //console.log(mutation);        
           
           // 色関係
-          if(document.querySelector("[class^=___program-comment-context-menu___]") && !document.querySelector("[class^=___program-comment-context-menu___]:empty")) {
+          if(document.querySelector("[class^=___context-menu___]") && !document.querySelector("[class^=___context-menu___]:empty")) {
             // 上記、:empty は、ニコ生のDOMが「へもさんが100ptニコニコ広告しました」などのシステムメッセージを右クリックした場合、コンテキストメニューのDOMが表示されていないのにDOM上は存在している状態になってしまう仕様があり、それを回避するためのもの。
 
-            if( !document.querySelector("[class^=___program-comment-context-menu___] .ext-menu") && currentUserID !== 0 ) {
+            if( !document.querySelector("[class^=___context-menu___] .ext-menu") && currentUserID !== 0 ) {
 
               let style = document.getElementById('extension_style');
               let _tempCurrentUserID;
@@ -990,7 +990,7 @@ function startWatchGridDOM() {
                 }
 
                 // コンテキストメニューを閉じる
-                document.querySelector('[class^=___program-comment-context-menu___]').style.display = "none"
+                document.querySelector('[class^=___context-menu___]').style.display = "none"
 
 
                 // カラー情報を保存するDOMに保存
@@ -1028,7 +1028,7 @@ function startWatchGridDOM() {
               observer.disconnect();
 
               // コンテキストメニューに追加メニュー項目を挿入
-              let commentContext = document.querySelector("[class^=___comment-menu___]"); // コメント関係のメニューDOMを指定
+              let commentContext = document.querySelector("[class^=___program-comment-menu___]"); // コメント関係のメニューDOMを指定
               if(commentContext && commentContext.parentNode){
                 commentContext.parentNode.insertBefore(ulElement, commentContext);    
               }
