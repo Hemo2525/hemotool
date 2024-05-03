@@ -356,8 +356,18 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
     //スタイル エレメントを作成
     let style = document.createElement("style");
     style.id = "extension_style";
-    //スタイルをヘッダに入れる
+    //<style>を<head>に入れる
     document.head.appendChild(style);
+
+    //スタイル エレメントを作成(Pアイコン、主アイコン用)
+    let style_comment_for_icon = document.createElement("style");
+    style_comment_for_icon.id = "extension_style_for_icon";
+    //<style>を<head>に入れる
+    document.head.appendChild(style_comment_for_icon);
+    style_comment_for_icon.sheet.insertRule('.premium_by_extention { background-image: url("' + chrome.runtime.getURL("/img/icon-premium.png") + '"); }');
+    style_comment_for_icon.sheet.insertRule('.noPremium_by_extention { background-image: url("' + chrome.runtime.getURL("/img/icon-normal.png") + '"); }');
+    style_comment_for_icon.sheet.insertRule('.owner_by_extention { background-image: url("' + chrome.runtime.getURL("/img/icon-owner.png") + '"); }');
+    
 
 
     // 拡張機能ボタンのメニュー表示

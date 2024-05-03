@@ -529,21 +529,21 @@ function InsertPremium(fragment, newNo, bIsOwner) {
   if(bIsOwner) {
     // 配信者のコメント ------------------
     // 配信者はプレ垢かどうか関わらずpremium==3になってるので配信者は(主)と表示
-    newContent = document.createTextNode("主");
-    newElement.appendChild(newContent);
+    // newContent = document.createTextNode("主");
+    // newElement.appendChild(newContent);
     newElement.setAttribute("class", "owner_by_extention");
     newElement.setAttribute("title", "配信者");
 
   } else {
     // リスナーのコメント ------------------
     if (_premiumList[newNo] === true) {
-      newContent = document.createTextNode("P");
-      newElement.appendChild(newContent);
+      // newContent = document.createTextNode("P");
+      // newElement.appendChild(newContent);
       newElement.setAttribute("class", "premium_by_extention");
       newElement.setAttribute("title", "プレミアムアカウント");   
     } else {
-      newContent = document.createTextNode("");
-      newElement.appendChild(newContent);
+      // newContent = document.createTextNode("");
+      // newElement.appendChild(newContent);
       newElement.setAttribute("class", "noPremium_by_extention");
       newElement.setAttribute("title", "一般アカウント");
     }  
@@ -1199,7 +1199,7 @@ function initialize(callback, timeoutMiliSec) {
       "[class^=___time-score___] span[class^=___value___]",
       "#ext_kotehanToInjectBox",
       "#ext_colorToInjectBox",
-      "#extension_style"
+      "#extension_style",
   ];
 
   const startMiliSec= Date.now();
