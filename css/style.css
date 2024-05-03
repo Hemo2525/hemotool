@@ -818,8 +818,10 @@ div#ext_dom_message {
     font-size: 12px; 
     background-color: white;
 
+    flex-shrink: 0; /* コメント文がFlexBoxより大きくなっても名前は縮まないようにする */
+
     /* 長い名前はCSSで省略(省略記号...表示) */
-    max-width: 80px;
+    max-width: 85px;
     -webkit-line-clamp: 1 !important;
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
@@ -856,11 +858,13 @@ div#ext_dom_message {
     padding: 0px 6px 0px 8px !important;
     border-radius: 10px !important;
     font-size: 12px !important;
-    background-color: white !important;
+    background-color: white;
 
     height: inherit !important;
     margin-right: 12px !important;
     margin-left: 9px !important;
+
+    flex-shrink: 0; /* コメント文がFlexBoxより大きくなっても名前は縮まないようにする */
 
     & span {
         color: #b70000 !important;
@@ -870,6 +874,13 @@ div#ext_dom_message {
         white-space: nowrap;
         color: inherit;
     }
+
+    /* 長い名前はCSSで省略(省略記号...表示) */
+    max-width: 100px;
+    -webkit-line-clamp: 1 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;    
 }
 
 [class^=___contents-area___][ext-master-comeview] .wrapComment_by_extention {
@@ -889,27 +900,9 @@ div#ext_dom_message {
 [class^=___contents-area___][ext-master-comeview] .content-area>.user-summary-area img {
     width: 25px !important;
     height: 25px !important;
+    top: -3px !important;
 }
 
-
-html[data-darkreader-scheme] .user_name_by_extention {
-    background-color: inherit;
-    color: #e54b4b;
-    border: 1px solid #e54b4b; 
-}
-html[data-darkreader-scheme] .user_name_by_extention.user184 {
-    background-color: inherit;
-    color: #d3d3d3;
-    border: 1px solid #d3d3d3; 
-}
-html[data-darkreader-scheme] .user_name_by_extention.kotehan {
-    background-color: inherit;
-    color: #204dad; 
-    border: 1px solid #204dad; 
-}
-html[data-darkreader-scheme] [class^=___player-area___] {
-    background-image: none !important;
-}
 
 
 /* 自身が配信者の場合のコメント欄*/
@@ -921,6 +914,7 @@ html[data-darkreader-scheme] [class^=___player-area___] {
     padding: 0px !important;
     margin-left: 5px !important;
     background-color: transparent !important;
+    max-width: inherit;
     & span {
         max-width: inherit !important;
     }
@@ -930,8 +924,15 @@ html[data-darkreader-scheme] [class^=___player-area___] {
     padding: 0px !important;
     margin-left: 0 !important;
     background-color: transparent !important;
+    max-width: inherit;
+    border-radius: inherit;
 }
-
+[ext-attr-IamOwner="true"] [class^="___contents-area___"][ext-master-comeview] .user_icon_by_extention,
+[ext-attr-IamOwner="true"] [class^="___contents-area___"][ext-master-comeview] .content-area > .user-summary-area img {
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px;
+}
 
 /* 
 公式生放送ではコメント番号がDOMにないのでへもツール独自のユーザー名を表示できない。
@@ -1370,4 +1371,44 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
 [class^=___program-information-area___] {
     position: relative;
     z-index: 1;
+}
+
+
+
+
+/*
+Chrome拡張機能Dark Readerに対応
+*/
+
+html[data-darkreader-scheme] .user_name_by_extention {
+    background-color: inherit;
+    color: #e54b4b;
+    border: 1px solid #e54b4b; 
+}
+html[data-darkreader-scheme] .user_name_by_extention.user184 {
+    background-color: inherit;
+    color: #d3d3d3;
+    border: 1px solid #d3d3d3; 
+}
+html[data-darkreader-scheme] .user_name_by_extention.kotehan {
+    background-color: inherit;
+    color: #204dad; 
+    border: 1px solid #204dad; 
+}
+html[data-darkreader-scheme] [class^=___player-area___] {
+    background-image: none !important;
+}
+html[data-darkreader-scheme] .ext-popup {
+    background-color: #000000;
+    color: white;
+}
+
+
+html[data-darkreader-scheme] [class^="___contents-area___"][ext-master-comeview][ext-opt-name] [class^="___user-name-button___"] {    
+    background-color: inherit;
+    color: #e54b4b !important;
+    border: 1px solid #e54b4b !important; 
+    & span {
+        color: #e54b4b !important;
+    }
 }
