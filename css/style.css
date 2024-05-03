@@ -817,6 +817,13 @@ div#ext_dom_message {
     border-radius: 10px; 
     font-size: 12px; 
     background-color: white;
+
+    /* 長い名前はCSSで省略(省略記号...表示) */
+    max-width: 80px;
+    -webkit-line-clamp: 1 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;    
 }
 .user_name_by_extention.user184 { 
     color: #424242; 
@@ -824,6 +831,14 @@ div#ext_dom_message {
     padding: 2px 10px 1px 10px; 
     font-size: 11px;
     background-color: white;
+
+    /* 長い名前はCSSで省略(省略記号...表示) */
+    max-width: 40px;
+    -webkit-line-clamp: 1 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+
 }
 .user_name_by_extention.kotehan { 
     color: #0034a3; 
@@ -872,8 +887,8 @@ div#ext_dom_message {
 }
 /* なふだ投稿のユーザーアイコンの大きさを揃える */
 [class^=___contents-area___][ext-master-comeview] .content-area>.user-summary-area img {
-    width: 25px;
-    height: 25px;
+    width: 25px !important;
+    height: 25px !important;
 }
 
 
@@ -1053,6 +1068,10 @@ html[data-darkreader-scheme] [class^=___player-area___] {
     display: inline-block;
 }
 
+/* コメビュ機能の共通スタイル */
+[ext-master-comeview] [class^=___comment-text___] {
+    margin: 0px !important;
+}
 
 /* コメント折り返しここから ------------------------------------ */
 
@@ -1068,31 +1087,13 @@ html[data-darkreader-scheme] [class^=___player-area___] {
     font-size: 9px !important;
 }
 
-/*
-[ext-master-comeview][ext-opt-orikaeshi] [class^=___comment-text___].one-line {
-    font-size: 12px !important;
-    line-height: 1.3 !important;
-}
-[ext-master-comeview][ext-opt-orikaeshi] [class^=___comment-text___].multiple-line {
-    height: 30px;    
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    line-height: 1.5 !important;
-    overflow: hidden !important;
-    font-size: 9px !important;
-    padding: 0 !important;
-}
-*/
-
 [ext-master-comeview][ext-opt-orikaeshi] [class^=___comment-text___] {
     height: auto;    
-    text-overflow: ellipsis;
+    /* text-overflow: ellipsis; */
     /*display: -webkit-box;*/
-    display: inline-block;
+    /* display: inline-block;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 2; */
     line-height: 1.1 !important;
     overflow: hidden !important;
     font-size: 12px !important;
@@ -1105,8 +1106,12 @@ html[data-darkreader-scheme] [class^=___player-area___] {
     */
     word-wrap: normal;
 
-    margin: 0 !important;
-
+    /* 2行より長い場合は三点リーダーで省略 */
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
 }
 
 

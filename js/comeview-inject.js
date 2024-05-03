@@ -301,7 +301,8 @@ function recvEvent(event) {
 
 
       _commentRawIdList[message.chat.no]  = message.chat.user_id;
-      _commentList[message.chat.no]       = message.chat.user_id.substring(0, 4) + "･･";
+      // _commentList[message.chat.no]       = message.chat.user_id.substring(0, 4) + "･･";
+      _commentList[message.chat.no]       = message.chat.user_id;
       _commentListFull[message.chat.no]   = message.chat.user_id;
       _183UserList[message.chat.no]       = message.chat.user_id;
       
@@ -342,9 +343,9 @@ function recvEvent(event) {
           var userNameFull = xmlDom.getElementsByTagName("dc:creator")[0].innerHTML;
           var userName = userNameFull;
           // 8文字より長い場合は省略
-          if (userName.length > 7) {
-            userName = userName.substring(0, 7) + "･･";
-          }
+          // if (userName.length > 7) {
+          //   userName = userName.substring(0, 7) + "･･";
+          // }
 
           _rawUserList[message.chat.user_id] = userName;
           _rawUserListFull[message.chat.user_id] = userNameFull;
@@ -473,9 +474,9 @@ function InsertUserName(fragment, newNo, bHide) {
     
 
     // 8文字より長い場合は省略
-    if (kotehan.length > 7) {
-      kotehan = kotehan.substring(0, 7) + "･･";
-    }
+    // if (kotehan.length > 7) {
+    //   kotehan = kotehan.substring(0, 7) + "･･";
+    // }
 
     //kotehan = _kotehanList[currentNoId];
     //kotehan = hitKotehan[0].kotehan;
