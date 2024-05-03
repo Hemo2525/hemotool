@@ -828,7 +828,7 @@ div#ext_dom_message {
 .user_name_by_extention.user184 { 
     color: #424242; 
     border: 1px solid #424242; 
-    padding: 2px 10px 1px 10px; 
+    padding: 2px 6px 1px 10px; 
     font-size: 11px;
     background-color: white;
 
@@ -1071,6 +1071,10 @@ html[data-darkreader-scheme] [class^=___player-area___] {
 /* コメビュ機能の共通スタイル */
 [ext-master-comeview] [class^=___comment-text___] {
     margin: 0px !important;
+}
+
+[class^=___contents-area___][ext-master-comeview][ext-opt-commentnum] .comment-number {
+    display: none !important;
 }
 
 /* コメント折り返しここから ------------------------------------ */

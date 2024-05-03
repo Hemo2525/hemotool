@@ -1006,6 +1006,10 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
     document.querySelector('.ext-setting-menu .ext-comeview .option.kotehan input').addEventListener('change', () => {
         comeview_option_kotehan();
     });
+    // [コメント] コメント番号非表示
+    document.querySelector('.ext-setting-menu .ext-comeview .option.commentnum input').addEventListener('change', () => {
+        comeview_option_commentnum();
+    });
 
     //-------------------------------------------------------
 
@@ -1326,6 +1330,9 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
 
             document.querySelector('.ext-setting-menu .ext-comeview .option.kotehan input').checked = true;
             comeview_option_kotehan();
+
+            document.querySelector('.ext-setting-menu .ext-comeview .option.commentnum input').checked = true;
+            comeview_option_commentnum();
         }
 
         // ストレージに保存されたバージョン情報とマニフェストのバージョン情報が異なる場合にポップアップを表示
@@ -1805,6 +1812,13 @@ function setSettingValue() {
             if (value.ext_comeview_opt_kotehan == "ON") {
                 document.querySelector('.ext-setting-menu .ext-comeview .option.kotehan input').checked = true;
                 comeview_option_kotehan();
+            }
+        });
+        // コメビュ機能のコメント番号非表示オプション
+        chrome.storage.local.get("ext_comeview_opt_commentnum", function (value) {
+            if (value.ext_comeview_opt_commentnum == "ON") {
+                document.querySelector('.ext-setting-menu .ext-comeview .option.commentnum input').checked = true;
+                comeview_option_commentnum();
             }
         });
         // 読み上げ機能

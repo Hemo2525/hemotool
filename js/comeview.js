@@ -121,6 +121,20 @@ function comeview_option_kotehan(){
   }
 }
 
+function comeview_option_commentnum(){
+  let input = document.querySelector('.ext-setting-menu .ext-comeview .option.commentnum input');
+  
+  // トグル
+  if(input.checked) {  // 注意　クリックされて変化後の値が入っている
+    chrome.storage.local.set({"ext_comeview_opt_commentnum": "ON"}, function() {});
+    document.querySelector("[class^=___contents-area___]").setAttribute("ext-opt-commentnum", "ON");
+
+  } else {
+    chrome.storage.local.set({"ext_comeview_opt_commentnum": "OFF"}, function() {});
+    document.querySelector("[class^=___contents-area___]").removeAttribute("ext-opt-commentnum");
+  }
+}
+
 
 
 
