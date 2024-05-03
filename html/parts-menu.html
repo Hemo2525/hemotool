@@ -73,49 +73,52 @@
                     </svg>
                 </div>
             </div>
-            <div class="help-page">
-                <h2>にゃあ</h2>
-            </div>
         </div>
         <div class="option-box">
-            <div class="option name">
+            <div class="option name" title="コメント主のIDまたは名前を表示します">
                 <div class="name">名前表示</div>
                 <div class="value">
                     <input type="checkbox">
                 </div>
             </div>
-            <div class="option icon">
+            <div class="option icon" title="コメント主のユーザーアイコンを表示します">
                 <div class="name">アイコン表示</div>
                 <div class="value">
                     <input type="checkbox">
                 </div>
             </div>
-            <div class="option wide">
+            <div class="option wide" title="コメント欄の幅を広げるバーが表示されます">
                 <div class="name">コメビュ幅の調整バー表示</div>
                 <div class="value">
                     <input type="checkbox">
                 </div>
             </div>
-            <div class="option orikaeshi">
+            <div class="option orikaeshi" title="長いコメントを最大2行まで折り返して表示します">
                 <div class="name">長いコメント折り返し</div>
                 <div class="value">
                     <input type="checkbox">
                 </div>
             </div>
-            <div class="option premium">
+            <div class="option premium" title="コメント主がプレミアムアカウントかどうかをマークで表示します">
                 <div class="name">プレ垢マーク表示</div>
                 <div class="value">
                     <input type="checkbox">
                 </div>
             </div>
-            <div class="option color">
+            <div class="option color" title="コメントの右クリックでコメントの配色を変更できます">
                 <div class="name">右クリックでコメ色変更</div>
                 <div class="value">
                     <input type="checkbox">
                 </div>
             </div>
-            <div class="option kotehan">
+            <div class="option kotehan" title="@マークの後ろにつけたコメントを名前として扱います">
                 <div class="name">コテハン表示(β版)</div>
+                <div class="value">
+                    <input type="checkbox">
+                </div>
+            </div>
+            <div class="option commentnum" title="コメント番号を非表示にします">
+                <div class="name new">コメント番号非表示</div>
                 <div class="value">
                     <input type="checkbox">
                 </div>
@@ -152,63 +155,63 @@
             </div>
         </div>
         <div class="option-box">
-            <div class="option voices">
+            <div class="option voices" title="">
                 <div class="name">音声の種類</div>
                 <div class="value">
                     <select></select>
                 </div>
             </div>
-            <div class="option volume">
+            <div class="option volume" title="">
                 <div class="name">音量</div>
                 <div class="value">
                     <input type="range" min="0" max="1" step="0.1">
                 </div>
             </div>
-            <div class="option rate">
+            <div class="option rate" title="">
                 <div class="name">速度</div>
                 <div class="value">
                     <input type="range" min="0.1" max="2" step="0.1">
                 </div>
             </div>
-            <div class="option pitch">
+            <div class="option pitch" title="">
                 <div class="name">ピッチ</div>
                 <div class="value">
                     <input type="range" min="0" max="2" step="0.1">
                 </div>
             </div>
             <div class="border"></div>
-            <div class="option gift">
+            <div class="option gift" title="">
                 <div class="name">[ギフト]の読み上げ</div>
                 <div class="value">
                     <input type="checkbox">
                 </div>
             </div>
-            <div class="option koukoku">
+            <div class="option koukoku" title="">
                 <div class="name">[広告] の読み上げ</div>
                 <div class="value">
                     <input type="checkbox">
                 </div>
             </div>
-            <div class="option raijosya">
+            <div class="option raijosya" title="">
                 <div class="name">[来場者] の読み上げ</div>
                 <div class="value">
-                    <input type="checkbox">
+                    <input type="checkbox" title="">
                 </div>
             </div>
-            <div class="option request">
+            <div class="option request" title="">
                 <div class="name">[リクエスト] の読み上げ</div>
                 <div class="value">
                     <input type="checkbox">
                 </div>
             </div>
-            <div class="option emotion">
+            <div class="option emotion" title="">
                 <div class="name">[エモーション] の読み上げ</div>
                 <div class="value">
                     <input type="checkbox">
                 </div>
             </div>
             <div class="border"></div>
-            <div class="option syoryaku">
+            <div class="option syoryaku" title="">
                 <div class="name">長いコメントを省略</div>
                 <div class="value flex">
                     <input class="syouryaku-left" type="number" max="99" min="0" step="1" size="2" placeholder="0" >
@@ -216,13 +219,13 @@
                 </div>
             </div>
             <div class="border"></div>
-            <div class="option nameyomiage">
+            <div class="option nameyomiage" title="">
                 <div class="name">名前を読み上げる</div>
                 <div class="value">
                     <input type="checkbox">
                 </div>
             </div>
-            <div class="option kyoiku">
+            <div class="option kyoiku" title="">
                 <div class="name">教育機能を有効</div>
                 <div class="value">
                     <input type="checkbox">
@@ -402,14 +405,14 @@
         </div>
         <div class="option-box">
             <div class="option desc">※ONにするとオプションを編集できます</div>
-            <div class="option reverse">
+            <div class="option reverse" title="">
                 <div class="name">左右反転</div>
                 <div class="value">
                     <input type="checkbox">
                 </div>
             </div>
-            <div class="option rotate">
-                <div class="name new">回転</div>
+            <div class="option rotate" title="">
+                <div class="name">回転</div>
                 <div class="value">
                     <select>
                         <option value="default">回転しない</option>
@@ -419,31 +422,31 @@
                 </div>
             </div>
             <div class="border"></div>
-            <div class="option brightness">
+            <div class="option brightness" title="">
                 <div class="name">明るさ</div>
                 <div class="value">
                     <input type="range" min="0" max="5" step="0.1" value="1">
                 </div>
             </div>
-            <div class="option grayscale">
+            <div class="option grayscale" title="">
                 <div class="name">グレースケール</div>
                 <div class="value">
                     <input type="range" min="0" max="1" step="0.1" value="0">
                 </div>
             </div>
-            <div class="option contrast">
+            <div class="option contrast" title="">
                 <div class="name">コントラスト</div>
                 <div class="value">
                     <input type="range" min="0" max="2" step="0.1" value="1">
                 </div>
             </div>
-            <div class="option opacity">
+            <div class="option opacity" title="">
                 <div class="name">不透明度</div>
                 <div class="value">
                     <input type="range" min="0" max="1" step="0.1" value="1">
                 </div>
             </div>
-            <div class="option reset">
+            <div class="option reset" title="">
                 <div class="name">リセット</div>
                 <div class="value">
                     <input type="button" value="デフォルトに戻す">
@@ -470,11 +473,10 @@
             </div>
         </div>
         <div class="option-box">
-            <div class="option desc">※この録画機能はPCにとって高負荷なのでご注意ください。</div>
             <div class="option desc">※映像ビットレートを上げると画質が上がりますがファイルサイズも巨大化します</div>
             <div class="option desc">※録画中はChromeのタブを切り替えてしまうと録画映像が黒くなります</div>
-            <div class="option desc" style="display: inline-block;">※録画できない場合はChromeの<a href="https://www.google.com/search?q=chrome+%E3%82%B0%E3%83%A9%E3%83%95%E3%82%A3%E3%83%83%E3%82%AF%E3%82%A2%E3%82%AF%E3%82%BB%E3%83%A9%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3+%E6%9C%89%E5%8A%B9%E3%81%AB%E3%81%99%E3%82%8B" targe="_blank">グラフィックアクセラレーション</a>を有効にしてください</div>
-            <div class="option videoBitrato">
+            <div class="option desc" style="display: inline-block;">※録画できない場合はChromeの<a href="https://www.google.com/search?q=chrome+%E3%82%B0%E3%83%A9%E3%83%95%E3%82%A3%E3%83%83%E3%82%AF%E3%82%A2%E3%82%AF%E3%82%BB%E3%83%A9%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3+%E6%9C%89%E5%8A%B9%E3%81%AB%E3%81%99%E3%82%8B" target="_blank">グラフィックアクセラレーション</a>を有効にしてください</div>
+            <div class="option videoBitrato" title="">
                 <div class="name">映像ビットレート</div>
                 <div class="value">
                     <select>

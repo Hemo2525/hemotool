@@ -1683,8 +1683,8 @@ function setSettingValue() {
                 document.querySelector('.ext-setting-menu .ext-rec .option.videoBitrato select').value = value.ext_rec_opt_videoBitrato;
                 setRecBitrato(value.ext_rec_opt_videoBitrato);
             } else {
-                document.querySelector('.ext-setting-menu .ext-rec .option.videoBitrato select').value = "2_000_000";
-                setRecBitrato("2_000_000");
+                document.querySelector('.ext-setting-menu .ext-rec .option.videoBitrato select').value = "10_000_000";
+                setRecBitrato("10_000_000");
             }
 
         });
