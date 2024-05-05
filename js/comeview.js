@@ -12,6 +12,9 @@ function comeview(){
     document.querySelector("[class^=___contents-area___]").removeAttribute("ext-master-comeview");
     document.querySelector("body").removeAttribute("ext-master-comeview");
 
+    // コメビュの幅を元に戻す
+    removeSplitterSize();   
+
   } else {
     chrome.storage.local.set({"ext_comeview": "ON"}, function() {});
     menu.setAttribute("ext-attr-on", "ON");
@@ -20,6 +23,9 @@ function comeview(){
 
     document.querySelector("[class^=___contents-area___]").setAttribute("ext-master-comeview", "ON");
     document.querySelector("body").setAttribute("ext-master-comeview", "ON");
+
+    // コメビュの幅を広げる
+    setSplitterSize(true); 
   }
 }
 
@@ -45,9 +51,16 @@ function comeview_option_wide(){
     chrome.storage.local.set({"ext_comeview_opt_wide": "ON"}, function() {});
     document.querySelector("body").setAttribute("ext-opt-wide", "ON");
 
+    // コメビュの幅を広げる
+    setSplitterSize(true);
+
   } else {
     chrome.storage.local.set({"ext_comeview_opt_wide": "OFF"}, function() {});
     document.querySelector("body").removeAttribute("ext-opt-wide");
+
+    // コメビュの幅を元に戻す
+    removeSplitterSize();
+
   }
 }
 

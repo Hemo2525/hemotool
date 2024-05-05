@@ -118,14 +118,92 @@ function ownerCheck(){
     }
 }
 
-function watchCommentParentDOM(mutationRecords, observer) {
 
-    console.log("イベントを設定し直します");
+
+window.addEventListener('resize', function(e){
+
+    console.log("リサイズイベント発生");
+
+    /* メニューの高さを調整 */
+    setExtSettingMenuHeight();
+
+    /* ポップアップ画面の高さ調整 */
+    setExtPopupHeight();
+
+    /* 画面幅を調整 */
+    setSplitterSize();
+
+});
+
+function setSplitterSize(bGetLocalSetting = false) {
+
+    console.log("setSplitterSize");
+
+    chrome.storage.local.get(["ext_comeview", "ext_comeview_opt_wide", "ext_comeview_opt_wide_panelWidth", "ext_comeview_opt_wide_displayWidth"], function (value) {
+        if (value.ext_comeview === "ON" && value.ext_comeview_opt_wide === "ON") {
+            if(bGetLocalSetting) {
+
+                /* 保存してある幅から設定 */
+                        
+                if (value.ext_comeview_opt_wide_panelWidth && value.ext_comeview_opt_wide_displayWidth) {
+    
+                    const getPanelWidth = Number(value.ext_comeview_opt_wide_panelWidth.replace("px", ""));
+    
+                    /* 画面幅を調整 */
+                    const displayElement = document.querySelector('[class^=___player-display___]');
+                    const panelElement = document.querySelector("[class^=___player-status-panel___]");
+                    const playerSection = document.querySelector('[class^=___player-section___]');
+                    const parentWidth = playerSection.clientWidth;
+    
+                    displayElement.style.width = parentWidth - getPanelWidth + "px";
+                    panelElement.style.width = getPanelWidth + "px";
+    
+                }
+        
+            } else {
+        
+                /* 現在の幅から画面幅を調整 */
+        
+                const displayElement = document.querySelector('[class^=___player-display___]');
+                const panelElement = document.querySelector("[class^=___player-status-panel___]");
+                const playerSection = document.querySelector('[class^=___player-section___]');
+                const parentWidth = playerSection.clientWidth;
+        
+                displayElement.style.width = parentWidth - panelElement.clientWidth + "px";
+        
+                chrome.storage.local.set({"ext_comeview_opt_wide_panelWidth": panelElement.clientWidth + "px"}, function() {});
+                chrome.storage.local.set({"ext_comeview_opt_wide_displayWidth": displayElement.style.width}, function() {});
+            }
+
+        } else {
+            removeSplitterSize();
+        }
+    });
+    
+}
+
+function removeSplitterSize() {
+
+    console.log("removeSplitterSize");
+
+    const displayElement = document.querySelector('[class^=___player-display___]'); // プレイヤーDOM
+    const panelElement = document.querySelector("[class^=___player-status-panel___]"); // コメント欄DOM
+    displayElement.style.width = "";
+    panelElement.style.width = "";
+}
+
+function setEvents() {
+
+    // コメビュ幅の調整バーを挿入
+    var splitElement = document.createElement("div");
+    splitElement.id = "split_by_extention";
+    var playerElement = document.querySelector("[class^=___player-status-panel___]");
+    playerElement.parentNode.insertBefore(splitElement, playerElement);
+
+
 
     /* コメビュ幅の調整バーの設定 */
-
     const displayElement = document.querySelector('[class^=___player-display___]');
-
     const splitter = document.getElementById("split_by_extention");
 
     let bActive = false;
@@ -138,13 +216,15 @@ function watchCommentParentDOM(mutationRecords, observer) {
         document.querySelector("#ext_overlay").style.display = "block";
     });
 
-    const panelElement = document.querySelector("[class^=___player-status-panel___]");
-    const parent = document.querySelector('[class^=___player-section___]');
+    const panelElement = document.querySelector("[class^=___player-status-panel___]"); // コメント欄DOM
+    const parent = document.querySelector('[class^=___player-section___]');             // プレイヤーDOMとコメント欄DOMの親DOM
     parent.addEventListener("mousemove", (event) => {
         if(bActive) {
+            // プレイヤー画面の左端からの距離を取得
             const parentRect = document.querySelector('[class^=___player-display___]').getClientRects();                
             const size = event.clientX - parentRect[0].x;
-            const parentWidth = document.querySelector('[class^=___player-section___]').clientWidth;
+            // プレイヤーDOMとコメント欄DOMの親DOMのサイズからコメント欄DOMのサイズを引いたサイズをコメント欄DOMに設定
+            const parentWidth = parent.clientWidth;
     
             panelElement.style.width = parentWidth - size + "px";
             displayElement.style.width = size + "px";
@@ -164,72 +244,45 @@ function watchCommentParentDOM(mutationRecords, observer) {
                 document.querySelector("#ext_overlay").style.display = "none";
             }
         }
-
-
-
     }, false);
 
-}
-
-function setEvents() {
 
     
-    window.addEventListener('resize', function(e){
+    //監視オプション
+    const optionsForParent = {
+        childList:              true,    //直接の子の変更を監視
+        characterData:          true,    //文字の変化を監視
+        characterDataOldValue:  false,   //属性の変化前を記録
+        attributes:             false,   //属性の変化を監視
+        subtree:                false,   //全ての子要素を監視
+    }
 
-        /* メニューの高さを調整 */
-        setExtSettingMenuHeight();
-
-        /* ポップアップ画面の高さ調整 */
-        setExtPopupHeight();
-
-
-        /* 画面幅を調整 */
-        const displayElement = document.querySelector('[class^=___player-display___]');
-        const panelElement = document.querySelector("[class^=___player-status-panel___]");
-        const playerSection = document.querySelector('[class^=___player-section___]');
-        const parentWidth = playerSection.clientWidth;
-
-        displayElement.style.width = parentWidth - panelElement.clientWidth + "px";
-
-        chrome.storage.local.set({"ext_comeview_opt_wide_panelWidth": panelElement.clientWidth + "px"}, function() {});
-        chrome.storage.local.set({"ext_comeview_opt_wide_displayWidth": displayElement.style.width}, function() {});
-
-    });
-
-
-    var splitElement = document.createElement("div");
-    splitElement.id = "split_by_extention";
-
-    var playerElement = document.querySelector("[class^=___player-status-panel___]");
-    playerElement.parentNode.insertBefore(splitElement, playerElement);
-
+    // コメントDOMの親DOMの監視を開始(フルスクリーン解除時、放送ネタ画面(ギフト画面)の表示時に対応するため)
+    const contentsArea = document.querySelector("[class^=___contents-area___]"); // コメントDOMの大元の親DOMを指定
+    if (contentsArea) {
+        const obs = new MutationObserver(setSplitterSize);
+        obs.observe(contentsArea, optionsForParent);
+    }
 
     //監視オプション
-    const options = {
-        childList: true,  //直接の子の変更を監視
-        characterData: true,  //文字の変化を監視
-        characterDataOldValue: false, //属性の変化前を記録
-        attributes: true,  //属性の変化を監視
-        subtree: false, //全ての子要素を監視
+    const optionsForTheaterBtn = {
+        childList:              false,   //直接の子の変更を監視
+        characterData:          false,   //文字の変化を監視
+        characterDataOldValue:  false,   //属性の変化前を記録
+        attributes:             true,    //属性の変化を監視
+        subtree:                false,   //全ての子要素を監視
     }
 
-    // コメントDOMの親DOMの監視を開始(フルスクリーン解除時、放送ネタ画面の表示時に対応するため)
-    const target_parent = document.querySelector("[class^=___contents-area___]"); // コメントDOMの大元の親DOMを指定
-    if (target_parent) {
-        const obs = new MutationObserver(watchCommentParentDOM);
-        obs.observe(target_parent, options);
+    // leo-playerの監視を開始(シアターモード時に対応するため。シアターモードのときはleo-playerの属性値が変化する)
+    const theaterBtn = document.querySelector("[class^=___leo-player___]");
+    if (theaterBtn) {
+        const obs = new MutationObserver(setSplitterSize);
+        obs.observe(theaterBtn, optionsForTheaterBtn);
     }
 
-    watchCommentParentDOM();
-
-
-/*
-    document.querySelector('.ext-comeview .helpBtn').addEventListener('click', function(){
-        document.querySelector('.ext-comeview .help-page').classList.add("show");
-    });
-*/
-
-
+    setSplitterSize();
+    
+    
 }
 
 function setExtSettingMenuHeight() {
@@ -338,21 +391,6 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
 
 
 
-/*
-    const infoPage = infoHtml.replace("sample.jpg", chrome.runtime.getURL("/img/sample.jpg"));
-    console.log(infoPage);
-    // 新しい要素を作成
-    const infoPageElement = document.createElement('div');
-    infoPageElement.id = "ext_info_page";
-    infoPageElement.innerHTML = infoPage;
-
-    // 貼り付け先の要素を取得
-    const plyaerDom = document.querySelector('[class^=___player-display___]');
-
-    // 新しい要素を追加
-    plyaerDom.appendChild(infoPageElement);
-*/
-
     //スタイル エレメントを作成
     let style = document.createElement("style");
     style.id = "extension_style";
@@ -460,30 +498,15 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
                 // ON → OFF
                 recStop();
             }
-            /*
-            document.querySelector('#ext_shortcut .item.rec').removeAttribute("recording");
-            document.querySelector('#ext_shortcut .item.rec .recBtn').textContent = "録画開始";
-            document.querySelector('#ext_shortcut .item.rec .status').removeAttribute("rec");
-            document.querySelector('#ext_shortcut .item.rec').setAttribute("aria-label", "録画を開始します");
-            */
 
         } else {
             // OFF → ON
             recStart();
-            /*
-            document.querySelector('#ext_shortcut .item.rec').setAttribute("recording", "ON");
-            document.querySelector('#ext_shortcut .item.rec .recBtn').textContent = "録画停止";
-            document.querySelector('#ext_shortcut .item.rec .status').setAttribute("rec", "on");
-            document.querySelector('#ext_shortcut .item.rec').setAttribute("aria-label", "録画を停止します");
-            */
            
             // オプション操作を無効化しておく
             
             document.querySelector('.option.videoBitrato select').setAttribute("disabled", 'on');
-            /*
-            document.querySelector('.option.size select').setAttribute("disabled", 'on');
-            document.querySelector('.option.kaku select').setAttribute("disabled", 'on');
-            */
+
         }
     });
 
@@ -815,12 +838,12 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
         
     });
     document.querySelector('#ext_videoVolumeSlider').addEventListener('mouseenter', function(event) {
-        console.log('マウスが乗りました');
+        // console.log('マウスが乗りました');
         document.querySelector('#ext_videoVolumeSlider').classList.add('mouseOver');
     });
     
     document.querySelector('#ext_videoVolumeSlider').addEventListener('mouseleave', function(event) {
-        console.log('マウスが離れました');
+        // console.log('マウスが離れました');
         document.querySelector('#ext_videoVolumeSlider').classList.remove('mouseOver');
     });
 
@@ -1331,8 +1354,8 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
             document.querySelector('.ext-setting-menu .ext-comeview .option.kotehan input').checked = true;
             comeview_option_kotehan();
 
-            document.querySelector('.ext-setting-menu .ext-comeview .option.commentnum input').checked = true;
-            comeview_option_commentnum();
+            // document.querySelector('.ext-setting-menu .ext-comeview .option.commentnum input').checked = true;
+            // comeview_option_commentnum();
         }
 
         // ストレージに保存されたバージョン情報とマニフェストのバージョン情報が異なる場合にポップアップを表示
@@ -1750,9 +1773,24 @@ function setSettingValue() {
             }
         });
         // コメビュ機能の『コメビュ幅の調整バー表示』オプション
-        chrome.storage.local.get("ext_comeview_opt_wide", function (value) {
-            if (value.ext_comeview_opt_wide == "ON") {
+        chrome.storage.local.get(["ext_comeview", "ext_comeview_opt_wide", "ext_comeview_opt_wide_panelWidth", "ext_comeview_opt_wide_displayWidth"], function (value) {
+            if (value.ext_comeview === "ON" && value.ext_comeview_opt_wide === "ON") {
                 document.querySelector('.ext-setting-menu .ext-comeview .option.wide input').checked = true;
+
+                if (value.ext_comeview_opt_wide_panelWidth && value.ext_comeview_opt_wide_displayWidth) {
+                    
+                    const getPanelWidth = Number(value.ext_comeview_opt_wide_panelWidth.replace("px", ""));
+    
+                    /* 画面幅を調整 */
+                    const displayElement = document.querySelector('[class^=___player-display___]');
+                    const panelElement = document.querySelector("[class^=___player-status-panel___]");
+                    const playerSection = document.querySelector('[class^=___player-section___]');
+                    const parentWidth = playerSection.clientWidth;
+    
+                    displayElement.style.width = parentWidth - getPanelWidth + "px";
+                    panelElement.style.width = getPanelWidth + "px";
+    
+                }
                 
                 // 5秒後にコメビュ幅の調整バーを表示（起動直後にバーを表示するとコメント欄のスクロールバーが発生するため）
                 setTimeout(comeview_option_wide, 3000);
@@ -1760,27 +1798,6 @@ function setSettingValue() {
             }
         });
         
-        chrome.storage.local.get(["ext_comeview_opt_wide_panelWidth", "ext_comeview_opt_wide_displayWidth"], function (value) {
-            if (value.ext_comeview_opt_wide_panelWidth && value.ext_comeview_opt_wide_displayWidth) {
-                
-                //document.querySelector("[class^=___player-status-panel___]").style.width = value.ext_comeview_opt_wide_panelWidth;
-                //document.querySelector('[class^=___player-display___]').style.width = value.ext_comeview_opt_wide_displayWidth;
-
-                //console.log("px確認", value.ext_comeview_opt_wide_panelWidth , value.ext_comeview_opt_wide_displayWidth);
-
-                const getPanelWidth = Number(value.ext_comeview_opt_wide_panelWidth.replace("px", ""));
-
-                /* 画面幅を調整 */
-                const displayElement = document.querySelector('[class^=___player-display___]');
-                const panelElement = document.querySelector("[class^=___player-status-panel___]");
-                const playerSection = document.querySelector('[class^=___player-section___]');
-                const parentWidth = playerSection.clientWidth;
-
-                displayElement.style.width = parentWidth - getPanelWidth + "px";
-                panelElement.style.width = getPanelWidth + "px";
-
-            }
-        });
 
 
 
