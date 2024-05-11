@@ -13,6 +13,37 @@ WebSocket = new Proxy(WebSocket, {
   }
 });
 
+/**
+ * 指定されたユーザーIDのコメントを\nで連結した文字列を取得する
+ * @param {string} userId ユーザーID
+ * @returns {string} 指定されたユーザーIDのコメントを\nで連結した文字列
+ */
+function getCommentsStringByUserId(userId, commentNo) {
+  // ユーザーIDが一致するコメントを抽出し、コメント番号の降順でソートする
+  const userComments = Object.values(_allComment)
+    .filter(item => item.user_id === userId)  // 特定のユーザーIDで抽出
+    .filter(item => item.no <= commentNo)     // マウスカーソルが乗ったコメント番号以前のものを抽出
+    .sort((a, b) => a.no - b.no);
+
+  // 最新のコメントを末尾から最大10件取得する
+  const latestComments = userComments.slice(-10).map(comment => ({ ...comment }));
+
+  for (const key in latestComments) {
+    const comment = latestComments[key];
+    // const totalSeconds = Math.floor(comment.vpos / 100);
+    // const hours = Math.floor(totalSeconds / 3600);
+    // const minutes = Math.floor((totalSeconds % 3600) / 60);
+    // const seconds = totalSeconds % 60;
+    // const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    // latestComments[key].comment = formattedTime + " " + latestComments[key].comment;
+
+    latestComments[key].comment = comment.no + "　　" + latestComments[key].comment;
+  }
+
+  // コメントの文字列を抽出し、\nで連結する
+  return latestComments.map(item => item.comment).join("\n");
+}
+
 // 現在の再生時間(秒数)を取得
 function getStartPlayTime() {
 
@@ -64,14 +95,16 @@ var _currentVoiceName = "";
 var _commentList = {};      // KEY:コメント番号, VALUE:対応するユーザー名(最大7文字)（184さんなら省略型のハッシュ値、生IDさんなら省略形のユーザー名）
 var _commentListFull = {};  // KEY:コメント番号, VALUE:対応するユーザー名(フルネーム)（184さんならFullハッシュ値、生IDさんならFullユーザー名）
 var _183UserList = {};      // KEY:コメント番号, VALUE:184ユーザーID
-var _newUserList = {};      // KEY:コメント番号, VALUE:初めて書き込むユーザーID 
+//var _newUserList = {};      // KEY:コメント番号, VALUE:初めて書き込むユーザーID 
 var _premiumList = {};      // KEY:コメント番号, VALUE:何でもいい値
 var _rawUserList = {};      // KEY:ユーザーID,   VALUE:GETしてきたユーザー名(最大7文字)
 var _rawUserListFull = {};  // KEY:ユーザーID,   VALUE:GETしてきたユーザー名(フルネーム)
 var _gettingList = {};      // KEY:ユーザーID,   VALUE:何でもいい値
 
-var _commentRawIdList = {}; // KEY:コメント番号   VALUE:ユーザーID（184さんならハッシュ値、生IDさんなら生IDが入る）
-var _kotehanList = [];      // KEY:ユーザーID,    VALUE:コテハン
+let _allComment = {};       // KEY:ユーザーID, 　
+
+var _commentRawIdList = {}; // KEY:コメント番号  VALUE:ユーザーID（184さんならハッシュ値、生IDさんなら生IDが入る）
+var _kotehanList = [];      // KEY:ユーザーID,   VALUE:コテハン
 
 let _styleList = {};        // KEY:ユーザーID（184さんならハッシュ値、生IDさんなら生IDが入る）, VALUE: スタイルのindex番号(insertRule()した戻り値)
 
@@ -289,6 +322,35 @@ function recvEvent(event) {
       _premiumList[message.chat.no] = true;
     }
 
+    /*--------------------------------------------------------------
+    //  
+    --------------------------------------------------------------*/
+    if (message.chat && message.chat.no && message.chat.user_id && message.chat.content && message.chat.vpos) {
+
+      // 184さんか、またはシステムメッセージ以外ならばコメントを保存
+      if(message.chat.premium == undefined || (message.chat.premium && message.chat.premium != 3)) {
+        
+        // message.chat.vpos は枠が開いてからの10ミリ秒単位（ミリ秒単位じゃなくて10ミリ秒単位であることに注意）
+        /*
+        const totalSeconds = Math.floor(message.chat.vpos / 100);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        
+        const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  */      
+        _allComment[message.chat.no] = 
+          {
+            user_id: message.chat.user_id, 
+            vpos: message.chat.vpos,
+            comment: message.chat.content,
+            no: message.chat.no
+          };
+
+        //console.log(_allComment);
+
+      }
+    }
 
     /*--------------------------------------------------------------
     //  ユーザー名の取得処理
@@ -806,17 +868,32 @@ const optionsForGrid = {
 function startWatchGridDOM() {
   
   const target = document.querySelector("[class^=___comment-data-grid___]");
-  
+
+
   let currentUserID = 0;
+  let currentCommentNo = 0;
 
   if (target) {
     const obs = new MutationObserver(function(mutationsList, observer){
 
-      for (const mutation of mutationsList) {
-        if(mutation.addedNodes){
+      const tootlTip = document.getElementById('ext_tooltipBox');
 
-          //console.log(mutation);        
-          
+      //console.log(mutationsList);
+
+      for (const mutation of mutationsList) {
+        if(mutation.addedNodes.length > 0) {
+
+
+          // ツールチップ関係
+          if(document.querySelector("[class^=___tooltip___]")) {
+            if(currentUserID !== 0 && currentCommentNo !== 0) {
+              // console.log("ツールチップを表示します", currentUserID, currentCommentNo);
+              if(tootlTip) tootlTip.innerText = getCommentsStringByUserId(currentUserID, currentCommentNo);
+
+            }
+          }
+
+
           // 色関係
           if(document.querySelector("[class^=___context-menu___]") && !document.querySelector("[class^=___context-menu___]:empty")) {
             // 上記、:empty は、ニコ生のDOMが「へもさんが100ptニコニコ広告しました」などのシステムメッセージを右クリックした場合、コンテキストメニューのDOMが表示されていないのにDOM上は存在している状態になってしまう仕様があり、それを回避するためのもの。
@@ -1040,10 +1117,6 @@ function startWatchGridDOM() {
             }
             
           }
-          
-
-
-
         }
       }
 
@@ -1051,8 +1124,64 @@ function startWatchGridDOM() {
     
     obs.observe(target, optionsForGrid);
 
+
     
+
+    document.querySelector("[class^=___comment-data-grid___]").addEventListener("mousemove", function(e) {
+
+      const tootlTip = document.getElementById('ext_tooltipBox');
+      // console.log("mousemove", currentUserID, currentCommentNo);
+      if(tootlTip) {
+        if(currentUserID !== 0 && currentCommentNo !== 0) {
+
+          // tootlTip.style.display = "block";
+          tootlTip.classList.add("show");
+
+          // 要素の位置を更新する
+          // 要素の右下の座標を計算
+          const right = e.clientX - 10;
+          const bottom = e.clientY - 10;
+    
+          // 要素の位置を更新する
+          tootlTip.style.right = `calc(100% - ${right}px)`;
+          tootlTip.style.bottom = `calc(100% - ${bottom}px)`;  
+        } else {
+          // システムメッセージなどの場合は非表示にする
+          tootlTip.classList.remove("show");
+        }
+      }
+    });
+
+    document.querySelector("[class^=___comment-data-grid___]").addEventListener("mouseleave", function(e) {
+      // 要素の位置を更新する
+      const tootlTip = document.getElementById('ext_tooltipBox');
+      // tootlTip.style.display = "none";
+      tootlTip.classList.remove("show");
+    }); 
+
+    // ツールチップや色関係で使うユーザーIDを取得する
+    document.querySelector("[class^=___comment-data-grid___]").addEventListener("mouseover", function(e) {
+
+      //console.log("★mouseover", e.target);
+
+      if (e.target.parentNode && e.target.closest("[class^=___table-cell___]")) {
+        let commentDom = e.target.closest("[class^=___table-cell___]").querySelector("[class^=___comment-number___]");
+        if(commentDom && commentDom.innerText) {
+
+          currentUserID = _commentRawIdList[commentDom.innerText];
+          currentCommentNo = commentDom.innerText;
+
+          //console.log("★currentUserID" + currentUserID);
+                    
+        } else {
+          currentUserID = 0;
+          currentCommentNo = 0;
+        }
+      }
+    });
+
     // 色関係
+    /*
     document.querySelector("[class^=___comment-data-grid___]").addEventListener("mousedown", function(e) {
       
       //console.log("★mousedown", e.button, e.target);
@@ -1068,6 +1197,7 @@ function startWatchGridDOM() {
         }
       }
     });
+    */
     
   }
 }
@@ -1158,9 +1288,6 @@ window.addEventListener('load', function () {
       }
 
 
-
-
-
     }
 
   }, 6000 * 10 * 5); // 5分
@@ -1196,11 +1323,13 @@ function watchKotehan(mutationRecords, observer){
 
 function initialize(callback, timeoutMiliSec) {
 
+
   let domList = [
       "[class^=___time-score___] span[class^=___value___]",
       "#ext_kotehanToInjectBox",
       "#ext_colorToInjectBox",
       "#extension_style",
+      "#ext_tooltipBox",
   ];
 
   const startMiliSec= Date.now();

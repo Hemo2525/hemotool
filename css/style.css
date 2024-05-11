@@ -1175,7 +1175,7 @@ div[data-layer-name="videoLayer"] video {
     overflow: inherit !important;
 }
 [ext-master-comeview][ext-opt-icon] [class^=___context-menu___] {
-    z-index: 1;
+    z-index: 20;
 }
 [ext-master-comeview][ext-opt-icon] .user_icon_by_extention {
     background-repeat: no-repeat;
@@ -1250,7 +1250,9 @@ body[ext-master-comeview][ext-opt-wide] [data-layout-mode="full"] #split_by_exte
 [class^=___context-menu___] .ext-menu {
     display: none;
 }
-[ext-master-comeview][ext-opt-color] [class^=___context-menu___] .ext-menu {
+
+/* [ext-master-comeview][ext-opt-color] [class^=___context-menu___] .ext-menu { */
+[ext-master-comeview][ext-opt-color] [class^=___context-menu___]:has([class^=___program-comment-menu___]) .ext-menu {
     display: block;
 
     list-style: none;
@@ -1374,6 +1376,31 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
 }
 
 
+/* へもツール用のツールチップはデフォルトで非表示 */
+#ext_tooltipBox {
+    display: none;
+}
+/* へもツール用のツールチップのスタイル */
+[class^=___contents-area___][ext-master-comeview][ext-opt-tooltip] #ext_tooltipBox {
+    position: fixed;
+    max-width: 300px;
+    background-color: #f4f4f4;
+    border: 1px solid #e5e5e5;
+    z-index: 10;
+    line-height: 2;
+    opacity: 0.9;
+    padding: 10px 20px;
+    display: none;
+    &.show {
+        display: block;
+    }
+}
+/* ニコ生のデフォルトのツールチップを非表示 */
+[class^=___contents-area___][ext-master-comeview][ext-opt-tooltip] [class^=___tooltip___] {
+    display: none;
+}
+
+
 
 
 /*
@@ -1411,4 +1438,11 @@ html[data-darkreader-scheme] [class^="___contents-area___"][ext-master-comeview]
     & span {
         color: #e54b4b !important;
     }
+}
+html[data-darkreader-scheme] [ext-master-comeview] [class^="___table-row___"] {
+    border-top: 1px dashed rgba(255, 255, 255, 0.123) !important;
+}
+html[data-darkreader-scheme] #ext_tooltipBox {
+    background-color: #141414 !important;
+    color: white !important;
 }

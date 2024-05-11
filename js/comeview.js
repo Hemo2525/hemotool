@@ -148,6 +148,19 @@ function comeview_option_commentnum(){
   }
 }
 
+function comeview_option_tooltip(){
+  let input = document.querySelector('.ext-setting-menu .ext-comeview .option.tooltip input');
+  
+  // トグル
+  if(input.checked) {  // 注意　クリックされて変化後の値が入っている
+    chrome.storage.local.set({"ext_comeview_opt_tooltip": "ON"}, function() {});
+    document.querySelector("[class^=___contents-area___]").setAttribute("ext-opt-tooltip", "ON");
+
+  } else {
+    chrome.storage.local.set({"ext_comeview_opt_tooltip": "OFF"}, function() {});
+    document.querySelector("[class^=___contents-area___]").removeAttribute("ext-opt-tooltip");
+  }
+}
 
 
 

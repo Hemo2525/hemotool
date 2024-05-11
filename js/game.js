@@ -382,6 +382,7 @@ function CheckAndWipe(launchItem) {
         && gameName.startsWith('公式生放送実況') == false
         && gameName.startsWith('アクティブユーザー') == false
         && gameName.startsWith('マルチカメラ') == false
+        && gameName.startsWith('同接表示ツール') == false
         ) {
             // ワイプ機能がONかどうか
             if(document.querySelector('.ext-setting-menu .ext-video-wipe').getAttribute("ext-attr-on"))

@@ -122,7 +122,7 @@ function ownerCheck(){
 
 window.addEventListener('resize', function(e){
 
-    console.log("リサイズイベント発生");
+    // console.log("リサイズイベント発生");
 
     /* メニューの高さを調整 */
     setExtSettingMenuHeight();
@@ -137,7 +137,7 @@ window.addEventListener('resize', function(e){
 
 function setSplitterSize(bGetLocalSetting = false) {
 
-    console.log("setSplitterSize");
+    // console.log("setSplitterSize");
 
     chrome.storage.local.get(["ext_comeview", "ext_comeview_opt_wide", "ext_comeview_opt_wide_panelWidth", "ext_comeview_opt_wide_displayWidth"], function (value) {
         if (value.ext_comeview === "ON" && value.ext_comeview_opt_wide === "ON") {
@@ -1033,6 +1033,10 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
     document.querySelector('.ext-setting-menu .ext-comeview .option.commentnum input').addEventListener('change', () => {
         comeview_option_commentnum();
     });
+    // [コメント] コメント履歴の表示
+    document.querySelector('.ext-setting-menu .ext-comeview .option.tooltip input').addEventListener('change', () => {
+        comeview_option_tooltip();
+    });
 
     //-------------------------------------------------------
 
@@ -1295,6 +1299,12 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
 
 
 
+    // 新しいHTML要素を作成
+    let tootlTipDom = document.createElement('div');
+    tootlTipDom.id = "ext_tooltipBox";
+
+    // 指定した要素の中の末尾に挿入
+    document.querySelector("[class^=___comment-data-grid___]").appendChild(tootlTipDom);
 
 
 
@@ -1401,26 +1411,6 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
     // メニューの高さを設定
     setExtSettingMenuHeight();
 
-
-    //initOthers();
-
-    /*
-    document.querySelector('.ext-setting-menu .item.info .hemotool .ver').addEventListener('click', function(){
-
-        let count = document.querySelector('.ext-setting-menu .item.info .hemotool .ver').getAttribute('data-click-count');
-        if(!count) { 
-            count = 0;
-        }
-
-        document.querySelector('.ext-setting-menu .item.info .hemotool .ver').setAttribute('data-click-count', ++count);
-
-        if(count % 3 === 0) {
-            
-            chrome.storage.local.set({"ext_dev_mode": "ON"}, function() {});
-
-        }
-    });
-    */
 
     //監視オプション
     const optionsTools = {
@@ -1836,6 +1826,13 @@ function setSettingValue() {
             if (value.ext_comeview_opt_commentnum == "ON") {
                 document.querySelector('.ext-setting-menu .ext-comeview .option.commentnum input').checked = true;
                 comeview_option_commentnum();
+            }
+        });
+        // コメビュ機能のコメント履歴機能オプション
+        chrome.storage.local.get("ext_comeview_opt_tooltip", function (value) {
+            if (value.ext_comeview_opt_tooltip == "ON") {
+                document.querySelector('.ext-setting-menu .ext-comeview .option.tooltip input').checked = true;
+                comeview_option_tooltip();
             }
         });
         // 読み上げ機能
