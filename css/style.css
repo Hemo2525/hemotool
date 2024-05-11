@@ -1077,6 +1077,10 @@ div#ext_dom_message {
 [class^=___contents-area___][ext-master-comeview][ext-opt-commentnum] .comment-number {
     display: none !important;
 }
+[ext-master-comeview] [data-extension-firstcomment] [class^=___comment-text___] {
+    font-weight: bold;
+}
+
 
 /* コメント折り返しここから ------------------------------------ */
 

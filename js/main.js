@@ -300,8 +300,8 @@ function setExtSettingMenuHeight() {
 function setExtPopupHeight() {
     let height = document.querySelector('[class^=___player-display-screen___').clientHeight * 0.8;
     
-    if(height > 320) {
-        height = 320;
+    if(height > 400) {
+        height = 400;
     }
     
     document.querySelector('.ext-popup').style.height = height + "px";

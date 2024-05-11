@@ -20,10 +20,10 @@ WebSocket = new Proxy(WebSocket, {
  */
 function getCommentsStringByUserId(userId, commentNo) {
   // ユーザーIDが一致するコメントを抽出し、コメント番号の降順でソートする
-  const userComments = Object.values(_allComment)
-    .filter(item => item.user_id === userId)  // 特定のユーザーIDで抽出
-    .filter(item => item.no <= commentNo)     // マウスカーソルが乗ったコメント番号以前のものを抽出
-    .sort((a, b) => a.no - b.no);
+  const userComments = _allComment
+                          .filter(item => item.user_id === userId)  // 特定のユーザーIDで抽出
+                          .filter(item => item.no <= commentNo);     // マウスカーソルが乗ったコメント番号以前のものを抽出
+                          //.sort((a, b) => a.no - b.no);
 
   // 最新のコメントを末尾から最大10件取得する
   const latestComments = userComments.slice(-10).map(comment => ({ ...comment }));
@@ -92,16 +92,16 @@ function getStartPlayTime() {
 var _startTime;
 var _currentVoiceName = "";
 
-var _commentList = {};      // KEY:コメント番号, VALUE:対応するユーザー名(最大7文字)（184さんなら省略型のハッシュ値、生IDさんなら省略形のユーザー名）
+// var _commentList = {};      // KEY:コメント番号, VALUE:対応するユーザー名(最大7文字)（184さんなら省略型のハッシュ値、生IDさんなら省略形のユーザー名）
 var _commentListFull = {};  // KEY:コメント番号, VALUE:対応するユーザー名(フルネーム)（184さんならFullハッシュ値、生IDさんならFullユーザー名）
 var _183UserList = {};      // KEY:コメント番号, VALUE:184ユーザーID
 //var _newUserList = {};      // KEY:コメント番号, VALUE:初めて書き込むユーザーID 
 var _premiumList = {};      // KEY:コメント番号, VALUE:何でもいい値
-var _rawUserList = {};      // KEY:ユーザーID,   VALUE:GETしてきたユーザー名(最大7文字)
+// var _rawUserList = {};      // KEY:ユーザーID,   VALUE:GETしてきたユーザー名(最大7文字)
 var _rawUserListFull = {};  // KEY:ユーザーID,   VALUE:GETしてきたユーザー名(フルネーム)
 var _gettingList = {};      // KEY:ユーザーID,   VALUE:何でもいい値
 
-let _allComment = {};       // KEY:ユーザーID, 　
+let _allComment = [];       // KEY:ユーザーID, 　
 
 var _commentRawIdList = {}; // KEY:コメント番号  VALUE:ユーザーID（184さんならハッシュ値、生IDさんなら生IDが入る）
 var _kotehanList = [];      // KEY:ユーザーID,   VALUE:コテハン
@@ -327,29 +327,29 @@ function recvEvent(event) {
     --------------------------------------------------------------*/
     if (message.chat && message.chat.no && message.chat.user_id && message.chat.content && message.chat.vpos) {
 
-      // 184さんか、またはシステムメッセージ以外ならばコメントを保存
-      if(message.chat.premium == undefined || (message.chat.premium && message.chat.premium != 3)) {
-        
-        // message.chat.vpos は枠が開いてからの10ミリ秒単位（ミリ秒単位じゃなくて10ミリ秒単位であることに注意）
-        /*
-        const totalSeconds = Math.floor(message.chat.vpos / 100);
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
-        
-        const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  */      
+/*
         _allComment[message.chat.no] = 
           {
             user_id: message.chat.user_id, 
-            vpos: message.chat.vpos,
+            //vpos: message.chat.vpos,
             comment: message.chat.content,
             no: message.chat.no
           };
+*/
+        _allComment.push({
+          user_id: message.chat.user_id,
+          //vpos: message.chat.vpos,
+          comment: message.chat.content,
+          no: message.chat.no
+        });
+      
+        if (_allComment.length > 20000) {
+          console.log("保存しているコメント数が20000を超えたので古いコメントから半分削除します");
+          _allComment.splice(0, 10000);
+        }
 
         //console.log(_allComment);
 
-      }
     }
 
     /*--------------------------------------------------------------
@@ -364,7 +364,7 @@ function recvEvent(event) {
 
       _commentRawIdList[message.chat.no]  = message.chat.user_id;
       // _commentList[message.chat.no]       = message.chat.user_id.substring(0, 4) + "･･";
-      _commentList[message.chat.no]       = message.chat.user_id;
+      // _commentList[message.chat.no]       = message.chat.user_id;
       _commentListFull[message.chat.no]   = message.chat.user_id;
       _183UserList[message.chat.no]       = message.chat.user_id;
       
@@ -375,13 +375,13 @@ function recvEvent(event) {
       _commentRawIdList[message.chat.no] = message.chat.user_id;
 
       // すでに名前を取得ずみであれば名前を取得しない
-      if (_rawUserList[message.chat.user_id]) {
-        _commentList[message.chat.no] = _rawUserList[message.chat.user_id];
+      if (_rawUserListFull[message.chat.user_id]) {
+        // _commentList[message.chat.no] = _rawUserList[message.chat.user_id];
         _commentListFull[message.chat.no] = _rawUserListFull[message.chat.user_id];
         return;
       } else {
         // 仮でユーザーIDをいれておく
-        _commentList[message.chat.no] = message.chat.user_id;
+        // _commentList[message.chat.no] = message.chat.user_id;
         _commentListFull[message.chat.no] = message.chat.user_id;
       }
 
@@ -409,17 +409,17 @@ function recvEvent(event) {
           //   userName = userName.substring(0, 7) + "･･";
           // }
 
-          _rawUserList[message.chat.user_id] = userName;
+          // _rawUserList[message.chat.user_id] = userName;
           _rawUserListFull[message.chat.user_id] = userNameFull;
 
           //console.log(`★★ ${message.chat.no} コメは ${userName} に設定`);
 
           // 過去のコメントの名前を置き換える
-          for (let key in _commentList) {
-            if (_commentList[key] == message.chat.user_id) {
-              _commentList[key] = userName;
-            }
-          }
+          // for (let key in _commentList) {
+          //   if (_commentList[key] == message.chat.user_id) {
+          //     _commentList[key] = userName;
+          //   }
+          // }
           // 過去のコメントの名前を置き換える
           for (let key in _commentListFull) {
             if (_commentListFull[key] == message.chat.user_id) {
@@ -493,7 +493,7 @@ function InsertUserName(fragment, newNo, bHide) {
 
   // 追加する名前のDOMを作成
   var newElement = document.createElement("span");
-  var newContent = document.createTextNode(_commentList[newNo]);
+  var newContent = document.createTextNode(_commentListFull[newNo]);
   newElement.appendChild(newContent);
 
   if (_183UserList[newNo]) {
@@ -552,10 +552,10 @@ function InsertUserName(fragment, newNo, bHide) {
 
     // コテハンがHITしなかった場合---------
 
-    let userName = _commentList[newNo];
+    // let userName = _commentList[newNo];
     let fullUserName = _commentListFull[newNo];
     
-    kotehan = _commentList[newNo]
+    kotehan = _commentListFull[newNo]
     if (_183UserList[newNo]) {
       kotehanElement.setAttribute("class", "user_name_by_extention viewKotehan user184");
     } else {
@@ -695,7 +695,6 @@ function editComment(currentNode) {
         // フラグメント作成
         let fragment = document.createDocumentFragment();
 
-
         // 初回だけ自身が配信者かどうか判定
         if(_bIsIamOwnerCheckOnce === false) {
           _bIsIamOwnerCheckOnce  = true;
@@ -717,7 +716,6 @@ function editComment(currentNode) {
           //console.log("自分が配信者ではありません");
         }
 
-
         // プレ垢のDOMを挿入
         let bIsOwner = false;
         
@@ -736,11 +734,11 @@ function editComment(currentNode) {
 
         //console.time("  InsertUserName time");
         // 名前のDOMを挿入
-        if (_commentList[newNo]) {
+        if (_commentListFull[newNo]) {
           fragment = InsertUserName(fragment, newNo, false);
         } else {
           //console.log(`${newNo} に対応する名前がありません。取得失敗さんにします。`);
-          _commentList[newNo] = "取得失敗";
+          _commentListFull[newNo] = "取得失敗";
           fragment = InsertUserName(fragment, newNo, false);
         }
         //console.timeEnd("  InsertUserName time");
@@ -750,11 +748,6 @@ function editComment(currentNode) {
         //console.time("  insertBefore time");
         commentTextElement.parentNode.insertBefore(fragment, commentTextElement);
         //console.timeEnd("  insertBefore time");
-
-        //console.time("  setAttribute time");
-        // editCommentしたコメントの証拠を残しておく（次回やらなくて済むように）
-        currentNode.setAttribute("data-extension-edited", "true");
-        //console.timeEnd("  setAttribute time");
 
       } else {
 
@@ -778,11 +771,11 @@ function editComment(currentNode) {
 
 
         // 名前のDOMを挿入
-        if (_commentList[newNo]) {
+        if (_commentListFull[newNo]) {
           fragment = InsertUserName(fragment, newNo , true);
         } else {
           //console.log(`${newNo} に対応する名前がありません。取得失敗さんにします。`);
-          _commentList[newNo] = "取得失敗";
+          _commentListFull[newNo] = "取得失敗";
           fragment = InsertUserName(fragment, newNo, true);
         }
 
@@ -790,10 +783,22 @@ function editComment(currentNode) {
         let comment = currentNode.querySelector("[class^=___user-thumbnail-image___]"); // なふだ機能のアイコンと名前の親DOM
         comment.parentNode.insertBefore(fragment, comment);
 
-        // editCommentしたコメントの証拠を残しておく（次回やらなくて済むように）
-        currentNode.setAttribute("data-extension-edited", "true");
-
       }
+
+      // editCommentしたコメントの証拠を残しておく（次回やらなくて済むように）
+      currentNode.setAttribute("data-extension-edited", "true");
+      
+      
+      // 受信している全てのコメントの中で、現在のユーザーIDのコメントの中で、
+      // 現在のコメント番号より若いコメントが存在していなければ、そのユーザーの一番最初のコメントだと判定
+      const userId = _commentRawIdList[newNo];
+      const userComments = _allComment.filter(item => item.user_id === userId)  // 特定のユーザーIDで抽出
+                                      .filter(item => item.no < newNo);         // 指定したコメント番号より古いコメントを抽出
+      if(userComments.length === 0) {
+        // 一番最初のコメントならCSSで太字にする
+        currentNode.setAttribute("data-extension-firstcomment", "true");       
+      }
+
 
     }
   }
