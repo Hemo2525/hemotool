@@ -1296,20 +1296,6 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
     getColor();
 
 
-
-
-
-    // 新しいHTML要素を作成
-    let tootlTipDom = document.createElement('div');
-    tootlTipDom.id = "ext_tooltipBox";
-
-    // 指定した要素の中の末尾に挿入
-    document.querySelector("[class^=___comment-data-grid___]").appendChild(tootlTipDom);
-
-
-
-
-
     // ニコニコ動画のフロントエンドバージョンを取得
     /*
     let nicoData = document.querySelector('#embedded-data');
@@ -1366,6 +1352,9 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
 
             // document.querySelector('.ext-setting-menu .ext-comeview .option.commentnum input').checked = true;
             // comeview_option_commentnum();
+
+            document.querySelector('.ext-setting-menu .ext-comeview .option.tooltip input').checked = true;
+            comeview_option_tooltip();
         }
 
         // ストレージに保存されたバージョン情報とマニフェストのバージョン情報が異なる場合にポップアップを表示

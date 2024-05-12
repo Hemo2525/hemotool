@@ -854,6 +854,15 @@ function startWatchCommentDOM() {
     var now = new Date();
     target.setAttribute("byExtention", now.getSeconds());
   }
+
+
+  // 新しいHTML要素を作成
+  let tootlTipDom = document.createElement('div');
+  tootlTipDom.id = "ext_tooltipBox";
+
+  // 指定した要素の中の末尾に挿入
+  document.querySelector("[class^=___comment-data-grid___]").appendChild(tootlTipDom);
+
 }
 
 function watchParentDOM(mutationsList, observer) {
@@ -894,7 +903,6 @@ function startWatchGridDOM() {
             if(currentUserID !== 0 && currentCommentNo !== 0) {
               // console.log("ツールチップを表示します", currentUserID, currentCommentNo);
               if(tootlTip) tootlTip.innerText = getCommentsStringByUserId(currentUserID, currentCommentNo);
-
             }
           }
 
@@ -1161,7 +1169,7 @@ function startWatchGridDOM() {
       // 要素の位置を更新する
       const tootlTip = document.getElementById('ext_tooltipBox');
       // tootlTip.style.display = "none";
-      tootlTip.classList.remove("show");
+      if(tootlTip) tootlTip.classList.remove("show");
     }); 
 
     // ツールチップや色関係で使うユーザーIDを取得する
