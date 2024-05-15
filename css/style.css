@@ -1399,11 +1399,76 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
         display: block;
     }
 }
+/* 右クリックメニューが表示されているときはツールチップを非表示 */
+[class^=___contents-area___][ext-master-comeview][ext-opt-tooltip] [class^=___comment-data-grid___]:has([class^=___context-menu___]) #ext_tooltipBox {
+    display: none;
+}
 /* ニコ生のデフォルトのツールチップを非表示 */
 [class^=___contents-area___][ext-master-comeview][ext-opt-tooltip] [class^=___tooltip___] {
     display: none;
 }
 
+
+
+
+
+/* コテハン入力画面 */
+#ext_myKotehanBox {
+    display: none;
+    background-color: #000000f0;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 100000;
+    line-height: 2;
+    
+    &.show {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #ext_myKotehanBox_Center {
+        width: 70%;
+    }
+    #ext_myKotehanDom_comment {
+        color: white;
+        display: block;
+    }
+    #ext_myKotehanInput {
+        display: block;
+        padding: 10px;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+        width: 100%;
+    }
+    #ext_myKotehanBox_OkBtn {
+        cursor: pointer;
+        background-color: rgb(0, 117, 255);
+        color: white;
+        display: inline-block;
+        padding: 3px 25px;
+        border-radius: 5px;
+        margin-right: 10px;
+    }
+    #ext_myKotehanBox_ClearBtn {
+        cursor: pointer;
+        background-color: rgb(0, 117, 255);
+        color: white;
+        display: inline-block;
+        padding: 3px 25px;
+        border-radius: 5px;
+        margin-right: 10px;
+    }
+    #ext_myKotehanBox_CancelBtn {
+        cursor: pointer;
+        background-color: rgb(71, 71, 71);
+        color: white;
+        display: inline-block;
+        padding: 3px 25px;
+        border-radius: 5px;
+    }
+}
 
 
 

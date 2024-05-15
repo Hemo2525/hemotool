@@ -863,6 +863,45 @@ function startWatchCommentDOM() {
   // 指定した要素の中の末尾に挿入
   document.querySelector("[class^=___comment-data-grid___]").appendChild(tootlTipDom);
 
+
+  // 新しいHTML要素を作成
+  // let fragment = document.createDocumentFragment();
+  let myKotehanDom = document.createElement('div');
+  myKotehanDom.id = "ext_myKotehanBox";
+
+  let myKotehanDomCenter = document.createElement('div');
+  myKotehanDomCenter.id = "ext_myKotehanBox_Center";
+
+
+  let myKotehanDom_comment = document.createElement('span');
+  myKotehanDom_comment.id = "ext_myKotehanDom_comment";
+  myKotehanDomCenter.appendChild(myKotehanDom_comment);
+
+  let inputKotehan = document.createElement("input");
+  inputKotehan.setAttribute("type", "text");
+  inputKotehan.setAttribute("id", "ext_myKotehanInput");
+  myKotehanDomCenter.appendChild(inputKotehan);
+
+  let myKotehanDom_OkBtn = document.createElement('span');
+  myKotehanDom_OkBtn.id = "ext_myKotehanBox_OkBtn";
+  myKotehanDom_OkBtn.innerText = "決定";
+  myKotehanDomCenter.appendChild(myKotehanDom_OkBtn);
+
+  let myKotehanDom_ClearBtn = document.createElement('span');
+  myKotehanDom_ClearBtn.id = "ext_myKotehanBox_ClearBtn";
+  myKotehanDom_ClearBtn.innerText = "コテハンクリア";
+  myKotehanDomCenter.appendChild(myKotehanDom_ClearBtn);
+
+
+  let myKotehanDom_CancelBtn = document.createElement('span');
+  myKotehanDom_CancelBtn.id = "ext_myKotehanBox_CancelBtn";
+  myKotehanDom_CancelBtn.innerText = "キャンセル";
+  myKotehanDomCenter.appendChild(myKotehanDom_CancelBtn);
+
+  myKotehanDom.appendChild(myKotehanDomCenter);
+  document.querySelector("[class^=___comment-data-grid___]").appendChild(myKotehanDom);
+
+
 }
 
 function watchParentDOM(mutationsList, observer) {
@@ -883,9 +922,13 @@ function startWatchGridDOM() {
   
   const target = document.querySelector("[class^=___comment-data-grid___]");
 
+  let currentUserIDfromMouseOver = 0;
 
   let currentUserID = 0;
   let currentCommentNo = 0;
+  let userId = "";
+  let userName = "";
+  let userComment = "";
 
   if (target) {
     const obs = new MutationObserver(function(mutationsList, observer){
@@ -900,9 +943,9 @@ function startWatchGridDOM() {
 
           // ツールチップ関係
           if(document.querySelector("[class^=___tooltip___]")) {
-            if(currentUserID !== 0 && currentCommentNo !== 0) {
-              // console.log("ツールチップを表示します", currentUserID, currentCommentNo);
-              if(tootlTip) tootlTip.innerText = getCommentsStringByUserId(currentUserID, currentCommentNo);
+            if(currentUserIDfromMouseOver !== 0 && currentCommentNo !== 0) {
+              // console.log("ツールチップを表示します", currentUserIDfromMouseOver, currentCommentNo);
+              if(tootlTip) tootlTip.innerText = getCommentsStringByUserId(currentUserIDfromMouseOver, currentCommentNo);
             }
           }
 
@@ -1100,19 +1143,89 @@ function startWatchGridDOM() {
               });
 
 
+              // コテハン設定ボタンのDOMを作成
+              let liKotehanElement = document.createElement("li");
+liKotehanElement.style.display = "none";
+              let labelKotehanElement = document.createElement("label");
+              labelKotehanElement.innerText = "コテハンを設定";              
 
-              // 追加するメニューを1つにまとめる
+              // コテハン設定ボタンのClickイベント
+              liKotehanElement.addEventListener('click', function(e) {
+                document.getElementById('ext_myKotehanBox').classList.add("show");
+                document.getElementById('ext_myKotehanInput').focus();
+                document.getElementById('ext_myKotehanInput').value = userName;
+                document.getElementById('ext_myKotehanDom_comment').innerText = userComment;
+              });
+
+              document.getElementById("ext_myKotehanBox_OkBtn").addEventListener('click', function(e) {
+                document.getElementById("ext_myKotehanBox").classList.remove("show");
+
+                let kotehan = document.getElementById('ext_myKotehanInput').value;
+                if(kotehan.length > 0) {
+                  let kotehanItem = {id: currentUserID, kotehan: kotehan};
+                  // 既に同じIDの人が登録されていれば削除してから追加
+                  _kotehanList = _kotehanList.filter(function (x) { return x.id !== currentUserID }); // 削除
+                  _kotehanList.push(kotehanItem); // 追加
+                  // コテハン保存用のDOMにコテハンをテキストを挿入（結果、読み上げられる）
+                  let kotehanBox = document.getElementById("ext_kotehanBox");
+                  if(kotehanBox) {
+                    let item = { id : currentUserID, kotehan : kotehan};
+                    var newYomiCommentDom = document.createElement('p');
+                    var newYomiCommentText = document.createTextNode(JSON.stringify(item));
+                    newYomiCommentDom.appendChild(newYomiCommentText);
+                    kotehanBox.appendChild(newYomiCommentDom);
+                  }
+
+                  // 表示中のコメントのコテハンを変更
+                  var currentCommentList = document.querySelectorAll('.user_name_by_extention');
+                  for (var i = 0; i < currentCommentList.length; i++) {
+                    if (currentCommentList[i].innerText == currentUserID) {
+                      currentCommentList[i].innerText = kotehan;
+                      currentCommentList[i].classList.add("kotehan");
+                      currentCommentList[i].classList.remove("user184");
+                    }
+                  }                  
+                }
+              });  
+              document.getElementById("ext_myKotehanBox_ClearBtn").addEventListener('click', function(e) {
+                document.getElementById("ext_myKotehanBox").classList.remove("show");
+
+                _kotehanList = _kotehanList.filter(function (x) { return x.id !== currentUserID }); // 削除
+                // コテハン保存用のDOMにコテハンをテキストを挿入（結果、読み上げられる）
+                let kotehanBox = document.getElementById("ext_kotehanBox");
+                if(kotehanBox) {
+                  let item = { id : currentUserID, kotehan : kotehan};
+                  var newYomiCommentDom = document.createElement('p');
+                  var newYomiCommentText = document.createTextNode(JSON.stringify(item));
+                  newYomiCommentDom.appendChild(newYomiCommentText);
+                  kotehanBox.appendChild(newYomiCommentDom);
+                }                
+              });
+              document.getElementById("ext_myKotehanBox_CancelBtn").addEventListener('click', function(e) {
+                document.getElementById("ext_myKotehanBox").classList.remove("show");
+              });              
+
+              /* --------------------------
+              追加するメニューを1つにまとめる
+              ----------------------------*/
+
+              // [文字色を設定]メニュー
               labelElement.appendChild(inputElement);
               liElement.appendChild(labelElement);
               ulElement.appendChild(liElement);
 
+              // [背景色を設定]メニュー
               labelBgColorElement.appendChild(inputBgColorElement);
               liBgColorElement.appendChild(labelBgColorElement);
               ulElement.appendChild(liBgColorElement);
 
-              //labelResetColorElement.appendChild(inputResetElement);
+              // [色設定をクリア]メニュー
               liResetColorElement.appendChild(labelResetColorElement);
               ulElement.appendChild(liResetColorElement);
+
+              // [コテハンを設定]メニュー
+              liKotehanElement.appendChild(labelKotehanElement);
+              ulElement.appendChild(liKotehanElement);        
 
 
               // コンテキストメニューの監視を解除
@@ -1137,15 +1250,12 @@ function startWatchGridDOM() {
     
     obs.observe(target, optionsForGrid);
 
-
-    
-
     document.querySelector("[class^=___comment-data-grid___]").addEventListener("mousemove", function(e) {
 
       const tootlTip = document.getElementById('ext_tooltipBox');
-      // console.log("mousemove", currentUserID, currentCommentNo);
+      // console.log("mousemove", currentUserIDfromMouseOver, currentCommentNo);
       if(tootlTip) {
-        if(currentUserID !== 0 && currentCommentNo !== 0) {
+        if(currentUserIDfromMouseOver !== 0 && currentCommentNo !== 0) {
 
           // tootlTip.style.display = "block";
           tootlTip.classList.add("show");
@@ -1179,26 +1289,27 @@ function startWatchGridDOM() {
 
       if (e.target.parentNode && e.target.closest("[class^=___table-cell___]")) {
         let commentDom = e.target.closest("[class^=___table-cell___]").querySelector("[class^=___comment-number___]");
-        if(commentDom && commentDom.innerText) {
+        let userNameDom = e.target.closest("[class^=___table-cell___]").querySelector(".user_name_by_extention");
+        let userCommentDom = e.target.closest("[class^=___table-cell___]").querySelector("[class^=___comment-text___]");
+        if(commentDom && commentDom.innerText && userNameDom && userCommentDom) {
 
-          currentUserID = _commentRawIdList[commentDom.innerText];
+          currentUserIDfromMouseOver = _commentRawIdList[commentDom.innerText];
           currentCommentNo = commentDom.innerText;
+          userName = userNameDom.innerText;
+          userComment = "コメント: " + userCommentDom.innerText;
 
           //console.log("★currentUserID" + currentUserID);
                     
         } else {
-          currentUserID = 0;
+          currentUserIDfromMouseOver = 0;
           currentCommentNo = 0;
         }
       }
     });
 
     // 色関係
-    /*
     document.querySelector("[class^=___comment-data-grid___]").addEventListener("mousedown", function(e) {
       
-      //console.log("★mousedown", e.button, e.target);
-
       if (e.button == 2 && e.target.parentNode) { // right click for mouse
         let commentDom = e.target.closest("[class^=___table-cell___]").querySelector("[class^=___comment-number___]");
         if(commentDom && commentDom.innerText) {
@@ -1210,7 +1321,6 @@ function startWatchGridDOM() {
         }
       }
     });
-    */
     
   }
 }
