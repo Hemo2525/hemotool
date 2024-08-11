@@ -40,6 +40,9 @@ window.addEventListener('load', function () {
 
 
 
+
+
+
     let currentURL = location.href;
     if (currentURL.startsWith("https://live.nicovideo.jp/")) {
         if(document.querySelector('[class^=___player-area___]')) {
@@ -102,7 +105,10 @@ window.addEventListener('load', function () {
         chrome.runtime.postMessage({stop: "stop"});
     }, false);
     
-
+    setInterval(() => {
+        console.log("サービスワーカーを活かすためのメッセージ送信");
+        chrome.runtime.sendMessage("何でも良いメッセージ");
+    }, 25 * 1000);
 
 
 });
@@ -287,25 +293,28 @@ function setEvents() {
 
 function setExtSettingMenuHeight() {
 
-    let height = document.querySelector('[class^=___player-display-screen___').clientHeight * 0.9;
-    document.querySelector('.ext-setting-menu').style.height = height + "px";
+    let height = document.querySelector('[class^=___player-display-screen___]').clientHeight * 0.9;
+    if(document.querySelector('.ext-setting-menu'))
+        document.querySelector('.ext-setting-menu').style.height = height + "px";
 
     const ITEM_HEIGHT = 34;
 
     let maxHeight = document.querySelectorAll('.ext-setting-menu > div').length * ITEM_HEIGHT;
-    document.querySelector('.ext-setting-menu').style.maxHeight  = maxHeight + "px";
+    if(document.querySelector('.ext-setting-menu'))
+        document.querySelector('.ext-setting-menu').style.maxHeight  = maxHeight + "px";
 
 }
 
 function setExtPopupHeight() {
-    let height = document.querySelector('[class^=___player-display-screen___').clientHeight * 0.8;
+    let height = document.querySelector('[class^=___player-display-screen___]').clientHeight * 0.8;
     
     if(height > 400) {
         height = 400;
     }
-    
-    document.querySelector('.ext-popup').style.height = height + "px";
-    document.querySelector('.ext-popup').style.top = -height - 60 + "px";
+    if(document.querySelector('.ext-popup')){
+        document.querySelector('.ext-popup').style.height = height + "px";
+        document.querySelector('.ext-popup').style.top = -height - 60 + "px";    
+    }
 }
 
 

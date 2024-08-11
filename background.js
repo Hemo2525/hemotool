@@ -11,6 +11,7 @@ function stopVoice(){
     _queCount = 0;
 }
 
+
 chrome.runtime.onMessage.addListener(function (request) {
 
     if(request.init){

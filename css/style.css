@@ -852,7 +852,7 @@ div#ext_dom_message {
 }
 
 /* なふだ機能による名前  */
-[class^=___contents-area___][ext-master-comeview][ext-opt-name] [class^=___user-name-button___] {
+[class^=___contents-area___][ext-master-comeview][ext-opt-name] .user-name-button {
     color: #b70000 !important;
     border: 1px solid #b70000 !important;
     padding: 0px 6px 0px 8px !important;
@@ -906,10 +906,10 @@ div#ext_dom_message {
 
 
 /* 自身が配信者の場合のコメント欄*/
-[ext-attr-IamOwner="true"] [class^=___contents-area___][ext-master-comeview] [class^=___comment-text___] {
+[ext-attr-IamOwner="true"] [class^=___contents-area___][ext-master-comeview] .comment-text {
     padding: 0px !important;
 }
-[ext-attr-IamOwner="true"] [class^=___contents-area___][ext-master-comeview][ext-opt-name] [class^=___user-name-button___] {
+[ext-attr-IamOwner="true"] [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user-name-button {
     border: none !important;
     padding: 0px !important;
     margin-left: 5px !important;
@@ -986,7 +986,7 @@ div#ext_dom_message {
 /*
 コメント番号がある場合は名前を非表示にする(コメント番号のDOMがある場合はユーザー放送なので、へもツールで取得した名前を表示させるため)
 */
-[class^=___contents-area___][ext-master-comeview][ext-opt-name] [class^=___comment-number___]+[class^=___comment-author-name___] {
+[class^=___contents-area___][ext-master-comeview][ext-opt-name] .comment-number+[class^=___comment-author-name___] {
     display: none !important;
 }
 
@@ -1070,14 +1070,14 @@ div#ext_dom_message {
 }
 
 /* コメビュ機能の共通スタイル */
-[ext-master-comeview] [class^=___comment-text___] {
+[ext-master-comeview] .comment-text {
     margin: 0px !important;
 }
 
 [class^=___contents-area___][ext-master-comeview][ext-opt-commentnum] .comment-number {
     display: none !important;
 }
-[ext-master-comeview] [data-extension-firstcomment] [class^=___comment-text___] {
+[ext-master-comeview] [data-extension-firstcomment] .comment-text {
     font-weight: bold;
 }
 
@@ -1088,7 +1088,7 @@ div#ext_dom_message {
     align-items: center !important;
 }
 
-[ext-master-comeview][ext-opt-orikaeshi] [class^=___comment-text___] {
+[ext-master-comeview][ext-opt-orikaeshi] .comment-text {
     white-space: break-spaces !important;
     padding-right: 10px !important;
     padding: 5px 0px !important;
@@ -1096,7 +1096,7 @@ div#ext_dom_message {
     font-size: 9px !important;
 }
 
-[ext-master-comeview][ext-opt-orikaeshi] [class^=___comment-text___] {
+[ext-master-comeview][ext-opt-orikaeshi] .comment-text {
     height: auto;    
     /* text-overflow: ellipsis; */
     /*display: -webkit-box;*/
@@ -1500,7 +1500,7 @@ html[data-darkreader-scheme] .ext-popup {
 }
 
 
-html[data-darkreader-scheme] [class^="___contents-area___"][ext-master-comeview][ext-opt-name] [class^="___user-name-button___"] {    
+html[data-darkreader-scheme] [class^="___contents-area___"][ext-master-comeview][ext-opt-name] .user-name-button {    
     background-color: inherit;
     color: #e54b4b !important;
     border: 1px solid #e54b4b !important; 
