@@ -192,14 +192,18 @@ function extractNicoLiveCommentContent(binaryData) {
             commentObjct.chat.user_id = hashed_user_idData;
 
         } else if(fieldNumber === 7) {
-            // "modifier"
+            // "modifier"（コメントの修飾情報）
             const oldOffset = offset;
-            const modifier = readVarInt();
+            const modifierLength = readVarInt();
             currentSubContentLength += offset - oldOffset;
 
             // console.log(`modifier: ${modifier}`);
+            if(modifierLength !== 0x00) {
+              const modifier = extractContent(modifierLength);
+              currentSubContentLength += modifierLength;
+            }
 
-            commentObjct.modifier = modifier;
+            //commentObjct.modifier = modifier;
 
         } else if(fieldNumber === 8) {
             // "no"
@@ -314,9 +318,9 @@ window.fetch = function(...args) {
           // ArrayBufferをUint8Arrayに変換
           const uint8Array = new Uint8Array(buffer);
   
-          //console.log('Decoding Niconico live messages...', uint8Array, buffer);
+//          console.log('Decoding Niconico live messages...', uint8Array);
           const decodedMessages = extractNicoLiveCommentContent(uint8Array);
-          //console.log(JSON.stringify(decodedMessages, null, 2));
+//          console.log(JSON.stringify(decodedMessages, null, 2));
   
           /*
           const extractedComments = extractComments(buffer);
@@ -355,8 +359,10 @@ window.fetch = function(...args) {
   
               // ArrayBufferをUint8Arrayに変換
               const uint8Array = new Uint8Array(value);
+
+//              console.log('Decoding Niconico live messages...', uint8Array);
               const decodedMessages = extractNicoLiveCommentContent(uint8Array);
-              //console.log(JSON.stringify(decodedMessages, null, 2));
+//              console.log(JSON.stringify(decodedMessages, null, 2));
 
 
 

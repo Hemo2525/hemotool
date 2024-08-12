@@ -1,7 +1,7 @@
 {
   "name": "ニコ生拡張機能 へもツール",
   "manifest_version": 3,
-  "version": "0.38.2",
+  "version": "0.38.3",
   "description": "ニコ生にコメビュ機能、録画機能、PIP、コメント読み上げ機能、シークバーOFF機能、ニコ生ゲーム音ミュート、映像加工、などなどの拡張機能を追加します",
   "permissions": [
     "storage",
