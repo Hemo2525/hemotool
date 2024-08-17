@@ -81,6 +81,12 @@
                     <input type="checkbox">
                 </div>
             </div>
+            <div class="option kotehan" title="@マークの後ろにつけたコメントを名前として扱います">
+                <div class="name">コテハン表示</div>
+                <div class="value">
+                    <input type="checkbox">
+                </div>
+            </div>
             <div class="option icon" title="コメント主のユーザーアイコンを表示します">
                 <div class="name">アイコン表示</div>
                 <div class="value">
@@ -111,12 +117,7 @@
                     <input type="checkbox">
                 </div>
             </div>
-            <div class="option kotehan" title="@マークの後ろにつけたコメントを名前として扱います">
-                <div class="name">コテハン表示(β版)</div>
-                <div class="value">
-                    <input type="checkbox">
-                </div>
-            </div>
+
             <div class="option commentnum" title="コメント番号を非表示にします">
                 <div class="name new">コメント番号非表示</div>
                 <div class="value">
@@ -554,7 +555,16 @@
     <div id="ext-info-box">
         <div class="item">
             <div class="time">2024.8.12</div>
-            <h2>不具合修正<span class="update">UPDATE!</span></h2>
+            <img src="20240817.png">            
+            <ul>
+                <li>コテハンは、@マークの後ろに新しい名前をつけてコメントするとその名前が設定される機能です。</li>
+                <li>コテハン機能を使うには、[コメビュ機能] → [コテハン表示]をONにしてください。</li>
+                <li>機能のリクエストありがとうございました。</li>
+            </ul>
+        </div> 
+        <div class="item">
+            <div class="time">2024.8.12</div>
+            <h2>不具合修正<!--<span class="update">UPDATE!</span>--></h2>
             <p>装飾したコメントのユーザー名が＜取得失敗＞となる不具合を修正</p>
         </div> 
         <div class="item">
@@ -578,7 +588,8 @@
             <p>2024年8月5日に公開された新しいニコ生では、へもツールのコメビュ機能が動作していません。<br>
                 これはニコ生のコメントデータの配信方式が全く新しい別物になったので、へもツールのプログラムが対応できなくなっているためです。<br>
                 現在、コメビュ機能を復活できるかどうか調査しています。しばらくコメビュ機能はOFFの状態にします。ご迷惑をおかけしますが、気長にお待ちいただけると幸いです。</p>
-        </div>        
+        </div>
+        <!--
         <div class="item">
             <div class="time">2024.6.7</div>
             <h2>不具合修正<span class="update">UPDATE!</span></h2>
@@ -610,7 +621,7 @@
 
         <div class="item">
             <div class="time">2024.5.5</div>
-            <h2>不具合修正<!--<span class="update">UPDATE!</span>--></h2>
+            <h2>不具合修正<span class="update">UPDATE!</span></h2>
             <ul>
                 <li>シアターモードで表示が崩れる問題の修正</li>
                 <li>コメビュ幅の調整バーの不具合修正</li>
@@ -661,7 +672,7 @@
         </div>
         <div class="item">
             <div class="time">2024.2.3</div>
-            <h2>不具合修正<!-- <span class="update">UPDATE!</span> --></h2>
+            <h2>不具合修正</h2>
             <ul>
                 <li>ニコ生アップデートによりNG設定画面が表示されなくなった問題を修正</li>
                 <li>ニコ生アップデートにより自分のなふだコメントの名前の表示が崩れる問題を修正</li>
@@ -705,7 +716,7 @@
             <p>へもツールからの機能紹介などは下記をクリックしてください。</p>
             <img src="20231226.png">
         </div>
-
+        -->
     </div>
     <!-- /ext-info-box -->
     <h2 id="ext-info-gift-title">開発を応援</h2>

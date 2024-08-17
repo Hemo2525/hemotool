@@ -905,6 +905,8 @@ div#ext_dom_message {
 
 
 
+
+
 /* 自身が配信者の場合のコメント欄*/
 [ext-attr-IamOwner="true"] [class^=___contents-area___][ext-master-comeview] .comment-text {
     padding: 0px !important;
@@ -1000,6 +1002,28 @@ div#ext_dom_message {
 [class^=___contents-area___][ext-master-comeview][ext-opt-name][ext-opt-kotehan] .user_name_by_extention.viewKotehan {
     display: inline-block;
 }
+
+/*コメビュをOFFにしたときになふだとアイコンが近すぎるので間を開ける*/
+.user-summary-area .user-name-button {
+    /* margin-left: 10px; */
+}
+
+/* なふだ機能の場合の、へもツールが挿入したユーザー名はclickイベントを設定してるので */
+.user-summary-area .user_name_by_extention {
+    cursor: pointer;
+}
+
+/* 自身が配信者のときの他人のなふだコメント or 自分がなふだコメントしたときのコメント */
+/* 名前表示＋コテハン機能がONのときはなふだのアイコンとコメントは非表示 */
+[class^=___contents-area___][ext-master-comeview][ext-opt-name] button.user-name-button,
+[class^=___contents-area___][ext-master-comeview] button.user-thumbnail-image {
+    display: none !important;
+}
+
+
+
+
+
 .premium_by_extention { 
     display: none;
     margin-right: 6px;
@@ -1181,7 +1205,12 @@ div[data-layer-name="videoLayer"] video {
 [ext-master-comeview][ext-opt-icon] [class^=___context-menu___] {
     z-index: 20;
 }
+[ext-master-comeview] .user_icon_by_extention {
+    display: none;
+}
 [ext-master-comeview][ext-opt-icon] .user_icon_by_extention {
+    display: block;
+
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
@@ -1450,6 +1479,7 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
         padding: 3px 25px;
         border-radius: 5px;
         margin-right: 10px;
+        margin-bottom: 20px;
     }
     #ext_myKotehanBox_ClearBtn {
         cursor: pointer;
@@ -1469,7 +1499,10 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
         border-radius: 5px;
     }
 }
-
+[class^=___comment-data-grid___]:has(#ext_myKotehanBox.show) #ext_tooltipBox {
+    /* コテハン入力画面が表示されているときはツールチップは非表示 */
+    display: none;
+}
 
 
 /*

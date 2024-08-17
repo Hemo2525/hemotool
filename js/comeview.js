@@ -170,12 +170,24 @@ function getKotehan() {
 
   //chrome.storage.local.remove('kotehan');
 
-  chrome.storage.local.get("kotehan", function (value) {
-      if(value && value.kotehan && Array.isArray(value.kotehan)) {
-        _Kotehan_comeview = value.kotehan;
+  chrome.storage.local.get("kotehanNew", function (value) {
+    if(value && value.kotehanNew && Array.isArray(value.kotehanNew)) {
 
-        console.log("▼localに保存されているコテハン");
-        console.log(_Kotehan_comeview);
+        _Kotehan_comeview = value.kotehanNew;
+
+        //console.log("削除前のコテハン", value, value.kotehanNew);
+
+        const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000); // 2週間前の日付
+        let enabled184Users = _Kotehan_comeview
+                              .filter(item => new Date(item.createDate) >= twoWeeksAgo) // 2週間以内の、
+                              .filter(item => item.is184User == true)                   // 184ユーザーだけ残す
+        let enabledUsers = _Kotehan_comeview
+                              .filter(item => item.is184User == false)  // 184ユーザー以外だけ残す
+
+        _Kotehan_comeview = enabled184Users.concat(enabledUsers);
+
+
+        console.log("▼localに保存されているコテハン", _Kotehan_comeview);
 
         if(_Kotehan_comeview.length > 0 && document.querySelector("#ext_kotehanToInjectBox")) {
           
@@ -184,7 +196,7 @@ function getKotehan() {
           dom.appendChild(domText);
           document.querySelector("#ext_kotehanToInjectBox").appendChild(dom);
 
-          console.log("inject側のDOMにコテハンを追加");
+          console.log("▼inject側のDOMにコテハンを追加", domText);
 
         }
 
@@ -192,27 +204,47 @@ function getKotehan() {
   });
 }
 
-function setKotehan(kotehan_id, kotehan_kotehan) {
+function setKotehan(kotehan) {
 
     // 既に同じIDの人が登録されていれば削除してから追加
-    _Kotehan_comeview = _Kotehan_comeview.filter(function (x) { return x.id !== kotehan_id });
+    _Kotehan_comeview = _Kotehan_comeview.filter(function (x) { return x.id !== kotehan.id });
 
-    let item = { id : kotehan_id, kotehan : kotehan_kotehan };
+    let item = { id : kotehan.id, kotehan : kotehan.kotehan, createDate: kotehan.createDate, is184User: kotehan.is184User};
     _Kotehan_comeview.push(item);
-    chrome.storage.local.set({ "kotehan": _Kotehan_comeview }, function () { });
+
+    // ストレージに全体を保存
+    chrome.storage.local.set({"kotehanNew": _Kotehan_comeview }, function () { });
+
+    console.log("追加するコテハン", item);
+
+}
+function deleteKotehan(kotehan) {
+
+  // 既に同じIDの人が登録されていれば削除
+  _Kotehan_comeview = _Kotehan_comeview.filter(function (x) { return x.id !== kotehan.id });
+
+  // ストレージに全体を保存
+  chrome.storage.local.set({"kotehanNew": _Kotehan_comeview }, function () { });
 
 }
 
-
 function kotehanInitialize(){
+
+  console.log("kotehanInitialize()を実行しました");
 
   function watchKotehanBox(mutationRecords, observer){
     mutationRecords.forEach(item => {
-      //console.debug(item.addedNodes[0].outerText);
+      console.debug(item.addedNodes[0].outerText);
       let kotehanJson = item.addedNodes[0].outerText;
       let kote = JSON.parse(kotehanJson);
 
-      setKotehan(kote.id, kote.kotehan);
+      console.debug(kote);
+
+      if(kote.type == "add") {
+        setKotehan(kote);
+      } else if(kote.type == "delete") {
+        deleteKotehan(kote);
+      }
 
 
       /** DOM変化の監視を一時停止 */

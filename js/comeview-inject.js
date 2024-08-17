@@ -484,15 +484,40 @@ function getStartPlayTime() {
   return totalSec;
 }
 
+
+function setKotehanInInject(userId, kotehan, is184User) {
+  // 現在の時間
+  const currentTime = new Date().toISOString();
+
+  console.log("currentTime : " + currentTime);
+
+  let kotehanItem = {id: userId, kotehan: kotehan, is184User: is184User, createDate: currentTime};
+        
+  // 既に同じIDの人が登録されていれば削除してから追加
+  _kotehanList = _kotehanList.filter(function (x) { return x.id !== userId }); // 削除
+  _kotehanList.push(kotehanItem); // 追加
+
+  // コテハン保存用のDOMにコテハンをテキストを挿入（結果、読み上げられる）
+  let kotehanBox = document.getElementById("ext_kotehanBox");
+  if(kotehanBox) {
+    let item = { id : userId, kotehan : kotehan, type: "add", is184User: is184User, createDate: currentTime};
+    let newYomiCommentDom = document.createElement('p');
+    let newYomiCommentText = document.createTextNode(JSON.stringify(item));
+    newYomiCommentDom.appendChild(newYomiCommentText);
+    kotehanBox.appendChild(newYomiCommentDom);
+    // console.log(newYomiCommentText);
+  }  
+}
+
+
+
+
 var _startTime;
 var _currentVoiceName = "";
 
-// var _commentList = {};      // KEY:コメント番号, VALUE:対応するユーザー名(最大7文字)（184さんなら省略型のハッシュ値、生IDさんなら省略形のユーザー名）
 var _commentListFull = {};  // KEY:コメント番号, VALUE:対応するユーザー名(フルネーム)（184さんならFullハッシュ値、生IDさんならFullユーザー名）
 var _183UserList = {};      // KEY:コメント番号, VALUE:184ユーザーID
-//var _newUserList = {};      // KEY:コメント番号, VALUE:初めて書き込むユーザーID 
 var _premiumList = {};      // KEY:コメント番号, VALUE:何でもいい値
-// var _rawUserList = {};      // KEY:ユーザーID,   VALUE:GETしてきたユーザー名(最大7文字)
 var _rawUserListFull = {};  // KEY:ユーザーID,   VALUE:GETしてきたユーザー名(フルネーム)
 var _gettingList = {};      // KEY:ユーザーID,   VALUE:何でもいい値
 
@@ -689,24 +714,19 @@ function recvChatComment(message) {
     if(kotehanAt === -1){
       kotehanAt = message.chat.content.indexOf('＠');
     }
-    if(kotehanAt !== -1){
+    if(kotehanAt === 0){
       let kotehan = message.chat.content.substring(kotehanAt + 1); // ＠の次の文字から後ろを抽出
       if(kotehan && kotehan.length > 0) {
         kotehan = kotehan.substr( 0, 16 ); // 最大16文字(公式の仕様にあわせる)
-        let kotehanItem = {id: message.chat.user_id, kotehan: kotehan};
-        // 既に同じIDの人が登録されていれば削除してから追加
-        _kotehanList = _kotehanList.filter(function (x) { return x.id !== message.chat.user_id }); // 削除
-        _kotehanList.push(kotehanItem); // 追加
 
-        // コテハン保存用のDOMにコテハンをテキストを挿入（結果、読み上げられる）
-        let kotehanBox = document.getElementById("ext_kotehanBox");
-        if(kotehanBox) {
-          let item = { id : message.chat.user_id, kotehan : kotehan};
-          var newYomiCommentDom = document.createElement('p');
-          var newYomiCommentText = document.createTextNode(JSON.stringify(item));
-          newYomiCommentDom.appendChild(newYomiCommentText);
-          kotehanBox.appendChild(newYomiCommentDom);
+        // 184ユーザーの判定
+        let is184User = false;
+        if (isNaN(message.chat.user_id)) {
+          is184User = true;
         }
+
+        // コテハンの保存
+        setKotehanInInject(message.chat.user_id, kotehan, is184User);        
       }
     }
 
@@ -725,15 +745,6 @@ function recvChatComment(message) {
     --------------------------------------------------------------*/
     if (message.chat && message.chat.no && message.chat.user_id && message.chat.content && message.chat.vpos) {
 
-/*
-        _allComment[message.chat.no] = 
-          {
-            user_id: message.chat.user_id, 
-            //vpos: message.chat.vpos,
-            comment: message.chat.content,
-            no: message.chat.no
-          };
-*/
         _allComment.push({
           user_id: message.chat.user_id,
           //vpos: message.chat.vpos,
@@ -746,40 +757,28 @@ function recvChatComment(message) {
           _allComment.splice(0, 10000);
         }
 
-        //console.log(_allComment);
-
     }
 
     /*--------------------------------------------------------------
     //  ユーザー名の取得処理
     --------------------------------------------------------------*/
-    //console.log(message.chat);
-    //console.log(message.chat.no + ", " + message.chat.content + ", " + message.chat.user_id);
 
     if (isNaN(message.chat.user_id)) {
       // 184さんの処理----------------------------
-
-
       _commentRawIdList[message.chat.no]  = message.chat.user_id;
-      // _commentList[message.chat.no]       = message.chat.user_id.substring(0, 4) + "･･";
-      // _commentList[message.chat.no]       = message.chat.user_id;
       _commentListFull[message.chat.no]   = message.chat.user_id;
       _183UserList[message.chat.no]       = message.chat.user_id;
       
-
-
     } else {
       // 生IDさんの処理----------------------------
       _commentRawIdList[message.chat.no] = message.chat.user_id;
 
       // すでに名前を取得ずみであれば名前を取得しない
       if (_rawUserListFull[message.chat.user_id]) {
-        // _commentList[message.chat.no] = _rawUserList[message.chat.user_id];
         _commentListFull[message.chat.no] = _rawUserListFull[message.chat.user_id];
         return;
       } else {
         // 仮でユーザーIDをいれておく
-        // _commentList[message.chat.no] = message.chat.user_id;
         _commentListFull[message.chat.no] = message.chat.user_id;
       }
 
@@ -803,22 +802,9 @@ function recvChatComment(message) {
           var xmlDom = request.responseXML.documentElement;
           var userNameFull = xmlDom.getElementsByTagName("dc:creator")[0].innerHTML;
           var userName = userNameFull;
-          // 8文字より長い場合は省略
-          // if (userName.length > 7) {
-          //   userName = userName.substring(0, 7) + "･･";
-          // }
 
-          // _rawUserList[message.chat.user_id] = userName;
           _rawUserListFull[message.chat.user_id] = userNameFull;
 
-          //console.log(`★★ ${message.chat.no} コメは ${userName} に設定`);
-
-          // 過去のコメントの名前を置き換える
-          // for (let key in _commentList) {
-          //   if (_commentList[key] == message.chat.user_id) {
-          //     _commentList[key] = userName;
-          //   }
-          // }
           // 過去のコメントの名前を置き換える
           for (let key in _commentListFull) {
             if (_commentListFull[key] == message.chat.user_id) {
@@ -846,7 +832,7 @@ function recvChatComment(message) {
 
 }
 
-function InsertUserName(fragment, newNo, bHide) {
+function InsertUserName(fragment, newNo, bIsMyComment) {
 
   // 追加するアイコンのDOMを作成
   var iconElement = document.createElement("div");
@@ -854,10 +840,10 @@ function InsertUserName(fragment, newNo, bHide) {
 
   if (_183UserList[newNo]) {
     // 184さんの処理----------------------------
-    iconElement.setAttribute("class", "user_icon_by_extention");
+    iconElement.classList.add("user_icon_by_extention");
     iconElement.setAttribute("style", "background-image: url(https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/defaults/blank.jpg);");
 
-    hoverElement.setAttribute("class", "user_iconHover_by_extention");
+    hoverElement.classList.add("user_iconHover_by_extention");
     hoverElement.setAttribute("style", "background-image: url(https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/defaults/blank.jpg);");
 
   } else {
@@ -871,10 +857,10 @@ function InsertUserName(fragment, newNo, bHide) {
       iconPath = "0";
     }
 
-    iconElement.setAttribute("class", "user_icon_by_extention");
+    iconElement.classList.add("user_icon_by_extention");
     iconElement.setAttribute("style", "background-image: url(https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/" + iconPath + "/" + userId + ".jpg), url(https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/defaults/blank.jpg);");
     hoverElement = document.createElement("a");
-    hoverElement.setAttribute("class", "user_iconHover_by_extention");
+    hoverElement.classList.add("user_iconHover_by_extention");
     hoverElement.setAttribute("style", "background-image: url(https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/" + iconPath + "/" + userId + ".jpg), url(https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/defaults/blank.jpg);");
     hoverElement.setAttribute("href", "https://www.nicovideo.jp/user/" + userId);
     hoverElement.setAttribute("target", "_blank");
@@ -882,99 +868,96 @@ function InsertUserName(fragment, newNo, bHide) {
 
   iconElement.appendChild(hoverElement);
 
-  // 自身が配信者なら非表示にする(DOMは残しておかないとカラー機能が使えなくなる)
-  if(bHide) {
-    iconElement.setAttribute("style", "display:none;");
+  // 自身がコメント主なら非表示にする(DOMは残しておかないとカラー機能が使えなくなる)
+  if(bIsMyComment) {
+    iconElement.classList.add("myComment");
   } 
 
   // 作成したDOMの挿入
   fragment.appendChild(iconElement);
 
+
+
+/*---------------- コテハンDOMの処理 --------------------*/
+
+let currentNoId = _commentRawIdList[newNo];
+//console.log(currentNoId);
+var kotehanElement = document.createElement("span");
+var kotehanContent = "";
+var kotehan = "";
+
+let hitKotehan = _kotehanList.filter(function (x) { return x.id == currentNoId });
+//console.log("hitKotehanは下記");
+//console.log(hitKotehan);
+
+if(hitKotehan[0]){
+
+  // コテハンがHITした場合---------------
+
+  let kotehanFull = hitKotehan[0].kotehan;
+
+  kotehanElement.classList.add("user_name_by_extention","viewKotehan", "kotehan");
+
+  kotehanContent = document.createTextNode(kotehanFull);
+  kotehanElement.appendChild(kotehanContent);
+  kotehanElement.setAttribute("title", kotehanFull);
+  kotehanElement.setAttribute("data-extension-userid", _commentRawIdList[newNo]);
+
+} else {
+
+  // コテハンがHITしなかった場合---------
+
+  let fullUserName = _commentListFull[newNo];
+  
+  kotehan = _commentListFull[newNo]
+  if (_183UserList[newNo]) {
+    kotehanElement.classList.add("user_name_by_extention", "viewKotehan", "user184");
+  } else {
+    kotehanElement.classList.add("user_name_by_extention", "viewKotehan");
+  }
+
+  kotehanContent = document.createTextNode(kotehan);
+  kotehanElement.appendChild(kotehanContent);  
+  kotehanElement.setAttribute("title", fullUserName);
+  kotehanElement.setAttribute("data-extension-userid", _commentRawIdList[newNo]);
+
+}
+
+// 自分のコメントなら非表示にする
+if(bIsMyComment) {
+  kotehanElement.classList.add("myComment");
+}
+
+// 作成したDOMの挿入
+fragment.appendChild(kotehanElement);
+
+
+  /*---------------- 名前DOMの処理 --------------------*/
+
   // 追加する名前のDOMを作成
-  var newElement = document.createElement("span");
-  var newContent = document.createTextNode(_commentListFull[newNo]);
-  newElement.appendChild(newContent);
+  var nameElement = document.createElement("span");
+  var nameContent = document.createTextNode(_commentListFull[newNo]);
+  nameElement.appendChild(nameContent);
 
   if (_183UserList[newNo]) {
-    newElement.setAttribute("class", "user_name_by_extention user184");
+    nameElement.setAttribute("class", "user_name_by_extention user184");
   } else {
-    newElement.setAttribute("class", "user_name_by_extention");
+    nameElement.setAttribute("class", "user_name_by_extention");
   }
-  newElement.setAttribute("title", _commentListFull[newNo]);
+  nameElement.setAttribute("title", _commentListFull[newNo]);
 
-  // 自身が配信者なら非表示にする(DOMは残しておかないとカラー機能が使えなくなる)
-  if(bHide) {
-    newElement.setAttribute("style", "display:none;");
+  // 自身がコメ主なら非表示にする(DOMは残しておかないとカラー機能が使えなくなる)
+  if(bIsMyComment) {
+    nameElement.classList.add("myComment");
   }
   
   // 作成したDOMの挿入
-  fragment.appendChild(newElement);
+  fragment.appendChild(nameElement);
 
 
   //console.log(_kotehanList);
   //console.log(_commentListFull);
   //console.log(_commentRawIdList);
-
-  let currentNoId = _commentRawIdList[newNo];
-  //console.log(currentNoId);
-
-  var kotehanElement = document.createElement("span");
-  var kotehanContent = "";
-  var kotehan = "";
-
-  let hitKotehan = _kotehanList.filter(function (x) { return x.id == currentNoId });
-  //console.log("hitKotehanは下記");
-  //console.log(hitKotehan);
-
-  if(hitKotehan[0]){
-
-    // コテハンがHITした場合---------------
-
-    let kotehanFull = hitKotehan[0].kotehan;
-    let kotehan     = hitKotehan[0].kotehan;
-    
-
-    // 8文字より長い場合は省略
-    // if (kotehan.length > 7) {
-    //   kotehan = kotehan.substring(0, 7) + "･･";
-    // }
-
-    //kotehan = _kotehanList[currentNoId];
-    //kotehan = hitKotehan[0].kotehan;
-    kotehanElement.setAttribute("class", "user_name_by_extention viewKotehan kotehan");
-
-    kotehanContent = document.createTextNode(kotehan);
-    kotehanElement.appendChild(kotehanContent);
-    kotehanElement.setAttribute("title", kotehanFull);
-    kotehanElement.setAttribute("data-extension-userid", _commentRawIdList[newNo]);
-  } else {
-
-    // コテハンがHITしなかった場合---------
-
-    // let userName = _commentList[newNo];
-    let fullUserName = _commentListFull[newNo];
-    
-    kotehan = _commentListFull[newNo]
-    if (_183UserList[newNo]) {
-      kotehanElement.setAttribute("class", "user_name_by_extention viewKotehan user184");
-    } else {
-      kotehanElement.setAttribute("class", "user_name_by_extention viewKotehan");
-    }
-
-    kotehanContent = document.createTextNode(kotehan);
-    kotehanElement.appendChild(kotehanContent);  
-    kotehanElement.setAttribute("title", fullUserName);
-    kotehanElement.setAttribute("data-extension-userid", _commentRawIdList[newNo]);
-
-  }
-
-  // 自身が配信者なら非表示にする(DOMは残しておかないとカラー機能が使えなくなる)
-  if(bHide) {
-    kotehanElement.setAttribute("style", "display:none;");
-  }
-
-  // 作成したDOMの挿入
-  fragment.appendChild(kotehanElement);
 
 
   
@@ -986,33 +969,23 @@ function InsertPremium(fragment, newNo, bIsOwner) {
 
   // 追加するDOMを作成
   var newElement = document.createElement("span");
-  var newContent;
 
   if(bIsOwner) {
     // 配信者のコメント ------------------
     // 配信者はプレ垢かどうか関わらずpremium==3になってるので配信者は(主)と表示
-    // newContent = document.createTextNode("主");
-    // newElement.appendChild(newContent);
     newElement.setAttribute("class", "owner_by_extention");
     newElement.setAttribute("title", "配信者");
 
   } else {
     // リスナーのコメント ------------------
     if (_premiumList[newNo] === true) {
-      // newContent = document.createTextNode("P");
-      // newElement.appendChild(newContent);
       newElement.setAttribute("class", "premium_by_extention");
       newElement.setAttribute("title", "プレミアムアカウント");   
     } else {
-      // newContent = document.createTextNode("");
-      // newElement.appendChild(newContent);
       newElement.setAttribute("class", "noPremium_by_extention");
       newElement.setAttribute("title", "一般アカウント");
     }  
   }
-
-
-
 
   // 作成したDOMの挿入
   fragment.appendChild(newElement);
@@ -1020,45 +993,18 @@ function InsertPremium(fragment, newNo, bIsOwner) {
   return fragment;
 }
 
-let _AddedNode = false;
-
 
 function watchCommentDOM(mutationsList, observer) {
-  //console.time("loop time");
-  //console.log("-----------------------------------------");
-  
-  //console.log(mutationsList);
   
   for (const mutation of mutationsList) {
-    
-
     if(mutation.type === "childList"){
-
-      // 初回動作
-      /*
-      if(_AddedNode == false){
-
-        for (var i = 0; i < mutation.target.childNodes.length; i++) {
-          var currentNode = mutation.target.childNodes[i];
-          editComment(currentNode);
-        }
-      }
-      */
-
       // 初回動作以外
-      mutation.addedNodes.forEach((currentNode) => {
-
-        _AddedNode = true;
-        
-        //console.time("editComment time");
+      mutation.addedNodes.forEach((currentNode) => {        
         editComment(currentNode);
-        //console.timeEnd("editComment time");
       });
 
     }
   }
-
-  //console.timeEnd("loop time");
 }
 
 function editComment(currentNode) {
@@ -1131,16 +1077,14 @@ function editComment(currentNode) {
         fragment = InsertPremium(fragment, newNo, bIsOwner);
         //console.timeEnd("  InsertPremium time");
 
-        //console.time("  InsertUserName time");
         // 名前のDOMを挿入
         if (_commentListFull[newNo]) {
-          fragment = InsertUserName(fragment, newNo, false);
         } else {
           //console.log(`${newNo} に対応する名前がありません。取得失敗さんにします。`);
           _commentListFull[newNo] = "取得失敗";
-          fragment = InsertUserName(fragment, newNo, false);
         }
-        //console.timeEnd("  InsertUserName time");
+        fragment = InsertUserName(fragment, newNo, bIsMyComment);
+
 
         // フラグメントを実DOMに挿入
         //let comment = currentNode.querySelector("[class^=___comment-text___]"); // コメントテキストのDOM
@@ -1151,7 +1095,7 @@ function editComment(currentNode) {
       } else {
 
         //----------------------------------------------------------------
-        //　なふだコメントの場合
+        //　なふだコメントの場合（自分で発言したなふだコメント、または配信者がわからみたなふだコメント、が対象）
         //----------------------------------------------------------------
 
         // フラグメント作成
@@ -1171,16 +1115,17 @@ function editComment(currentNode) {
 
         // 名前のDOMを挿入
         if (_commentListFull[newNo]) {
-          fragment = InsertUserName(fragment, newNo , true);
         } else {
           //console.log(`${newNo} に対応する名前がありません。取得失敗さんにします。`);
           _commentListFull[newNo] = "取得失敗";
-          fragment = InsertUserName(fragment, newNo, true);
         }
+        fragment = InsertUserName(fragment, newNo , bIsMyComment);
 
         // フラグメントを実DOMに挿入
         let comment = currentNode.querySelector(".user-thumbnail-image"); // なふだ機能のアイコンと名前の親DOM
         comment.parentNode.insertBefore(fragment, comment);
+        // let comment = currentNode.querySelector(".user-thumbnail-image"); // なふだ機能のユーザーアイコン
+        // comment.after(fragment);
 
       }
 
@@ -1201,527 +1146,551 @@ function editComment(currentNode) {
 
     }
   }
-  //console.time("  commentTextElement time");
-  // コメントに行送りを対応させるためクラスを付与
-  //var commentTextElement = currentNode.querySelector("[class^=___comment-text___]");
-  /*
-  if (commentTextElement.offsetHeight > 28) {
-    commentTextElement.classList.add('multiple-line');
-    //commentTextElement.setAttribute('multiple-line', "true");
-  } else {
-    commentTextElement.classList.add('one-line');
-    //commentTextElement.setAttribute('one-line', "true");
-  }
-  */
-  //console.timeEnd("  commentTextElement time");
-  //console.timeEnd("  mmmm time");
 }
 
 
-//監視オプション
-const options = {
-  childList: true,  //直接の子の変更を監視
-  characterData: false,  //文字の変化を監視
-  characterDataOldValue: false, //属性の変化前を記録
-  attributes: false,  //属性の変化を監視
-  subtree: false, //全ての子要素を監視
-}
 
-function startWatchCommentDOM() {
 
-  startWatchGridDOM();
+function startWatchCommentDOM(mutationsList, observer) {
 
-  // ギフト画面を表示 → ギフト画面を非表示　をした場合には既存のコメントは裸のままになるのでここでeditComment()しておく
-  const tableDom = document.querySelector("[class^=___table___]"); // コメントDOMの直上の親DOMを指定
-  if (tableDom) {
-      
-    tableDom.childNodes.forEach((currentNode)=>{   
-  
-      editComment(currentNode);
+  if(!mutationsList || mutationsList[0].addedNodes.length > 0) {
 
+    console.log("startWatchCommentDOM", mutationsList);
+
+    startWatchGridDOM();
+
+    // ギフト画面を表示 → ギフト画面を非表示　をした場合には既存のコメントは裸のままになるのでここでeditComment()しておく
+    const tableDom = document.querySelector("[class^=___table___]"); // コメントDOMの直上の親DOMを指定
+    if (tableDom) {
+        
+      tableDom.childNodes.forEach((currentNode)=>{   
+    
+        editComment(currentNode);
+
+      });
+    }
+
+    const target = document.querySelector("[class^=___table___]"); // コメントDOMの直上の親DOMを指定
+    if (target) {
+      const obs = new MutationObserver(watchCommentDOM);
+
+      //監視オプション
+      const options = {
+        childList: true,  //直接の子の変更を監視
+        characterData: false,  //文字の変化を監視
+        characterDataOldValue: false, //属性の変化前を記録
+        attributes: false,  //属性の変化を監視
+        subtree: false, //全ての子要素を監視
+      }
+
+      obs.observe(target, options);
+      // 監視をスタートしたら直後に再描画させる
+      var now = new Date();
+      target.setAttribute("byExtention", now.getSeconds());
+    }
+
+
+    // 新しいHTML要素を作成
+    let tootlTipDom = document.createElement('div');
+    tootlTipDom.id = "ext_tooltipBox";
+
+    // 指定した要素の中の末尾に挿入
+    document.querySelector("[class^=___comment-data-grid___]").appendChild(tootlTipDom);
+
+
+    // 新しいHTML要素を作成
+    // let fragment = document.createDocumentFragment();
+    let myKotehanDom = document.createElement('div');
+    myKotehanDom.id = "ext_myKotehanBox";
+
+    let myKotehanDomCenter = document.createElement('div');
+    myKotehanDomCenter.id = "ext_myKotehanBox_Center";
+
+    let myKotehanDom_span = document.createElement('span');
+    myKotehanDom_span.id = "ext_myKotehanDom_comment";
+    myKotehanDom_span.innerText = "コテハンを入力してください(最大16文字)";
+    myKotehanDomCenter.appendChild(myKotehanDom_span);
+
+    let inputKotehan = document.createElement("input");
+    inputKotehan.setAttribute("type", "text");
+    inputKotehan.setAttribute("id", "ext_myKotehanInput");
+    inputKotehan.setAttribute("autocomplete", "off");
+    inputKotehan.setAttribute("placeholder", "コテハンを入力してください");
+    inputKotehan.setAttribute("maxlength", "16");
+    myKotehanDomCenter.appendChild(inputKotehan);
+
+    let myKotehanDom_OkBtn = document.createElement('span');
+    myKotehanDom_OkBtn.id = "ext_myKotehanBox_OkBtn";
+    myKotehanDom_OkBtn.innerText = "決定";
+    myKotehanDomCenter.appendChild(myKotehanDom_OkBtn);
+
+    let myKotehanDom_ClearBtn = document.createElement('span');
+    myKotehanDom_ClearBtn.id = "ext_myKotehanBox_ClearBtn";
+    myKotehanDom_ClearBtn.innerText = "コテハンクリア";
+    myKotehanDomCenter.appendChild(myKotehanDom_ClearBtn);
+
+    let myKotehanDom_CancelBtn = document.createElement('span');
+    myKotehanDom_CancelBtn.id = "ext_myKotehanBox_CancelBtn";
+    myKotehanDom_CancelBtn.innerText = "キャンセル";
+    myKotehanDomCenter.appendChild(myKotehanDom_CancelBtn);
+        
+    // DOMに追加
+    myKotehanDom.appendChild(myKotehanDomCenter);
+    document.querySelector("[class^=___comment-data-grid___]").appendChild(myKotehanDom);
+
+
+    document.getElementById("ext_myKotehanInput").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        document.getElementById("ext_myKotehanBox_OkBtn").click();
+      }
     });
 
+    document.getElementById("ext_myKotehanBox_OkBtn").addEventListener('click', function(e) {
+
+      console.log("クリックイベント発生")
+
+      document.getElementById("ext_myKotehanBox").classList.remove("show");
+
+      let kotehan = document.getElementById('ext_myKotehanInput').value;
+      if(kotehan.length > 0) {
+
+        setKotehanInInject(mouseClick.userId, kotehan, mouseClick.is184User);
+
+        // 表示中のコメントのコテハンを変更
+        // var currentCommentList = document.querySelectorAll('.user_name_by_extention');
+        const currentCommentList = document.querySelectorAll('[data-extension-userid]');
+        for (var i = 0; i < currentCommentList.length; i++) {
+          //console.log("名前比較", currentCommentList[i].getAttribute("data-extension-userid"), mouseClick.userId);
+          if (currentCommentList[i].getAttribute("data-extension-userid") == mouseClick.userId) {
+            currentCommentList[i].innerText = kotehan;
+            currentCommentList[i].classList.add("kotehan");
+            currentCommentList[i].classList.remove("user184");
+          }
+        }                  
+      }
+    });  
+    document.getElementById("ext_myKotehanBox_ClearBtn").addEventListener('click', function(e) {
+      document.getElementById("ext_myKotehanBox").classList.remove("show");
+
+      _kotehanList = _kotehanList.filter(function (x) { return x.id !== mouseClick.userId }); // 削除
+      // コテハン保存用のDOMにコテハンをテキストを挿入（結果、読み上げられる）
+      let kotehanBox = document.getElementById("ext_kotehanBox");
+      if(kotehanBox) {
+        let item = { id : mouseClick.userId, kotehan : "", type: "delete"};
+        var newYomiCommentDom = document.createElement('p');
+        var newYomiCommentText = document.createTextNode(JSON.stringify(item));
+        newYomiCommentDom.appendChild(newYomiCommentText);
+        kotehanBox.appendChild(newYomiCommentDom);
+      }
+      // 表示中のコメントのコテハンを変更
+      const currentCommentList = document.querySelectorAll('[data-extension-userid]');
+      for (var i = 0; i < currentCommentList.length; i++) {
+        //console.log("名前比較", currentCommentList[i].getAttribute("data-extension-userid"), mouseClick.userId);
+        if (currentCommentList[i].getAttribute("data-extension-userid") == mouseClick.userId) {
+
+          if(mouseClick.is184User) {
+            currentCommentList[i].innerText = mouseClick.userId;
+            currentCommentList[i].classList.remove("kotehan");
+            currentCommentList[i].classList.add("user184");  
+          } else {
+            currentCommentList[i].innerText = mouseClick.userName;
+            currentCommentList[i].classList.remove("kotehan");
+            //currentCommentList[i].classList.add("user184");
+          }
+        }
+      }
+    });
+    document.getElementById("ext_myKotehanBox_CancelBtn").addEventListener('click', function(e) {
+      document.getElementById("ext_myKotehanBox").classList.remove("show");
+    }); 
   }
-
-
-
-  const target = document.querySelector("[class^=___table___]"); // コメントDOMの直上の親DOMを指定
-  if (target) {
-    const obs = new MutationObserver(watchCommentDOM);
-    obs.observe(target, options);
-    // 監視をスタートしたら直後に再描画させる
-    var now = new Date();
-    target.setAttribute("byExtention", now.getSeconds());
-  }
-
-
-  // 新しいHTML要素を作成
-  let tootlTipDom = document.createElement('div');
-  tootlTipDom.id = "ext_tooltipBox";
-
-  // 指定した要素の中の末尾に挿入
-  document.querySelector("[class^=___comment-data-grid___]").appendChild(tootlTipDom);
-
-
-  // 新しいHTML要素を作成
-  // let fragment = document.createDocumentFragment();
-  let myKotehanDom = document.createElement('div');
-  myKotehanDom.id = "ext_myKotehanBox";
-
-  let myKotehanDomCenter = document.createElement('div');
-  myKotehanDomCenter.id = "ext_myKotehanBox_Center";
-
-
-  let myKotehanDom_comment = document.createElement('span');
-  myKotehanDom_comment.id = "ext_myKotehanDom_comment";
-  myKotehanDomCenter.appendChild(myKotehanDom_comment);
-
-  let inputKotehan = document.createElement("input");
-  inputKotehan.setAttribute("type", "text");
-  inputKotehan.setAttribute("id", "ext_myKotehanInput");
-  myKotehanDomCenter.appendChild(inputKotehan);
-
-  let myKotehanDom_OkBtn = document.createElement('span');
-  myKotehanDom_OkBtn.id = "ext_myKotehanBox_OkBtn";
-  myKotehanDom_OkBtn.innerText = "決定";
-  myKotehanDomCenter.appendChild(myKotehanDom_OkBtn);
-
-  let myKotehanDom_ClearBtn = document.createElement('span');
-  myKotehanDom_ClearBtn.id = "ext_myKotehanBox_ClearBtn";
-  myKotehanDom_ClearBtn.innerText = "コテハンクリア";
-  myKotehanDomCenter.appendChild(myKotehanDom_ClearBtn);
-
-
-  let myKotehanDom_CancelBtn = document.createElement('span');
-  myKotehanDom_CancelBtn.id = "ext_myKotehanBox_CancelBtn";
-  myKotehanDom_CancelBtn.innerText = "キャンセル";
-  myKotehanDomCenter.appendChild(myKotehanDom_CancelBtn);
-
-  myKotehanDom.appendChild(myKotehanDomCenter);
-  document.querySelector("[class^=___comment-data-grid___]").appendChild(myKotehanDom);
-
-
 }
 
-function watchParentDOM(mutationsList, observer) {
-  // コメントDOMの監視を開始
-  startWatchCommentDOM();
+let mouseOver = {
+  userId: 0,      // マウスオーバーしたコメントのユーザーID
+  commentNo: 0    // マウスオーバーしたコメントのコメント番号
 }
 
-//監視オプション
-const optionsForGrid = {
-  childList: true,  //直接の子の変更を監視
-  characterData: false,  //文字の変化を監視
-  characterDataOldValue: false, //属性の変化前を記録
-  attributes: false,  //属性の変化を監視
-  subtree: false, //全ての子要素を監視
+let mouseClick = {
+  userId: 0,        // クリックしたコメントのユーザーID
+  commentNo: 0,     // クリックしたコメントのコメント番号
+  userName: "",     // クリックしたコメントのユーザー名
+  is184User: false, // クリックしたコメントが184さんかどうか
+  userComment: "",  // クリックしたコメントの内容
+  kotehan: ""       // クリックしたコメントのコテハン（あれば）
 }
 
 function startWatchGridDOM() {
   
   const target = document.querySelector("[class^=___comment-data-grid___]");
+  if(!target) return;
 
-  let currentUserIDfromMouseOver = 0;
+  //監視オプション
+  const optionsForGrid = {
+    childList: true,              //直接の子の変更を監視
+    characterData: false,         //文字の変化を監視
+    characterDataOldValue: false, //属性の変化前を記録
+    attributes: false,            //属性の変化を監視
+    subtree: false,               //全ての子要素を監視
+  }  
 
-  let currentUserID = 0;
-  let currentCommentNo = 0;
-  let userId = "";
-  let userName = "";
-  let userComment = "";
+  const obs = new MutationObserver(function(mutationsList, observer){
 
-  if (target) {
-    const obs = new MutationObserver(function(mutationsList, observer){
+    const tootlTip = document.getElementById('ext_tooltipBox');
 
-      const tootlTip = document.getElementById('ext_tooltipBox');
+    //console.log(mutationsList);
 
-      //console.log(mutationsList);
-
-      for (const mutation of mutationsList) {
-        if(mutation.addedNodes.length > 0) {
+    for (const mutation of mutationsList) {
+      if(mutation.addedNodes.length > 0) {
 
 
-          // ツールチップ関係
-          if(document.querySelector("[class^=___tooltip___]")) {
-            if(currentUserIDfromMouseOver !== 0 && currentCommentNo !== 0) {
-              // console.log("ツールチップを表示します", currentUserIDfromMouseOver, currentCommentNo);
-              if(tootlTip) tootlTip.innerText = getCommentsStringByUserId(currentUserIDfromMouseOver, currentCommentNo);
-            }
+        // ツールチップ関係
+        if(document.querySelector("[class^=___tooltip___]")) {
+          if(mouseOver.userId !== 0 && mouseOver.commentNo !== 0) {
+            // ツールチップの表示テキストを取得
+            if(tootlTip) tootlTip.innerText = getCommentsStringByUserId(mouseOver.userId, mouseOver.commentNo);
           }
+        }
 
 
-          // 色関係
-          if(document.querySelector("[class^=___context-menu___]") && !document.querySelector("[class^=___context-menu___]:empty")) {
-            // 上記、:empty は、ニコ生のDOMが「へもさんが100ptニコニコ広告しました」などのシステムメッセージを右クリックした場合、コンテキストメニューのDOMが表示されていないのにDOM上は存在している状態になってしまう仕様があり、それを回避するためのもの。
+        // 色関係
+        if(document.querySelector("[class^=___context-menu___]") && !document.querySelector("[class^=___context-menu___]:empty")) {
+          // 上記、:empty は、ニコ生のDOMが「へもさんが100ptニコニコ広告しました」などのシステムメッセージを右クリックした場合、コンテキストメニューのDOMが表示されていないのにDOM上は存在している状態になってしまう仕様があり、それを回避するためのもの。
 
-            if( !document.querySelector("[class^=___context-menu___] .ext-menu") && currentUserID !== 0 ) {
+          if( !document.querySelector("[class^=___context-menu___] .ext-menu") && mouseClick.userId !== 0 ) {
 
-              let style = document.getElementById('extension_style');
-              let _tempCurrentUserID;
+            let style = document.getElementById('extension_style');
+            let _tempCurrentUserID;
 
-              console.log("▼色オブジェクトリスト");
-              console.log(_styleList);
-              console.log("▼CSSルール");
-              console.log(style.sheet.cssRules);
+            console.log("▼色オブジェクトリスト");
+            console.log(_styleList);
+            console.log("▼CSSルール");
+            console.log(style.sheet.cssRules);
 
-              // 追加するメニューのDOMを作成
-              let ulElement = document.createElement("ul");
-              let liElement = document.createElement("li");
-              let labelElement = document.createElement("label");
-              let inputElement = document.createElement("input");
+            // 追加するメニューのDOMを作成
+            let ulElement = document.createElement("ul");
+            let liElement = document.createElement("li");
+            let labelElement = document.createElement("label");
+            let inputElement = document.createElement("input");
 
-              // 追加するメニューのDOMの属性やイベントの設定
-              ulElement.setAttribute("class", "ext-menu");
-              //liElement.setAttribute("class", "setColor");
-              inputElement.setAttribute("class", "extention");
-              inputElement.setAttribute("type", "color");
-              labelElement.innerText = "文字色を設定";
-
-
-              if(_styleList[currentUserID] && _styleList[currentUserID].textColor !== -1) {
-                inputElement.value = _styleList[currentUserID].textColor;
-              } else {
-                inputElement.value = "#000000";
-              }
-              
-              // カラーピッカーの色を動かしたときのイベント
-              inputElement.addEventListener('input', function(e) {
-                //console.log("色をつけます" , currentUserID, this.value);
-
-                if(!_styleList[currentUserID]) {
-                  let objct = {textIndex : -1, textColor: -1, bgIndex : -1, bgColor: -1};
-                  _styleList[currentUserID] = objct;
-                }
-
-                //スタイルシートの設定
-                if(_styleList[currentUserID].textIndex !== -1) {
-                  // 追加済みなら置換
-                  style.sheet.deleteRule(_styleList[currentUserID].textIndex);
-                  //style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span.user_name_by_extention.viewKotehan[data-extension-userid="'+ currentUserID + '"] + span {color: ' + this.value + '!important;}', _styleList[currentUserID].textIndex);
-                  style.sheet.insertRule('[ext-master-comeview][ext-opt-color] .content-area:has([data-extension-userid="'+ currentUserID + '"]) .comment-text {color: ' + this.value + '!important;}', _styleList[currentUserID].textIndex);
-                } else {
-                  //let index = style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span.user_name_by_extention.viewKotehan[data-extension-userid="'+ currentUserID + '"] + span {color: ' + this.value + '!important;}', style.sheet.cssRules.length);
-                  let index = style.sheet.insertRule('[ext-master-comeview][ext-opt-color] .content-area:has([data-extension-userid="'+ currentUserID + '"]) .comment-text {color: ' + this.value + '!important;}', style.sheet.cssRules.length);
-                  _styleList[currentUserID].textIndex = index;  
-                }
-                //console.log("index", style.sheet.cssRules);
-
-                // 色を選択しているユーザーIDを保存しておく
-                _tempCurrentUserID = currentUserID;
-              
-              });
-              // カラーピッカーの色変更を確定したときのイベント
-              inputElement.addEventListener('change', function(e) {
-                console.log("色を保存します" , _tempCurrentUserID, this.value);
-                _styleList[_tempCurrentUserID].textColor = this.value;
+            // 追加するメニューのDOMの属性やイベントの設定
+            ulElement.setAttribute("class", "ext-menu");
+            //liElement.setAttribute("class", "setColor");
+            liElement.id = "menu-setColor";
+            inputElement.setAttribute("class", "extention");
+            inputElement.setAttribute("type", "color");
+            labelElement.innerText = "文字色を設定";
 
 
-                // カラー情報を保存するDOMに保存
-                let colorBox = document.getElementById("ext_colorBox");
-                if(colorBox) {
-                  let item = { 
-                    id : _tempCurrentUserID,
-                    textColor : _styleList[_tempCurrentUserID].textColor,
-                    bgColor : _styleList[_tempCurrentUserID].bgColor,
-                    deleteFlag : false,
-                    createDate : new Date().toUTCString()
-                  };
-                  var colorItemDom = document.createElement('p');
-                  var newYomiCommentText = document.createTextNode(JSON.stringify(item));
-                  colorItemDom.appendChild(newYomiCommentText);
-                  colorBox.appendChild(colorItemDom);
-                }
-
-              });
-
-
-              
-
-              let liBgColorElement = document.createElement("li");
-              let labelBgColorElement = document.createElement("label");
-              let inputBgColorElement = document.createElement("input");
-              inputBgColorElement.setAttribute("class", "extention");
-              inputBgColorElement.setAttribute("type", "color");
-              labelBgColorElement.innerText = "背景色を設定";
-
-
-              if(_styleList[currentUserID] && _styleList[currentUserID].bgColor !== -1) {
-                inputBgColorElement.value = _styleList[currentUserID].bgColor;
-              } else {
-                inputBgColorElement.value = "#ffffff";
-              }
-
-              // カラーピッカーの色を動かしたときのイベント
-              inputBgColorElement.addEventListener('input', function(e) {
-                // console.log("背景色をつけます" , currentUserID, this.value, _styleList);
-
-                if(!_styleList[currentUserID]) {
-                  let objct = {textIndex : -1, textColor: -1, bgIndex : -1, bgColor: -1};
-                  _styleList[currentUserID] = objct;
-                }
-
-                //スタイルシートの設定
-                if(_styleList[currentUserID].bgIndex !== -1) {
-                  // 追加済みなら置換
-                  style.sheet.deleteRule(_styleList[currentUserID].bgIndex);
-                  style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span:has([data-extension-userid="'+ currentUserID + '"] ) { background-color: ' + this.value + ';}', _styleList[currentUserID].bgIndex);
-                } else {
-                  // 未追加なら追加
-                  let index = style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span:has([data-extension-userid="'+ currentUserID + '"] ) { background-color: ' + this.value + ';}', style.sheet.cssRules.length);
-                  _styleList[currentUserID].bgIndex = index;  
-                }
-                // console.log("index", style.sheet.cssRules);
-
-                // 色を選択しているユーザーIDを保存しておく
-                _tempCurrentUserID = currentUserID;
-              
-              });
-              // カラーピッカーの色変更を確定したときのイベント
-              inputBgColorElement.addEventListener('change', function(e) {
-
-                console.log("背景色を保存します" , _tempCurrentUserID, this.value);
-                _styleList[_tempCurrentUserID].bgColor = this.value;
-
-                // カラー情報を保存するDOMに保存
-                let colorBox = document.getElementById("ext_colorBox");
-                if(colorBox) {
-                  let item = { 
-                    id : _tempCurrentUserID,
-                    textColor : _styleList[_tempCurrentUserID].textColor,
-                    bgColor : _styleList[_tempCurrentUserID].bgColor,
-                    deleteFlag : false,
-                    createDate : new Date().toUTCString()
-                  };
-                  var colorItemDom = document.createElement('p');
-                  var newYomiCommentText = document.createTextNode(JSON.stringify(item));
-                  colorItemDom.appendChild(newYomiCommentText);
-                  colorBox.appendChild(colorItemDom);
-                }
-              });
-
-
-
-              let liResetColorElement = document.createElement("li");
-              let labelResetColorElement = document.createElement("label");
-              labelResetColorElement.innerText = "色設定をクリア";
-
-              // 色設定をクリアするボタンのイベント              
-              liResetColorElement.addEventListener('click', function(e) {
-                console.log("色設定を削除します", currentUserID, _styleList);
-
-                if(_styleList[currentUserID] && _styleList[currentUserID].textIndex !== -1) {
-                  // 追加済みなら置換
-                  style.sheet.deleteRule(_styleList[currentUserID].textIndex);
-                  style.sheet.insertRule('span.user_name_by_extention.viewKotehan[data-extension-userid="'+ currentUserID + '"] + span {color: #000000;}', _styleList[currentUserID].textIndex);
-                  _styleList[currentUserID].textColor = "#000000";
-                }
-
-                if(_styleList[currentUserID] && _styleList[currentUserID].bgIndex !== -1) {
-                  // 追加済みなら置換
-                  style.sheet.deleteRule(_styleList[currentUserID].bgIndex);
-                  style.sheet.insertRule('span:has([data-extension-userid="'+ currentUserID + '"] ) { background-color: #ffffff;}', _styleList[currentUserID].bgIndex);
-                  _styleList[currentUserID].bgColor = "#ffffff";
-                }
-
-                // コンテキストメニューを閉じる
-                document.querySelector('[class^=___context-menu___]').style.display = "none"
-
-
-                // カラー情報を保存するDOMに保存
-                let colorBox = document.getElementById("ext_colorBox");
-                if(colorBox) {
-                  let item = { 
-                    id : currentUserID,
-                    deleteFlag : true
-                  };
-                  var colorItemDom = document.createElement('p');
-                  var newYomiCommentText = document.createTextNode(JSON.stringify(item));
-                  colorItemDom.appendChild(newYomiCommentText);
-                  colorBox.appendChild(colorItemDom);
-                }
-
-              });
-
-
-              // コテハン設定ボタンのDOMを作成
-              let liKotehanElement = document.createElement("li");
-liKotehanElement.style.display = "none";
-              let labelKotehanElement = document.createElement("label");
-              labelKotehanElement.innerText = "コテハンを設定";              
-
-              // コテハン設定ボタンのClickイベント
-              liKotehanElement.addEventListener('click', function(e) {
-                document.getElementById('ext_myKotehanBox').classList.add("show");
-                document.getElementById('ext_myKotehanInput').focus();
-                document.getElementById('ext_myKotehanInput').value = userName;
-                document.getElementById('ext_myKotehanDom_comment').innerText = userComment;
-              });
-
-              document.getElementById("ext_myKotehanBox_OkBtn").addEventListener('click', function(e) {
-                document.getElementById("ext_myKotehanBox").classList.remove("show");
-
-                let kotehan = document.getElementById('ext_myKotehanInput').value;
-                if(kotehan.length > 0) {
-                  let kotehanItem = {id: currentUserID, kotehan: kotehan};
-                  // 既に同じIDの人が登録されていれば削除してから追加
-                  _kotehanList = _kotehanList.filter(function (x) { return x.id !== currentUserID }); // 削除
-                  _kotehanList.push(kotehanItem); // 追加
-                  // コテハン保存用のDOMにコテハンをテキストを挿入（結果、読み上げられる）
-                  let kotehanBox = document.getElementById("ext_kotehanBox");
-                  if(kotehanBox) {
-                    let item = { id : currentUserID, kotehan : kotehan};
-                    var newYomiCommentDom = document.createElement('p');
-                    var newYomiCommentText = document.createTextNode(JSON.stringify(item));
-                    newYomiCommentDom.appendChild(newYomiCommentText);
-                    kotehanBox.appendChild(newYomiCommentDom);
-                  }
-
-                  // 表示中のコメントのコテハンを変更
-                  var currentCommentList = document.querySelectorAll('.user_name_by_extention');
-                  for (var i = 0; i < currentCommentList.length; i++) {
-                    if (currentCommentList[i].innerText == currentUserID) {
-                      currentCommentList[i].innerText = kotehan;
-                      currentCommentList[i].classList.add("kotehan");
-                      currentCommentList[i].classList.remove("user184");
-                    }
-                  }                  
-                }
-              });  
-              document.getElementById("ext_myKotehanBox_ClearBtn").addEventListener('click', function(e) {
-                document.getElementById("ext_myKotehanBox").classList.remove("show");
-
-                _kotehanList = _kotehanList.filter(function (x) { return x.id !== currentUserID }); // 削除
-                // コテハン保存用のDOMにコテハンをテキストを挿入（結果、読み上げられる）
-                let kotehanBox = document.getElementById("ext_kotehanBox");
-                if(kotehanBox) {
-                  let item = { id : currentUserID, kotehan : kotehan};
-                  var newYomiCommentDom = document.createElement('p');
-                  var newYomiCommentText = document.createTextNode(JSON.stringify(item));
-                  newYomiCommentDom.appendChild(newYomiCommentText);
-                  kotehanBox.appendChild(newYomiCommentDom);
-                }                
-              });
-              document.getElementById("ext_myKotehanBox_CancelBtn").addEventListener('click', function(e) {
-                document.getElementById("ext_myKotehanBox").classList.remove("show");
-              });              
-
-              /* --------------------------
-              追加するメニューを1つにまとめる
-              ----------------------------*/
-
-              // [文字色を設定]メニュー
-              labelElement.appendChild(inputElement);
-              liElement.appendChild(labelElement);
-              ulElement.appendChild(liElement);
-
-              // [背景色を設定]メニュー
-              labelBgColorElement.appendChild(inputBgColorElement);
-              liBgColorElement.appendChild(labelBgColorElement);
-              ulElement.appendChild(liBgColorElement);
-
-              // [色設定をクリア]メニュー
-              liResetColorElement.appendChild(labelResetColorElement);
-              ulElement.appendChild(liResetColorElement);
-
-              // [コテハンを設定]メニュー
-              liKotehanElement.appendChild(labelKotehanElement);
-              ulElement.appendChild(liKotehanElement);        
-
-
-              // コンテキストメニューの監視を解除
-              observer.disconnect();
-
-              // コンテキストメニューに追加メニュー項目を挿入
-              let commentContext = document.querySelector("[class^=___program-comment-menu___]"); // コメント関係のメニューDOMを指定
-              if(commentContext && commentContext.parentNode){
-                commentContext.parentNode.insertBefore(ulElement, commentContext);    
-              }
-
-              // コンテキストメニューの監視を再開
-              const target = document.querySelector("[class^=___comment-data-grid___]");
-              observer.observe(target, optionsForGrid);
+            if(_styleList[mouseClick.userId] && _styleList[mouseClick.userId].textColor !== -1) {
+              inputElement.value = _styleList[mouseClick.userId].textColor;
+            } else {
+              inputElement.value = "#000000";
             }
             
+            // カラーピッカーの色を動かしたときのイベント
+            inputElement.addEventListener('input', function(e) {
+              //console.log("色をつけます" , currentUserID, this.value);
+
+              if(!_styleList[mouseClick.userId]) {
+                let objct = {textIndex : -1, textColor: -1, bgIndex : -1, bgColor: -1};
+                _styleList[mouseClick.userId] = objct;
+              }
+
+              //スタイルシートの設定
+              if(_styleList[mouseClick.userId].textIndex !== -1) {
+                // 追加済みなら置換
+                style.sheet.deleteRule(_styleList[mouseClick.userId].textIndex);
+                style.sheet.insertRule('[ext-master-comeview][ext-opt-color] .content-area:has([data-extension-userid="'+ mouseClick.userId + '"]) .comment-text {color: ' + this.value + '!important;}', _styleList[mouseClick.userId].textIndex);
+              } else {
+                let index = style.sheet.insertRule('[ext-master-comeview][ext-opt-color] .content-area:has([data-extension-userid="'+ mouseClick.userId + '"]) .comment-text {color: ' + this.value + '!important;}', style.sheet.cssRules.length);
+                _styleList[mouseClick.userId].textIndex = index;
+              }
+              //console.log("index", style.sheet.cssRules);
+
+              // 色を選択しているユーザーIDを保存しておく
+              _tempCurrentUserID = mouseClick.userId;
+            
+            });
+            // カラーピッカーの色変更を確定したときのイベント
+            inputElement.addEventListener('change', function(e) {
+              console.log("色を保存します" , _tempCurrentUserID, this.value);
+              _styleList[_tempCurrentUserID].textColor = this.value;
+
+
+              // カラー情報を保存するDOMに保存
+              let colorBox = document.getElementById("ext_colorBox");
+              if(colorBox) {
+                let item = { 
+                  id : _tempCurrentUserID,
+                  textColor : _styleList[_tempCurrentUserID].textColor,
+                  bgColor : _styleList[_tempCurrentUserID].bgColor,
+                  deleteFlag : false,
+                  createDate : new Date().toUTCString()
+                };
+                var colorItemDom = document.createElement('p');
+                var newYomiCommentText = document.createTextNode(JSON.stringify(item));
+                colorItemDom.appendChild(newYomiCommentText);
+                colorBox.appendChild(colorItemDom);
+              }
+
+            });
+
+
+            
+
+            let liBgColorElement = document.createElement("li");
+            liBgColorElement.id = "menu-setBgColor";
+            let labelBgColorElement = document.createElement("label");
+            let inputBgColorElement = document.createElement("input");
+            inputBgColorElement.setAttribute("class", "extention");
+            inputBgColorElement.setAttribute("type", "color");
+            labelBgColorElement.innerText = "背景色を設定";
+
+
+            if(_styleList[mouseClick.userId] && _styleList[mouseClick.userId].bgColor !== -1) {
+              inputBgColorElement.value = _styleList[mouseClick.userId].bgColor;
+            } else {
+              inputBgColorElement.value = "#ffffff";
+            }
+
+            // カラーピッカーの色を動かしたときのイベント
+            inputBgColorElement.addEventListener('input', function(e) {
+
+
+              if(!_styleList[mouseClick.userId]) {
+                let objct = {textIndex : -1, textColor: -1, bgIndex : -1, bgColor: -1};
+                _styleList[mouseClick.userId] = objct;
+              }
+
+              //スタイルシートの設定
+              if(_styleList[mouseClick.userId].bgIndex !== -1) {
+                // 追加済みなら置換
+                style.sheet.deleteRule(_styleList[mouseClick.userId].bgIndex);
+                style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span:has([data-extension-userid="'+ mouseClick.userId + '"] ) { background-color: ' + this.value + ';}', _styleList[mouseClick.userId].bgIndex);
+              } else {
+                // 未追加なら追加
+                let index = style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span:has([data-extension-userid="'+ mouseClick.userId + '"] ) { background-color: ' + this.value + ';}', style.sheet.cssRules.length);
+                _styleList[mouseClick.userId].bgIndex = index;  
+              }
+              // console.log("index", style.sheet.cssRules);
+
+              // 色を選択しているユーザーIDを保存しておく
+              _tempCurrentUserID = mouseClick.userId;
+            
+            });
+            // カラーピッカーの色変更を確定したときのイベント
+            inputBgColorElement.addEventListener('change', function(e) {
+
+              console.log("背景色を保存します" , _tempCurrentUserID, this.value);
+              _styleList[_tempCurrentUserID].bgColor = this.value;
+
+              // カラー情報を保存するDOMに保存
+              let colorBox = document.getElementById("ext_colorBox");
+              if(colorBox) {
+                let item = { 
+                  id : _tempCurrentUserID,
+                  textColor : _styleList[_tempCurrentUserID].textColor,
+                  bgColor : _styleList[_tempCurrentUserID].bgColor,
+                  deleteFlag : false,
+                  createDate : new Date().toUTCString()
+                };
+                var colorItemDom = document.createElement('p');
+                var newYomiCommentText = document.createTextNode(JSON.stringify(item));
+                colorItemDom.appendChild(newYomiCommentText);
+                colorBox.appendChild(colorItemDom);
+              }
+            });
+
+
+
+            let liResetColorElement = document.createElement("li");
+            liResetColorElement.id = "menu-resetColor";
+            let labelResetColorElement = document.createElement("label");
+            labelResetColorElement.innerText = "色設定をクリア";
+
+            // 色設定をクリアするボタンのイベント              
+            liResetColorElement.addEventListener('click', function(e) {
+              console.log("色設定を削除します", mouseClick.userId, _styleList);
+
+              if(_styleList[mouseClick.userId] && _styleList[mouseClick.userId].textIndex !== -1) {
+                // 追加済みなら置換
+                style.sheet.deleteRule(_styleList[mouseClick.userId].textIndex);
+                style.sheet.insertRule('span.user_name_by_extention.viewKotehan[data-extension-userid="'+ mouseClick.userId + '"] + span {color: #000000;}', _styleList[mouseClick.userId].textIndex);
+                _styleList[mouseClick.userId].textColor = "#000000";
+              }
+
+              if(_styleList[mouseClick.userId] && _styleList[mouseClick.userId].bgIndex !== -1) {
+                // 追加済みなら置換
+                style.sheet.deleteRule(_styleList[mouseClick.userId].bgIndex);
+                style.sheet.insertRule('span:has([data-extension-userid="'+ mouseClick.userId + '"] ) { background-color: #ffffff;}', _styleList[mouseClick.userId].bgIndex);
+                _styleList[mouseClick.userId].bgColor = "#ffffff";
+              }
+
+              // コンテキストメニューを閉じる
+              document.querySelector('[class^=___context-menu___]').style.display = "none"
+
+
+              // カラー情報を保存するDOMに保存
+              let colorBox = document.getElementById("ext_colorBox");
+              if(colorBox) {
+                let item = { 
+                  id : mouseClick.userId,
+                  deleteFlag : true
+                };
+                var colorItemDom = document.createElement('p');
+                var newYomiCommentText = document.createTextNode(JSON.stringify(item));
+                colorItemDom.appendChild(newYomiCommentText);
+                colorBox.appendChild(colorItemDom);
+              }
+
+            });
+
+
+            // コテハン設定ボタンのDOMを作成
+            let liKotehanElement = document.createElement("li");
+            //liKotehanElement.style.display = "none";
+            liKotehanElement.id = "menu-kotehan";
+            let labelKotehanElement = document.createElement("label");
+            labelKotehanElement.innerText = "コテハンを設定";              
+
+            // コテハン設定ボタンのClickイベント
+            liKotehanElement.addEventListener('click', function(e) {
+              document.getElementById('ext_myKotehanBox').classList.add("show");
+              document.getElementById('ext_myKotehanInput').focus();
+              document.getElementById('ext_myKotehanInput').value = mouseClick.kotehan;
+              // document.getElementById('ext_myKotehanDom_comment').innerText = userComment;
+
+              // コンテキストメニューを閉じておく
+              document.querySelector('[class^=___context-menu___]').style.display = "none"              
+            });
+
+
+
+            /* --------------------------
+            追加するメニューを1つにまとめる
+            ----------------------------*/
+
+            // [文字色を設定]メニュー
+            labelElement.appendChild(inputElement);
+            liElement.appendChild(labelElement);
+            ulElement.appendChild(liElement);
+
+            // [背景色を設定]メニュー
+            labelBgColorElement.appendChild(inputBgColorElement);
+            liBgColorElement.appendChild(labelBgColorElement);
+            ulElement.appendChild(liBgColorElement);
+
+            // [色設定をクリア]メニュー
+            liResetColorElement.appendChild(labelResetColorElement);
+            ulElement.appendChild(liResetColorElement);
+
+            // [コテハンを設定]メニュー
+            liKotehanElement.appendChild(labelKotehanElement);
+            ulElement.appendChild(liKotehanElement);        
+
+
+            // コンテキストメニューの監視を解除
+            observer.disconnect();
+
+            // コンテキストメニューに追加メニュー項目を挿入
+            let commentContext = document.querySelector("[class^=___program-comment-menu___]"); // コメント関係のメニューDOMを指定
+            if(commentContext && commentContext.parentNode){
+              commentContext.parentNode.insertBefore(ulElement, commentContext);    
+            }
+
+            // コンテキストメニューの監視を再開
+            const target = document.querySelector("[class^=___comment-data-grid___]");
+            observer.observe(target, optionsForGrid);
           }
+          
         }
       }
+    }
 
-    });
-    
-    obs.observe(target, optionsForGrid);
+  });
+  
+  obs.observe(target, optionsForGrid);
 
-    document.querySelector("[class^=___comment-data-grid___]").addEventListener("mousemove", function(e) {
+  document.querySelector("[class^=___comment-data-grid___]").addEventListener("mouseover", function(e) {
+    // マウスオーバーしたコメント情報を保存（ツールチップや色関係で使う）
+    if (e.target.parentNode && e.target.closest("[class^=___table-cell___]")) {
+      const commentDom = e.target.closest("[class^=___table-cell___]").querySelector(".comment-number");
+      if(commentDom && commentDom.innerText) {
+        mouseOver.userId = _commentRawIdList[commentDom.innerText];
+        mouseOver.commentNo = commentDom.innerText;
+      } else {
+        mouseOver.userId = 0;
+        mouseOver.commentNo = 0;
+      }
+    }
+  });    
 
-      const tootlTip = document.getElementById('ext_tooltipBox');
-      // console.log("mousemove", currentUserIDfromMouseOver, currentCommentNo);
-      if(tootlTip) {
-        if(currentUserIDfromMouseOver !== 0 && currentCommentNo !== 0) {
+  document.querySelector("[class^=___comment-data-grid___]").addEventListener("mousemove", function(e) {
+    // マウスカーソルを移動したときにツールチップを追従させる
+    const tootlTip = document.getElementById('ext_tooltipBox');
+    if(tootlTip) {
+      if(mouseOver.userId !== 0 && mouseOver.commentNo !== 0) {
 
-          // tootlTip.style.display = "block";
-          tootlTip.classList.add("show");
+        tootlTip.classList.add("show");
 
-          // 要素の位置を更新する
-          // 要素の右下の座標を計算
-          const right = e.clientX - 10;
-          const bottom = e.clientY - 10;
-    
-          // 要素の位置を更新する
-          tootlTip.style.right = `calc(100% - ${right}px)`;
-          tootlTip.style.bottom = `calc(100% - ${bottom}px)`;  
+        // 要素の位置を更新。 要素の右下の座標を計算。
+        const right = e.clientX - 10;
+        const bottom = e.clientY - 10;
+  
+        // 要素の位置を更新する
+        tootlTip.style.right = `calc(100% - ${right}px)`;
+        tootlTip.style.bottom = `calc(100% - ${bottom}px)`;  
+      } else {
+        // システムメッセージなどの場合は非表示にする
+        tootlTip.classList.remove("show");
+      }
+    }
+  });
+
+  document.querySelector("[class^=___comment-data-grid___]").addEventListener("mouseleave", function(e) {
+    // マウスが離れたらツールチップを非表示にする
+    const tootlTip = document.getElementById('ext_tooltipBox');
+    // tootlTip.style.display = "none";
+    if(tootlTip) tootlTip.classList.remove("show");
+  }); 
+
+  // ツールチップや色関係で使うユーザーIDを取得する
+  document.querySelector("[class^=___comment-data-grid___]").addEventListener("mousedown", function(e) {
+    // 右クリックからコンテキストメニューを表示した際のクリックしたコメント情報を保存    
+    if (e.button == 2 && e.target.parentNode) { // 右クリックの場合、かつ、親のDOMが存在する場合
+
+      let commentDom = e.target.closest("[class^=___table-cell___]").querySelector(".comment-number");
+      let userNameDom = e.target.closest("[class^=___table-cell___]").querySelector(".user_name_by_extention");
+      let userCommentDom = e.target.closest("[class^=___table-cell___]").querySelector(".comment-text");
+
+      if(commentDom && commentDom.innerText 
+        && userCommentDom && userCommentDom.innerText 
+        && userNameDom && userNameDom.innerText
+      ) {
+
+        mouseClick.userId = _commentRawIdList[commentDom.innerText];
+        mouseClick.commentNo = commentDom.innerText;
+        mouseClick.userComment = userCommentDom.innerText;
+        mouseClick.userName = userNameDom.innerText;
+
+        if(e.target.closest("[class^=___table-cell___]").querySelector(".user_name_by_extention.user184")){
+          mouseClick.is184User = true;
         } else {
-          // システムメッセージなどの場合は非表示にする
-          tootlTip.classList.remove("show");
+          mouseClick.is184User = false;
         }
-      }
-    });
 
-    document.querySelector("[class^=___comment-data-grid___]").addEventListener("mouseleave", function(e) {
-      // 要素の位置を更新する
-      const tootlTip = document.getElementById('ext_tooltipBox');
-      // tootlTip.style.display = "none";
-      if(tootlTip) tootlTip.classList.remove("show");
-    }); 
-
-    // ツールチップや色関係で使うユーザーIDを取得する
-    document.querySelector("[class^=___comment-data-grid___]").addEventListener("mouseover", function(e) {
-
-      //console.log("★mouseover", e.target);
-
-      if (e.target.parentNode && e.target.closest("[class^=___table-cell___]")) {
-        let commentDom = e.target.closest("[class^=___table-cell___]").querySelector(".comment-number");
-        let userNameDom = e.target.closest("[class^=___table-cell___]").querySelector(".user_name_by_extention");
-        let userCommentDom = e.target.closest("[class^=___table-cell___]").querySelector(".comment-text");
-        if(commentDom && commentDom.innerText && userNameDom && userCommentDom) {
-
-          currentUserIDfromMouseOver = _commentRawIdList[commentDom.innerText];
-          currentCommentNo = commentDom.innerText;
-          userName = userNameDom.innerText;
-          userComment = "コメント: " + userCommentDom.innerText;
-
-          //console.log("★currentUserID" + currentUserID);
-                    
+        const userKotehanDom = e.target.closest("[class^=___table-cell___]").querySelector(".user_name_by_extention.kotehan");
+        if(userKotehanDom) {
+          mouseClick.kotehan = userKotehanDom.innerText;
         } else {
-          currentUserIDfromMouseOver = 0;
-          currentCommentNo = 0;
+          mouseClick.kotehan = ""; // ちゃんと初期化する
         }
+        
+        console.log("クリックしたコメント情報", mouseClick);      
       }
-    });
-
-    // 色関係
-    document.querySelector("[class^=___comment-data-grid___]").addEventListener("mousedown", function(e) {
-      
-      if (e.button == 2 && e.target.parentNode) { // right click for mouse
-        let commentDom = e.target.closest("[class^=___table-cell___]").querySelector(".comment-number");
-        if(commentDom && commentDom.innerText) {
-
-          currentUserID = _commentRawIdList[commentDom.innerText];
-
-          console.log("★currentUserID" + currentUserID);
-                    
-        }
-      }
-    });
-    
-  }
+    }
+  });    
 }
 
 
@@ -1735,7 +1704,15 @@ window.addEventListener('load', function () {
   // コメントDOMの親DOMの監視を開始(フルスクリーン解除時、放送ネタ画面の表示時に対応するため)
   const target_parent = document.querySelector("[class^=___contents-area___]"); // コメントDOMの大元の親DOMを指定
   if (target_parent) {
-    const obs = new MutationObserver(watchParentDOM);
+    const obs = new MutationObserver(startWatchCommentDOM);
+    //監視オプション
+    const options = {
+      childList: true,              //直接の子の変更を監視
+      characterData: false,         //文字の変化を監視
+      characterDataOldValue: false, //属性の変化前を記録
+      attributes: false,            //属性の変化を監視
+      subtree: false,               //全ての子要素を監視
+    }
     obs.observe(target_parent, options);
   }
 
@@ -1765,7 +1742,23 @@ window.addEventListener('load', function () {
       if(kotehanJson && kotehanJson.outerText){
         _kotehanList = JSON.parse(kotehanJson.outerText);
         console.log("▼inject側で受け取ったコテハン2");
-        console.log(_kotehanList);  
+        console.log(_kotehanList);
+
+        // 表示中のコメントのコテハンを変更
+        const currentCommentList = document.querySelectorAll('[data-extension-userid]');
+        for (var i = 0; i < currentCommentList.length; i++) {
+          for(kotehan of _kotehanList) {
+            // console.log("名前比較", currentCommentList[i].getAttribute("data-extension-userid"), kotehan.id);
+            if (currentCommentList[i].getAttribute("data-extension-userid") == kotehan.id) {
+              currentCommentList[i].innerText = kotehan.kotehan;
+              currentCommentList[i].classList.add("kotehan");
+              currentCommentList[i].classList.remove("user184");
+              break;
+            }
+          }
+        }        
+      } else {
+        console.log("コテハンがありません");
       }
 
 
@@ -1805,8 +1798,26 @@ window.addEventListener('load', function () {
 
         console.log("最終カラー情報");
         console.log(_styleList);
+      }
 
 
+
+      // 自身が配信者の場合のなふださんのコメント　もしくは、　自身がなふだコメントしたときのコメント　に対して、
+      // 名前をクリックしたときに、プロフィール画面を開く
+      const playerArea = document.querySelector("[class^=___player-area___]");
+      if(playerArea) {
+        document.body.addEventListener('click', function(event) {
+          const clickedElement = event.target.closest('.user-summary-area .user_name_by_extention');
+          if (clickedElement) {
+            // console.log('挿入された要素がクリックされました！');
+            const thumbnailImage = clickedElement.closest('.user-summary-area').querySelector('.user-thumbnail-image');
+            if (thumbnailImage) {
+              thumbnailImage.click();
+            } else {
+              // console.log('.user-thumbnail-image not found');
+            }
+          }
+        });
       }
 
 
