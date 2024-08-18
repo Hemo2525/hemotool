@@ -1405,6 +1405,10 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
     // [棒読み] プレビュー実行
     document.querySelector('.ext-setting-menu .ext-bouyomi .option.bouyomitest input').addEventListener('click', (e) => {
         if(e.isTrusted){
+
+            // 現在の棒読みを停止（自動再開）
+            clearBouyomiNowTask();
+
             sendTextToBouyomiChan("棒読みテストです");
         }
     });
@@ -2085,6 +2089,10 @@ function setSettingValue() {
             if (value.ext_bouyomi_opt_voices) {
                 initBouyomiChan(value.ext_bouyomi_opt_voices); // 棒読みちゃんの音質一覧を取得してドロップダウンリストを生成
                 _bouyomi_voideId = value.ext_bouyomi_opt_voices;
+            } else {
+                // デフォルト値
+                initBouyomiChan("1");
+                _bouyomi_voideId = "1";
             }
         });   
         // [棒読み] 音量
