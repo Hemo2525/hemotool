@@ -253,7 +253,7 @@ async function recStart() {
     // 配信者名、番組名、録画開始時間を取得
     _bangumiUserName = "";
     _bangumiTitle = "";
-    let bangumiUserDom = document.querySelector('[class^=___user-name-area___] .name');
+    let bangumiUserDom = document.querySelector('.user-name-area .label');
     if(bangumiUserDom) {
         _bangumiUserName = escapeFileName(bangumiUserDom.textContent);
     } else {

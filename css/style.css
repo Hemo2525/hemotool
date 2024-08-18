@@ -165,6 +165,12 @@
     a {
         color: inherit;
     }
+    #ext-view {
+        width: 13px;
+        margin-top: 2px;
+        margin-bottom: -3px;
+        cursor: pointer;    
+    }
 }
 .ext-setting-menu .item.info:hover {
     background-color: #141414;
@@ -251,6 +257,20 @@
 .ext-setting-menu .item .setting.active svg path {
     fill: #056dff;
 }
+/* 
+.ext-setting-menu .item .view {
+    display: none;
+    width: 14px;
+    margin-top: 2px;
+    margin-bottom: -3px;
+    cursor: pointer;
+    &.show {
+        display: block;
+    }
+} */
+
+
+
 .ext-setting-menu .option-box {
     transition: max-height 0.3s;
     max-height: 0;
@@ -278,6 +298,7 @@
     &.desc {
         line-height: 1.2;
         padding: 6px 20px;
+        display: block;
     }
 }
 .ext-setting-menu .option-box .option.desc a {

@@ -70,6 +70,31 @@ function yomiage() {
 }
 
 
+function bouyomi() {
+
+    let menu = document.querySelector('.ext-setting-menu .ext-bouyomi');
+
+    // トグル
+    if (menu.getAttribute("ext-attr-on")) {
+
+        chrome.storage.local.set({ "ext_bouyomi": "OFF" }, function () { });
+        menu.removeAttribute("ext-attr-on");
+        // ショートカットを非アクティブ状態
+        document.querySelector('#ext_shortcut .item.bouyomi').removeAttribute("active");
+
+        // 棒読みを即停止
+        clearBouyomiTask();
+
+    } else {
+
+        chrome.storage.local.set({ "ext_bouyomi": "ON" }, function () { });
+        menu.setAttribute("ext-attr-on", "ON");
+        // ショートカットをアクティブ状態
+        document.querySelector('#ext_shortcut .item.bouyomi').setAttribute("active", "ON");
+
+    }
+}
+
 function kyoiku(content, isDebug = false) {
 
     if (isDebug) console.log("入力値 →　" + content);

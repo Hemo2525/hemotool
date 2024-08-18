@@ -34,6 +34,9 @@
 </button>
 <div class="ext-setting-menu">
     <div class="item info">
+        <!-- <div id="ext-view" class="ext-ifo-item">
+            <svg fill="#ffffff" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 442.04 442.04" xml:space="preserve" stroke="#ffffff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <g> <path d="M221.02,341.304c-49.708,0-103.206-19.44-154.71-56.22C27.808,257.59,4.044,230.351,3.051,229.203 c-4.068-4.697-4.068-11.669,0-16.367c0.993-1.146,24.756-28.387,63.259-55.881c51.505-36.777,105.003-56.219,154.71-56.219 c49.708,0,103.207,19.441,154.71,56.219c38.502,27.494,62.266,54.734,63.259,55.881c4.068,4.697,4.068,11.669,0,16.367 c-0.993,1.146-24.756,28.387-63.259,55.881C324.227,321.863,270.729,341.304,221.02,341.304z M29.638,221.021 c9.61,9.799,27.747,27.03,51.694,44.071c32.83,23.361,83.714,51.212,139.688,51.212s106.859-27.851,139.688-51.212 c23.944-17.038,42.082-34.271,51.694-44.071c-9.609-9.799-27.747-27.03-51.694-44.071 c-32.829-23.362-83.714-51.212-139.688-51.212s-106.858,27.85-139.688,51.212C57.388,193.988,39.25,211.219,29.638,221.021z"></path> </g> <g> <path d="M221.02,298.521c-42.734,0-77.5-34.767-77.5-77.5c0-42.733,34.766-77.5,77.5-77.5c18.794,0,36.924,6.814,51.048,19.188 c5.193,4.549,5.715,12.446,1.166,17.639c-4.549,5.193-12.447,5.714-17.639,1.166c-9.564-8.379-21.844-12.993-34.576-12.993 c-28.949,0-52.5,23.552-52.5,52.5s23.551,52.5,52.5,52.5c28.95,0,52.5-23.552,52.5-52.5c0-6.903,5.597-12.5,12.5-12.5 s12.5,5.597,12.5,12.5C298.521,263.754,263.754,298.521,221.02,298.521z"></path> </g> <g> <path d="M221.02,246.021c-13.785,0-25-11.215-25-25s11.215-25,25-25c13.786,0,25,11.215,25,25S234.806,246.021,221.02,246.021z"></path></g></g></g></svg>
+        </div> -->
         <div id="ext-info" class="ext-info-item">お知らせ</div>
         <div id="ext-gift" class="ext-info-item">開発を応援</div>
         <a href="https://chromewebstore.google.com/detail/bakmgoejpahphkdcgeembmbkklggiocc/support" target="_blank" class="ext-info-item">要望･不具合報告</a>
@@ -132,7 +135,7 @@
             </div>
         </div>
     </div>
-    <div class="ext-yomiage ext-on-off border-bottom" title="コメントを機械音声で読み上げます">
+    <div class="ext-yomiage ext-on-off" title="コメントを機械音声で読み上げます">
         <div class="item">
             <div class="name">コメント読み上げ</div>
             <div class="btn-group">
@@ -238,6 +241,157 @@
                     <input type="checkbox">
                 </div>
             </div>
+        </div>
+    </div>
+    <div class="ext-bouyomi ext-on-off border-bottom" title="棒読みちゃんと連携します">
+        <div class="item">
+            <div class="name new">棒読みちゃん連携(β版)</div>
+            <div class="btn-group">
+                <div class="value">ON</div>
+                <div class="pin">
+                    <svg version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg"
+                        xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512"
+                        xml:space="preserve">
+                        <g>
+                            <path class="st0"
+                                d="M98.715,369.376l-97.028,97.02L0,512l45.603-1.688l97.02-97.02c-7.614-6.725-15.196-13.783-22.665-21.252 C112.49,384.572,105.425,376.991,98.715,369.376z">
+                            </path>
+                            <path class="st0"
+                                d="M446.021,65.979C387.878,7.853,317.914-16.443,289.735,11.744c-15.688,15.672-15.074,44.312-1.477,76.625 l-88.3,76.56c-55.728-31.15-107.774-37.642-133.911-11.506c-39.168,39.168-5.426,136.398,75.349,217.18 c80.782,80.775,178.013,114.517,217.173,75.357c26.144-26.144,19.653-78.19-11.498-133.911l76.576-88.3 c32.305,13.589,60.936,14.194,76.608-1.478C528.442,194.085,504.155,124.121,446.021,65.979z">
+                            </path>
+                        </g>
+                    </svg>
+                </div>
+                <div class="setting">
+                    <svg width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                        xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve">
+                        <path
+                            d="M56.511,3.161c-0.4,-1.721 -1.882,-2.976 -3.645,-3.087c-1.909,-0.101 -3.823,-0.101 -5.731,0.008c-1.76,0.111 -3.239,1.363 -3.638,3.081c-0.722,3.07 -1.85,7.923 -2.503,10.734c-0.312,1.343 -1.294,2.43 -2.598,2.877c-1.259,0.432 -2.49,0.941 -3.688,1.519c-1.236,0.605 -2.696,0.53 -3.864,-0.197c-2.454,-1.519 -6.683,-4.153 -9.361,-5.82c-1.499,-0.934 -3.435,-0.774 -4.76,0.394c-1.421,1.279 -2.774,2.632 -4.046,4.059c-1.166,1.322 -1.327,3.253 -0.394,4.75c1.66,2.682 4.294,6.911 5.82,9.36c0.729,1.171 0.803,2.634 0.198,3.872c-0.586,1.195 -1.095,2.426 -1.534,3.682c-0.447,1.302 -1.532,2.281 -2.872,2.593c-2.809,0.661 -7.662,1.789 -10.734,2.503c-1.721,0.4 -2.976,1.882 -3.087,3.645c-0.101,1.909 -0.101,3.823 0.008,5.731c0.111,1.76 1.363,3.239 3.081,3.638c3.07,0.722 7.923,1.85 10.734,2.503c1.343,0.312 2.43,1.294 2.877,2.598c0.432,1.259 0.941,2.49 1.519,3.688c0.605,1.236 0.53,2.696 -0.197,3.864c-1.519,2.454 -4.153,6.683 -5.82,9.361c-0.934,1.499 -0.774,3.435 0.394,4.76c1.279,1.421 2.632,2.774 4.059,4.046c1.322,1.166 3.253,1.327 4.75,0.394c2.682,-1.66 6.911,-4.294 9.36,-5.82c1.171,-0.729 2.634,-0.803 3.872,-0.198c1.195,0.586 2.426,1.095 3.682,1.534c1.302,0.447 2.281,1.532 2.593,2.872c0.661,2.809 1.789,7.662 2.503,10.734c0.4,1.721 1.882,2.976 3.645,3.087c1.909,0.101 3.823,0.101 5.731,-0.008c1.76,-0.111 3.239,-1.363 3.638,-3.081c0.722,-3.07 1.85,-7.923 2.503,-10.734c0.312,-1.343 1.294,-2.43 2.598,-2.877c1.259,-0.432 2.49,-0.941 3.688,-1.519c1.236,-0.605 2.696,-0.53 3.864,0.197c2.454,1.519 6.683,4.153 9.361,5.82c1.499,0.934 3.435,0.774 4.76,-0.394c1.421,-1.279 2.774,-2.632 4.046,-4.059c1.166,-1.322 1.327,-3.253 0.394,-4.75c-1.66,-2.682 -4.294,-6.911 -5.82,-9.36c-0.729,-1.171 -0.803,-2.634 -0.198,-3.872c0.586,-1.195 1.095,-2.426 1.534,-3.682c0.447,-1.302 1.532,-2.281 2.872,-2.593c2.809,-0.661 7.662,-1.789 10.734,-2.503c1.721,-0.4 2.976,-1.882 3.087,-3.645c0.101,-1.909 0.101,-3.823 -0.008,-5.731c-0.111,-1.76 -1.363,-3.239 -3.081,-3.638c-3.07,-0.722 -7.923,-1.85 -10.734,-2.503c-1.343,-0.312 -2.43,-1.294 -2.877,-2.598c-0.432,-1.259 -0.941,-2.49 -1.519,-3.688c-0.605,-1.236 -0.53,-2.696 0.197,-3.864c1.519,-2.454 4.153,-6.683 5.82,-9.361c0.934,-1.499 0.774,-3.435 -0.394,-4.76c-1.279,-1.421 -2.632,-2.774 -4.059,-4.046c-1.322,-1.166 -3.253,-1.327 -4.75,-0.394c-2.682,1.66 -6.911,4.294 -9.36,5.82c-1.171,0.729 -2.634,0.803 -3.872,0.198c-1.195,-0.586 -2.426,-1.095 -3.682,-1.534c-1.302,-0.447 -2.281,-1.532 -2.593,-2.872c-0.661,-2.809 -1.789,-7.662 -2.503,-10.734ZM50,30.158c0,0 0,0 0,0c10.951,0 19.842,8.891 19.842,19.842c0,0 0,0 0,0c0,10.951 -8.891,19.842 -19.842,19.842c0,0 0,0 0,0c-10.951,0 -19.842,-8.891 -19.842,-19.842c0,0 0,0 0,0c0,-10.951 8.891,-19.842 19.842,-19.842Z">
+                        </path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        <div class="option-box">
+
+            <div class="option desc">棒読みちゃん(<a href="https://chi.usamimi.info/Program/Application/BouyomiChan/" target="_blank">公式サイト</a>)と連携します</div>
+            <div class="option desc">棒読みちゃんを起動し設定画面にあるHTTPのポート番号を指定してください</div>
+            
+            <div class="border"></div>
+
+            <div class="option host" title="" style="display:none;">
+                <div class="name">接続ホスト</div>
+                <div class="value">
+                    <input type="text" placeholder="localhost" style="width: 122px; cursor: text;">
+                </div>
+            </div>
+
+            <div class="option port" title="">
+                <div class="name">ポート番号(HTTP)</div>
+                <div class="value">
+                    <input type="number" placeholder="(例)50080" style="width: 122px; cursor: text;">
+                </div>
+            </div>
+
+            <div class="option tryconnect" title="">
+                <div class="name">接続テスト</div>
+                <div class="value">
+                    <input type="button" value="接続">
+                </div>
+            </div>            
+            
+            <div class="border"></div>
+
+            <div class="option voices" title="">
+                <div class="name">音質</div>
+                <div class="value">
+                    <select></select>
+                </div>
+            </div>
+            <div class="option volume" title="">
+                <div class="name">音量</div>
+                <div class="value">
+                    <input type="range" min="0" max="100" step="1">
+                </div>
+            </div>
+            <div class="option rate" title="">
+                <div class="name">速度</div>
+                <div class="value">
+                    <input type="range" min="50" max="300" step="1">
+                </div>
+            </div>
+            <div class="option pitch" title="">
+                <div class="name">ピッチ</div>
+                <div class="value">
+                    <input type="range" min="50" max="300" step="1">
+                </div>
+            </div>
+
+            <div class="option reset" title="">
+                <div class="name">リセット</div>
+                <div class="value">
+                    <input type="button" value="デフォルトに戻す">
+                </div>
+            </div>
+
+            <div class="option bouyomitest" title="">
+                <div class="name">棒読みプレビュー</div>
+                <div class="value">
+                    <input type="button" value="プレビュー実行">
+                </div>
+            </div>
+
+            <!-- <div class="border"></div>
+            <div class="option gift" title="">
+                <div class="name">[ギフト]の読み上げ</div>
+                <div class="value">
+                    <input type="checkbox">
+                </div>
+            </div>
+            <div class="option koukoku" title="">
+                <div class="name">[広告] の読み上げ</div>
+                <div class="value">
+                    <input type="checkbox">
+                </div>
+            </div>
+            <div class="option raijosya" title="">
+                <div class="name">[来場者] の読み上げ</div>
+                <div class="value">
+                    <input type="checkbox" title="">
+                </div>
+            </div>
+            <div class="option request" title="">
+                <div class="name">[リクエスト] の読み上げ</div>
+                <div class="value">
+                    <input type="checkbox">
+                </div>
+            </div>
+            <div class="option emotion" title="">
+                <div class="name">[エモーション] の読み上げ</div>
+                <div class="value">
+                    <input type="checkbox">
+                </div>
+            </div> -->
+            
+            <div class="border"></div>
+
+            <!-- <div class="option syoryaku" title="">
+                <div class="name">長いコメントを省略</div>
+                <div class="value flex">
+                    <input class="syouryaku-left" type="number" max="99" min="0" step="1" size="2" placeholder="0" >
+                    <span class="syouryaku-right">文字で省略</span>
+                </div>
+            </div> -->
+
+            <div class="option nameyomiage" title="">
+                <div class="name">名前を読み上げる</div>
+                <div class="value">
+                    <input type="checkbox">
+                </div>
+            </div>
+
+
+
         </div>
     </div>
     <div class="item ext-rightClick" title="ニコ生ゲーム『魔道士vsゾンビ?』で役立つかも？">
@@ -361,7 +515,7 @@
         </div>
     </div>
     <div class="item ext-video-wipe" title="ニコ生ゲームが起動すると配信映像をワイプにします">
-        <div class="name new">ニコ生ゲーム自動ワイプ</div>
+        <div class="name">ニコ生ゲーム自動ワイプ</div>
         <div class="btn-group">
             <div class="value">ON</div>
             <div class="pin">
@@ -554,7 +708,7 @@
 
     <div id="ext-info-box">
         <div class="item">
-            <div class="time">2024.8.12</div>
+            <div class="time">2024.8.17</div>
             <img src="20240817.png">            
             <ul>
                 <li>コテハンは、@マークの後ろに新しい名前をつけてコメントするとその名前が設定される機能です。</li>

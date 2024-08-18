@@ -535,6 +535,8 @@ let _bIsIamOwnerCheckOnce = false;  // 自分が配信者かどうか確認し�
 function recvEvent(event) {
   
 }
+
+
 function recvChatComment(message) {
 
   // 受信メッセージをJSON形式にパース
@@ -561,130 +563,124 @@ function recvChatComment(message) {
     if (_startTime !== undefined && (Number(message.chat.vpos) + (10 * 100)) > _startTime) {  // startTimeは常に更新してるので10秒の足を履かせる(vposは10ミリ秒単位なので+100すると1秒プラスと同じ)
     //if (_startTime !== undefined){
       
-      //console.log(message);
+      /*--------------------------------------------------------------
+      //  読み上げ
+      --------------------------------------------------------------*/
+      if(_yomiage_menu.getAttribute("ext-attr-on")) {
 
-      let yomiage_text = message.chat.content.toLowerCase();
-      let isSystemComment = false;
-      
-      if (message.chat.content.startsWith('/gift', 0)) {
-        isSystemComment = true;
-        if (document.querySelector('.ext-yomiage .option.gift input').checked ){
-          // ギフト
-          // 例 →　/gift flowerstandmsg 36777535 "げすと" 5000 "お誕生日おめでとう" "フラワースタンド" 1
-          let content = message.chat.content;
-          content = content.split(' ');
-          if (content.length >= 3) {
-            yomiage_text = content[3] + "さんが" + content[4] + "ptギフトしました";
-          }
-        } else {
-          yomiage_text = "";
-        }
-      }
-     
-      if (message.chat.content.startsWith('/nicoad', 0)) {
-        isSystemComment = true;
-        if (document.querySelector('.ext-yomiage .option.koukoku input').checked ){
-          // 広告
-          // 例 →　/nicoad {"version":"1","totalAdPoint":32000,"message":"【広告貢献3位】もぴ太郎さんが100ptニコニ広告しました"}
-          const content = message.chat.content;
-          const pos = content.indexOf('{');
-          const obj = JSON.parse(content.substr(pos));
-          yomiage_text = obj.message;
-        } else {
-          yomiage_text = "";
-        }
-      }
-      
-      if (message.chat.content.startsWith('/info', 0)) {
-        isSystemComment = true;
-        if (document.querySelector('.ext-yomiage .option.raijosya input').checked ){
-          // インフォ
-          // 例 →　/info 10 放送者のサポーターが1人来場しました
-          //       /info 10 ニコニ広告枠から1人が来場しました
-          //       /info 8 第16位にランクインしました
-          let content = message.chat.content;
-          const pos = content.indexOf(' ', content.indexOf(' ') + 1); // ２つ目の半角スペースの位置を探す
-          yomiage_text = content.substr(pos);
-        } else {
-          yomiage_text = "";
-        }
-      }
-
-      if (message.chat.content.startsWith('/spi', 0)) {
-        isSystemComment = true;
-        if (document.querySelector('.ext-yomiage .option.request input').checked ){
-          // ゲームリクエスト
-          // 例 →　/spi "「ナンプレ」がリクエストされました"
-          let content = message.chat.content;
-          const pos = content.indexOf(' ');
-          yomiage_text = content.substr(pos);
-        } else {
-          yomiage_text = "";
-        }
-      }
-
-      if (message.chat.content.startsWith('/emotion', 0)) {
-        isSystemComment = true;
-        if (document.querySelector('.ext-yomiage .option.emotion input').checked ){
-          // エモーション
-          // 例 →　/emotion ちいさい秋
-          let content = message.chat.content;
-          const pos = content.indexOf(' ');
-          yomiage_text = content.substr(pos);
-        } else {
-          yomiage_text = "";
-        }
-      }
-
-      yomiage_text = yomiage_text.replace(/youtuber/g, 'ユーチューバー');
-      yomiage_text = yomiage_text.replace(/youtube/g, 'ユーチューブ');
-      yomiage_text = yomiage_text.replace(/twitch/g, 'ツイッチ');
-      yomiage_text = yomiage_text.replace(/wwww/g, 'ワラワラ');
-      yomiage_text = yomiage_text.replace(/ww/g, 'ワラワラ');
-      yomiage_text = yomiage_text.replace(/w/g, 'ワラ');
-      yomiage_text = yomiage_text.replace(/ｗｗｗ/g, 'ワラワラ');
-      yomiage_text = yomiage_text.replace(/ｗｗ/g, 'ワラワラ');
-      yomiage_text = yomiage_text.replace(/ｗ/g, 'ワラ');
-      yomiage_text = yomiage_text.replace(/8888/g, 'ぱちぱちぱち');
-      yomiage_text = yomiage_text.replace(/888/g, 'ぱちぱちぱち');
-      yomiage_text = yomiage_text.replace(/88/g, 'ぱちぱち');
-      yomiage_text = yomiage_text.replace(/８８８８/g, 'ぱちぱちぱち');
-      yomiage_text = yomiage_text.replace(/８８８/g, 'ぱちぱちぱち');
-      yomiage_text = yomiage_text.replace(/８８/g, 'ぱちぱち');
-      yomiage_text = yomiage_text.replace(/・/g, '');  // 「なかぐろ」と読み上げられる為
-
-      if ( yomiage_text.match(/http/)) yomiage_text = "URL省略";
-      
-
-
-      // オプションの省略機能が有効ならば
-      if (yomiage_text.length > 0 && document.querySelector('.ext-yomiage .option.syoryaku input').value ){
-        let syouryaku = document.querySelector('.ext-yomiage .option.syoryaku input').value;
-        if(!isNaN(syouryaku) && syouryaku > 0) {
-          if(yomiage_text.length >= syouryaku) {
-            yomiage_text = yomiage_text.substr( 0, syouryaku );
-            yomiage_text += "、以下略";
-          }
-        }
-      }
-
-
-
-
-
-      // オプションの名前の読み上げ機能がONならば
-      if (isSystemComment === false && document.querySelector('.ext-yomiage .option.nameyomiage input').checked ){
-        if (message.chat && message.chat.user_id && isNaN(message.chat.user_id)) {
-          // 184さんの処理
-          // yomiage_text += "　イヤヨ";
-        } else if(_rawUserListFull[message.chat.user_id]){
-          yomiage_text += "、" + _rawUserListFull[message.chat.user_id];
-        }
-      }
-
-      // 読み上げ機能がONならば
-      if(document.querySelector('.ext-setting-menu .ext-yomiage').getAttribute("ext-attr-on")) {
+        let yomiage_text = message.chat.content.toLowerCase();
+        let isSystemComment = false;
         
+        if (message.chat.content.startsWith('/gift', 0)) {
+          isSystemComment = true;
+          if (document.querySelector('.ext-yomiage .option.gift input').checked ){
+            // ギフト
+            // 例 →　/gift flowerstandmsg 36777535 "げすと" 5000 "お誕生日おめでとう" "フラワースタンド" 1
+            let content = message.chat.content;
+            content = content.split(' ');
+            if (content.length >= 3) {
+              yomiage_text = content[3] + "さんが" + content[4] + "ptギフトしました";
+            }
+          } else {
+            yomiage_text = "";
+          }
+        }
+      
+        if (message.chat.content.startsWith('/nicoad', 0)) {
+          isSystemComment = true;
+          if (document.querySelector('.ext-yomiage .option.koukoku input').checked ){
+            // 広告
+            // 例 →　/nicoad {"version":"1","totalAdPoint":32000,"message":"【広告貢献3位】もぴ太郎さんが100ptニコニ広告しました"}
+            const content = message.chat.content;
+            const pos = content.indexOf('{');
+            const obj = JSON.parse(content.substr(pos));
+            yomiage_text = obj.message;
+          } else {
+            yomiage_text = "";
+          }
+        }
+        
+        if (message.chat.content.startsWith('/info', 0)) {
+          isSystemComment = true;
+          if (document.querySelector('.ext-yomiage .option.raijosya input').checked ){
+            // インフォ
+            // 例 →　/info 10 放送者のサポーターが1人来場しました
+            //       /info 10 ニコニ広告枠から1人が来場しました
+            //       /info 8 第16位にランクインしました
+            let content = message.chat.content;
+            const pos = content.indexOf(' ', content.indexOf(' ') + 1); // ２つ目の半角スペースの位置を探す
+            yomiage_text = content.substr(pos);
+          } else {
+            yomiage_text = "";
+          }
+        }
+
+        if (message.chat.content.startsWith('/spi', 0)) {
+          isSystemComment = true;
+          if (document.querySelector('.ext-yomiage .option.request input').checked ){
+            // ゲームリクエスト
+            // 例 →　/spi "「ナンプレ」がリクエストされました"
+            let content = message.chat.content;
+            const pos = content.indexOf(' ');
+            yomiage_text = content.substr(pos);
+          } else {
+            yomiage_text = "";
+          }
+        }
+
+        if (message.chat.content.startsWith('/emotion', 0)) {
+          isSystemComment = true;
+          if (document.querySelector('.ext-yomiage .option.emotion input').checked ){
+            // エモーション
+            // 例 →　/emotion ちいさい秋
+            let content = message.chat.content;
+            const pos = content.indexOf(' ');
+            yomiage_text = content.substr(pos);
+          } else {
+            yomiage_text = "";
+          }
+        }
+
+        yomiage_text = yomiage_text.replace(/youtuber/g, 'ユーチューバー');
+        yomiage_text = yomiage_text.replace(/youtube/g, 'ユーチューブ');
+        yomiage_text = yomiage_text.replace(/twitch/g, 'ツイッチ');
+        yomiage_text = yomiage_text.replace(/wwww/g, 'ワラワラ');
+        yomiage_text = yomiage_text.replace(/ww/g, 'ワラワラ');
+        yomiage_text = yomiage_text.replace(/w/g, 'ワラ');
+        yomiage_text = yomiage_text.replace(/ｗｗｗ/g, 'ワラワラ');
+        yomiage_text = yomiage_text.replace(/ｗｗ/g, 'ワラワラ');
+        yomiage_text = yomiage_text.replace(/ｗ/g, 'ワラ');
+        yomiage_text = yomiage_text.replace(/8888/g, 'ぱちぱちぱち');
+        yomiage_text = yomiage_text.replace(/888/g, 'ぱちぱちぱち');
+        yomiage_text = yomiage_text.replace(/88/g, 'ぱちぱち');
+        yomiage_text = yomiage_text.replace(/８８８８/g, 'ぱちぱちぱち');
+        yomiage_text = yomiage_text.replace(/８８８/g, 'ぱちぱちぱち');
+        yomiage_text = yomiage_text.replace(/８８/g, 'ぱちぱち');
+        yomiage_text = yomiage_text.replace(/・/g, '');  // 「なかぐろ」と読み上げられる為
+
+        if ( yomiage_text.match(/http/)) yomiage_text = "URL省略";
+        
+        // オプションの省略機能が有効ならば
+        if (yomiage_text.length > 0 && document.querySelector('.ext-yomiage .option.syoryaku input').value ){
+          let syouryaku = document.querySelector('.ext-yomiage .option.syoryaku input').value;
+          if(!isNaN(syouryaku) && syouryaku > 0) {
+            if(yomiage_text.length >= syouryaku) {
+              yomiage_text = yomiage_text.substr( 0, syouryaku );
+              yomiage_text += "、以下略";
+            }
+          }
+        }
+
+        // オプションの名前の読み上げ機能がONならば
+        if (isSystemComment === false && document.querySelector('.ext-yomiage .option.nameyomiage input').checked ){
+          if (message.chat && message.chat.user_id && isNaN(message.chat.user_id)) {
+            // 184さんの処理
+            // yomiage_text += "　イヤヨ";
+          } else if(_rawUserListFull[message.chat.user_id]){
+            yomiage_text += "、" + _rawUserListFull[message.chat.user_id];
+          }
+        }
+
         // 読み上げ用のDOMに読み上げテキストを挿入（結果、読み上げられる）
         if(yomiage_text.length > 0 && document.getElementById("ext_logBox")){
           //console.log("正常系：comeview-inject.js : " + yomiage_text);
@@ -695,8 +691,54 @@ function recvChatComment(message) {
         } else {
           //console.error("異常系：comeview-inject.js : " + yomiage_text);
         }
-
       }
+
+
+      /*--------------------------------------------------------------
+      //  棒読みちゃん連携
+      --------------------------------------------------------------*/
+      if(_bouyomi_menu.getAttribute("ext-attr-on")) {
+
+        let yomiage_text = message.chat.content.toLowerCase();
+        let isSystemComment = false;
+        
+        // オプションの省略機能が有効ならば
+        // if (yomiage_text.length > 0 && document.querySelector('.ext-bouyomi .option.syoryaku input').value ){
+        //   let syouryaku = document.querySelector('.ext-bouyomi .option.syoryaku input').value;
+        //   if(!isNaN(syouryaku) && syouryaku > 0) {
+        //     if(yomiage_text.length >= syouryaku) {
+        //       yomiage_text = yomiage_text.substr( 0, syouryaku );
+        //       yomiage_text += "、以下略";
+        //     }
+        //   }
+        // }
+
+        // オプションの名前の読み上げ機能がONならば
+        if (isSystemComment === false && document.querySelector('.ext-bouyomi .option.nameyomiage input').checked ){
+
+          console.log("棒読み：message.chat.user_id : " + message.chat.user_id);
+          console.log("棒読み：_rawUserListFull[message.chat.user_id] : " + _rawUserListFull[message.chat.user_id]);
+
+          if (message.chat && message.chat.user_id && isNaN(message.chat.user_id)) {
+            // 184さんの処理
+            // yomiage_text += "　イヤヨ";
+          } else if(_rawUserListFull[message.chat.user_id]){
+            yomiage_text += "、" + _rawUserListFull[message.chat.user_id];
+          }
+        }
+
+        // 読み上げ用のDOMに読み上げテキストを挿入（結果、読み上げられる）
+        if(yomiage_text.length > 0 && document.getElementById("ext_bouyomiBox")){
+          //console.log("正常系：comeview-inject.js : " + yomiage_text);
+          var newYomiCommentDom = document.createElement('p');
+          var newYomiCommentText = document.createTextNode(yomiage_text);
+          newYomiCommentDom.appendChild(newYomiCommentText);
+          document.getElementById("ext_bouyomiBox").appendChild(newYomiCommentDom);
+        } else {
+          //console.error("異常系：comeview-inject.js : " + yomiage_text);
+        }
+
+      }      
 
       //console.log("読み上げます → [" + message.chat.no + "] " + yomiage_text);
     } else {
@@ -1694,6 +1736,10 @@ function startWatchGridDOM() {
 }
 
 
+
+let _yomiage_menu;
+let _bouyomi_menu;
+
 window.addEventListener('load', function () {
   
   
@@ -1821,6 +1867,12 @@ window.addEventListener('load', function () {
       }
 
 
+      // パフォーマンス改善のため、読み上げメニューを一度だけ取得しておく
+      _yomiage_menu = document.querySelector('.ext-setting-menu .ext-yomiage');
+
+      _bouyomi_menu = document.querySelector('.ext-setting-menu .ext-bouyomi');
+
+
     }
 
   }, 6000 * 10 * 5); // 5分
@@ -1853,6 +1905,8 @@ function watchKotehan(mutationRecords, observer){
   });
 
 };
+
+
 
 function initialize(callback, timeoutMiliSec) {
 

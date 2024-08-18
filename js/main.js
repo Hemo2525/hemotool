@@ -465,6 +465,7 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
     shortcut.innerHTML = 
         '<div class="item comeview" aria-label="コメントビューアー機能をONにします">コメビュ</div>'+
         '<div class="item yomiage" aria-label="読み上げ機能をONにします">読み上げ</div>'+
+        '<div class="item bouyomi" aria-label="棒読みちゃん連携をONにします">棒読み</div>'+
         '<div class="item click" aria-label="ブラウザの右クリックメニューを無効化します">右クリックメニューOFF</div>'+
         '<div class="item seek" aria-label="シークバーを無効化します">シークバーOFF</div>'+
         '<div class="item video" aria-label="配信映像を非表示にします">配信映像OFF</div>'+
@@ -550,6 +551,9 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
 
 
 
+
+
+
     // 読み上げ
     let yomiageBtn = document.querySelector('.ext-setting-menu .ext-yomiage .item .value');
     yomiageBtn.addEventListener('click', yomiage);
@@ -574,8 +578,32 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
     document.querySelector('#ext_shortcut .yomiage').addEventListener('click', function() {
         yomiage();
     });
+    
 
-
+    // 棒読みちゃん連携
+    let bouyomiBtn = document.querySelector('.ext-setting-menu .ext-bouyomi .item .value');
+    bouyomiBtn.addEventListener('click', bouyomi);
+    let bouyomiPin = document.querySelector('.ext-setting-menu .ext-bouyomi .item .pin');
+    bouyomiPin.addEventListener('click', function() {
+        if(bouyomiPin.getAttribute("ext-pin-on")){
+            // 設定画面のピンのアイコンをOFF表示
+            bouyomiPin.removeAttribute("ext-pin-on");
+            // ショートカットを非表示
+            document.querySelector('#ext_shortcut .item.bouyomi').removeAttribute("ext-pin-on");
+            // 拡張機能の設定に保存
+            chrome.storage.local.set({"ext_bouyomi_pin": "OFF"}, function() {});
+        } else {
+            // 設定画面のピンのアイコンをON表示
+            bouyomiPin.setAttribute("ext-pin-on", "ON");
+            // ショートカットを表示
+            document.querySelector('#ext_shortcut .item.bouyomi').setAttribute("ext-pin-on", "ON");
+            // 拡張機能の設定に保存
+            chrome.storage.local.set({"ext_bouyomi_pin": "ON"}, function() {});
+        }
+    });
+    document.querySelector('#ext_shortcut .bouyomi').addEventListener('click', function() {
+        bouyomi();
+    });
 
     // 右クリックOFF
     let righClickBtn = document.querySelector('.ext-setting-menu .ext-rightClick .value');
@@ -955,6 +983,12 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
         document.querySelector('.ext-setting-menu .ext-yomiage .setting').classList.toggle('active')
     }, false);
 
+    // [棒読みちゃん連携]の詳細設定ボタン
+    document.querySelector('.ext-setting-menu .ext-bouyomi .setting').addEventListener('click', (e) => {
+        changeElement(document.querySelector('.ext-setting-menu .ext-bouyomi .option-box'));
+        document.querySelector('.ext-setting-menu .ext-bouyomi .setting').classList.toggle('active')
+    }, false);    
+
     // [映像加工]の詳細設定ボタン
     document.querySelector('.ext-setting-menu .ext-video-effect .setting').addEventListener('click', (e) => {
         changeElement(document.querySelector('.ext-setting-menu .ext-video-effect .option-box'));
@@ -1211,6 +1245,7 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
         }
     });
 
+    // 読み上げ機能の音声の種類を取得
     let s = setSpeech();
     s.then((voices) => {
 
@@ -1230,18 +1265,154 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
         
                 let select = document.querySelector('.ext-setting-menu .ext-yomiage .option.voices select');
                 select.appendChild(item);
-
-
-
             });
-
-
         });
-
-
-        
-        //chrome.runtime.sendMessage({init: "AAA"});
     });
+
+    // [棒読み] ホスト
+    document.querySelector('.ext-setting-menu .ext-bouyomi .option.host input').addEventListener('change', (e) => {
+        if(e.isTrusted){
+            const host = document.querySelector('.ext-setting-menu .ext-bouyomi .option.host input').value;
+            _bouyomi_host = host;
+            chrome.storage.local.set({"ext_bouyomi_opt_host": host}, function() {});
+        }
+    });
+
+    // [棒読み] ポート番号
+    document.querySelector('.ext-setting-menu .ext-bouyomi .option.port input').addEventListener('change', (e) => {
+        if(e.isTrusted){
+            const port = document.querySelector('.ext-setting-menu .ext-bouyomi .option.port input').value;
+            _bouyomi_port = port;
+            chrome.storage.local.set({"ext_bouyomi_opt_port": port}, function() {});
+        }
+    });
+
+
+    // [棒読み] 接続ボタン
+    document.querySelector('.ext-setting-menu .ext-bouyomi .option.tryconnect input').addEventListener('click', (e) => {
+        if(e.isTrusted){
+            // [棒読み] 音質
+            chrome.storage.local.get("ext_bouyomi_opt_voices", function (value) {
+                initBouyomiChan(value.ext_bouyomi_opt_voices); // 棒読みちゃんの音質一覧を取得してドロップダウンリストを生成
+            });
+        }
+    });
+
+    // [棒読み] 音質
+    document.querySelector('.ext-setting-menu .ext-bouyomi .option.voices select').addEventListener('change', (e) => {
+        if(e.isTrusted){
+            const voideId = document.querySelector('.ext-setting-menu .ext-bouyomi .option.voices select').value;
+            _bouyomi_voideId = voideId;
+            chrome.storage.local.set({"ext_bouyomi_opt_voices": voideId}, function() {});
+
+            // 棒読みを停止（自動再開）
+            clearBouyomiTask();
+
+            console.log("棒読みちゃんの音質を変更しました", _bouyomi_voideId);
+        }
+    });
+    // [棒読み] 音量
+    document.querySelector('.ext-setting-menu .ext-bouyomi .option.volume input').addEventListener('change', (e) => {
+        if(e.isTrusted){
+            const volume = document.querySelector('.ext-setting-menu .ext-bouyomi .option.volume input').value;
+            _bouyomi_volume = volume;
+            chrome.storage.local.set({"ext_bouyomi_opt_volume": volume}, function() {});
+
+            // 棒読みを停止（自動再開）
+            clearBouyomiTask();
+
+            console.log("棒読みちゃんの音量を変更しました", _bouyomi_volume);
+        }
+    });
+    // [棒読み] 速度
+    document.querySelector('.ext-setting-menu .ext-bouyomi .option.rate input').addEventListener('change', (e) => {
+        if(e.isTrusted){
+            const rate = document.querySelector('.ext-setting-menu .ext-bouyomi .option.rate input').value;
+            _bouyomi_speed = rate;
+            chrome.storage.local.set({"ext_bouyomi_opt_rate": rate}, function() {});
+
+            // 棒読みを停止（自動再開）
+            clearBouyomiTask();
+
+            console.log("棒読みちゃんの速度を変更しました", _bouyomi_speed);
+        }
+    });
+    // [棒読み] ピッチ
+    document.querySelector('.ext-setting-menu .ext-bouyomi .option.pitch input').addEventListener('change', (e) => {
+        if(e.isTrusted){
+            const pitch = document.querySelector('.ext-setting-menu .ext-bouyomi .option.pitch input').value;
+            _bouyomi_tone = pitch;
+            chrome.storage.local.set({"ext_bouyomi_opt_pitch": pitch}, function() {});
+
+            // 棒読みを停止（自動再開）
+            clearBouyomiTask();
+
+            console.log("棒読みちゃんのピッチを変更しました", _bouyomi_tone);
+        }
+    });
+
+    // [棒読み] デフォルトに戻す
+    document.querySelector('.ext-setting-menu .ext-bouyomi .option.reset input').addEventListener('click', (e) => {
+        if(e.isTrusted){
+
+            const default_voideId = 1;
+            document.querySelector('.ext-setting-menu .ext-bouyomi .option.voices select').value = default_voideId;
+            _bouyomi_voideId = default_voideId;
+            chrome.storage.local.set({"ext_bouyomi_opt_voices": default_voideId}, function() {});
+            
+            const default_volume = 10;
+            document.querySelector('.ext-setting-menu .ext-bouyomi .option.volume input').value = default_volume;
+            _bouyomi_volume = default_volume;
+            chrome.storage.local.set({"ext_bouyomi_opt_volume": default_volume}, function() {});
+            
+            const default_rate = 90;
+            document.querySelector('.ext-setting-menu .ext-bouyomi .option.rate input').value = default_rate;
+            _bouyomi_speed = default_rate;
+            chrome.storage.local.set({"ext_bouyomi_opt_rate": default_rate}, function() {});
+
+            const default_pitch = 130;
+            document.querySelector('.ext-setting-menu .ext-bouyomi .option.pitch input').value = default_pitch;
+            _bouyomi_tone = default_pitch;
+            chrome.storage.local.set({"ext_bouyomi_opt_pitch": default_pitch}, function() {});
+
+            // 棒読みを停止（自動再開）
+            clearBouyomiTask();
+            
+        }
+    });
+
+    // [棒読み] 長いコメントの省略
+    // document.querySelector('.ext-setting-menu .ext-bouyomi .option.syoryaku input').addEventListener('change', (e) => {
+    //     let syoryakuValue = document.querySelector('.ext-setting-menu .ext-bouyomi .option.syoryaku input').value;
+    //     if(syoryakuValue && !isNaN(syoryakuValue)) {
+    //         chrome.storage.local.set({"ext_bouyomi_opt_syoryaku": syoryakuValue}, function() {});
+            
+    //         // 現在の棒読みを停止（自動再開）
+    //         clearBouyomiNowTask();
+    //     }
+    // });
+    
+    // [棒読み] 名前の読み上げ
+    document.querySelector('.ext-setting-menu .ext-bouyomi .option.nameyomiage input').addEventListener('change', (e) => {
+        if(document.querySelector('.ext-setting-menu .ext-bouyomi .option.nameyomiage input').checked){
+            chrome.storage.local.set({"ext_bouyomi_opt_nameyomiage": "ON"}, function() {});
+        } else {
+            chrome.storage.local.set({"ext_bouyomi_opt_nameyomiage": "OFF"}, function() {});
+        }
+        // 現在の棒読みを停止（自動再開）
+        clearBouyomiNowTask();
+    });
+    // [棒読み] プレビュー実行
+    document.querySelector('.ext-setting-menu .ext-bouyomi .option.bouyomitest input').addEventListener('click', (e) => {
+        if(e.isTrusted){
+            sendTextToBouyomiChan("棒読みテストです");
+        }
+    });
+
+
+    //-------------------------------------------------------
+    // 読み上げ情報の受け渡し用DOMを作成
+    //-------------------------------------------------------
 
     // id属性で要素を取得
     var targeteElement = document.querySelector("[class^=___player-area___]");
@@ -1253,16 +1424,38 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
     // 指定した要素の中の末尾に挿入
     targeteElement.appendChild(logElement);
 
-
     const logOption = {
         childList:  true,  //直接の子の変更を監視
     };
     let targetLogDom = document.getElementById('ext_logBox');
 
-    _obsLogBox = new MutationObserver(wathLogBox);
+    _obsLogBox = new MutationObserver(watchLogBox);
     _obsLogBox.observe(targetLogDom, logOption);
 
 
+    //-------------------------------------------------------
+    // 棒読みちゃん用の読み上げ情報の受け渡し用DOMを作成
+    //-------------------------------------------------------
+
+    // 新しいHTML要素を作成
+    var bouyomiElement = document.createElement('div');
+    bouyomiElement.id = "ext_bouyomiBox";
+
+    // 指定した要素の中の末尾に挿入
+    targeteElement.appendChild(bouyomiElement);
+
+    const bouyomiOption = {
+        childList:  true,  //直接の子の変更を監視
+    };
+    const targetBouyomiDom = document.getElementById('ext_bouyomiBox');
+
+    const bouyomiObserver = new MutationObserver(watchBouyomiBox);
+    bouyomiObserver.observe(targetBouyomiDom, bouyomiOption);    
+
+
+    //-------------------------------------------------------
+    // コテハン情報の受け渡し用DOMを作成
+    //-------------------------------------------------------
 
     // 新しいHTML要素を作成
     var kotehanElement = document.createElement('div');
@@ -1284,7 +1477,9 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
 
 
 
-
+    //-------------------------------------------------------
+    // カラー情報の受け渡し用DOMを作成
+    //-------------------------------------------------------
 
     // 新しいHTML要素を作成
     var colorElement = document.createElement('div');
@@ -1514,16 +1709,12 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
 
 let ___first_run = true; // ★拡張機能の更新後にブラウザを更新すると動かなくなる不具合の暫定対処★
 
-function wathLogBox(mutationRecords, observer){
-
-
+function watchLogBox(mutationRecords, observer){
 
     mutationRecords.forEach((mutation)=> {
 
         // 子ノードの増減
         if (mutation.type === "childList") {
-
-
 
             // ADD ----------------------------------------------------------------
             mutation.addedNodes.forEach((addNode) => {
@@ -1552,113 +1743,45 @@ function wathLogBox(mutationRecords, observer){
                     }
                 }
 
+                // 音声の種類を送信
                 if(___first_run) {
                     ___first_run = false;
                     chrome.runtime.sendMessage({setVoiceName: document.querySelector('.ext-setting-menu .ext-yomiage .option.voices select').value});
                 }
     
+                // 読み上げ
                 chrome.runtime.sendMessage({toSay: yomiage_text });
                 console.log("読み上げ : " + yomiage_text)
-
+                
                 logBox.removeChild( logBox.firstChild );
                         
             });
 
-            // pタグの削除
-            // document.getElementById('ext_logBox').innerHTML = "";
-
-            // pタグの削除
-            /*
-            let logBox = document.getElementById('ext_logBox');
-            while( logBox.firstChild ){
-                logBox.removeChild( logBox.firstChild );
-            }
-            */
         }
     });
+}
 
+function watchBouyomiBox(mutationRecords, observer){
 
-    return;
+    mutationRecords.forEach((mutation)=> {
 
+        // 子ノードの増減
+        if (mutation.type === "childList") {
 
+            // ADD ----------------------------------------------------------------
+            mutation.addedNodes.forEach((addNode) => {
 
+                let logBox = document.getElementById('ext_bouyomiBox');
 
-
-
-
-
-
-
-
-
-
-    if(mutationRecords && mutationRecords.length > 0 && mutationRecords[0].addedNodes && mutationRecords[0].addedNodes.length > 0){
-        
-        // 一度に2つ以上のDOM追加にも対応
-        mutationRecords.forEach(item => {
-            //console.debug(item.addedNodes[0].outerText);
-            let yomiage_text = item.addedNodes[0].outerText;
-
-            // 教育機能が有効ならば
-            if(document.querySelector('.ext-setting-menu .ext-yomiage .option.kyoiku input').checked){
-                let kyoikuRet = kyoiku(yomiage_text, false);
-                if(kyoikuRet.bIsSuccess) {
-                    yomiage_text = kyoikuRet.leftWord + "、は、" + kyoikuRet.rightWord + "、を覚えました";
-                    setKyoiku(kyoikuRet.leftWord, kyoikuRet.rightWord);
-                }
-    
-                let boukyakuRet = boukyaku(yomiage_text, false);
-                if(boukyakuRet.bIsSuccess) {
-                    yomiage_text = boukyakuRet.word + "、を忘れました";
-                    deleteKyoiku(boukyakuRet.word);
-                }
-    
-                // 教育コマンドや忘却コマンドではないときに限り置換
-                if(kyoikuRet.bIsSuccess === false && boukyakuRet.bIsSuccess === false) {
-                    yomiage_text = replaceKyoiku(yomiage_text);
-                }
-            }
-
-
-/*
-            let kotehanAt = yomiage_text.indexOf('@');
-            if(kotehanAt === -1){
-              kotehanAt = yomiage_text.indexOf('＠');
-            }
-            if(kotehanAt !== -1){
-              let kotehan = yomiage_text.substring(kotehanAt + 1); // ＠の次の文字から後ろを抽出
-              if(kotehan && kotehan.length > 0) {
-                kotehan = kotehan.substr( 0, 16 ); // 最大16文字(公式の仕様にあわせる)
-              }
-            }
-*/            
-            
-
-
-            if(___first_run) {
-                ___first_run = false;
-                chrome.runtime.sendMessage({setVoiceName: document.querySelector('.ext-setting-menu .ext-yomiage .option.voices select').value});
-            }
-
-            chrome.runtime.sendMessage({toSay: yomiage_text });
-            console.log("読み上げ : " + yomiage_text)
-        
-            /** DOM変化の監視を一時停止 */
-            _obsLogBox.disconnect();
-    
-            /* pタグの削除 */
-            document.getElementById('ext_logBox').innerHTML = "";
-    
-            /** DOM変化の監視を再開 */
-            let targetLogDom = document.getElementById('ext_logBox');
-            const logOption = {
-                childList:  true,  //直接の子の変更を監視
-            };
-            _obsLogBox.observe(targetLogDom, logOption);
-
-        });
-
-    }
+                let yomiage_text = addNode.outerText;
+                
+                console.log("棒読み : " + yomiage_text);
+                sendTextToBouyomiChan(yomiage_text);
+                
+                logBox.removeChild( logBox.firstChild );                        
+            });
+        }
+    });
 }
 
 function setSpeech() {
@@ -1922,6 +2045,95 @@ function setSettingValue() {
                 document.querySelector('.ext-setting-menu .ext-yomiage .option.kyoiku input').checked = true;
             }
         });
+        
+        
+        // 棒読みちゃん連携機能
+        chrome.storage.local.get("ext_bouyomi", function (value) {
+            if (value.ext_bouyomi == "ON") {
+                bouyomi();
+            }
+        });
+        // 棒読みちゃん連携機能のピン状態
+        chrome.storage.local.get("ext_bouyomi_pin", function (value) {
+            if (value.ext_bouyomi_pin == "ON") {
+                // 設定画面のピンのアイコンをON表示
+                document.querySelector('.ext-setting-menu .ext-bouyomi .pin').setAttribute("ext-pin-on", "ON");
+                // ショートカットを表示
+                document.querySelector('#ext_shortcut .item.bouyomi').setAttribute("ext-pin-on", "ON");                
+            }
+        });
+        // [棒読み] ホスト
+        chrome.storage.local.get("ext_bouyomi_opt_host", function (value) {
+            if (value.ext_bouyomi_opt_host) {
+                document.querySelector('.ext-setting-menu .ext-bouyomi .option.host input').value = value.ext_bouyomi_opt_host;
+            } else {
+                // デフォルト値
+                document.querySelector('.ext-setting-menu .ext-bouyomi .option.host input').value = "localhost";
+            }
+        });
+        // [棒読み] ポート番号
+        chrome.storage.local.get("ext_bouyomi_opt_port", function (value) {
+            if (value.ext_bouyomi_opt_port && !isNaN(value.ext_bouyomi_opt_port)) {
+                document.querySelector('.ext-setting-menu .ext-bouyomi .option.port input').value = value.ext_bouyomi_opt_port;
+            } else {
+                // デフォルト値
+                document.querySelector('.ext-setting-menu .ext-bouyomi .option.port input').value = "50080";
+            }
+        });
+        // [棒読み] 音質
+        chrome.storage.local.get("ext_bouyomi_opt_voices", function (value) {
+            if (value.ext_bouyomi_opt_voices) {
+                initBouyomiChan(value.ext_bouyomi_opt_voices); // 棒読みちゃんの音質一覧を取得してドロップダウンリストを生成
+                _bouyomi_voideId = value.ext_bouyomi_opt_voices;
+            }
+        });   
+        // [棒読み] 音量
+        chrome.storage.local.get("ext_bouyomi_opt_volume", function (value) {
+            if (value.ext_bouyomi_opt_volume) {
+                document.querySelector('.ext-setting-menu .ext-bouyomi .option.volume input').value = value.ext_bouyomi_opt_volume;
+                _bouyomi_volume = value.ext_bouyomi_opt_volume;
+            } else {
+                // デフォルト値
+                document.querySelector('.ext-setting-menu .ext-bouyomi .option.volume input').value = "10";
+                _bouyomi_volume = "10";
+            }
+        });
+        // [棒読み] 速度
+        chrome.storage.local.get("ext_bouyomi_opt_rate", function (value) {
+            if (value.ext_bouyomi_opt_rate) {
+                document.querySelector('.ext-setting-menu .ext-bouyomi .option.rate input').value = value.ext_bouyomi_opt_rate;
+                _bouyomi_speed = value.ext_bouyomi_opt_rate;
+            } else {
+                // デフォルト値
+                document.querySelector('.ext-setting-menu .ext-bouyomi .option.rate input').value = "90";
+                _bouyomi_speed = "90";
+            }
+        });
+         // [棒読み] ピッチ
+        chrome.storage.local.get("ext_bouyomi_opt_pitch", function (value) {
+            if (value.ext_bouyomi_opt_pitch) {
+                document.querySelector('.ext-setting-menu .ext-bouyomi .option.pitch input').value = value.ext_bouyomi_opt_pitch;
+                _bouyomi_tone = value.ext_bouyomi_opt_pitch;
+            } else {
+                // デフォルト値
+                document.querySelector('.ext-setting-menu .ext-bouyomi .option.pitch input').value = "130";
+                _bouyomi_tone = "130";
+            }
+        });
+        // [棒読み] 長いコメントを省略
+        // chrome.storage.local.get("ext_bouyomi_opt_syoryaku", function (value) {
+        //     if (value.ext_bouyomi_opt_syoryaku && !isNaN(value.ext_bouyomi_opt_syoryaku)) {
+        //         document.querySelector('.ext-setting-menu .ext-bouyomi .option.syoryaku input').value = value.ext_bouyomi_opt_syoryaku;
+        //     }
+        // });
+        // [棒読み] 名前の読み上げ
+        chrome.storage.local.get("ext_bouyomi_opt_nameyomiage", function (value) {
+            if (value.ext_bouyomi_opt_nameyomiage == "ON") {
+                document.querySelector('.ext-setting-menu .ext-bouyomi .option.nameyomiage input').checked = true;
+            }
+        });
+
+
         // 右クリックOFF
         chrome.storage.local.get("ext_rightClick", function (value) {
             if (value.ext_rightClick == "ON") {

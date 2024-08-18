@@ -14,6 +14,19 @@ function stopVoice(){
 
 chrome.runtime.onMessage.addListener(function (request) {
 
+
+    if (request.bouyomiRequest) {
+        
+        fetch(request.bouyomiRequest)
+            .then(function (res) {
+                return res.json(); // フェッチしたデータを JSON 形式に変換
+            })
+            .then(function (jsonData) {
+                console.log(jsonData); // JSON へ変換されたデータをコンソールに表示
+            });
+    }
+
+
     if(request.init){
         chrome.tts.getVoices(function (availableVoices) {
             _tts_voices = availableVoices;

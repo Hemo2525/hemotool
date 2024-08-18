@@ -1,12 +1,15 @@
 {
   "name": "ニコ生拡張機能 へもツール",
   "manifest_version": 3,
-  "version": "0.38.4",
+  "version": "0.38.5",
   "description": "ニコ生にコメビュ機能、録画機能、PIP、コメント読み上げ機能、シークバーOFF機能、ニコ生ゲーム音ミュート、映像加工、などなどの拡張機能を追加します",
   "permissions": [
     "storage",
     "unlimitedStorage",
     "tts"
+  ],
+  "host_permissions": [
+    "http://localhost:*/"
   ],
   "background": {
     "service_worker": "background.js"
@@ -42,6 +45,7 @@
         "/js/main.js",
         "/js/comeview.js",
         "/js/yomiage.js",
+        "/js/bouyomi.js",
         "/js/seekbar.js",
         "/js/video.js",
         "/js/game.js",
