@@ -298,8 +298,21 @@ function setExtSettingMenuHeight() {
         document.querySelector('.ext-setting-menu').style.height = height + "px";
 
     const ITEM_HEIGHT = 34;
+    const MENU_HEIGHT = 28; //  表示前だから取得できないdocument.querySelector('.ext-setting-menu .item.info').clientHeight の高さ
+    const BORDER_HEIGHT = 3; // ボーダーの高さ
+    
+    // 表示状態のアイテム数を取得
+    let maxHeight = document.querySelectorAll('.ext-setting-menu .ext-item:not([ext-view-item-off])').length * ITEM_HEIGHT;
+    maxHeight += MENU_HEIGHT;
 
-    let maxHeight = document.querySelectorAll('.ext-setting-menu > div').length * ITEM_HEIGHT;
+    maxHeight += document.querySelectorAll('.ext-setting-menu .ext-item.border-bottom').length * BORDER_HEIGHT;
+    
+    console.log("ボーダーの数：" + document.querySelectorAll('.ext-setting-menu .ext-item.border-bottom').length);
+    console.log("アイテムの数：" + document.querySelectorAll('.ext-setting-menu .ext-item:not([ext-view-item-off])').length);
+    console.log("メニューの高さ：" + document.querySelector('.ext-setting-menu .item.info').clientHeight);
+    console.log("メニューの高さ：" + maxHeight);
+
+    //let maxHeight = document.querySelectorAll('.ext-setting-menu > div').length * ITEM_HEIGHT;
     if(document.querySelector('.ext-setting-menu'))
         document.querySelector('.ext-setting-menu').style.maxHeight  = maxHeight + "px";
 
@@ -444,9 +457,13 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
         document.querySelector("#ext_overlay").style.display = "none";
         document.querySelector('.ext-setting-menu').removeAttribute("ext-attr-show");
 
+        // 表示設定をOFFにする
+        document.querySelector('.ext-setting-menu').removeAttribute('ext-view-on');
+        //setExtSettingMenuHeight();// メニューの高さを調整
         
         // お知らせポップアップを非表示
         document.querySelector('.ext-popup').classList.remove('show');
+
         // ストレージに現在のマニフェストのバージョン情報を保存
         var manifestData = chrome.runtime.getManifest();
         chrome.storage.local.set({"ext_current_version": manifestData.version});             
@@ -479,7 +496,93 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
     document.querySelector('[class^=___player-controller___]').append(shortcut);
     
 
+    chrome.storage.local.get("ext_viewoff_array", function (value) {
+        if(value && value.ext_viewoff_array && Array.isArray(value.ext_viewoff_array)) {
+
+            value.ext_viewoff_array.forEach(function(item){
+                document.querySelector(item).setAttribute("ext-view-item-off", "on");
+                document.querySelector(item).querySelector('.view').setAttribute("view-off", "on");
+            });
+
+        }
+    });
+
     
+    document.getElementById('ext-view').addEventListener('click', function(){
+        const viewOn = document.querySelector('.ext-setting-menu').getAttribute('ext-view-on');
+        if(viewOn) {
+            document.querySelector('.ext-setting-menu').removeAttribute('ext-view-on');
+            setExtSettingMenuHeight();// メニューの高さを調整     
+
+        } else {
+            document.querySelector('.ext-setting-menu').setAttribute('ext-view-on','on');
+
+            // 歯車ボタンは全て非アクティブ
+            document.querySelectorAll('.ext-setting-menu .setting').forEach(function(item){
+                item.classList.remove('active');
+            });
+            // 歯車のオプションメニューを全て非表示
+            document.querySelectorAll('.ext-setting-menu .option-box').forEach(function(item){
+                item.classList.remove('show');
+            });            
+        }
+    });
+    const menuViewButtons = document.querySelectorAll('.ext-setting-menu .btn-group .view');
+    menuViewButtons.forEach(function(btn){
+        
+        btn.addEventListener('click', function(e){
+            
+            if(this.getAttribute('view-off')) {
+                this.removeAttribute('view-off')
+                this.closest('.ext-item').removeAttribute('ext-view-item-off');
+
+
+                const classes = Array.from(this.closest('.ext-item').classList);
+                let classStr = "";
+                classes.forEach(className => {
+                    classStr += "." + className;
+                });
+                chrome.storage.local.get("ext_viewoff_array", function (value) {
+                    if(value && value.ext_viewoff_array && Array.isArray(value.ext_viewoff_array)) {
+                        let viewOffArray = value.ext_viewoff_array;
+                        if (viewOffArray.includes(classStr)) {
+                            viewOffArray = viewOffArray.filter(item => item !== classStr);
+                            chrome.storage.local.set({"ext_viewoff_array": viewOffArray});                                
+                        }
+                        console.log("OFFクラス：" + viewOffArray);
+                    }
+                });
+
+            } else {
+                this.setAttribute('view-off', 'on');
+                this.closest('.ext-item').setAttribute('ext-view-item-off','on');
+                
+                const classes = Array.from(this.closest('.ext-item').classList);
+                let classStr = "";
+                classes.forEach(className => {
+                    classStr += "." + className;
+                });
+                chrome.storage.local.get("ext_viewoff_array", function (value) {
+                    if(value && value.ext_viewoff_array && Array.isArray(value.ext_viewoff_array)) {
+                        // 追加保存
+                        let viewOffArray = value.ext_viewoff_array;
+                        if (!viewOffArray.includes(classStr)) {
+                            viewOffArray.push(classStr);
+                            chrome.storage.local.set({"ext_viewoff_array": viewOffArray});
+                            console.log("OFFクラスリストの保存：" + viewOffArray);
+                        }
+                    } else {
+                        // 初回保存
+                        let viewOffArray = [];
+                        viewOffArray.push(classStr);
+                        chrome.storage.local.set({"ext_viewoff_array": viewOffArray});
+                        console.log("OFFクラスリストの保存：" + viewOffArray);
+                    } 
+                });   
+            }
+        });
+    });
+
 
 
     // 簡易録画機能

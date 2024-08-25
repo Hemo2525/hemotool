@@ -104,6 +104,9 @@
     .border-bottom {
         border-bottom: 1px solid rgb(65 65 65);
     }
+
+
+
 }
 
 /*
@@ -169,7 +172,16 @@
         width: 13px;
         margin-top: 2px;
         margin-bottom: -3px;
-        cursor: pointer;    
+        cursor: pointer;
+        
+        svg {
+            margin-left: -1px;
+        }
+        &:hover {
+            svg g {
+                fill: rgb(5, 109, 255) !important;
+            }
+        }
     }
 }
 .ext-setting-menu .item.info:hover {
@@ -209,9 +221,60 @@
     font-size: 11px;
     padding-left: 7px;
 }
+.ext-setting-menu {
+    [ext-view-item-off] {
+        display: none;
+    }
+    &[ext-view-on] {
+        max-height: 50svh !important; /* 表示設定画面のときは高さを制限しない */
+        .btn-group {
+            justify-content: flex-end;
+        }
+        [ext-view-item-off] {
+            display: block;
+        }
+    }
+    transition: 0.5s;
+    &:has(.setting.active) {
+        max-height: 50svh !important; /* オプション表示のときは高さを制限しない */
+    }
+}
 .ext-setting-menu .item .btn-group {
     display: flex;
     width: 68px;
+    /* justify-content: flex-end; */
+    .view {
+        display: none;
+    }
+}
+.ext-setting-menu {
+    svg g {
+        fill: rgb(255, 255, 255) !important;
+    }
+
+    &[ext-view-on] {
+        svg g {
+            fill: rgb(5, 109, 255) !important;
+        }    
+    }
+}
+.ext-setting-menu[ext-view-on] .btn-group {
+    .value,
+    .pin,
+    .setting {
+        display: none;
+    }
+    .view {
+        display: block;
+        height: 19px;
+        cursor: pointer;
+        svg g {
+            fill: rgb(5, 109, 255) !important;
+        }
+        &[view-off] svg g {
+            fill: rgb(255, 255, 255) !important;
+        }
+    }
 }
 .ext-setting-menu .item .value {
     cursor: pointer;
@@ -219,7 +282,7 @@
     user-select: none;
 }
 .ext-setting-menu .ext-on-off[ext-attr-on] .item .value,
-.ext-setting-menu .item[ext-attr-on] .value {
+.ext-setting-menu [ext-attr-on] .value {
     color: #056dff;
 }
 
