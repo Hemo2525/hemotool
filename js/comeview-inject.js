@@ -53,6 +53,7 @@ function extractNicoLiveCommentContent(binaryData) {
     return content;
   }
 
+
   if(_firstSegment && binaryData.length >= 3 && binaryData[2] === 0x00) {
     _firstSegment = false;
     _kugiri[0] = binaryData[0];
@@ -65,10 +66,9 @@ function extractNicoLiveCommentContent(binaryData) {
       && binaryData[1] === _kugiri[1]
       && binaryData[2] === _kugiri[2]
   ){
+    // console.log("SKIPします");
     offset += 3; // Skip [02 08 00]
   }
-
-
 
   while (offset < binaryData.length) {
 
@@ -122,7 +122,7 @@ function extractNicoLiveCommentContent(binaryData) {
     commentObjct.chat = {};
     commentObjct.chat.content = content;
 
-    // console.log("currentSubContentLength" + currentSubContentLength + ", subContentLength : " + subContentLength);
+    // console.log("currentSubContentLength : " + currentSubContentLength + ", subContentLength : " + subContentLength);
 
 
     while(currentSubContentLength < subContentLength) {
@@ -214,8 +214,18 @@ function extractNicoLiveCommentContent(binaryData) {
             // console.log(`no: ${no}`);
 
             commentObjct.chat.no = no;
-        }
+        } else {
+            // 未知のフィールド
+            // console.log(`未知のフィールド number: ${fieldNumber}`);
+            // console.log(`未知のフィールド tag: ${fieldTag}`);
 
+            const oldOffset = offset;
+            let someValue = readVarInt();
+            currentSubContentLength += offset - oldOffset;
+
+            // console.log(`someValue: ${someValue}`);
+            // console.log("現在の位置：currentSubContentLength : " + currentSubContentLength);
+        }
     }
 
     recvChatComment(commentObjct);
@@ -294,6 +304,7 @@ worker.onmessage = function(e) {
 */
 
 
+
 // fetchのインターセプト
 // オリジナルのfetch関数を保存
 const originalFetch = window.fetch;
@@ -305,6 +316,7 @@ window.fetch = function(...args) {
   const [resource, config] = args;
   const url = typeof resource === 'string' ? resource : resource.url;
 
+  
   if( url.includes('mpn.live.nicovideo.jp/data/backward/v4')) {
     return originalFetch.apply(this, args).then(response => {
 
@@ -318,15 +330,15 @@ window.fetch = function(...args) {
           // ArrayBufferをUint8Arrayに変換
           const uint8Array = new Uint8Array(buffer);
   
-//          console.log('Decoding Niconico live messages...', uint8Array);
+          // console.log('Decoding Niconico live messages(backward)...', uint8Array);
           const decodedMessages = extractNicoLiveCommentContent(uint8Array);
 //          console.log(JSON.stringify(decodedMessages, null, 2));
   
-          /*
-          const extractedComments = extractComments(buffer);
-          console.log('Extracted comments count:', extractedComments.length);
-          worker.postMessage({ action: 'parseComments', comments: extractedComments });
-          */
+          
+          //const extractedComments = extractComments(buffer);
+          //console.log('Extracted comments count:', extractedComments.length);
+          //worker.postMessage({ action: 'parseComments', comments: extractedComments });
+          
 
         }).catch(error => {
           console.error('Error processing comment data:', error);
@@ -334,6 +346,7 @@ window.fetch = function(...args) {
       
       return response;
     });
+    
   }
   else if (url.includes('mpn.live.nicovideo.jp/data/segment/v4'))
   {
@@ -360,7 +373,7 @@ window.fetch = function(...args) {
               // ArrayBufferをUint8Arrayに変換
               const uint8Array = new Uint8Array(value);
 
-//              console.log('Decoding Niconico live messages...', uint8Array);
+              // console.log('Decoding Niconico live messages(segment)...', uint8Array);
               const decodedMessages = extractNicoLiveCommentContent(uint8Array);
 //              console.log(JSON.stringify(decodedMessages, null, 2));
 
