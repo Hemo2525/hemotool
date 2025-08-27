@@ -1,9 +1,5 @@
 /*
-
 ▼▼▼▼ 利用させていただいているMITライセンスの著作権表示 ▼▼▼▼
-
-
-
 < mp4-muxer >---------------------------------------------------------------------
 
 MIT License
@@ -27,21 +23,11 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-
-
 */
 
 let _obsLogBox;
 
-
-
 window.addEventListener('load', function () {
-
-
-
-
-
 
     let currentURL = location.href;
     if (currentURL.startsWith("https://live.nicovideo.jp/")) {
@@ -99,7 +85,6 @@ window.addEventListener('load', function () {
         //console.log("ここくる？-------------------------------------");
         setAkashicParentFrameEvent();
     }
-
     
     window.addEventListener('beforeunload', function(e) {
         chrome.runtime.postMessage({stop: "stop"});
@@ -109,8 +94,6 @@ window.addEventListener('load', function () {
         console.log("サービスワーカーを活かすためのメッセージ送信");
         chrome.runtime.sendMessage("何でも良いメッセージ");
     }, 25 * 1000);
-
-
 });
 
 
@@ -1269,13 +1252,42 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
             chrome.storage.local.set({"ext_yomiage_opt_volume": document.querySelector('.ext-setting-menu .ext-yomiage .option.volume input').value}, function() {});
         }
     });
+    
     // [読み上げ] 速度
-    document.querySelector('.ext-setting-menu .ext-yomiage .option.rate input').addEventListener('change', (e) => {
+    function yomiage_rate_change(e){
+
         if(e.isTrusted){
-            chrome.runtime.sendMessage({setRate: document.querySelector('.ext-setting-menu .ext-yomiage .option.rate input').value});
-            chrome.storage.local.set({"ext_yomiage_opt_rate": document.querySelector('.ext-setting-menu .ext-yomiage .option.rate input').value}, function() {});
+            // 小数点第1位まで表示 2 -> 2.0
+            const value = parseFloat(document.querySelector('.ext-setting-menu .ext-yomiage .option.rate input').value).toFixed(1);
+
+            // 親要素のoptionのdata-currentを更新
+            document.querySelector('.ext-setting-menu .ext-yomiage .option.rate').setAttribute('data-current', "速度 " + value);
+
+            chrome.runtime.sendMessage({setRate: value});
+            chrome.storage.local.set({"ext_yomiage_opt_rate": value}, function() {});
         }
+    }
+    document.querySelector('.ext-setting-menu .ext-yomiage .option.rate input').addEventListener('mousewheel', (e) => {
+
+        e.preventDefault(); // 画面スクロールさせない
+
+        // 引数eから現在の値を取得
+        const currentValue = e.target.value;
+        const delta = Math.sign(-e.deltaY) * 0.1;
+
+        const min = Number(e.target.min);
+        const max = Number(e.target.max);
+
+        const newValue = Number(currentValue) + Number(delta);
+        if(newValue < min) newValue = min;
+        if(newValue > max) newValue = max;
+
+        e.target.value = newValue;
+        yomiage_rate_change(e);
+
     });
+    document.querySelector('.ext-setting-menu .ext-yomiage .option.rate input').addEventListener('input', yomiage_rate_change);
+
     // [読み上げ] ピッチ
     document.querySelector('.ext-setting-menu .ext-yomiage .option.pitch input').addEventListener('change', (e) => {
         if(e.isTrusted){

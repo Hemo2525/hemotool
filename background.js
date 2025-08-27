@@ -63,12 +63,9 @@ chrome.runtime.onMessage.addListener(function (request) {
     if(request.toSay){
         // 一定の数だけキューが溜まったらリセット
         if(_queCount > 50) {
-
             console.log("キューが溜まったのでリセットします");
             stopVoice();
-
         } else {
-
             console.log("キューの数：" +_queCount);
             _queCount++;
             chrome.tts.speak(request.toSay,
@@ -92,14 +89,26 @@ chrome.runtime.onMessage.addListener(function (request) {
                             console.log("読み上げがキャンセルされました");
                             if(_queCount > 0) _queCount--;
                         }
+                        if(event.type === "error"){
+                            console.error("読み上げエラー:", event.errorMessage);
+                            if(_queCount > 0) _queCount--;
+                        }
                     }
                 },
                 function () {
-        
+                    // コールバック関数でエラーハンドリング
+                    if(chrome.runtime.lastError) {
+                        console.error("TTSエラー:", chrome.runtime.lastError);
+                        // chrome.notifications.create({
+                        //     type: "basic",
+                        //     iconUrl: "icon48.png",
+                        //     title: "読み上げエラー",
+                        //     message: "読み上げに失敗しました。設定を確認してください。"
+                        // });
+                    }
                 }
             );
         }
-
     }
 
 });
