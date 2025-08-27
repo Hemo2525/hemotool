@@ -847,11 +847,67 @@ function recvChatComment(message) {
       //console.log("★★ " + message.chat.user_id+ " は新しいユーザーIDです。名前を取得にいきます。");
 
       var request = new XMLHttpRequest();
-      var getURL = "https://www.nicovideo.jp/user/" + message.chat.user_id + "/video?rss=2.0";
+      //var getURL = "https://www.nicovideo.jp/user/" + message.chat.user_id + "/video?rss=2.0";
+      //let getURL = "https://seiga.nicovideo.jp/api/user/info?id=" + message.chat.user_id;
+      let getURL = "https://www.nicovideo.jp/user/" + message.chat.user_id;
       request.open('GET', getURL);
       request.send();
       request.addEventListener("load", function () {
 
+        /*
+        console.log("★★ " + message.chat.user_id+ " の名前を取得します。");
+        console.log("★★ " + request.responseXML);
+        console.log("★★ " + request.responseText);
+        */
+
+        if(request.responseText) {
+          try {
+            // HTMLをパースしてDOMDocumentを作成
+            var parser = new DOMParser();
+            var htmlDoc = parser.parseFromString(request.responseText, 'text/html');
+            
+            var userName = "";
+            var userNameFull = "";
+            
+            // JSON-LDスキーマから名前を取得
+            const jsonLdScript = htmlDoc.querySelector('script[type="application/ld+json"]');
+            
+            const jsonData = JSON.parse(jsonLdScript.textContent);
+                
+            // Person型のスキーマからnameを取得
+            if (jsonData['@type'] === 'Person' && jsonData.name) {
+              userName = jsonData.name;
+              userNameFull = jsonData.name;
+              console.log("★★ JSON-LDから名前を取得:", userName);
+
+
+              _rawUserListFull[message.chat.user_id] = userNameFull;
+
+              // 過去のコメントの名前を置き換える
+              for (let key in _commentListFull) {
+                if (_commentListFull[key] == message.chat.user_id) {
+                  _commentListFull[key] = userNameFull;
+                }
+              }
+    
+              var currentCommentList = document.querySelectorAll('.user_name_by_extention:not(.user184)');
+              for (var i = 0; i < currentCommentList.length; i++) {
+                if (currentCommentList[i].innerText == message.chat.user_id) {
+                  currentCommentList[i].innerText = userName;
+                  currentCommentList[i].setAttribute("title", userNameFull);
+                }
+              }
+
+            }
+            
+          } catch (error) {
+            console.error("★★ HTML解析エラー:", error);
+            console.log("★★ レスポンステキストの一部:", request.responseText.substring(0, 500));
+          }
+        }
+
+
+        /*
         if (request.responseXML) {
 
           var xmlDom = request.responseXML.documentElement;
@@ -874,11 +930,10 @@ function recvChatComment(message) {
               currentCommentList[i].setAttribute("title", userNameFull);
             }
           }
-
-
         } else {
           //console.log("名前をGETできませんでした。");
         }
+        */
 
       }, false);
     }
