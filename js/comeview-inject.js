@@ -1767,7 +1767,7 @@ function startWatchGridDOM() {
 
         // 要素の位置を更新。 要素の右下の座標を計算。
         const right = e.clientX - 10;
-        const bottom = e.clientY - 10;
+        const bottom = e.clientY - 30;
   
         // 要素の位置を更新する
         tootlTip.style.right = `calc(100% - ${right}px)`;

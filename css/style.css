@@ -1592,68 +1592,68 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
 ・ニコ生のダークモードに対応（html[data-color-theme]）
 ・Chrome拡張機能Dark Readerに対応（html[data-darkreader-scheme]）
 */
-html[data-color-theme] .user_name_by_extention,
+html[data-color-theme=dark] .user_name_by_extention,
 html[data-darkreader-scheme] .user_name_by_extention {
   background-color: inherit;
   color: #e54b4b;
   border: 1px solid #e54b4b;
 }
 
-html[data-color-theme] .user_name_by_extention.user184,
+html[data-color-theme=dark] .user_name_by_extention.user184,
 html[data-darkreader-scheme] .user_name_by_extention.user184 {
   background-color: inherit;
   color: #d3d3d3;
   border: 1px solid #d3d3d3;
 }
 
-html[data-color-theme] .user_name_by_extention.kotehan,
+html[data-color-theme=dark] .user_name_by_extention.kotehan,
 html[data-darkreader-scheme] .user_name_by_extention.kotehan {
   background-color: inherit;
   color: #204dad;
   border: 1px solid #204dad;
 }
 
-html[data-color-theme] [class^=___player-area___],
+html[data-color-theme=dark] [class^=___player-area___],
 html[data-darkreader-scheme] [class^=___player-area___] {
   background-image: none !important;
 }
 
-html[data-color-theme] .ext-popup,
+html[data-color-theme=dark] .ext-popup,
 html[data-darkreader-scheme] .ext-popup {
   background-color: #000000;
   color: white;
 }
 
-html[data-color-theme] [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user-name-button,
+html[data-color-theme=dark] [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user-name-button,
 html[data-darkreader-scheme] [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user-name-button {
   background-color: inherit;
   color: #e54b4b !important;
   border: 1px solid #e54b4b !important;
 }
-html[data-color-theme] [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user-name-button span,
+html[data-color-theme=dark] [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user-name-button span,
 html[data-darkreader-scheme] [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user-name-button span {
   color: #e54b4b !important;
 }
 
-html[data-color-theme] [ext-master-comeview] [class^=___table-row___],
+html[data-color-theme=dark] [ext-master-comeview] [class^=___table-row___],
 html[data-darkreader-scheme] [ext-master-comeview] [class^=___table-row___] {
   border-top: 1px dashed rgba(255, 255, 255, 0.123) !important;
 }
 
-html[data-color-theme] #ext_tooltipBox,
+html[data-color-theme=dark] #ext_tooltipBox,
 html[data-darkreader-scheme] #ext_tooltipBox {
   background-color: #141414 !important;
   color: white !important;
 }
 
-html[data-color-theme] [class^=___context-menu___] .ext-menu label,
+html[data-color-theme=dark] [class^=___context-menu___] .ext-menu label,
 html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
   background-color: rgb(51, 51, 51) !important;
   color: white !important;
 }
 
-html[data-color-theme] [class^=___context-menu___] .ext-menu label input,
-html[data-color-theme] [class^=___context-menu___] .ext-menu label textarea,
+html[data-color-theme=dark] [class^=___context-menu___] .ext-menu label input,
+html[data-color-theme=dark] [class^=___context-menu___] .ext-menu label textarea,
 html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label input,
 html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label textarea {
   background-color: rgb(51, 51, 51) !important;
