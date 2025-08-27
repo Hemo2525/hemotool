@@ -1649,9 +1649,30 @@ function startWatchGridDOM() {
             observer.disconnect();
 
             // コンテキストメニューに追加メニュー項目を挿入
+            /*
             let commentContext = document.querySelector("[class^=___program-comment-menu___]"); // コメント関係のメニューDOMを指定
             if(commentContext && commentContext.parentNode){
               commentContext.parentNode.insertBefore(ulElement, commentContext);    
+            }
+            */
+
+           /*
+           　以下のDOMに対して、コンテキストメニューのメニューを追加する
+            <div class="___context-menu___YxhCJ context-menu" style="position: absolute; left: 177px; top: 181px;">
+              <!-- ★ここに挿入★ -->
+              <button class="___button___wbaq8 comment-copy-button" type="button">コメントをコピー</button>
+              <button class="___button___wbaq8 user-id-copy-button" type="button">ユーザーIDをコピー</button>
+              <button class="___button___wbaq8 program-seek-to-comment-position-button" type="button">コメントが投稿された時点から視聴</button>
+              <hr>
+              <button class="___button___wbaq8 ng-comment-register-button" type="button">コメントをNGに追加</button>
+              <button class="___button___wbaq8 ng-user-id-register-button" type="button">ユーザーIDをNGに追加</button>
+              <hr>
+              <button class="___button___wbaq8 comment-allegation-button" type="button">荒らし通報</button>
+            </div>
+            */
+            let commentContext = document.querySelector("[class^=___context-menu___]"); // コメント関係のメニューDOMを指定
+            if(commentContext && commentContext.parentNode){
+              commentContext.insertBefore(ulElement, commentContext.firstChild);  
             }
 
             // コンテキストメニューの監視を再開

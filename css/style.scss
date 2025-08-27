@@ -1,0 +1,1635 @@
+/* 設定アイコン */
+.ext-setting-btn:before {
+    background-color: #252525;
+    border-radius: 2px;
+    bottom: 100%;
+    box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+    color: #fff;
+    content: attr(aria-label);
+    display: block;
+    font-size: 12px;
+    left: 50%;
+    letter-spacing: normal;
+    line-height: 1;
+    opacity: 0;
+    padding: 6px 8px;
+    pointer-events: none;
+    position: absolute;
+    text-align: center;
+    transform: translate(-50%);
+    transition: opacity .12s ease;
+    white-space: nowrap;
+    z-index: 10000;
+}
+
+.ext-setting-btn:enabled:hover:before,
+.ext-setting-btn:not([aira-disabled]:enabled:disabled):hover:before,
+[data-input-mode=keyboard] .ext-mute-btn:enabled:focus:before {
+    opacity: 1;
+}
+
+.ext-setting-btn { 
+    cursor: pointer;
+    background-color:transparent;
+    border: 0;
+    height: 36px;
+    margin: 0;
+    overflow: visible;
+    padding: 0;
+    position: relative;
+    width: 32px;
+}
+.ext-setting-btn svg { 
+    height: var(--player-controller-icon-butoon-icon-size,16px);
+    vertical-align: bottom;
+    width: var(--player-controller-icon-butoon-icon-size,16px);
+}
+.ext-setting-btn svg path {
+    fill: #fffcfc;
+    transition: fill .12s ease;
+}
+.ext-setting-btn:hover svg path {
+    fill: #1f7cff;
+}
+.ext-setting-btn:before {
+    background-color: #252525;
+    border-radius: 2px;
+    bottom: 100%;
+    box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+    color: #fff;
+    content: attr(aria-label);
+    display: block;
+    font-size: 12px;
+    left: 50%;
+    letter-spacing: normal;
+    line-height: 1;
+    opacity: 0;
+    padding: 6px 8px;
+    pointer-events: none;
+    position: absolute;
+    text-align: center;
+    transform: translate(-50%);
+    transition: opacity .12s ease;
+    white-space: nowrap;
+    z-index: 10000;
+}
+.ext-setting-btn.ON svg path {
+    fill: #088700;
+}
+
+
+
+
+
+.ext-setting-menu {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 20px);
+    right: 0;
+    background-color: rgba(37,37,37,.95);
+    border: 1px solid #404040;
+    border-radius: 4px;
+    overflow: auto;
+    width: 294px;
+    transition: 0.3s;
+    z-index: 2;
+
+    overflow-y: scroll; /* スクロールの有無で表示がズレるので常に表示 */
+    /*max-height: 310px;*/
+    height: 310px;
+
+
+    .border-bottom {
+        border-bottom: 1px solid rgb(65, 65, 65);
+    }
+
+
+
+}
+
+/*
+.ext-setting-menu .dev-mode {
+    display: none;
+}
+.ext-setting-menu .dev-mode.show {
+    display: block;
+}
+*/
+
+.ext-setting-menu::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    background: #657586;
+}
+.ext-setting-menu::-webkit-scrollbar-thumb {
+    background: #b2bec2;
+}
+
+.ext-setting-menu[ext-attr-show] {
+    display: block;
+}
+.ext-setting-menu .item {
+    color: white;
+    cursor: default;
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    padding: 8px 10px;
+    transition: 0.3s;
+}
+.ext-setting-menu .item:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+.ext-setting-menu .item.info {
+    justify-content: flex-end;
+    background-color: #141414;
+    padding: 5px 10px;
+    
+    .ext-info-item {
+        user-select: none;
+        font-size: 11px;
+        margin-left: 10px;
+        text-decoration: none;
+        color: white;
+        cursor: pointer;
+        transition: 0.2s;
+        border-left: 1px solid rgb(85, 85, 85);
+        padding-left: 9px;
+        &:last-child {
+            border-right: 1px solid rgb(85, 85, 85);
+            padding-right: 9px;
+        }
+        &:hover {
+            color: rgb(5, 109, 255);
+        }
+    }
+    a {
+        color: inherit;
+    }
+    #ext-view {
+        width: 13px;
+        margin-top: 2px;
+        margin-bottom: -3px;
+        cursor: pointer;
+        
+        svg {
+            margin-left: -1px;
+        }
+        &:hover {
+            svg g {
+                fill: rgb(5, 109, 255) !important;
+            }
+        }
+    }
+}
+.ext-setting-menu .item.info:hover {
+    background-color: #141414;
+}
+.ext-setting-menu .item.info .niconico,
+.ext-setting-menu .item.info .hemotool {
+    width: 50%;
+    text-align: right;
+}
+.ext-setting-menu .item.info .ver {
+    display: inline-block;
+}
+.ext-setting-menu .item .name {
+    user-select: none;
+    position: relative;
+}
+
+.ext-setting-menu .item .name.new::after {
+    content: "new";
+    color: #ff4242;
+    position: absolute;
+    top: -1px;
+    right: -30px;
+    font-size: 12px;    
+}
+.ext-setting-menu .item .name.update::after {
+    content: "update";
+    color: #ff4242;
+    position: absolute;
+    top: -1px;
+    right: -50px;
+    font-size: 12px;    
+}
+.ext-setting-menu .item .name .mini {
+    color: #ff6767;
+    font-size: 11px;
+    padding-left: 7px;
+}
+.ext-setting-menu {
+    [ext-view-item-off] {
+        display: none;
+    }
+    &[ext-view-on] {
+        max-height: 50svh !important; /* 表示設定画面のときは高さを制限しない */
+        .btn-group {
+            justify-content: flex-end;
+        }
+        [ext-view-item-off] {
+            display: block;
+        }
+    }
+    transition: 0.5s;
+    &:has(.setting.active) {
+        max-height: 50svh !important; /* オプション表示のときは高さを制限しない */
+    }
+}
+.ext-setting-menu .item .btn-group {
+    display: flex;
+    width: 68px;
+    /* justify-content: flex-end; */
+    .view {
+        display: none;
+    }
+}
+.ext-setting-menu {
+    svg g {
+        fill: rgb(255, 255, 255) !important;
+    }
+
+    &[ext-view-on] {
+        svg g {
+            fill: rgb(5, 109, 255) !important;
+        }    
+    }
+}
+.ext-setting-menu[ext-view-on] .btn-group {
+    .value,
+    .pin,
+    .setting {
+        display: none;
+    }
+    .view {
+        display: block;
+        height: 19px;
+        cursor: pointer;
+        svg g {
+            fill: rgb(5, 109, 255) !important;
+        }
+        &[view-off] svg g {
+            fill: rgb(255, 255, 255) !important;
+        }
+    }
+}
+.ext-setting-menu .item .value {
+    cursor: pointer;
+    font-weight: bold;
+    user-select: none;
+}
+.ext-setting-menu .ext-on-off[ext-attr-on] .item .value,
+.ext-setting-menu [ext-attr-on] .value {
+    color: #056dff;
+}
+
+.ext-setting-menu .item .pin {
+    margin-left: 13px;
+    cursor: pointer;
+}
+.ext-setting-menu .item .pin.blank {
+    cursor: default;
+    width: 11px;
+    height: 11px;
+    margin-left: 25px;
+}
+.ext-setting-menu .item .pin svg {
+    width: 11px;
+    height: 11px;
+}
+.ext-setting-menu .item .pin svg path {
+    fill: white;
+}
+.ext-setting-menu .item .pin[ext-pin-on] svg path {
+    fill: #056dff;
+}
+.ext-setting-menu .item .setting {
+    margin-left: 13px;
+    cursor: pointer;
+}
+.ext-setting-menu .item .setting svg {
+    width: 14px !important;
+    height: 14px !important;
+}
+.ext-setting-menu .item .setting svg path {
+    fill: white;
+}
+.ext-setting-menu .item .setting.active svg path {
+    fill: #056dff;
+}
+/* 
+.ext-setting-menu .item .view {
+    display: none;
+    width: 14px;
+    margin-top: 2px;
+    margin-bottom: -3px;
+    cursor: pointer;
+    &.show {
+        display: block;
+    }
+} */
+
+
+
+.ext-setting-menu .option-box {
+    transition: max-height 0.3s;
+    max-height: 0;
+    overflow: hidden;
+}
+.ext-setting-menu .option-box.show {
+    max-height: var(--max-height);
+    background-color: rgba(0, 0, 0, 0.6);
+    /*
+    border-top: 1px solid #585858;
+    border-bottom: 1px solid #585858;
+    */
+}
+.ext-setting-menu .option-box .option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    font-size: 12px;
+    padding: 10px 20px;
+    cursor: default;
+    user-select: none;
+    transition: all 0.3s ease 0s;
+
+    &.desc {
+        line-height: 1.2;
+        padding: 6px 20px;
+        display: block;
+    }
+}
+.ext-setting-menu .option-box .option.desc a {
+    color: white;
+}
+.ext-setting-menu .option-box .option:first-child {
+    /*padding-top: 5px;*/
+}
+.ext-setting-menu .option-box .option:last-child {
+    /*padding-bottom: 5px;*/
+}
+.ext-setting-menu .option-box .option:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+.ext-setting-menu .option-box .option.desc:hover {
+    background: none;
+}
+
+.ext-setting-menu .option-box .option .value * {
+    cursor: pointer;
+}
+.ext-setting-menu .option-box .option .name {
+    position: relative;
+    /*flex-basis: 200px;*/
+}
+
+.ext-setting-menu .option-box .option .name.new::after {
+    content: "new";
+    color: #ff4242;
+    position: absolute;
+    top: -1px;
+    right: -30px;
+    font-size: 12px;    
+}
+
+.ext-setting-menu .option-box .option .value {
+    flex-basis: calc(100% - 220px);
+}
+.ext-setting-menu .option-box .option .value select {
+    width: 130px;
+}
+.ext-setting-menu .option-box .border {
+    display: block;
+    width: calc(100% - 40px);
+    margin: 5px auto;
+    border-bottom: 1px solid #424242;
+}
+.ext-setting-menu .option-box .option .value.flex {
+    display: flex;
+    align-content: center;
+    justify-content: space-around;
+}
+.ext-setting-menu .option-box .option .value.flex .syouryaku-left {
+    width: 35px;
+    margin-right: 10px;
+}
+.ext-setting-menu .option-box .option .value.flex .syouryaku-right {
+    width: 64px;
+}
+.ext-setting-menu .option-box .option .value input[type="button"] {
+    background-color: #0075ff;
+    color: white;
+    border-radius: 5px;
+    font-size: 10px;
+    padding: 2px 10px;
+    border: none;
+}
+.ext-setting-menu .option-box .option .value input[type="button"][disabled] {
+    background-color: gray;
+}
+
+
+
+.ext-popup {
+    display: none;
+
+    /*animation: 3s fuwafuwa infinite;*/
+    position: absolute;
+    background-color: #ffffff;
+    /*border: 1px solid black;*/
+    /*top: -274px;*/
+    top: attr(data-topposition)"";
+    left: -45px;
+    padding: 34px 10px 10px 10px;
+    text-align: center;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.529);
+
+    /*top: -691%;*/
+    /*
+    width: 300px;
+    left: -143px;
+    */
+    width: 265px;
+    left: -126px;
+    opacity: 0.94;
+    
+    #ext-info-box-title,
+    #ext-info-gift-title {
+        display: none;
+        position: absolute;
+        
+        top: 8px;
+        left: 0;
+        right: 0;
+        
+        color: gray;
+        letter-spacing: 1px;
+        
+        &.show {
+            display: inline-block;
+        }
+    }
+
+    #ext-info-box,
+    #ext-info-gift {
+        display: none;
+        &.show {
+            display: block;
+        }
+        overflow-y: auto;
+        height: calc(100% - 22px);
+
+        .item {
+            text-align: justify;
+            margin: 0px 13px;
+            border-bottom: 1px solid #d9d9d9;
+            padding-bottom: 10px;
+            margin-bottom: 3px;
+            &.no-border {
+                border-bottom: none;
+                padding-bottom: 0px;
+                margin-bottom: 0px;
+            }
+            .time {
+                font-size: 11px;
+                color: gray;
+                text-align: right;
+                margin-bottom: 0;
+            }
+            & h2 {
+                font-weight: bold;
+                font-size: 15px;
+                line-height: 1.2;
+                margin: 0;
+                padding: 0;
+                margin-bottom: 6px;
+            }
+            & h3 {
+                font-weight: bold;
+                font-size: 15px;
+                
+                line-height: 1.2;
+                margin: 0;
+                margin-bottom: 6px;
+                padding: 0;
+            }
+            & p {
+                font-size: 13px;
+                text-align: justify;
+                line-height: 1.5;
+                padding: 0px;
+                margin: 0;
+                &.note {
+                    font-size: 12px;
+                    color: gray;
+                }
+            }
+            & ul {
+                padding: 0px;
+                margin: 0;
+                margin-left: 20px;
+                & li {
+                    font-size: 13px;
+                    text-align: justify;
+                    line-height: 1.5;    
+                    margin-bottom: 3px;
+                    &:last-child {
+                        margin-bottom: 0px;
+                    }
+                }
+            }
+            & img {
+                width: 100%;
+            }
+            .icon {
+                width:20px;
+                margin-right:5px;
+                vertical-align: sub;
+            }
+
+            & span.update {
+                color: #b50000;
+                font-size: 9px;
+                font-weight: bold;
+                margin-left: 6px;
+                vertical-align: -webkit-baseline-middle;
+                line-height: 1;
+                margin-bottom: 11px;
+                display: inline-block;                
+            }
+        }
+
+    }
+
+    span.close {
+        cursor: pointer;
+        position: absolute;
+        z-index: 10;
+        right: 8px;
+        top: 6px;
+        font-size: 10px;
+        font-weight: bold;
+        background-color: gray;
+        color: white;
+        border-radius: 10px;
+        padding: 2px 7px;
+    }
+
+    &::before {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: calc(50% - 10px);
+        border-top: 15px solid #ffffffeb;
+        border-right: 10px solid transparent;
+        border-bottom: 0px solid transparent;
+        border-left: 10px solid transparent;
+    }
+}
+.ext-popup.show {
+    display: block;
+}
+.ext-popup h2 {
+    font-size: 11px;
+    margin-block: inherit;
+    margin-bottom: 5px;
+}
+
+@keyframes fuwafuwa {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+  
+
+#ext_overlay {
+    background-color: transparent;
+    display: none;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    z-index: 1;
+}
+
+#ext_logBox {
+    display: none;
+}
+#ext_kotehanBox {
+    display: none;
+}
+#ext_kotehanToInjectBox {
+    display: none;
+}
+
+
+/* シークバー関係　*/
+.extBtnCover {
+    display: none;
+    /*background-color: red;*/
+    width: 32px;
+    height: 36px;
+    position: absolute;
+    /*cursor: not-allowed;*/
+    z-index: 1;
+}
+
+div#ext_dom_message {
+    color: white;
+    text-align: center;
+    font-size: 14px;
+    padding: 10px;
+    background-color: #857c7c;
+}
+
+
+[class^=___player-display-footer___] {
+    z-index: 1;
+}
+
+
+
+
+
+
+
+#ext_shortcut {
+    width: 100%;
+    text-align: right;
+    padding: 2px 6px 7px 6px;
+    box-sizing: border-box;
+    
+    
+}
+#ext_shortcut .item {
+    display: none;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    font-size: 10px;
+    border: 1px solid #fff;
+/*    padding: 4px 6px 0px 6px;*/
+    border-radius: 5px;
+
+    padding: 2px 10px 2px;
+    margin-left: 3px;    
+    color: white;
+}
+#ext_shortcut .item[ext-pin-on] {
+    display: inline-block;
+
+}
+#ext_shortcut .item::before {
+    background-color: rgb(37, 37, 37);
+    /*bottom: 100%;*/
+    top: -33px;
+    left: 50%;
+    box-shadow: rgba(0, 0, 0, 0.5) 0px 0px 2px 0px;
+    box-sizing: border-box;
+    color: rgb(255, 255, 255);
+    content: attr(aria-label);
+    display: block;
+    font-size: 12px;
+    letter-spacing: normal;
+    line-height: 1;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    text-align: center;
+    transform: translate(-50%);
+    white-space: nowrap;
+    z-index: 10000;
+    border-radius: 2px;
+    padding: 6px 8px;
+    transition: opacity 0.12s ease 0s;
+}
+#ext_shortcut .item:hover::before {
+    opacity: 1;
+}
+#ext_shortcut .item svg {
+    width: 16px;
+    height: 16px;
+}
+#ext_shortcut .item {
+    
+}
+#ext_shortcut .item:hover {
+    color: #858585;
+    border: 1px solid #858585;
+}
+#ext_shortcut .item[active] {
+    color: white;
+    border: 2px solid rgb(0, 61, 147);
+    background-color: rgb(0, 61, 147);
+    padding: 1px 9px;
+}
+
+#ext_shortcut .item.rec {
+    border: none;
+    margin-left: 10px;
+    font-size: 12px;
+}
+#ext_shortcut .item.rec .status {
+    color: rgb(88, 88, 88);
+    margin-right: 10px;
+}
+#ext_shortcut .item.rec .status[rec] {
+    color: rgb(204, 0, 0);
+    animation: recFlash 1.5s linear infinite;
+}
+#ext_shortcut .item.rec .recBtn {
+    cursor: pointer;
+}
+@keyframes recFlash {
+    0%,100% {
+      opacity: 1;
+    }
+  
+    50% {
+      opacity: 0;
+    }
+  }
+
+#ext_volume_overlay {
+    display: none;
+    position: absolute;
+    /* color: white; */
+    background-color: black;
+    /*background-color: #000000a6;*/
+    /*cursor: not-allowed;*/
+    z-index: 1;
+    /*
+    line-height: 1.4;
+    font-size: 9px;
+    */
+    user-select: none;
+    box-sizing: border-box;
+    /*padding-top: 3px;
+    text-align: justify;    
+    */
+
+}
+#ext_volume_overlay.show {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#ext_volume_overlay svg {
+    /* ニコ生のもともとの定義 */
+    height: var(--player-controller-icon-butoon-icon-size,16px);
+    vertical-align: bottom;
+    width: var(--player-controller-icon-butoon-icon-size,16px);
+
+    /* */
+    cursor: pointer;
+}
+#ext_volume_overlay svg path{
+    fill: #fff;
+    transition: fill .12s ease;
+}
+
+#ext_video_volume_overlay {
+    display: none;
+    position: absolute;
+    color: white;
+    background-color: black;
+    /*background-color: #000000a6;*/
+    /*cursor: not-allowed;*/
+    z-index: 1;
+    line-height: 1.4;
+    font-size: 9px;
+    user-select: none;
+    box-sizing: border-box;
+    padding-top: 3px;
+    text-align: justify;  
+}
+#ext_video_volume_overlay.show {
+    display: block;
+}
+
+#ext_videoVolumeSlider {
+    display: none;
+    cursor: pointer;
+
+    /* 独自の見た目を有効化 */
+    -webkit-appearance: none;
+    appearance: none;
+
+    background: #e78a00;
+    outline: none;
+    height: 7px;
+    border-radius: 12px;
+    position: relative;
+
+    &::before {
+        background-color: #252525;
+        border-radius: 2px;
+        box-shadow: 0 0 2px 0 rgba(0,0,0,.5);
+        box-sizing: border-box;
+        color: #fff;
+        content: attr(aria-label);
+        display: block;
+        font-size: 12px;
+        top: -40px;
+        left: 50%;
+        letter-spacing: normal;
+        line-height: 1;
+        opacity: 0;
+        padding: 6px 8px;
+        pointer-events: none;
+        position: absolute;
+        text-align: center;
+        transform: translateX(-50%);
+        transition: opacity .12s ease;
+        white-space: nowrap;
+        z-index: 10000;
+    }
+
+    &.mouseOver {
+        &::before {
+            opacity: 1;
+        }
+    }
+}
+
+#ext_videoVolumeSlider::-webkit-slider-thumb {
+    
+    /* 独自の見た目を有効化 */
+    -webkit-appearance: none;
+    appearance: none;
+    
+    background: #7a4900;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    box-shadow: 0px 3px 6px 0px rgba(0, 0, 0, 0.15);
+
+}
+
+#ext_videoVolumeSlider.show {
+    display: block;
+}
+#ext_videoVolumeSlider[disabled] {
+    cursor: not-allowed;
+    background: #7c7c7c;
+}
+#ext_videoVolumeSlider[disabled]::-webkit-slider-thumb {
+    background: #474747;
+}
+
+[class^=___volume-size-control___] input[class^=___slider___][disabled] {
+    cursor: not-allowed;
+}
+
+
+/* コメビュ用 */
+.user_name_by_extention { 
+    display: none;
+    color: #b70000;
+    border: 1px solid #b70000; 
+    padding: 2px 7px 1px 7px; 
+    margin-right: 9px; 
+    border-radius: 10px; 
+    font-size: 12px; 
+    background-color: white;
+
+    flex-shrink: 0; /* コメント文がFlexBoxより大きくなっても名前は縮まないようにする */
+
+    /* 長い名前はCSSで省略(省略記号...表示) */
+    max-width: 85px;
+    -webkit-line-clamp: 1 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;    
+}
+.user_name_by_extention.user184 { 
+    color: #424242; 
+    border: 1px solid #424242; 
+    padding: 2px 6px 1px 10px; 
+    font-size: 11px;
+    background-color: white;
+
+    /* 長い名前はCSSで省略(省略記号...表示) */
+    max-width: 40px;
+    -webkit-line-clamp: 1 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+
+}
+.user_name_by_extention.kotehan { 
+    color: #0034a3; 
+    border: 1px solid #0034a3; 
+}
+
+[class^=___contents-area___][ext-master-comeview][ext-opt-name] .user_name_by_extention {
+    display: inline-block;
+}
+
+/* なふだ機能による名前  */
+[class^=___contents-area___][ext-master-comeview][ext-opt-name] .user-name-button {
+    color: #b70000 !important;
+    border: 1px solid #b70000 !important;
+    padding: 0px 6px 0px 8px !important;
+    border-radius: 10px !important;
+    font-size: 12px !important;
+    background-color: white;
+
+    height: inherit !important;
+    margin-right: 12px !important;
+    margin-left: 9px !important;
+
+    flex-shrink: 0; /* コメント文がFlexBoxより大きくなっても名前は縮まないようにする */
+
+    & span {
+        color: #b70000 !important;
+        max-width: 94px !important;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        color: inherit;
+    }
+
+    /* 長い名前はCSSで省略(省略記号...表示) */
+    max-width: 100px;
+    -webkit-line-clamp: 1 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;    
+}
+
+[class^=___contents-area___][ext-master-comeview] .wrapComment_by_extention {
+    align-items: center;
+    display: flex;
+    font-size: 10px;
+    line-height: 15px;
+    width: var(--local-user-summary-area-width);
+}
+
+
+/* なふだ機能で自分の名前のPタグが縦に伸びてしまう現象を解消 */
+[class^=___contents-area___][ext-master-comeview] .content-area>.user-summary-area {
+    line-height: inherit !important;
+}
+/* なふだ投稿のユーザーアイコンの大きさを揃える */
+[class^=___contents-area___][ext-master-comeview] .content-area>.user-summary-area img {
+    width: 25px !important;
+    height: 25px !important;
+    top: -3px !important;
+}
+
+
+
+
+
+/* 自身が配信者の場合のコメント欄*/
+[ext-attr-IamOwner="true"] [class^=___contents-area___][ext-master-comeview] .comment-text {
+    padding: 0px !important;
+}
+[ext-attr-IamOwner="true"] [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user-name-button {
+    border: none !important;
+    padding: 0px !important;
+    margin-left: 5px !important;
+    background-color: transparent !important;
+    max-width: inherit;
+    & span {
+        max-width: inherit !important;
+    }
+}
+[ext-attr-IamOwner="true"] [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user_name_by_extention {
+    border: none !important;
+    padding: 0px !important;
+    margin-left: 0 !important;
+    background-color: transparent !important;
+    max-width: inherit;
+    border-radius: inherit;
+}
+[ext-attr-IamOwner="true"] [class^="___contents-area___"][ext-master-comeview] .user_icon_by_extention,
+[ext-attr-IamOwner="true"] [class^="___contents-area___"][ext-master-comeview] .content-area > .user-summary-area img {
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px;
+}
+
+/* 
+公式生放送ではコメント番号がDOMにないのでへもツール独自のユーザー名を表示できない。
+公式生放送の場合は標準でユーザー名がDOMに入っているユーザー名を使う方式にするため、display:block;で表示させる。
+ */
+[class^=___contents-area___][ext-master-comeview][ext-opt-name] [class^=___comment-author-name___] {
+    display: block;
+    color: #424242;
+    border: 1px solid #424242; 
+    padding: 2px 7px 1px 7px; 
+    margin-right: 9px; 
+    border-radius: 10px; 
+    font-size: 12px; 
+    background-color: white;
+
+    /* 長い名前はCSSで省略(省略記号...表示) */
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 100px;
+    text-align: center;
+}
+[class^=___contents-area___][ext-master-comeview][ext-opt-name] [class^=___comment-author-name___]:empty {
+    border: inherit;
+    padding: 0;
+    margin-right: inherit;
+    width: 0px;
+}
+
+/*
+公式生放送では184の場合は184IDがわからないので184と表示
+*/
+/*
+
+→ 自分のコメントはユーザー名が入っていないので、184としか表示できないが、それだと紛らわしいので、184も自分も名前は非表示にする。
+　→ つまり、公式放送の場合は自分以外でユーザー名が入っている人の名前のみ表示。
+　→ そのため下記はコメントアウトしとく。
+
+[class^=___contents-area___][ext-master-comeview][ext-opt-name] [class^=___comment-author-name___]:empty:before {
+    content: "184";
+    color: #424242;
+    border: 1px solid #424242; 
+    padding: 2px 10px 1px 10px; 
+    margin-right: 9px; 
+    border-radius: 10px; 
+    font-size: 12px; 
+    background-color: white;
+}
+*/
+
+/*
+コメント番号がある場合は名前を非表示にする(コメント番号のDOMがある場合はユーザー放送なので、へもツールで取得した名前を表示させるため)
+*/
+[class^=___contents-area___][ext-master-comeview][ext-opt-name] .comment-number+[class^=___comment-author-name___] {
+    display: none !important;
+}
+
+
+[class^=___contents-area___][ext-master-comeview][ext-opt-name][ext-opt-kotehan] .user_name_by_extention {
+    display: none;
+}
+[class^=___contents-area___][ext-master-comeview][ext-opt-name] .user_name_by_extention.viewKotehan {
+    display: none;
+}
+[class^=___contents-area___][ext-master-comeview][ext-opt-name][ext-opt-kotehan] .user_name_by_extention.viewKotehan {
+    display: inline-block;
+}
+
+/*コメビュをOFFにしたときになふだとアイコンが近すぎるので間を開ける*/
+.user-summary-area .user-name-button {
+    /* margin-left: 10px; */
+}
+
+/* なふだ機能の場合の、へもツールが挿入したユーザー名はclickイベントを設定してるので */
+.user-summary-area .user_name_by_extention {
+    cursor: pointer;
+}
+
+/* 自身が配信者のときの他人のなふだコメント or 自分がなふだコメントしたときのコメント */
+/* 名前表示＋コテハン機能がONのときはなふだのアイコンとコメントは非表示 */
+[class^=___contents-area___][ext-master-comeview][ext-opt-name] button.user-name-button,
+[class^=___contents-area___][ext-master-comeview] button.user-thumbnail-image {
+    display: none !important;
+}
+
+
+
+
+
+.premium_by_extention { 
+    display: none;
+    margin-right: 6px;
+    /* background-image: url("chrome-extension://pibfefehkigcakddgjnbgjkllhfbabjm/img/icon-premium.png"); */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100% 100%;
+    /* border-radius: 25px; */
+    flex-basis: 12px;
+    flex-shrink: 0;
+    width: 12px;
+    height: 12px;
+    padding: 0;
+}
+[class^=___contents-area___][ext-master-comeview][ext-opt-premium] .premium_by_extention {
+    display: inline-block;
+}
+
+.noPremium_by_extention { 
+    display: none;
+    margin-right: 6px;
+    padding: 0;
+    /* flex-basis: 11px;
+    max-width: 11px;
+    width: 100%;
+    height: 11px;
+    flex-shrink: 0;
+    background-color: #e9e9e9;
+    border-radius: 100%; */
+
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100% 100%;
+    flex-basis: 12px;
+    flex-shrink: 0;
+    width: 12px;
+    height: 12px;
+    padding: 0;
+
+}
+[class^=___contents-area___][ext-master-comeview][ext-opt-premium] .noPremium_by_extention {
+    display: inline-block;
+}
+
+
+.owner_by_extention { 
+    display: none;
+    margin-right: 6px;
+    padding: 0;
+    /* color: #ffffff;
+    background-color: rgb(129, 1, 1);
+    border-radius: 25px;
+    padding: 0px 2px;
+    font-size: 9px !important;
+    width: 10px;
+    margin-left: -2px; */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100% 100%;
+    flex-basis: 12px;
+    flex-shrink: 0;
+    width: 12px;
+    height: 12px;
+    padding: 0;    
+}
+[class^=___contents-area___][ext-master-comeview][ext-opt-premium] .owner_by_extention {
+    display: inline-block;
+}
+
+/* コメビュ機能の共通スタイル */
+[ext-master-comeview] .comment-text {
+    margin: 0px !important;
+}
+
+[class^=___contents-area___][ext-master-comeview][ext-opt-commentnum] .comment-number {
+    display: none !important;
+}
+[ext-master-comeview] [data-extension-firstcomment] .comment-text {
+    font-weight: bold;
+}
+
+
+/* コメント折り返しここから ------------------------------------ */
+
+[ext-master-comeview][ext-opt-orikaeshi] [class^=___table-cell___] {
+    align-items: center !important;
+}
+
+[ext-master-comeview][ext-opt-orikaeshi] .comment-text {
+    white-space: break-spaces !important;
+    padding-right: 10px !important;
+    padding: 5px 0px !important;
+    line-height: 1.5 !important;
+    font-size: 9px !important;
+}
+
+[ext-master-comeview][ext-opt-orikaeshi] .comment-text {
+    height: auto;    
+    /* text-overflow: ellipsis; */
+    /*display: -webkit-box;*/
+    /* display: inline-block;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2; */
+    line-height: 1.1 !important;
+    overflow: hidden !important;
+    font-size: 12px !important;
+    padding: 0 !important;
+    max-height: 30px !important;
+    
+    /*
+    下記みたいなコメントがあると、コメントの高さが壊れるので、その対策
+    ███████████████████████████████████████████████████████
+    */
+    word-wrap: normal;
+
+    /* 2行より長い場合は三点リーダーで省略 */
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+
+/* コメント量に応じて高さを可変にするとうまくいかないのでコメントアウト
+[class^=___table-row___] {
+    height: auto !important;
+    min-height: 32px !important;
+}
+*/
+
+/*ここまで------------------------------------------*/
+
+/* コメントの背景を行ごとに色付けして読みやすく */
+/*
+[ext-master-comeview] [class^=___table-row___]:nth-child(odd) {
+    background-color: #f1f1f1;
+}
+*/
+/* コメントの行の背景がDark ReaderというChrome拡張機能を入れているときにダークモードにならないと指摘があったので対応 */
+/*
+html[data-darkreader-scheme] [ext-master-comeview] [class^=___table-row___]:nth-child(odd) {
+    background-color: inherit;
+}
+*/
+
+/**
+コメントの行の背景色に色をつけると色がうまくいかないので背景色ではなくボーダーでコメントの区切りをわかりやすくする
+*/
+[ext-master-comeview] [class^=___table-row___] {
+    border-top: 1px dashed #dadada;
+}
+[ext-master-comeview] [class^=___table-row___]:first-child {
+    border-top: none;
+}
+/**
+コメントのカーソルのホバー時にコメントの内容がツールチップ表示されるが、それがニコ生プレイヤーの後ろに隠れてしまうのを解消する
+*/
+[class^=___player-status-panel___] {
+    z-index: 1;
+}
+[class^=___tooltip___] {
+    z-index: 100000;
+}
+
+/* 映像加工 */
+div[data-layer-name="videoLayer"] video {
+    transition-duration: 0.3s;
+}
+
+
+/*
+アイコン関係
+*/
+[ext-master-comeview][ext-opt-icon] [class^=___table-cell___] {
+    position: relative;
+    overflow: inherit !important;
+}
+[ext-master-comeview][ext-opt-icon] [class^=___context-menu___] {
+    z-index: 20;
+}
+[ext-master-comeview] .user_icon_by_extention {
+    display: none;
+}
+[ext-master-comeview][ext-opt-icon] .user_icon_by_extention {
+    display: block;
+
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    width: 45px;
+    height: 25px;
+    border-radius: 100px;
+    margin-right: 5px;
+
+    max-width: 24px;
+    flex-basis: auto;
+    flex-shrink: 1;
+    min-width: 24px;
+    border-radius: 100%;
+
+    position: relative;
+}
+
+[ext-master-comeview][ext-opt-icon] .user_iconHover_by_extention {
+    display: none;
+}
+[ext-master-comeview][ext-opt-icon] .user_icon_by_extention:hover .user_iconHover_by_extention {
+    display: block;
+    background-position: center;
+    background-size: contain;
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    z-index: 111111111;
+    left: calc(50% - 40px);
+    top: calc(50% - 40px);
+    
+    box-shadow: 4px 4px 10px rgba(118, 118, 118, 0.322);
+}
+
+
+
+
+
+/*
+セパレーター関係
+*/
+#split_by_extention {
+    width: 0px;
+    background-color: #c5c5c5;
+    cursor: col-resize;
+    z-index: 1;
+    transition: 0.3s;
+}
+body[ext-master-comeview][ext-opt-wide] [aria-expanded="false"] + #split_by_extention {
+    width: 8px;
+    min-width: 8px;
+}
+body[ext-master-comeview][ext-opt-wide] [data-layout-mode="full"] #split_by_extention {
+    width: 0px;
+    min-width: 0px;
+}
+[class^=___comment-panel___] [class^=___table-cell___],
+[class^=___comment-panel___] [class^=___table___] {
+    width: inherit !important;
+}
+[data-layout-mode="full"] [class^=___player-display___] {
+    width: inherit !important;
+}
+
+
+
+/*
+色選択
+*/
+[class^=___context-menu___] .ext-menu {
+    display: none;
+}
+
+/* [ext-master-comeview][ext-opt-color] [class^=___context-menu___] .ext-menu { */
+/*[ext-master-comeview][ext-opt-color] [class^=___context-menu___]:has([class^=___program-comment-menu___]) .ext-menu {*/
+[ext-master-comeview][ext-opt-color] [class^=___context-menu___] .ext-menu {
+    display: block;
+
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-bottom: 1px solid #e5e5e5;
+
+    overflow: hidden;
+}
+
+[class^=___context-menu___] .ext-menu label {
+    background-color: #fff;
+    border-style: none;
+    color: #000;
+    display: block;
+    padding: 8px 16px;
+    text-align: left;
+    text-decoration: none;
+    width: 100%;
+    user-select: none;
+}
+[class^=___context-menu___] .ext-menu label:hover {
+    background-color: #e5e5e5;
+    cursor: pointer;
+}
+
+html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
+    background-color: inherit;
+    color: inherit;
+}
+[class^=___context-menu___] .ext-menu input {
+    margin-left: 10px;
+    width: 40px;
+    height: 20px;
+    padding: 0;
+    border: none;
+}
+[class^=___contents-area___][ext-master-comeview][ext-opt-color]  {
+    position: relative;
+    z-index: 1;
+}
+
+#ext_colorBox,
+#ext_colorToInjectBox {
+    display: none;
+}
+
+
+
+
+
+
+[class^=___seek-information___] #ext_thumb {
+    width: 100%;
+    margin-top: 10px;    
+}
+
+
+[class^=___comment-text-box___] {
+    padding-left: 37px !important;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+
+/* COMMENT OUT 20230704 */
+/*
+[class^=___player-display___].pipMode {
+    padding-top: 600px;
+}
+*/
+
+.helpBtn {
+    cursor: pointer;
+}
+.help-page {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;    
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 100000;
+    &.show {
+        display: block;
+    }
+}
+
+
+[class^=___akashic-game-view-layer___],
+[class^=___video-layer___] {
+    transition: 0.4s;
+}
+[ext-master-wipe] [class^=___akashic-game-view-layer___] {
+    transform: translate(0%, 0%) scale(0.8);
+    transform-origin: top left;
+    background-color: rgba(255, 255, 255, 0.315);
+    
+}
+[ext-master-wipe] [class^=___video-layer___] {
+    transform: translate(35%, 35%) scale(0.3);
+    background-color: rgba(255, 255, 255, 0.315);
+}
+
+
+/* 2024年2月あたりにNG設定画面がコメビュに隠れる問題の修正 */
+[class^=___ng-setting-panel___] {
+    z-index: 1;
+}
+
+
+/* コメントのコンテキストメニューが下のエリアの背面に隠れる問題の対応 */
+[class^=___player-area___] {
+    position: relative;
+    z-index: 2;
+}
+[class^=___program-information-area___] {
+    position: relative;
+    z-index: 1;
+}
+
+
+/* へもツール用のツールチップはデフォルトで非表示 */
+#ext_tooltipBox {
+    display: none;
+}
+/* へもツール用のツールチップのスタイル */
+[class^=___contents-area___][ext-master-comeview][ext-opt-tooltip] #ext_tooltipBox {
+    position: fixed;
+    max-width: 300px;
+    background-color: #f4f4f4;
+    border: 1px solid #e5e5e5;
+    z-index: 10;
+    line-height: 2;
+    opacity: 0.9;
+    padding: 10px 20px;
+    display: none;
+    &.show {
+        display: block;
+    }
+}
+/* 右クリックメニューが表示されているときはツールチップを非表示 */
+[class^=___contents-area___][ext-master-comeview][ext-opt-tooltip] [class^=___comment-data-grid___]:has([class^=___context-menu___]) #ext_tooltipBox {
+    display: none;
+}
+/* ニコ生のデフォルトのツールチップを非表示 */
+[class^=___contents-area___][ext-master-comeview][ext-opt-tooltip] [class^=___tooltip___] {
+    display: none;
+}
+
+
+
+
+
+/* コテハン入力画面 */
+#ext_myKotehanBox {
+    display: none;
+    background-color: rgba(0, 0, 0, 0.941);
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 100000;
+    line-height: 2;
+    
+    &.show {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #ext_myKotehanBox_Center {
+        width: 70%;
+    }
+    #ext_myKotehanDom_comment {
+        color: white;
+        display: block;
+    }
+    #ext_myKotehanInput {
+        display: block;
+        padding: 10px;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+        width: 100%;
+    }
+    #ext_myKotehanBox_OkBtn {
+        cursor: pointer;
+        background-color: rgb(0, 117, 255);
+        color: white;
+        display: inline-block;
+        padding: 3px 25px;
+        border-radius: 5px;
+        margin-right: 10px;
+        margin-bottom: 20px;
+    }
+    #ext_myKotehanBox_ClearBtn {
+        cursor: pointer;
+        background-color: rgb(0, 117, 255);
+        color: white;
+        display: inline-block;
+        padding: 3px 25px;
+        border-radius: 5px;
+        margin-right: 10px;
+    }
+    #ext_myKotehanBox_CancelBtn {
+        cursor: pointer;
+        background-color: rgb(71, 71, 71);
+        color: white;
+        display: inline-block;
+        padding: 3px 25px;
+        border-radius: 5px;
+    }
+}
+[class^=___comment-data-grid___]:has(#ext_myKotehanBox.show) #ext_tooltipBox {
+    /* コテハン入力画面が表示されているときはツールチップは非表示 */
+    display: none;
+}
+
+
+/*
+Chrome拡張機能Dark Readerに対応
+*/
+
+html[data-darkreader-scheme] .user_name_by_extention {
+    background-color: inherit;
+    color: #e54b4b;
+    border: 1px solid #e54b4b; 
+}
+html[data-darkreader-scheme] .user_name_by_extention.user184 {
+    background-color: inherit;
+    color: #d3d3d3;
+    border: 1px solid #d3d3d3; 
+}
+html[data-darkreader-scheme] .user_name_by_extention.kotehan {
+    background-color: inherit;
+    color: #204dad; 
+    border: 1px solid #204dad; 
+}
+html[data-darkreader-scheme] [class^=___player-area___] {
+    background-image: none !important;
+}
+html[data-darkreader-scheme] .ext-popup {
+    background-color: #000000;
+    color: white;
+}
+
+
+html[data-darkreader-scheme] [class^="___contents-area___"][ext-master-comeview][ext-opt-name] .user-name-button {    
+    background-color: inherit;
+    color: #e54b4b !important;
+    border: 1px solid #e54b4b !important; 
+    & span {
+        color: #e54b4b !important;
+    }
+}
+html[data-darkreader-scheme] [ext-master-comeview] [class^="___table-row___"] {
+    border-top: 1px dashed rgba(255, 255, 255, 0.123) !important;
+}
+html[data-darkreader-scheme] #ext_tooltipBox {
+    background-color: #141414 !important;
+    color: white !important;
+}
