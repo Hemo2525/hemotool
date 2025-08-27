@@ -1633,7 +1633,7 @@ function startWatchGridDOM() {
               if(_styleList[mouseClick.userId] && _styleList[mouseClick.userId].bgIndex !== -1) {
                 // 追加済みなら置換
                 style.sheet.deleteRule(_styleList[mouseClick.userId].bgIndex);
-                style.sheet.insertRule('span:has([data-extension-userid="'+ mouseClick.userId + '"] ) { background-color: #ffffff;}', _styleList[mouseClick.userId].bgIndex);
+                style.sheet.insertRule('span:has([data-extension-userid="'+ mouseClick.userId + '"] ) { background-color: inherit;}', _styleList[mouseClick.userId].bgIndex);
                 _styleList[mouseClick.userId].bgColor = "#ffffff";
               }
 
