@@ -1597,9 +1597,13 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
 
 html[data-color-theme="dark"] .user_name_by_extention,
 html[data-darkreader-scheme] .user_name_by_extention {
-    background-color: inherit;
-    color: #e54b4b;
-    border: 1px solid #e54b4b; 
+    // background-color: inherit !important;
+    // color: #e54b4b;
+    // border: 1px solid #e54b4b; 
+
+    background-color: #ffffff00 !important;
+    color: #df7474;
+    border-color: #df7474;
 }
 
 html[data-color-theme="dark"] .user_name_by_extention.user184,
