@@ -2,27 +2,10 @@
  コメビュ機能
 ----------------------------------------*/
 
-
-// XMLHttpRequestのインターセプト
-/*
-const originalXHROpen = XMLHttpRequest.prototype.open;
-XMLHttpRequest.prototype.open = function (...args) {
-    const url = args[1];
-    console.log('XHR open:', url);
-    // ニコニコ生放送の特定のURLパターンに対する処理をここに追加
-    originalXHROpen.apply(this, args);
-};
-*/
-
-
-
-
-
-
-
 let _firstSegment = true;
 let _kugiri = [];
 
+// バイナリデータを解析してコメントを抽出する
 function extractNicoLiveCommentContent(binaryData) {
   //const binaryData = new Uint8Array(hexString.split(/\s+/).map(byte => parseInt(byte, 16)));
 
@@ -44,12 +27,9 @@ function extractNicoLiveCommentContent(binaryData) {
 
   function extractContent(length) {
     const endOffset = offset + length;
-    let content = null;
-
-    const contentData = binaryData.slice(offset, offset + length);
-    content = new TextDecoder('utf-8').decode(contentData);
+    const contentData = binaryData.slice(offset, endOffset);
+    const content = new TextDecoder('utf-8').decode(contentData);
     offset += length;
-
     return content;
   }
 
@@ -197,9 +177,17 @@ function extractNicoLiveCommentContent(binaryData) {
             const modifierLength = readVarInt();
             currentSubContentLength += offset - oldOffset;
 
-            // console.log(`modifier: ${modifier}`);
+            // console.log(`modifierLength: ${modifierLength}`);
             if(modifierLength !== 0x00) {
-              const modifier = extractContent(modifierLength);
+
+              //const modifier = extractContent(modifierLength);
+
+              const endOffset = offset + modifierLength;
+              const modifier = binaryData.slice(offset, endOffset);
+              // console.log(`modifier: ${modifier}`);
+              commentObjct.chat.modifier = modifier;
+              offset += modifierLength;
+
               currentSubContentLength += modifierLength;
             }
 
@@ -221,6 +209,7 @@ function extractNicoLiveCommentContent(binaryData) {
 
             const oldOffset = offset;
             let someValue = readVarInt();
+            commentObjct.chat.someValue = someValue;
             currentSubContentLength += offset - oldOffset;
 
             // console.log(`someValue: ${someValue}`);
@@ -240,88 +229,21 @@ function extractNicoLiveCommentContent(binaryData) {
   return commentObjcts;
 }
 
-
-/*
-let worker;
-
-try {
-  // Worker の作成（前述のコードと同じ）
-  const workerCode = `
-  console.log('Worker started');
-
-  function formatTimestamp(seconds) {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const remainingSeconds = seconds % 60;
-    return \`\${hours}:\${minutes.toString().padStart(2, '0')}:\${remainingSeconds.toString().padStart(2, '0')}\`;
-  }
-
-  function sanitizeString(str) {
-    return str.replace(/[\\u0000-\\u001F\\u007F-\\u009F]/g, '');
-  }
-
-  self.onmessage = function(e) {
-    console.log('Worker received message:', e.data);
-    if (e.data.action === 'parseComments') {
-      const comments = e.data.comments;
-      const formattedComments = comments.map(comment => ({
-        ...comment,
-        text: sanitizeString(comment.text),
-        userId: sanitizeString(comment.userId),
-        formattedTimestamp: formatTimestamp(comment.timestamp)
-      }));
-      console.log('Parsed comments:', formattedComments);
-      self.postMessage({ action: 'parsedComments', comments: formattedComments });
-    }
-  };
-`;
-const blob = new Blob([workerCode], {type: 'application/javascript'});
-const workerURL = URL.createObjectURL(blob);
-
-  worker = new Worker(workerURL);
-  console.log('Worker created successfully');
-
-  // Worker のメッセージハンドラーをここで一度だけ設定
-worker.onmessage = function(e) {
-  console.log('Received message from worker:', e.data);
-  if (e.data.action === 'parsedComments') {
-    console.log('Parsed Niconico live comments:', e.data.comments);
-    e.data.comments.forEach(comment => {
-      if (comment.text && comment.userId) {
-        console.log(`Comment: ${comment.text}, Number: ${comment.number}, User: ${comment.userId}, Time: ${comment.formattedTimestamp}`);
-      }
-    });
-  }
-};
-
-  worker.onerror = function(error) {
-    console.error('Worker error:', error);
-  };
-
-} catch (error) {
-  console.error('Failed to create worker:', error);
-}
-*/
-
-
-
-// fetchのインターセプト
-// オリジナルのfetch関数を保存
+// fetchのインターセプトを行うため、オリジナルのfetch関数を保存
 const originalFetch = window.fetch;
 
 // 累積バッファを保持するオブジェクト（ストリームごとに個別のバッファを持つ）
 const streamBuffers = new Map();
 
+// fetchのインターセプト
 window.fetch = function(...args) {
   const [resource, config] = args;
   const url = typeof resource === 'string' ? resource : resource.url;
-
   
   if( url.includes('mpn.live.nicovideo.jp/data/backward/v4')) {
     return originalFetch.apply(this, args).then(response => {
 
         //console.log('[backward] Fetch:', url);
-  
         const clonedResponse = response.clone();
         
         clonedResponse.arrayBuffer().then(buffer => {
@@ -332,14 +254,12 @@ window.fetch = function(...args) {
   
           // console.log('Decoding Niconico live messages(backward)...', uint8Array);
           const decodedMessages = extractNicoLiveCommentContent(uint8Array);
-//          console.log(JSON.stringify(decodedMessages, null, 2));
-  
-          
+          // console.log(JSON.stringify(decodedMessages, null, 2));
+            
           //const extractedComments = extractComments(buffer);
           //console.log('Extracted comments count:', extractedComments.length);
           //worker.postMessage({ action: 'parseComments', comments: extractedComments });
-          
-
+  
         }).catch(error => {
           console.error('Error processing comment data:', error);
         });
@@ -353,9 +273,7 @@ window.fetch = function(...args) {
     return originalFetch.apply(this, args).then(response => {
 
       //console.log('[segment] Fetch:', url);
-
       const originalBody = response.body;
-
       
       // 新しいReadableStreamを作成
       const newBody = new ReadableStream({
@@ -368,16 +286,13 @@ window.fetch = function(...args) {
                 controller.close();
                 return;
               }
-              
   
               // ArrayBufferをUint8Arrayに変換
               const uint8Array = new Uint8Array(value);
 
               // console.log('Decoding Niconico live messages(segment)...', uint8Array);
               const decodedMessages = extractNicoLiveCommentContent(uint8Array);
-//              console.log(JSON.stringify(decodedMessages, null, 2));
-
-
+              // console.log(JSON.stringify(decodedMessages, null, 2));
 
               // 新しいストリームにデータを書き込む
               controller.enqueue(value);
@@ -393,21 +308,14 @@ window.fetch = function(...args) {
       // 新しいResponseオブジェクトを作成して返す
       return new Response(newBody, response);
     });
+
+  } else {
+
+    // ニコ生のAPI以外は通常通り処理
+    return originalFetch.apply(this, args);
+
   }
-
-  // ニコ生のAPI以外は通常通り処理
-  return originalFetch.apply(this, args);
 }
-
-
-
-
-
-
-
-
-
-
 
 
 // WebSocketのProxyを作成
@@ -427,15 +335,22 @@ WebSocket = new Proxy(WebSocket, {
  * @returns {string} 指定されたユーザーIDのコメントを\nで連結した文字列
  */
 function getCommentsStringByUserId(userId, commentNo) {
+
+  // console.time("getCommentsStringByUserId");
   // ユーザーIDが一致するコメントを抽出し、コメント番号の降順でソートする
   const userComments = _allComment
                           .filter(item => item.user_id === userId)  // 特定のユーザーIDで抽出
                           .filter(item => item.no <= commentNo);     // マウスカーソルが乗ったコメント番号以前のものを抽出
                           //.sort((a, b) => a.no - b.no);
 
+  // console.timeEnd("getCommentsStringByUserId");
+
+  // console.time("userComments");
   // 最新のコメントを末尾から最大10件取得する
   const latestComments = userComments.slice(-10).map(comment => ({ ...comment }));
+  // console.timeEnd("userComments");
 
+  
   for (const key in latestComments) {
     const comment = latestComments[key];
     // const totalSeconds = Math.floor(comment.vpos / 100);
@@ -525,19 +440,19 @@ function setKotehanInInject(userId, kotehan, is184User) {
 
 
 
-var _startTime;
-var _currentVoiceName = "";
+let _startTime;
+let _currentVoiceName = "";
 
-var _commentListFull = {};  // KEY:コメント番号, VALUE:対応するユーザー名(フルネーム)（184さんならFullハッシュ値、生IDさんならFullユーザー名）
-var _183UserList = {};      // KEY:コメント番号, VALUE:184ユーザーID
-var _premiumList = {};      // KEY:コメント番号, VALUE:何でもいい値
-var _rawUserListFull = {};  // KEY:ユーザーID,   VALUE:GETしてきたユーザー名(フルネーム)
-var _gettingList = {};      // KEY:ユーザーID,   VALUE:何でもいい値
+let _commentListFull = {};  // KEY:コメント番号, VALUE:対応するユーザー名(フルネーム)（184さんならFullハッシュ値、生IDさんならFullユーザー名）
+let _183UserList = {};      // KEY:コメント番号, VALUE:184ユーザーID
+let _premiumList = {};      // KEY:コメント番号, VALUE:何でもいい値
+let _rawUserListFull = {};  // KEY:ユーザーID,   VALUE:GETしてきたユーザー名(フルネーム)
+let _gettingList = {};      // KEY:ユーザーID,   VALUE:何でもいい値
 
 let _allComment = [];       // KEY:ユーザーID, 　
 
-var _commentRawIdList = {}; // KEY:コメント番号  VALUE:ユーザーID（184さんならハッシュ値、生IDさんなら生IDが入る）
-var _kotehanList = [];      // KEY:ユーザーID,   VALUE:コテハン
+let _commentRawIdList = {}; // KEY:コメント番号  VALUE:ユーザーID（184さんならハッシュ値、生IDさんなら生IDが入る）
+let _kotehanList = [];      // KEY:ユーザーID,   VALUE:コテハン
 
 let _styleList = {};        // KEY:ユーザーID（184さんならハッシュ値、生IDさんなら生IDが入る）, VALUE: スタイルのindex番号(insertRule()した戻り値)
 
@@ -563,6 +478,9 @@ function recvChatComment(message) {
   
   // chatメッセージのみ解析
   if (message.chat) {
+
+    // console.log("CHAT--------------------------------");
+    // console.log(message);
 
 
     /*--------------------------------------------------------------
@@ -800,9 +718,15 @@ function recvChatComment(message) {
     --------------------------------------------------------------*/
     if (message.chat && message.chat.no && message.chat.user_id && message.chat.content && message.chat.vpos) {
 
+      // NG対象のコメントの場合は_allCommentに保存しない
+      const ngData = JSON.parse(localStorage.getItem('LeoPlayer_NgStore_list') || '[]');
+      const ngUserIds = new Set(ngData.filter(item => item.type === 'id').map(item => item.value));
+      const ngWords = ngData.filter(item => item.type === 'word').map(item => item.value);
+      if(!ngUserIds.has(message.chat.user_id) && !ngWords.some(word => message.chat.content.includes(word))) {
+
         _allComment.push({
           user_id: message.chat.user_id,
-          //vpos: message.chat.vpos,
+          vpos: message.chat.vpos,
           comment: message.chat.content,
           no: message.chat.no
         });
@@ -810,8 +734,11 @@ function recvChatComment(message) {
         if (_allComment.length > 20000) {
           console.log("保存しているコメント数が20000を超えたので古いコメントから半分削除します");
           _allComment.splice(0, 10000);
-        }
+        } 
 
+      } else {
+        console.log("NG対象のコメントです", message.chat.no, message.chat.user_id, message.chat.content);
+      }
     }
 
     /*--------------------------------------------------------------
@@ -1064,11 +991,13 @@ fragment.appendChild(kotehanElement);
   // 作成したDOMの挿入
   fragment.appendChild(nameElement);
 
-
-  //console.log(_kotehanList);
-  //console.log(_commentListFull);
-  //console.log(_commentRawIdList);
-
+/*
+  console.log("--------------------------------");
+  console.log(newNo + "番目のコメント");
+  console.log(_kotehanList);
+  console.log(_commentListFull);
+  console.log(_commentRawIdList);
+*/
 
   
   return fragment;
@@ -1110,7 +1039,7 @@ function watchCommentDOM(mutationsList, observer) {
     if(mutation.type === "childList"){
       // 初回動作以外
       mutation.addedNodes.forEach((currentNode) => {        
-        editComment(currentNode);
+        editComment(currentNode, mutationsList);
       });
 
     }
@@ -1118,143 +1047,184 @@ function watchCommentDOM(mutationsList, observer) {
 }
 
 function editComment(currentNode) {
-  //console.time("  mmmm time");
-  //console.time("  ccc time");
-  var commentTextElement = currentNode.querySelector(".comment-text"); // コメントテキストのDOM
-  let commentNumberDom = currentNode.querySelector(".comment-number"); // コメント番号のDOM
-  //console.timeEnd("  ccc time");
-  if (commentNumberDom) { 
-    //console.time("  bbb time");
-    var newNo = commentNumberDom.textContent;
-    //console.timeEnd("  bbb time");
-    
-    //console.time("  getAttribute time");
-    let bIsEdited = currentNode.getAttribute("data-extension-edited");
-    //console.timeEnd("  getAttribute time");
+  const commentTextElement = currentNode.querySelector(".comment-text"); // コメントテキストのDOM
+  const commentNumberDom = currentNode.querySelector(".comment-number"); // コメント番号のDOM
 
-    // 既にeditCommentしたコメントはスキップ
-    if (newNo.length > 0 && !bIsEdited) {
+  // DOMの存在確認
+  if (!commentNumberDom || !commentTextElement) { 
+    return;
+  }
+  // コメント番号とテキストが存在しているか確認(「「アニメ」が好きな2人が来場しました」などのシステムメッセージの対応)
+  if (commentNumberDom.textContent.length === 0 || commentTextElement.textContent.length === 0) {
+    return;
+  }
 
-      // 自分のコメント かつ なふだコメント かどうかを判定
-      //console.time("  querySelector time");
-      let bIsMyComment = currentNode.querySelector(".user-thumbnail-image");
-      //console.timeEnd("  querySelector time");
 
-      if(!bIsMyComment)
-      {
-        //----------------------------------------------------------------
-        //　匿名コメントの場合
-        //----------------------------------------------------------------
-        //console.time("  aaa time");
 
-        // フラグメント作成
-        let fragment = document.createDocumentFragment();
+  // このノードのコメント番号を取得
+  let newNo = commentNumberDom.textContent;
 
-        // 初回だけ自身が配信者かどうか判定
-        if(_bIsIamOwnerCheckOnce === false) {
-          _bIsIamOwnerCheckOnce  = true;
-          const broadvastTool = document.querySelector('[class^=___broadcaster-tool___]');
-          if(broadvastTool) {
-            //console.log("自分が配信者ですです");
-            _bIsIamOwner = true; // 配信者
-          }
+  // このノードのテキストを取得
+  const commentText = commentTextElement.textContent;
+
+  /*
+  console.log("--------------------------------");
+  console.log(`対象ノードの表示コメント番号 ${newNo}のコメントは「${commentText}」です`);
+  const jsonComment = _allComment.filter(item => item.no >= newNo); 
+  console.log(`JSONコメントのコメント番号${newNo}のコメントは「${jsonComment[0].comment}」です`);
+  */
+
+  // _allCommentに存在しないものはNGコメントとする
+  const existComment = _allComment.filter(item => item.no == newNo);
+  if(existComment.length === 0) {
+    console.log("◆NGコメントです◆", newNo, commentText);
+
+    // NGのコメント以降で一番近いコメント番号を採用
+    const sameComments = _allComment.filter(item => item.comment === commentText).filter(item => item.no > newNo);
+    if(sameComments.length > 0) {
+      console.log(`${newNo} 番のコメントは受信したJSONコメントの ${sameComments[0].no}番として扱います`);
+      console.log(sameComments);
+      newNo = sameComments[0].no;
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // このノードが既にeditCommentしたコメントかどうかを取得
+  const bIsEdited = currentNode.getAttribute("data-extension-edited");
+
+  // 既にeditCommentしたコメントはスキップ
+  if (!bIsEdited) {
+
+    // 自分のコメント かつ なふだコメント かどうかを判定
+    let bIsMyComment = currentNode.querySelector(".user-thumbnail-image");
+    if(!bIsMyComment)
+    {
+      //----------------------------------------------------------------
+      //　匿名コメントの場合
+      //----------------------------------------------------------------
+      //console.time("  aaa time");
+
+      // フラグメント作成
+      let fragment = document.createDocumentFragment();
+
+      // 初回だけ自身が配信者かどうか判定
+      if(_bIsIamOwnerCheckOnce === false) {
+        _bIsIamOwnerCheckOnce  = true;
+        const broadvastTool = document.querySelector('[class^=___broadcaster-tool___]');
+        if(broadvastTool) {
+          //console.log("自分が配信者ですです");
+          _bIsIamOwner = true; // 配信者
         }
+      }
 
-        // 自分が配信者であればDIVでWrapする
-        if(_bIsIamOwner) {
-          //console.log("自分が配信者です");
-          let divElement = document.createElement("div");
-          divElement.setAttribute("class", "wrapComment_by_extention");
-          fragment.appendChild(divElement);
-          fragment = fragment.querySelector('.wrapComment_by_extention'); // wrapComment_by_extentionの中にDOMを追加するようにする
-        } else {
-          //console.log("自分が配信者ではありません");
-        }
-
-        // プレ垢のDOMを挿入
-        let bIsOwner = false;
-        
-        if(currentNode.getAttribute("data-comment-type") === "operator") {
-          //console.log("配信者のコメントです");
-          bIsOwner = true;
-        } else {
-          //console.log("リスナーのコメントです");
-        }
-
-        //console.timeEnd("  aaa time");
-
-        //console.time("  InsertPremium time");
-        fragment = InsertPremium(fragment, newNo, bIsOwner);
-        //console.timeEnd("  InsertPremium time");
-
-        // 名前のDOMを挿入
-        if (_commentListFull[newNo]) {
-        } else {
-          //console.log(`${newNo} に対応する名前がありません。取得失敗さんにします。`);
-          _commentListFull[newNo] = "取得失敗";
-        }
-        fragment = InsertUserName(fragment, newNo, bIsMyComment);
-
-
-        // フラグメントを実DOMに挿入
-        //let comment = currentNode.querySelector("[class^=___comment-text___]"); // コメントテキストのDOM
-        //console.time("  insertBefore time");
-        commentTextElement.parentNode.insertBefore(fragment, commentTextElement);
-        //console.timeEnd("  insertBefore time");
-
+      // 自分が配信者であればDIVでWrapする
+      if(_bIsIamOwner) {
+        //console.log("自分が配信者です");
+        let divElement = document.createElement("div");
+        divElement.setAttribute("class", "wrapComment_by_extention");
+        fragment.appendChild(divElement);
+        fragment = fragment.querySelector('.wrapComment_by_extention'); // wrapComment_by_extentionの中にDOMを追加するようにする
       } else {
-
-        //----------------------------------------------------------------
-        //　なふだコメントの場合（自分で発言したなふだコメント、または配信者がわからみたなふだコメント、が対象）
-        //----------------------------------------------------------------
-
-        // フラグメント作成
-        let fragment = document.createDocumentFragment();
-
-        // プレ垢のDOMを挿入
-        let bIsOwner = false;
-        
-        if(currentNode.getAttribute("data-comment-type") === "operator") {
-          //console.log("配信者のコメントです");
-          bIsOwner = true;
-        } else {
-          //console.log("リスナーのコメントです");
-        }
-        fragment = InsertPremium(fragment, newNo, bIsOwner);
-
-
-        // 名前のDOMを挿入
-        if (_commentListFull[newNo]) {
-        } else {
-          //console.log(`${newNo} に対応する名前がありません。取得失敗さんにします。`);
-          _commentListFull[newNo] = "取得失敗";
-        }
-        fragment = InsertUserName(fragment, newNo , bIsMyComment);
-
-        // フラグメントを実DOMに挿入
-        let comment = currentNode.querySelector(".user-thumbnail-image"); // なふだ機能のアイコンと名前の親DOM
-        comment.parentNode.insertBefore(fragment, comment);
-        // let comment = currentNode.querySelector(".user-thumbnail-image"); // なふだ機能のユーザーアイコン
-        // comment.after(fragment);
-
+        //console.log("自分が配信者ではありません");
       }
 
-      // editCommentしたコメントの証拠を残しておく（次回やらなくて済むように）
-      currentNode.setAttribute("data-extension-edited", "true");
+      // プレ垢のDOMを挿入
+      let bIsOwner = false;
       
-      
-      // 受信している全てのコメントの中で、現在のユーザーIDのコメントの中で、
-      // 現在のコメント番号より若いコメントが存在していなければ、そのユーザーの一番最初のコメントだと判定
-      const userId = _commentRawIdList[newNo];
-      const userComments = _allComment.filter(item => item.user_id === userId)  // 特定のユーザーIDで抽出
-                                      .filter(item => item.no < newNo);         // 指定したコメント番号より古いコメントを抽出
-      if(userComments.length === 0) {
-        // 一番最初のコメントならCSSで太字にする
-        currentNode.setAttribute("data-extension-firstcomment", "true");       
+      if(currentNode.getAttribute("data-comment-type") === "operator") {
+        //console.log("配信者のコメントです");
+        bIsOwner = true;
+      } else {
+        //console.log("リスナーのコメントです");
       }
 
+      //console.timeEnd("  aaa time");
+
+      //console.time("  InsertPremium time");
+      fragment = InsertPremium(fragment, newNo, bIsOwner);
+      //console.timeEnd("  InsertPremium time");
+
+      // 名前のDOMを挿入
+      if (_commentListFull[newNo]) {
+      } else {
+        //console.log(`${newNo} に対応する名前がありません。取得失敗さんにします。`);
+        _commentListFull[newNo] = "取得失敗";
+      }
+      fragment = InsertUserName(fragment, newNo, bIsMyComment);
+
+
+      // フラグメントを実DOMに挿入
+      //let comment = currentNode.querySelector("[class^=___comment-text___]"); // コメントテキストのDOM
+      //console.time("  insertBefore time");
+      commentTextElement.parentNode.insertBefore(fragment, commentTextElement);
+      //console.timeEnd("  insertBefore time");
+
+    } else {
+
+      //----------------------------------------------------------------
+      //　なふだコメントの場合（自分で発言したなふだコメント、または配信者がわからみたなふだコメント、が対象）
+      //----------------------------------------------------------------
+
+      // フラグメント作成
+      let fragment = document.createDocumentFragment();
+
+      // プレ垢のDOMを挿入
+      let bIsOwner = false;
+      
+      if(currentNode.getAttribute("data-comment-type") === "operator") {
+        //console.log("配信者のコメントです");
+        bIsOwner = true;
+      } else {
+        //console.log("リスナーのコメントです");
+      }
+      fragment = InsertPremium(fragment, newNo, bIsOwner);
+
+
+      // 名前のDOMを挿入
+      if (_commentListFull[newNo]) {
+      } else {
+        //console.log(`${newNo} に対応する名前がありません。取得失敗さんにします。`);
+        _commentListFull[newNo] = "取得失敗";
+      }
+      fragment = InsertUserName(fragment, newNo , bIsMyComment);
+
+      // フラグメントを実DOMに挿入
+      let comment = currentNode.querySelector(".user-thumbnail-image"); // なふだ機能のアイコンと名前の親DOM
+      comment.parentNode.insertBefore(fragment, comment);
+      // let comment = currentNode.querySelector(".user-thumbnail-image"); // なふだ機能のユーザーアイコン
+      // comment.after(fragment);
 
     }
+
+    // editCommentしたコメントの証拠を残しておく（次回やらなくて済むように）
+    currentNode.setAttribute("data-extension-edited", "true");
+    
+    
+    // 受信している全てのコメントの中で、現在のユーザーIDのコメントの中で、
+    // 現在のコメント番号より若いコメントが存在していなければ、そのユーザーの一番最初のコメントだと判定
+    const userId = _commentRawIdList[newNo];
+    const userComments = _allComment.filter(item => item.user_id === userId)  // 特定のユーザーIDで抽出
+                                    .filter(item => item.no < newNo);         // 指定したコメント番号より古いコメントを抽出
+    if(userComments.length === 0) {
+      // 一番最初のコメントならCSSで太字にする
+      currentNode.setAttribute("data-extension-firstcomment", "true");       
+    }
+
+
   }
 }
 

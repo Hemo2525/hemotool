@@ -309,7 +309,7 @@ function setExtSettingMenuHeight() {
     
     console.log("ボーダーの数：" + document.querySelectorAll('.ext-setting-menu .ext-item.border-bottom').length);
     console.log("アイテムの数：" + document.querySelectorAll('.ext-setting-menu .ext-item:not([ext-view-item-off])').length);
-    console.log("メニューの高さ：" + document.querySelector('.ext-setting-menu .item.info').clientHeight);
+    console.log("メニューの高さ：" + document.querySelector('.ext-setting-menu .item.info')?.clientHeight);
     console.log("メニューの高さ：" + maxHeight);
 
     //let maxHeight = document.querySelectorAll('.ext-setting-menu > div').length * ITEM_HEIGHT;
