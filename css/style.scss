@@ -1601,14 +1601,15 @@ html[data-darkreader-scheme] .user_name_by_extention {
     // color: #e54b4b;
     // border: 1px solid #e54b4b; 
 
-    background-color: #ffffff00 !important;
+    background-color: #1a1a1a;
     color: #df7474;
     border-color: #df7474;
 }
 
 html[data-color-theme="dark"] .user_name_by_extention.user184,
 html[data-darkreader-scheme] .user_name_by_extention.user184 {
-    background-color: inherit;
+    // background-color: inherit;
+    background-color: #1a1a1a;
     color: #d3d3d3;
     border: 1px solid #d3d3d3; 
 }
@@ -1626,9 +1627,16 @@ html[data-darkreader-scheme] [class^=___player-area___] {
 }
 html[data-color-theme="dark"] .ext-popup,
 html[data-darkreader-scheme] .ext-popup {
-    background-color: #000000;
+    box-shadow: 0 0 4px white;
+    background-color: rgba(37, 37, 37, 0.95);
     color: white;
 }
+
+html[data-color-theme="dark"] .ext-popup::before,
+html[data-darkreader-scheme] .ext-popup::before {
+    border-top: 15px solid rgba(37, 37, 37, 0.95);
+}
+
 
 html[data-color-theme="dark"] [class^="___contents-area___"][ext-master-comeview][ext-opt-name] .user-name-button,
 html[data-darkreader-scheme] [class^="___contents-area___"][ext-master-comeview][ext-opt-name] .user-name-button {    
@@ -1663,3 +1671,4 @@ html[data-darkreader-scheme] [class^="___context-menu___"] .ext-menu label input
 html[data-darkreader-scheme] [class^="___context-menu___"] .ext-menu label textarea {
     background-color: rgb(51, 51, 51) !important;
 }
+
