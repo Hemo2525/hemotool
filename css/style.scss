@@ -1523,6 +1523,69 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
 }
 
 
+#addHemoTool {
+    display: none;
+    position: absolute;
+    left: 109px;
+    bottom: 14px;
+    border: 1px solid;
+    background-color: black;
+    border-radius: 34px;
+    color: white;
+    padding: 3px 19px 4px;
+    cursor: pointer;
+}
+[class^=___ichiba-balloon___][data-size] #addHemoTool {
+    display: block;
+}
+
+#ext_ichiba_shortcut {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    width: 100%;
+    padding: 4px;
+    padding-right: 20px;
+    padding-top: 0;
+
+    .item {
+        flex-basis: 40px;
+        position: relative;
+        background-color: white;
+        margin-left: 16px;
+        cursor: pointer;
+
+        border: 1px solid #ffffff;
+        border-radius: 4px;
+        overflow: hidden;
+
+        img {
+            object-fit: cover;
+            height: 40px;
+            width: 40px;
+        
+            display: block;
+        }
+        .delete-btn {
+            position: absolute;
+            cursor: pointer;
+
+            top: -3px;
+            right: -3px;
+            background-color: black;
+            border: 1px solid white;
+            border-radius: 134px;
+            line-height: 1;
+            padding: 0px 3px 2px;
+            font-size: 14px;
+        }
+    }
+}
+
+
+
+
 
 
 

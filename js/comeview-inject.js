@@ -336,6 +336,8 @@ WebSocket = new Proxy(WebSocket, {
  */
 function getCommentsStringByUserId(userId, commentNo) {
 
+  // console.log("測定開始------------------");
+
   // console.time("getCommentsStringByUserId");
   // ユーザーIDが一致するコメントを抽出し、コメント番号の降順でソートする
   const userComments = _allComment
@@ -1416,14 +1418,14 @@ function startWatchGridDOM() {
 
   const obs = new MutationObserver(function(mutationsList, observer){
 
-    const tootlTip = document.getElementById('ext_tooltipBox');
+    // const tootlTip = document.getElementById('ext_tooltipBox');
 
     //console.log(mutationsList);
 
     for (const mutation of mutationsList) {
       if(mutation.addedNodes.length > 0) {
 
-
+        /*
         // ツールチップ関係
         if(document.querySelector("[class^=___tooltip___]")) {
           if(mouseOver.userId !== 0 && mouseOver.commentNo !== 0) {
@@ -1431,6 +1433,7 @@ function startWatchGridDOM() {
             if(tootlTip) tootlTip.innerText = getCommentsStringByUserId(mouseOver.userId, mouseOver.commentNo);
           }
         }
+        */
 
 
         // 色関係
@@ -1718,8 +1721,19 @@ function startWatchGridDOM() {
     if (e.target.parentNode && e.target.closest("[class^=___table-cell___]")) {
       const commentDom = e.target.closest("[class^=___table-cell___]").querySelector(".comment-number");
       if(commentDom && commentDom.innerText) {
-        mouseOver.userId = _commentRawIdList[commentDom.innerText];
-        mouseOver.commentNo = commentDom.innerText;
+
+        // ツールチップに表示するコメント番号が変わったらツールチップを更新
+        if(mouseOver.commentNo !== commentDom.innerText) {
+          // console.log("ツールチップを更新", mouseOver.commentNo);
+          mouseOver.userId = _commentRawIdList[commentDom.innerText];
+          mouseOver.commentNo = commentDom.innerText;
+
+          // ツールチップを更新
+          const tootlTip = document.getElementById('ext_tooltipBox');
+          if(tootlTip) tootlTip.innerText = getCommentsStringByUserId(mouseOver.userId, mouseOver.commentNo);
+        }
+
+
       } else {
         mouseOver.userId = 0;
         mouseOver.commentNo = 0;

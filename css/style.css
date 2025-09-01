@@ -19,7 +19,7 @@
   position: absolute;
   text-align: center;
   transform: translate(-50%);
-  transition: opacity .12s ease;
+  transition: opacity 0.12s ease;
   white-space: nowrap;
   z-index: 10000;
 }
@@ -50,7 +50,7 @@
 
 .ext-setting-btn svg path {
   fill: #fffcfc;
-  transition: fill .12s ease;
+  transition: fill 0.12s ease;
 }
 
 .ext-setting-btn:hover svg path {
@@ -76,7 +76,7 @@
   position: absolute;
   text-align: center;
   transform: translate(-50%);
-  transition: opacity .12s ease;
+  transition: opacity 0.12s ease;
   white-space: nowrap;
   z-index: 10000;
 }
@@ -97,14 +97,12 @@
   width: 294px;
   transition: 0.3s;
   z-index: 2;
-  overflow-y: scroll;
-  /* スクロールの有無で表示がズレるので常に表示 */
+  overflow-y: scroll; /* スクロールの有無で表示がズレるので常に表示 */
   /*max-height: 310px;*/
   height: 310px;
 }
-
 .ext-setting-menu .border-bottom {
-  border-bottom: 1px solid #414141;
+  border-bottom: 1px solid rgb(65, 65, 65);
 }
 
 /*
@@ -148,45 +146,40 @@
   background-color: #141414;
   padding: 5px 10px;
 }
-
 .ext-setting-menu .item.info .ext-info-item {
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
   font-size: 11px;
   margin-left: 8px;
   text-decoration: none;
   color: white;
   cursor: pointer;
   transition: 0.2s;
-  border-left: 1px solid #555555;
+  border-left: 1px solid rgb(85, 85, 85);
   padding-left: 9px;
 }
-
 .ext-setting-menu .item.info .ext-info-item:last-child {
-  border-right: 1px solid #555555;
+  border-right: 1px solid rgb(85, 85, 85);
   padding-right: 9px;
 }
-
 .ext-setting-menu .item.info .ext-info-item:hover {
-  color: #056dff;
+  color: rgb(5, 109, 255);
 }
-
 .ext-setting-menu .item.info a {
   color: inherit;
 }
-
 .ext-setting-menu .item.info #ext-view {
   width: 13px;
   margin-top: 2px;
   margin-bottom: -3px;
   cursor: pointer;
 }
-
 .ext-setting-menu .item.info #ext-view svg {
   margin-left: -1px;
 }
-
 .ext-setting-menu .item.info #ext-view:hover svg g {
-  fill: #056dff !important;
+  fill: rgb(5, 109, 255) !important;
 }
 
 .ext-setting-menu .item.info:hover {
@@ -204,7 +197,9 @@
 }
 
 .ext-setting-menu .item .name {
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
   position: relative;
 }
 
@@ -235,27 +230,20 @@
 .ext-setting-menu {
   transition: 0.5s;
 }
-
 .ext-setting-menu [ext-view-item-off] {
   display: none;
 }
-
 .ext-setting-menu[ext-view-on] {
-  max-height: 50svh !important;
-  /* 表示設定画面のときは高さを制限しない */
+  max-height: 50svh !important; /* 表示設定画面のときは高さを制限しない */
 }
-
 .ext-setting-menu[ext-view-on] .btn-group {
   justify-content: flex-end;
 }
-
 .ext-setting-menu[ext-view-on] [ext-view-item-off] {
   display: block;
 }
-
 .ext-setting-menu:has(.setting.active) {
-  max-height: 50svh !important;
-  /* オプション表示のときは高さを制限しない */
+  max-height: 50svh !important; /* オプション表示のときは高さを制限しない */
 }
 
 .ext-setting-menu .item .btn-group {
@@ -263,17 +251,15 @@
   width: 68px;
   /* justify-content: flex-end; */
 }
-
 .ext-setting-menu .item .btn-group .view {
   display: none;
 }
 
 .ext-setting-menu svg g {
-  fill: white !important;
+  fill: rgb(255, 255, 255) !important;
 }
-
 .ext-setting-menu[ext-view-on] svg g {
-  fill: #056dff !important;
+  fill: rgb(5, 109, 255) !important;
 }
 
 .ext-setting-menu[ext-view-on] .btn-group .value,
@@ -281,25 +267,24 @@
 .ext-setting-menu[ext-view-on] .btn-group .setting {
   display: none;
 }
-
 .ext-setting-menu[ext-view-on] .btn-group .view {
   display: block;
   height: 19px;
   cursor: pointer;
 }
-
 .ext-setting-menu[ext-view-on] .btn-group .view svg g {
-  fill: #056dff !important;
+  fill: rgb(5, 109, 255) !important;
 }
-
 .ext-setting-menu[ext-view-on] .btn-group .view[view-off] svg g {
-  fill: white !important;
+  fill: rgb(255, 255, 255) !important;
 }
 
 .ext-setting-menu .item .value {
   cursor: pointer;
   font-weight: bold;
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
 }
 
 .ext-setting-menu .ext-on-off[ext-attr-on] .item .value,
@@ -371,9 +356,9 @@
   max-height: var(--max-height);
   background-color: rgba(0, 0, 0, 0.6);
   /*
-    border-top: 1px solid #585858;
-    border-bottom: 1px solid #585858;
-    */
+  border-top: 1px solid #585858;
+  border-bottom: 1px solid #585858;
+  */
 }
 
 .ext-setting-menu .option-box .option {
@@ -384,10 +369,11 @@
   font-size: 12px;
   padding: 10px 20px;
   cursor: default;
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
   transition: all 0.3s ease 0s;
 }
-
 .ext-setting-menu .option-box .option.desc {
   line-height: 1.2;
   padding: 6px 20px;
@@ -462,7 +448,7 @@
   width: 64px;
 }
 
-.ext-setting-menu .option-box .option .value input[type="button"] {
+.ext-setting-menu .option-box .option .value input[type=button] {
   background-color: #0075ff;
   color: white;
   border-radius: 5px;
@@ -471,7 +457,7 @@
   border: none;
 }
 
-.ext-setting-menu .option-box .option .value input[type="button"][disabled] {
+.ext-setting-menu .option-box .option .value input[type=button][disabled] {
   background-color: gray;
 }
 
@@ -490,14 +476,13 @@
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.529);
   /*top: -691%;*/
   /*
-    width: 300px;
-    left: -143px;
-    */
+  width: 300px;
+  left: -143px;
+  */
   width: 265px;
   left: -126px;
   opacity: 0.94;
 }
-
 .ext-popup #ext-info-box-title,
 .ext-popup #ext-info-gift-title {
   display: none;
@@ -508,24 +493,20 @@
   color: gray;
   letter-spacing: 1px;
 }
-
 .ext-popup #ext-info-box-title.show,
 .ext-popup #ext-info-gift-title.show {
   display: inline-block;
 }
-
 .ext-popup #ext-info-box,
 .ext-popup #ext-info-gift {
   display: none;
   overflow-y: auto;
   height: calc(100% - 22px);
 }
-
 .ext-popup #ext-info-box.show,
 .ext-popup #ext-info-gift.show {
   display: block;
 }
-
 .ext-popup #ext-info-box .item,
 .ext-popup #ext-info-gift .item {
   text-align: justify;
@@ -534,14 +515,12 @@
   padding-bottom: 10px;
   margin-bottom: 3px;
 }
-
 .ext-popup #ext-info-box .item.no-border,
 .ext-popup #ext-info-gift .item.no-border {
   border-bottom: none;
   padding-bottom: 0px;
   margin-bottom: 0px;
 }
-
 .ext-popup #ext-info-box .item .time,
 .ext-popup #ext-info-gift .item .time {
   font-size: 11px;
@@ -549,7 +528,6 @@
   text-align: right;
   margin-bottom: 0;
 }
-
 .ext-popup #ext-info-box .item h2,
 .ext-popup #ext-info-gift .item h2 {
   font-weight: bold;
@@ -559,7 +537,6 @@
   padding: 0;
   margin-bottom: 6px;
 }
-
 .ext-popup #ext-info-box .item h3,
 .ext-popup #ext-info-gift .item h3 {
   font-weight: bold;
@@ -569,7 +546,6 @@
   margin-bottom: 6px;
   padding: 0;
 }
-
 .ext-popup #ext-info-box .item p,
 .ext-popup #ext-info-gift .item p {
   font-size: 13px;
@@ -578,20 +554,17 @@
   padding: 0px;
   margin: 0;
 }
-
 .ext-popup #ext-info-box .item p.note,
 .ext-popup #ext-info-gift .item p.note {
   font-size: 12px;
   color: gray;
 }
-
 .ext-popup #ext-info-box .item ul,
 .ext-popup #ext-info-gift .item ul {
   padding: 0px;
   margin: 0;
   margin-left: 20px;
 }
-
 .ext-popup #ext-info-box .item ul li,
 .ext-popup #ext-info-gift .item ul li {
   font-size: 13px;
@@ -599,24 +572,20 @@
   line-height: 1.5;
   margin-bottom: 3px;
 }
-
 .ext-popup #ext-info-box .item ul li:last-child,
 .ext-popup #ext-info-gift .item ul li:last-child {
   margin-bottom: 0px;
 }
-
 .ext-popup #ext-info-box .item img,
 .ext-popup #ext-info-gift .item img {
   width: 100%;
 }
-
 .ext-popup #ext-info-box .item .icon,
 .ext-popup #ext-info-gift .item .icon {
   width: 20px;
   margin-right: 5px;
   vertical-align: sub;
 }
-
 .ext-popup #ext-info-box .item span.update,
 .ext-popup #ext-info-gift .item span.update {
   color: #b50000;
@@ -628,7 +597,6 @@
   margin-bottom: 11px;
   display: inline-block;
 }
-
 .ext-popup span.close {
   cursor: pointer;
   position: absolute;
@@ -642,13 +610,12 @@
   border-radius: 10px;
   padding: 2px 7px;
 }
-
 .ext-popup::before {
   content: "";
   position: absolute;
   top: 100%;
   left: calc(50% - 10px);
-  border-top: 15px solid #ffffffeb;
+  border-top: 15px solid rgba(255, 255, 255, 0.9215686275);
   border-right: 10px solid transparent;
   border-bottom: 0px solid transparent;
   border-left: 10px solid transparent;
@@ -672,7 +639,6 @@
     transform: translateY(-10px);
   }
 }
-
 #ext_overlay {
   background-color: transparent;
   display: none;
@@ -728,7 +694,9 @@ div#ext_dom_message {
 #ext_shortcut .item {
   display: none;
   cursor: pointer;
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
   position: relative;
   font-size: 10px;
   border: 1px solid #fff;
@@ -744,13 +712,13 @@ div#ext_dom_message {
 }
 
 #ext_shortcut .item::before {
-  background-color: #252525;
+  background-color: rgb(37, 37, 37);
   /*bottom: 100%;*/
   top: -33px;
   left: 50%;
   box-shadow: rgba(0, 0, 0, 0.5) 0px 0px 2px 0px;
   box-sizing: border-box;
-  color: white;
+  color: rgb(255, 255, 255);
   content: attr(aria-label);
   display: block;
   font-size: 12px;
@@ -784,8 +752,8 @@ div#ext_dom_message {
 
 #ext_shortcut .item[active] {
   color: white;
-  border: 2px solid #003d93;
-  background-color: #003d93;
+  border: 2px solid rgb(0, 61, 147);
+  background-color: rgb(0, 61, 147);
   padding: 1px 9px;
 }
 
@@ -796,12 +764,12 @@ div#ext_dom_message {
 }
 
 #ext_shortcut .item.rec .status {
-  color: #585858;
+  color: rgb(88, 88, 88);
   margin-right: 10px;
 }
 
 #ext_shortcut .item.rec .status[rec] {
-  color: #cc0000;
+  color: rgb(204, 0, 0);
   animation: recFlash 1.5s linear infinite;
 }
 
@@ -817,7 +785,6 @@ div#ext_dom_message {
     opacity: 0;
   }
 }
-
 #ext_volume_overlay {
   display: none;
   position: absolute;
@@ -827,14 +794,16 @@ div#ext_dom_message {
   /*cursor: not-allowed;*/
   z-index: 1;
   /*
-    line-height: 1.4;
-    font-size: 9px;
-    */
-  user-select: none;
+  line-height: 1.4;
+  font-size: 9px;
+  */
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
   box-sizing: border-box;
   /*padding-top: 3px;
-    text-align: justify;    
-    */
+  text-align: justify;    
+  */
 }
 
 #ext_volume_overlay.show {
@@ -854,7 +823,7 @@ div#ext_dom_message {
 
 #ext_volume_overlay svg path {
   fill: #fff;
-  transition: fill .12s ease;
+  transition: fill 0.12s ease;
 }
 
 #ext_video_volume_overlay {
@@ -867,7 +836,9 @@ div#ext_dom_message {
   z-index: 1;
   line-height: 1.4;
   font-size: 9px;
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
   box-sizing: border-box;
   padding-top: 3px;
   text-align: justify;
@@ -882,14 +853,14 @@ div#ext_dom_message {
   cursor: pointer;
   /* 独自の見た目を有効化 */
   -webkit-appearance: none;
-  appearance: none;
+  -moz-appearance: none;
+       appearance: none;
   background: #e78a00;
   outline: none;
   height: 7px;
   border-radius: 12px;
   position: relative;
 }
-
 #ext_videoVolumeSlider::before {
   background-color: #252525;
   border-radius: 2px;
@@ -909,11 +880,10 @@ div#ext_dom_message {
   position: absolute;
   text-align: center;
   transform: translateX(-50%);
-  transition: opacity .12s ease;
+  transition: opacity 0.12s ease;
   white-space: nowrap;
   z-index: 10000;
 }
-
 #ext_videoVolumeSlider.mouseOver::before {
   opacity: 1;
 }
@@ -956,8 +926,7 @@ div#ext_dom_message {
   border-radius: 10px;
   font-size: 12px;
   background-color: white;
-  flex-shrink: 0;
-  /* コメント文がFlexBoxより大きくなっても名前は縮まないようにする */
+  flex-shrink: 0; /* コメント文がFlexBoxより大きくなっても名前は縮まないようにする */
   /* 長い名前はCSSで省略(省略記号...表示) */
   max-width: 85px;
   -webkit-line-clamp: 1 !important;
@@ -1000,8 +969,7 @@ div#ext_dom_message {
   height: inherit !important;
   margin-right: 12px !important;
   margin-left: 9px !important;
-  flex-shrink: 0;
-  /* コメント文がFlexBoxより大きくなっても名前は縮まないようにする */
+  flex-shrink: 0; /* コメント文がFlexBoxより大きくなっても名前は縮まないようにする */
   /* 長い名前はCSSで省略(省略記号...表示) */
   max-width: 100px;
   -webkit-line-clamp: 1 !important;
@@ -1009,7 +977,6 @@ div#ext_dom_message {
   overflow: hidden !important;
   text-overflow: ellipsis !important;
 }
-
 [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user-name-button span {
   color: #b70000 !important;
   max-width: 94px !important;
@@ -1040,23 +1007,22 @@ div#ext_dom_message {
 }
 
 /* 自身が配信者の場合のコメント欄*/
-[ext-attr-IamOwner="true"] [class^=___contents-area___][ext-master-comeview] .comment-text {
+[ext-attr-IamOwner=true] [class^=___contents-area___][ext-master-comeview] .comment-text {
   padding: 0px !important;
 }
 
-[ext-attr-IamOwner="true"] [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user-name-button {
+[ext-attr-IamOwner=true] [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user-name-button {
   border: none !important;
   padding: 0px !important;
   margin-left: 5px !important;
   background-color: transparent !important;
   max-width: inherit;
 }
-
-[ext-attr-IamOwner="true"] [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user-name-button span {
+[ext-attr-IamOwner=true] [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user-name-button span {
   max-width: inherit !important;
 }
 
-[ext-attr-IamOwner="true"] [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user_name_by_extention {
+[ext-attr-IamOwner=true] [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user_name_by_extention {
   border: none !important;
   padding: 0px !important;
   margin-left: 0 !important;
@@ -1065,8 +1031,8 @@ div#ext_dom_message {
   border-radius: inherit;
 }
 
-[ext-attr-IamOwner="true"] [class^="___contents-area___"][ext-master-comeview] .user_icon_by_extention,
-[ext-attr-IamOwner="true"] [class^="___contents-area___"][ext-master-comeview] .content-area > .user-summary-area img {
+[ext-attr-IamOwner=true] [class^=___contents-area___][ext-master-comeview] .user_icon_by_extention,
+[ext-attr-IamOwner=true] [class^=___contents-area___][ext-master-comeview] .content-area > .user-summary-area img {
   width: 20px !important;
   height: 20px !important;
   min-width: 20px;
@@ -1180,12 +1146,12 @@ div#ext_dom_message {
   margin-right: 6px;
   padding: 0;
   /* flex-basis: 11px;
-    max-width: 11px;
-    width: 100%;
-    height: 11px;
-    flex-shrink: 0;
-    background-color: #e9e9e9;
-    border-radius: 100%; */
+  max-width: 11px;
+  width: 100%;
+  height: 11px;
+  flex-shrink: 0;
+  background-color: #e9e9e9;
+  border-radius: 100%; */
   background-repeat: no-repeat;
   background-position: center;
   background-size: 100% 100%;
@@ -1205,12 +1171,12 @@ div#ext_dom_message {
   margin-right: 6px;
   padding: 0;
   /* color: #ffffff;
-    background-color: rgb(129, 1, 1);
-    border-radius: 25px;
-    padding: 0px 2px;
-    font-size: 9px !important;
-    width: 10px;
-    margin-left: -2px; */
+  background-color: rgb(129, 1, 1);
+  border-radius: 25px;
+  padding: 0px 2px;
+  font-size: 9px !important;
+  width: 10px;
+  margin-left: -2px; */
   background-repeat: no-repeat;
   background-position: center;
   background-size: 100% 100%;
@@ -1256,17 +1222,17 @@ div#ext_dom_message {
   /* text-overflow: ellipsis; */
   /*display: -webkit-box;*/
   /* display: inline-block;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2; */
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2; */
   line-height: 1.1 !important;
   overflow: hidden !important;
   font-size: 12px !important;
   padding: 0 !important;
   max-height: 30px !important;
   /*
-    下記みたいなコメントがあると、コメントの高さが壊れるので、その対策
-    ███████████████████████████████████████████████████████
-    */
+  下記みたいなコメントがあると、コメントの高さが壊れるので、その対策
+  ███████████████████████████████████████████████████████
+  */
   word-wrap: normal;
   /* 2行より長い場合は三点リーダーで省略 */
   display: -webkit-box !important;
@@ -1318,7 +1284,7 @@ html[data-darkreader-scheme] [ext-master-comeview] [class^=___table-row___]:nth-
 }
 
 /* 映像加工 */
-div[data-layer-name="videoLayer"] video {
+div[data-layer-name=videoLayer] video {
   transition-duration: 0.3s;
 }
 
@@ -1383,12 +1349,12 @@ div[data-layer-name="videoLayer"] video {
   transition: 0.3s;
 }
 
-body[ext-master-comeview][ext-opt-wide] [aria-expanded="false"] + #split_by_extention {
+body[ext-master-comeview][ext-opt-wide] [aria-expanded=false] + #split_by_extention {
   width: 8px;
   min-width: 8px;
 }
 
-body[ext-master-comeview][ext-opt-wide] [data-layout-mode="full"] #split_by_extention {
+body[ext-master-comeview][ext-opt-wide] [data-layout-mode=full] #split_by_extention {
   width: 0px;
   min-width: 0px;
 }
@@ -1398,7 +1364,7 @@ body[ext-master-comeview][ext-opt-wide] [data-layout-mode="full"] #split_by_exte
   width: inherit !important;
 }
 
-[data-layout-mode="full"] [class^=___player-display___] {
+[data-layout-mode=full] [class^=___player-display___] {
   width: inherit !important;
 }
 
@@ -1429,7 +1395,9 @@ body[ext-master-comeview][ext-opt-wide] [data-layout-mode="full"] #split_by_exte
   text-align: left;
   text-decoration: none;
   width: 100%;
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
 }
 
 [class^=___context-menu___] .ext-menu label:hover {
@@ -1491,7 +1459,6 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 100000;
 }
-
 .help-page.show {
   display: block;
 }
@@ -1545,7 +1512,6 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
   padding: 10px 20px;
   display: none;
 }
-
 [class^=___contents-area___][ext-master-comeview][ext-opt-tooltip] #ext_tooltipBox.show {
   display: block;
 }
@@ -1560,6 +1526,62 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
   display: none;
 }
 
+#addHemoTool {
+  display: none;
+  position: absolute;
+  left: 109px;
+  bottom: 14px;
+  border: 1px solid;
+  background-color: black;
+  border-radius: 34px;
+  color: white;
+  padding: 3px 19px 4px;
+  cursor: pointer;
+}
+
+[class^=___ichiba-balloon___][data-size] #addHemoTool {
+  display: block;
+}
+
+#ext_ichiba_shortcut {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  padding: 4px;
+  padding-right: 20px;
+  padding-top: 0;
+}
+#ext_ichiba_shortcut .item {
+  flex-basis: 40px;
+  position: relative;
+  background-color: white;
+  margin-left: 16px;
+  cursor: pointer;
+  border: 1px solid #ffffff;
+  border-radius: 4px;
+  overflow: hidden;
+}
+#ext_ichiba_shortcut .item img {
+  -o-object-fit: cover;
+     object-fit: cover;
+  height: 40px;
+  width: 40px;
+  display: block;
+}
+#ext_ichiba_shortcut .item .delete-btn {
+  position: absolute;
+  cursor: pointer;
+  top: -3px;
+  right: -3px;
+  background-color: black;
+  border: 1px solid white;
+  border-radius: 134px;
+  line-height: 1;
+  padding: 0px 3px 2px;
+  font-size: 14px;
+}
+
 /* コテハン入力画面 */
 #ext_myKotehanBox {
   display: none;
@@ -1570,22 +1592,18 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
   z-index: 100000;
   line-height: 2;
 }
-
 #ext_myKotehanBox.show {
   display: flex;
   justify-content: center;
   align-items: center;
 }
-
 #ext_myKotehanBox #ext_myKotehanBox_Center {
   width: 70%;
 }
-
 #ext_myKotehanBox #ext_myKotehanDom_comment {
   color: white;
   display: block;
 }
-
 #ext_myKotehanBox #ext_myKotehanInput {
   display: block;
   padding: 10px;
@@ -1593,10 +1611,9 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
   box-sizing: border-box;
   width: 100%;
 }
-
 #ext_myKotehanBox #ext_myKotehanBox_OkBtn {
   cursor: pointer;
-  background-color: #0075ff;
+  background-color: rgb(0, 117, 255);
   color: white;
   display: inline-block;
   padding: 3px 25px;
@@ -1604,20 +1621,18 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
   margin-right: 10px;
   margin-bottom: 20px;
 }
-
 #ext_myKotehanBox #ext_myKotehanBox_ClearBtn {
   cursor: pointer;
-  background-color: #0075ff;
+  background-color: rgb(0, 117, 255);
   color: white;
   display: inline-block;
   padding: 3px 25px;
   border-radius: 5px;
   margin-right: 10px;
 }
-
 #ext_myKotehanBox #ext_myKotehanBox_CancelBtn {
   cursor: pointer;
-  background-color: #474747;
+  background-color: rgb(71, 71, 71);
   color: white;
   display: inline-block;
   padding: 3px 25px;
@@ -1633,76 +1648,75 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
 ・ニコ生のダークモードに対応（html[data-color-theme]）
 ・Chrome拡張機能Dark Readerに対応（html[data-darkreader-scheme]）
 */
-html[data-color-theme="dark"] .user_name_by_extention,
+html[data-color-theme=dark] .user_name_by_extention,
 html[data-darkreader-scheme] .user_name_by_extention {
   background-color: #1a1a1a;
   color: #df7474;
   border-color: #df7474;
 }
 
-html[data-color-theme="dark"] .user_name_by_extention.user184,
+html[data-color-theme=dark] .user_name_by_extention.user184,
 html[data-darkreader-scheme] .user_name_by_extention.user184 {
   background-color: #1a1a1a;
   color: #d3d3d3;
   border: 1px solid #d3d3d3;
 }
 
-html[data-color-theme="dark"] .user_name_by_extention.kotehan,
+html[data-color-theme=dark] .user_name_by_extention.kotehan,
 html[data-darkreader-scheme] .user_name_by_extention.kotehan {
   background-color: inherit;
   color: #83a9fb;
   border: 1px solid #83a9fb;
 }
 
-html[data-color-theme="dark"] [class^=___player-area___],
+html[data-color-theme=dark] [class^=___player-area___],
 html[data-darkreader-scheme] [class^=___player-area___] {
   background-image: none !important;
 }
 
-html[data-color-theme="dark"] .ext-popup,
+html[data-color-theme=dark] .ext-popup,
 html[data-darkreader-scheme] .ext-popup {
   box-shadow: 0 0 4px white;
   background-color: rgba(37, 37, 37, 0.95);
   color: white;
 }
 
-html[data-color-theme="dark"] .ext-popup::before,
+html[data-color-theme=dark] .ext-popup::before,
 html[data-darkreader-scheme] .ext-popup::before {
   border-top: 15px solid rgba(37, 37, 37, 0.95);
 }
 
-html[data-color-theme="dark"] [class^="___contents-area___"][ext-master-comeview][ext-opt-name] .user-name-button,
-html[data-darkreader-scheme] [class^="___contents-area___"][ext-master-comeview][ext-opt-name] .user-name-button {
+html[data-color-theme=dark] [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user-name-button,
+html[data-darkreader-scheme] [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user-name-button {
   background-color: inherit;
   color: #e54b4b !important;
   border: 1px solid #e54b4b !important;
 }
-
-html[data-color-theme="dark"] [class^="___contents-area___"][ext-master-comeview][ext-opt-name] .user-name-button span,
-html[data-darkreader-scheme] [class^="___contents-area___"][ext-master-comeview][ext-opt-name] .user-name-button span {
+html[data-color-theme=dark] [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user-name-button span,
+html[data-darkreader-scheme] [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user-name-button span {
   color: #e54b4b !important;
 }
 
-html[data-color-theme="dark"] [ext-master-comeview] [class^="___table-row___"],
-html[data-darkreader-scheme] [ext-master-comeview] [class^="___table-row___"] {
+html[data-color-theme=dark] [ext-master-comeview] [class^=___table-row___],
+html[data-darkreader-scheme] [ext-master-comeview] [class^=___table-row___] {
   border-top: 1px dashed rgba(255, 255, 255, 0.123) !important;
 }
 
-html[data-color-theme="dark"] #ext_tooltipBox,
+html[data-color-theme=dark] #ext_tooltipBox,
 html[data-darkreader-scheme] #ext_tooltipBox {
   background-color: #141414 !important;
   color: white !important;
 }
 
-html[data-color-theme="dark"] [class^="___context-menu___"] .ext-menu label,
-html[data-darkreader-scheme] [class^="___context-menu___"] .ext-menu label {
-  background-color: #333333 !important;
+html[data-color-theme=dark] [class^=___context-menu___] .ext-menu label,
+html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
+  background-color: rgb(51, 51, 51) !important;
   color: white !important;
 }
 
-html[data-color-theme="dark"] [class^="___context-menu___"] .ext-menu label input,
-html[data-color-theme="dark"] [class^="___context-menu___"] .ext-menu label textarea,
-html[data-darkreader-scheme] [class^="___context-menu___"] .ext-menu label input,
-html[data-darkreader-scheme] [class^="___context-menu___"] .ext-menu label textarea {
-  background-color: #333333 !important;
-}
+html[data-color-theme=dark] [class^=___context-menu___] .ext-menu label input,
+html[data-color-theme=dark] [class^=___context-menu___] .ext-menu label textarea,
+html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label input,
+html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label textarea {
+  background-color: rgb(51, 51, 51) !important;
+}/*# sourceMappingURL=style.css.map */
