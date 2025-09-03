@@ -665,8 +665,13 @@ div#ext_dom_message {
 #ext_shortcut {
     width: 100%;
     text-align: right;
-    padding: 2px 6px 7px 6px;
+    padding: 0;
     box-sizing: border-box;
+
+    // １つでもピンがONの場合はパディングを追加
+    &:has([ext-pin-on]) {
+        padding: 2px 6px 14px 6px;
+    }
     
     
 }
@@ -1541,15 +1546,22 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
 
 
 #ext_ichiba_shortcut {
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: flex-end;
 
     width: 100%;
-    padding: 10px 7px 2px 4px;
+    padding: 8px 7px 10px 4px;
     border-top: 1px solid #535353;
     box-sizing: border-box;
-    
+
+    color: #b3b3b3;
+
+    &.show {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
 
     &.disabled {
         opacity: 0.5;
@@ -1565,7 +1577,7 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
         flex-basis: 40px;
         position: relative;
         background-color: white;
-        margin-left: 10px;
+        // margin-left: 10px;
         cursor: pointer;
 
         border: 1px solid #ffffff;
@@ -1578,7 +1590,8 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
             object-fit: cover;
             height: 40px;
             width: 40px;
-        
+            border-radius: 3px;
+
             display: block;
 
             &.loading {
@@ -1600,7 +1613,10 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
         }
 
         .balloon {
-            display: none;
+            pointer-events: none; // baloonの後ろにある要素にクリックが効くようにする
+            display: block;
+            z-index: -10000000000;
+
             position: absolute;
 
             cursor: default;
@@ -1620,17 +1636,22 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
             line-height: 1.5;
             padding: 10px;
             border-radius: 5px;
-            z-index: 100000;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             opacity: 0;
-            transition: opacity 0.3s ease, transform 0.3s ease;
+            transition: opacity 0.3s ease, transform 0.9s ease;
             transform: translateY(-10px);
+
+            &.hide {
+                display: none;
+            }
+
+            &.show {
+                z-index: 10000000000;
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        .balloon.show {
-            display: block;
-            opacity: 1;
-            transform: translateY(0);
-        }
+
     }
 }
 
@@ -1887,3 +1908,67 @@ html[data-darkreader-scheme] [class^="___context-menu___"] .ext-menu label texta
     background-color: rgb(51, 51, 51) !important;
 }
 
+// デバイス設定がダークモードの場合もダークモードにする
+@media (prefers-color-scheme: dark) {
+
+    .user_name_by_extention {    
+        background-color: #1a1a1a;
+        color: #df7474;
+        border-color: #df7474;
+    }
+    
+    .user_name_by_extention.user184 {
+        // background-color: inherit;
+        background-color: #1a1a1a;
+        color: #d3d3d3;
+        border: 1px solid #d3d3d3; 
+    }
+    
+    .user_name_by_extention.kotehan {
+        background-color: inherit;
+        color: #83a9fb; 
+        border: 1px solid #83a9fb; 
+    }
+    
+    [class^=___player-area___] {
+        background-image: none !important;
+    }
+    .ext-popup {
+        box-shadow: 0 0 4px white;
+        background-color: rgba(37, 37, 37, 0.95);
+        color: white;
+    }
+    
+    .ext-popup::before {
+        border-top: 15px solid rgba(37, 37, 37, 0.95);
+    }
+    
+    
+    [class^="___contents-area___"][ext-master-comeview][ext-opt-name] .user-name-button {    
+        background-color: inherit;
+        color: #e54b4b !important;
+        border: 1px solid #e54b4b !important; 
+        & span {
+            color: #e54b4b !important;
+        }
+    }
+    
+    [ext-master-comeview] [class^="___table-row___"] {
+        border-top: 1px dashed rgba(255, 255, 255, 0.123) !important;
+    }
+    
+    #ext_tooltipBox {
+        background-color: #141414 !important;
+        color: white !important;
+    }
+    
+    [class^="___context-menu___"] .ext-menu label {
+        background-color: rgb(51, 51, 51) !important;
+        color: white !important;
+    }
+    
+    [class^="___context-menu___"] .ext-menu label input,
+    [class^="___context-menu___"] .ext-menu label textarea {
+        background-color: rgb(51, 51, 51) !important;
+    }
+}

@@ -33,7 +33,7 @@ SOFTWARE.
 */
 
 let _obsLogBox;
-
+let _embeddedDataJson;
 
 window.addEventListener('load', function () {
 
@@ -62,6 +62,9 @@ window.addEventListener('load', function () {
                         return Promise.all(responses.map(response => response.text()));
                     })
                     .then(([partsHtml, infoHtml]) => {
+
+                        // ニコ生の埋込データを取得
+                        getEmbeddedDataJson();
 
                         // 自身が配信者かどうかのチェック
                         ownerCheck();
@@ -103,6 +106,21 @@ window.addEventListener('load', function () {
 
 
 });
+
+function getEmbeddedDataJson(){
+
+    const nicoData = document.querySelector('#embedded-data');
+    if(nicoData){
+        const jsonString = nicoData.getAttribute("data-props");
+        if(jsonString){
+            try {
+                _embeddedDataJson = JSON.parse(jsonString);
+            } catch (err) {
+                console.error("ニコ生の埋込データを取得できませんでした", err);
+            }
+        }
+    }
+}
 
 
 function ownerCheck(){
@@ -355,7 +373,7 @@ function setEvents() {
 
         /*
         以下のURLから、id=521 を取得する
-        "https://services.spi.nicovideo.jp/game/index.html?id=521&content_id=lv348610725&frontend_id=9&frontend_version=600.0.0&content_type=live"
+        "https://services.spi.nicovideo.jp/game/index.html?id=521&content_id=lv00000000000&frontend_id=9&frontend_version=600.0.0&content_type=live"
         */
         const src = currentNode.getAttribute("src");
         const id = src.split("id=")[1].split("&")[0];
@@ -363,7 +381,7 @@ function setEvents() {
 
         /*
         以下のURLから、１階層目のフォルダ名(以下の例ならgame）を取得する
-        "https://services.spi.nicovideo.jp/game/index.html?id=521&content_id=lv348610725&frontend_id=9&frontend_version=600.0.0&content_type=live"
+        "https://services.spi.nicovideo.jp/game/index.html?id=521&content_id=lv00000000000&frontend_id=9&frontend_version=600.0.0&content_type=live"
         */
         const folderName = src.split('/')[3];
         console.log('フォルダ名:', folderName);
@@ -410,7 +428,7 @@ function setEvents() {
                 */
 
                 chrome.storage.local.get("ichibaList", function(value){
-                    console.log("にゃー", value);
+                    
                     if(value && value.ichibaList && Array.isArray(value.ichibaList)){
 
                         // 既に追加済みなら追加しない
@@ -441,6 +459,21 @@ function setEvents() {
                             console.log("追加しました2");
                             addHemoTool.textContent = "追加しました";
                             addIchibaShortcut();
+
+                            // 0件から1件になった場合はショートカット機能を有効状態にする
+
+                            const ichibaShortcut = document.querySelector('#ext_ichiba_shortcut');
+                            ichibaShortcut.classList.add("show");
+                            
+                            // ON状態に
+                            const menu = document.querySelector('.ext-setting-menu .ext-ichiba');
+                            menu.setAttribute("ext-attr-on", "ON");        
+                            
+                            // ストレージにボタンの状態を保存
+                            chrome.storage.local.set({"ext_ichiba": "ON"}, function() {});
+                    
+                            // ショートカットをアクティブ状態
+                            document.querySelector('#ext_shortcut .item.ichiba').setAttribute("active", "ON");
                         });
                     }
                 });
@@ -651,20 +684,6 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
 
 
 
-    // 市場ショートカット用のDOMを作成しておく
-    const ichibaShortcut = document.createElement('div');
-    ichibaShortcut.id = "ext_ichiba_shortcut";
-    document.querySelector('[class^=___player-controller___]').append(ichibaShortcut);
-    // 市場ショートカット用のDOMに各ショートカットを追加する
-    addIchibaShortcut();
-
-    
-
-
-
-
-
-
     // 各種ショートカット用のDOMを作成しておく
     let shortcut = document.createElement('div');
     shortcut.id = "ext_shortcut";
@@ -678,11 +697,20 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
         '<div class="item video-mute" aria-label="配信音をミュートにします">配信音ミュート</div>'+
         '<div class="item game" aria-label="ニコ生ゲームの映像を非表示にします">ニコ生ゲーム画面OFF</div>'+
         '<div class="item game-mute" aria-label="ニコ生ゲームの音をミュートします">ニコ生ゲーム音ミュート</div>'+
+        '<div class="item ichiba" aria-label="ニコ生ゲームのショートカットを起動します">ニコ生ゲームショートカット</div>'+
         '<div class="item video-wipe" aria-label="ニコ生ゲーム起動時に配信映像をワイプします">ワイプ</div>'+
         '<div class="item video-effect" aria-label="配信映像を加工します">映像加工</div>'+
         '<div class="item picture" aria-label="映像＋コメントを小窓で表示します">小窓表示</div>'+
         '<div class="item rec" aria-label="録画を開始します"><span class="status">●</span><span class="recBtn">録画開始</span></div>';
     document.querySelector('[class^=___player-controller___]').append(shortcut);
+
+
+    // 市場ショートカット用のDOMを作成しておく
+    const ichibaShortcut = document.createElement('div');
+    ichibaShortcut.id = "ext_ichiba_shortcut";
+    document.querySelector('[class^=___player-controller___]').append(ichibaShortcut);
+    // 市場ショートカット用のDOMに各ショートカットを追加する
+    addIchibaShortcut();
     
 
     chrome.storage.local.get("ext_viewoff_array", function (value) {
@@ -1176,6 +1204,33 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
         document.querySelector('#ext_videoVolumeSlider').classList.remove('mouseOver');
     });
 
+
+    // ニコ生ゲームショートカット
+    document.querySelector('.ext-setting-menu .ext-ichiba .item .value').addEventListener('click', ichibaShortcutToggle);
+    const ichibaPin = document.querySelector('.ext-setting-menu .ext-ichiba .item .pin');
+    ichibaPin.addEventListener('click', function() {
+        if(ichibaPin.getAttribute("ext-pin-on")){
+
+            // 設定画面のピンのアイコンをOFF表示
+            ichibaPin.removeAttribute("ext-pin-on");
+            // ショートカットを非表示
+            document.querySelector('#ext_shortcut .item.ichiba').removeAttribute("ext-pin-on");
+            // 拡張機能の設定に保存
+            chrome.storage.local.set({"ext_ichiba_pin": "OFF"}, function() {});
+        } else {
+            // 設定画面のピンのアイコンをON表示
+            ichibaPin.setAttribute("ext-pin-on", "ON");
+            // ショートカットを表示
+            document.querySelector('#ext_shortcut .item.ichiba').setAttribute("ext-pin-on", "ON");
+            // 拡張機能の設定に保存
+            chrome.storage.local.set({"ext_ichiba_pin": "ON"}, function() {});
+        }
+    });
+    document.querySelector('#ext_shortcut .ichiba').addEventListener('click', function() {
+        ichibaShortcutToggle();
+    });
+
+
     // 映像加工
     document.querySelector('.ext-setting-menu .ext-video-effect .item .value').addEventListener('click', videoEffect);
     let effectPin = document.querySelector('.ext-setting-menu .ext-video-effect .item .pin');
@@ -1279,7 +1334,13 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
     document.querySelector('.ext-setting-menu .ext-bouyomi .setting').addEventListener('click', (e) => {
         changeElement(document.querySelector('.ext-setting-menu .ext-bouyomi .option-box'));
         document.querySelector('.ext-setting-menu .ext-bouyomi .setting').classList.toggle('active')
-    }, false);    
+    }, false);
+
+    // [ニコ生ゲームショートカット]の詳細設定ボタン
+    document.querySelector('.ext-setting-menu .ext-ichiba .setting').addEventListener('click', (e) => {
+        changeElement(document.querySelector('.ext-setting-menu .ext-ichiba .option-box'));
+        document.querySelector('.ext-setting-menu .ext-ichiba .setting').classList.toggle('active')
+    }, false);
 
     // [映像加工]の詳細設定ボタン
     document.querySelector('.ext-setting-menu .ext-video-effect .setting').addEventListener('click', (e) => {
@@ -1795,25 +1856,6 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
     colorInitialize();
     getColor();
 
-
-    // ニコニコ動画のフロントエンドバージョンを取得
-    /*
-    let nicoData = document.querySelector('#embedded-data');
-    if(nicoData){
-        let dataProps = nicoData.getAttribute("data-props");
-        if(dataProps){
-            try {
-                let dataJson = JSON.parse(dataProps);
-                if(dataJson && dataJson.site && dataJson.site.frontendVersion) {
-                    document.querySelector('.ext-setting-menu .item.info .niconico .ver').textContent  = dataJson.site.frontendVersion;
-                }    
-            } catch (err) {
-                console.error(err);
-            }
-        
-        }
-    }
-    */
 
     // へもツールのバージョン情報を取得
     var manifestData = chrome.runtime.getManifest();
@@ -2493,8 +2535,23 @@ function setSettingValue() {
             }
         });
 
-
-
+        // ニコ生ゲームショートカット
+        chrome.storage.local.get("ext_ichiba", function (value) {
+            if (value.ext_ichiba == "ON") {
+                ichibaShortcutToggle();
+                // ショートカットをアクティブ状態
+                document.querySelector('#ext_shortcut .item.ichiba').setAttribute("active", "ON");   
+            }
+        });
+        // ニコ生ゲームショートカットのピン状態
+        chrome.storage.local.get("ext_ichiba_pin", function (value) {
+            if (value.ext_ichiba_pin == "ON") {
+                // 設定画面のピンのアイコンをON表示
+                document.querySelector('.ext-setting-menu .ext-ichiba .pin').setAttribute("ext-pin-on", "ON");
+                // ショートカットを表示
+                document.querySelector('#ext_shortcut .item.ichiba').setAttribute("ext-pin-on", "ON");                
+            }
+        });
 
 
 
@@ -2687,6 +2744,7 @@ function addIchibaShortcut() {
     const ichibaShortcut = document.querySelector("#ext_ichiba_shortcut");
     ichibaShortcut.innerHTML = "";
 
+    // タイムシフトなどで、ゲームを追加できない場合は、ショートカットを無効化
     const ichibaAddBtn = document.querySelector("[class^=___ichiba-counter-section___] [class^=___add-button___]");
     const bIsDisableIchiba = ichibaAddBtn && ichibaAddBtn.hasAttribute("disabled");
     if(bIsDisableIchiba){
@@ -2694,11 +2752,36 @@ function addIchibaShortcut() {
     }
 
     /*
+    console.log("--------------------------------");
+    console.log(_embeddedDataJson);
+    */
+
+    let frontendId = "9";
+    if(_embeddedDataJson && _embeddedDataJson.site && _embeddedDataJson.site.frontendId){
+        console.log("frontendId:", _embeddedDataJson.site.frontendId);
+        frontendId = _embeddedDataJson.site.frontendId;
+    } else {
+        console.error("frontendIdが取得できませんでした");
+    }
+
+    let frontendVersion = "600.0.0";
+    if(_embeddedDataJson && _embeddedDataJson.site && _embeddedDataJson.site.frontendVersion){
+        console.log("frontendVersion:", _embeddedDataJson.site.frontendVersion);
+        frontendVersion = _embeddedDataJson.site.frontendVersion;
+    } else {
+        console.error("frontendVersionが取得できませんでした");
+    }
+
+
+
+    /*
     chrome.storage.local.getして、#ext_ichiba_shortcutに、以下のようにDOMを追加する
     <div class="item ichiba" aria-label="アイテムタイトル"><img src="画像URL" alt="アイテムタイトル"><span class="delete-btn">×</span>/div>
     */
     chrome.storage.local.get("ichibaList", function (value) {
         if(value && value.ichibaList && Array.isArray(value.ichibaList)) {
+
+            ichibaShortcut.textContent = "";
 
             // DOMに各アイテムを追加していく
             value.ichibaList.forEach(function(item){
@@ -2774,7 +2857,6 @@ function addIchibaShortcut() {
 
 
                     async function getProduct(programId, folderName, itemId) {
-                        // https://eapi.spi.nicovideo.jp/v1/users/self/authority?contentId=lv348624606
                         const url = "https://eapi.spi.nicovideo.jp/v1/users/self/authority?contentId=" + programId;                        
 
                         // fetchに渡す設定情報
@@ -2847,7 +2929,7 @@ function addIchibaShortcut() {
                         },
                         "referrer": "https://spi.nicovideo.jp/",
                         "referrerPolicy": "strict-origin-when-cross-origin",
-                        "body": "{\"serviceName\":\"" + folderName + "\",\"serviceProductId\":\"" + itemId + "\",\"frontendId\":9,\"frontendVersion\":\"585.0.0\",\"expectedGrade\":5}",
+                        "body": "{\"serviceName\":\"" + folderName + "\",\"serviceProductId\":\"" + itemId + "\",\"frontendId\":" + frontendId + ",\"frontendVersion\":\"" + frontendVersion + "\",\"expectedGrade\":5}",
                         "method": "POST",
                         "mode": "cors",
                         "credentials": "include"
@@ -2900,10 +2982,11 @@ function addIchibaShortcut() {
                                 // balloonにエラーメッセージを表示
                                 document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).textContent = errorMessage;
                                 document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).classList.add("show");
-                                // 1秒後に非表示
+                                // 数ミリ秒後に非表示
                                 setTimeout(function(){
                                     document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).classList.remove("show");
-                                }, 1000);
+                                    document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).style.pointerEvents = "none";
+                                }, 900);
 
                                 itemIcon.classList.remove("loading");
                                 
@@ -2918,10 +3001,10 @@ function addIchibaShortcut() {
                             // balloonに成功メッセージを表示
                             document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).textContent = "リクエストしました";
                             document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).classList.add("show");
-                            // 1秒後に非表示
+                            // 数ミリ秒後に非表示
                             setTimeout(function(){
                                 document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).classList.remove("show");
-                            }, 1000);
+                            }, 900);
 
                             itemIcon.classList.remove("loading");
 
@@ -3039,6 +3122,8 @@ function addIchibaShortcut() {
                     }
                 });
             }
+        } else {
+            ichibaShortcut.textContent = "ここにゲームが登録されます。リクエスト済みのゲームをクリックするとショートカットに登録できます。";
         }
     });
 }
