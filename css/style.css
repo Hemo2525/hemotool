@@ -1857,53 +1857,53 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label textare
 }
 
 @media (prefers-color-scheme: dark) {
-  .user_name_by_extention {
+  html[data-color-theme=auto] .user_name_by_extention {
     background-color: #1a1a1a;
     color: #df7474;
     border-color: #df7474;
   }
-  .user_name_by_extention.user184 {
+  html[data-color-theme=auto] .user_name_by_extention.user184 {
     background-color: #1a1a1a;
     color: #d3d3d3;
     border: 1px solid #d3d3d3;
   }
-  .user_name_by_extention.kotehan {
+  html[data-color-theme=auto] .user_name_by_extention.kotehan {
     background-color: inherit;
     color: #83a9fb;
     border: 1px solid #83a9fb;
   }
-  [class^=___player-area___] {
+  html[data-color-theme=auto] [class^=___player-area___] {
     background-image: none !important;
   }
-  .ext-popup {
+  html[data-color-theme=auto] .ext-popup {
     box-shadow: 0 0 4px white;
     background-color: rgba(37, 37, 37, 0.95);
     color: white;
   }
-  .ext-popup::before {
+  html[data-color-theme=auto] .ext-popup::before {
     border-top: 15px solid rgba(37, 37, 37, 0.95);
   }
-  [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user-name-button {
+  html[data-color-theme=auto] [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user-name-button {
     background-color: inherit;
     color: #e54b4b !important;
     border: 1px solid #e54b4b !important;
   }
-  [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user-name-button span {
+  html[data-color-theme=auto] [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user-name-button span {
     color: #e54b4b !important;
   }
-  [ext-master-comeview] [class^=___table-row___] {
+  html[data-color-theme=auto] [ext-master-comeview] [class^=___table-row___] {
     border-top: 1px dashed rgba(255, 255, 255, 0.123) !important;
   }
-  #ext_tooltipBox {
+  html[data-color-theme=auto] #ext_tooltipBox {
     background-color: #141414 !important;
     color: white !important;
   }
-  [class^=___context-menu___] .ext-menu label {
+  html[data-color-theme=auto] [class^=___context-menu___] .ext-menu label {
     background-color: rgb(51, 51, 51) !important;
     color: white !important;
   }
-  [class^=___context-menu___] .ext-menu label input,
-  [class^=___context-menu___] .ext-menu label textarea {
+  html[data-color-theme=auto] [class^=___context-menu___] .ext-menu label input,
+  html[data-color-theme=auto] [class^=___context-menu___] .ext-menu label textarea {
     background-color: rgb(51, 51, 51) !important;
   }
 }/*# sourceMappingURL=style.css.map */
