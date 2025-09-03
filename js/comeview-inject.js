@@ -835,35 +835,6 @@ function recvChatComment(message) {
           }
         }
 
-
-        /*
-        if (request.responseXML) {
-
-          var xmlDom = request.responseXML.documentElement;
-          var userNameFull = xmlDom.getElementsByTagName("dc:creator")[0].innerHTML;
-          var userName = userNameFull;
-
-          _rawUserListFull[message.chat.user_id] = userNameFull;
-
-          // 過去のコメントの名前を置き換える
-          for (let key in _commentListFull) {
-            if (_commentListFull[key] == message.chat.user_id) {
-              _commentListFull[key] = userNameFull;
-            }
-          }
-
-          var currentCommentList = document.querySelectorAll('.user_name_by_extention:not(.user184)');
-          for (var i = 0; i < currentCommentList.length; i++) {
-            if (currentCommentList[i].innerText == message.chat.user_id) {
-              currentCommentList[i].innerText = userName;
-              currentCommentList[i].setAttribute("title", userNameFull);
-            }
-          }
-        } else {
-          //console.log("名前をGETできませんでした。");
-        }
-        */
-
       }, false);
     }
 

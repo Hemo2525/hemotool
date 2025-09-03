@@ -1539,26 +1539,40 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
     display: block;
 }
 
+
 #ext_ichiba_shortcut {
     display: flex;
     align-items: center;
     justify-content: flex-end;
 
     width: 100%;
-    padding: 4px;
-    padding-right: 20px;
-    padding-top: 0;
+    padding: 10px 7px 2px 4px;
+    border-top: 1px solid #535353;
+    box-sizing: border-box;
+    
+
+    &.disabled {
+        opacity: 0.5;
+        .item {
+            cursor: not-allowed;
+            &:hover {
+                opacity: 0.5;
+            }
+        }
+    }
 
     .item {
         flex-basis: 40px;
         position: relative;
         background-color: white;
-        margin-left: 16px;
+        margin-left: 10px;
         cursor: pointer;
 
         border: 1px solid #ffffff;
         border-radius: 4px;
-        overflow: hidden;
+        // overflow: hidden;
+
+
 
         img {
             object-fit: cover;
@@ -1566,13 +1580,17 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
             width: 40px;
         
             display: block;
+
+            &.loading {
+                opacity: 0.3;
+            }
         }
         .delete-btn {
             position: absolute;
             cursor: pointer;
-
+            color: white;
             top: -3px;
-            right: -3px;
+            right: -8px;
             background-color: black;
             border: 1px solid white;
             border-radius: 134px;
@@ -1580,10 +1598,144 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
             padding: 0px 3px 2px;
             font-size: 14px;
         }
+
+        .balloon {
+            display: none;
+            position: absolute;
+
+            cursor: default;
+
+            width: 181px;
+            height: 17px;
+            top: -48px;
+            left: -80px;
+            right: 0;
+            margin: 0 auto;
+            border: 1px solid white;
+
+            background-color: rgba(0, 0, 0, 0.941);
+            color: white;
+            font-size: 12px;
+            text-align: center;
+            line-height: 1.5;
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 100000;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: translateY(-10px);
+        }
+        .balloon.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 }
 
+// ドラッグ関係のスタイル
+#ext_ichiba_shortcut {
+    position: relative;
+    
+    .item {
+        transition: all 0.2s ease;
+        position: relative;
+        
+        // ドラッグ中の要素
+        &.dragging {
+            cursor: grabbing;
+            opacity: 0.5;
+            transform: scale(0.95) rotate(2deg);
+            z-index: 1000;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        
+        // ドロップ位置インジケーター
+        &.drag-after::before {
+            content: '';
+            position: absolute;
+            left: -2px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, #007bff, #0056b3);
+            border-radius: 2px;
+            animation: pulse 1s infinite;
+        }
+        
+        // ドラッグ可能スタイル
+        &[draggable="true"] {
+            // cursor: grab;
+            user-select: none;
+            
+            &:active {
+                cursor: grabbing;
+            }
+            
+            // ドラッグハンドル風の視覚効果
+            /*
+            &::after {
+                content: '⋮⋮';
+                position: absolute;
+                right: 4px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #ccc;
+                font-size: 12px;
+                opacity: 0;
+                transition: opacity 0.2s ease;
+            }
+            */
+            
+            &:hover::after {
+                opacity: 1;
+            }
+        }
+        
+        // ホバー効果
+        &:hover:not(.dragging) {
+            // transform: translateY(-2px);
+            // box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            opacity: 0.8;
+        }
+    }
+    
+    // ドラッグオーバー時のコンテナ
+    &.drag-over {
+        background: linear-gradient(135deg, 
+            rgba(0, 123, 255, 0.05) 0%, 
+            rgba(0, 123, 255, 0.02) 100%);
+        border: 2px dashed #007bff;
+        border-radius: 8px;
+        
+        &::before {
+            content: 'ここにドロップ';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #007bff;
+            font-size: 14px;
+            font-weight: bold;
+            opacity: 0.7;
+            pointer-events: none;
+            z-index: -1;
+        }
+    }
+}
 
+// パルスアニメーション
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scaleY(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scaleY(0.95);
+    }
+}
 
 
 

@@ -1548,19 +1548,27 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
   align-items: center;
   justify-content: flex-end;
   width: 100%;
-  padding: 4px;
-  padding-right: 20px;
-  padding-top: 0;
+  padding: 10px 7px 2px 4px;
+  border-top: 1px solid #535353;
+  box-sizing: border-box;
+}
+#ext_ichiba_shortcut.disabled {
+  opacity: 0.5;
+}
+#ext_ichiba_shortcut.disabled .item {
+  cursor: not-allowed;
+}
+#ext_ichiba_shortcut.disabled .item:hover {
+  opacity: 0.5;
 }
 #ext_ichiba_shortcut .item {
   flex-basis: 40px;
   position: relative;
   background-color: white;
-  margin-left: 16px;
+  margin-left: 10px;
   cursor: pointer;
   border: 1px solid #ffffff;
   border-radius: 4px;
-  overflow: hidden;
 }
 #ext_ichiba_shortcut .item img {
   -o-object-fit: cover;
@@ -1569,11 +1577,15 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
   width: 40px;
   display: block;
 }
+#ext_ichiba_shortcut .item img.loading {
+  opacity: 0.3;
+}
 #ext_ichiba_shortcut .item .delete-btn {
   position: absolute;
   cursor: pointer;
+  color: white;
   top: -3px;
-  right: -3px;
+  right: -8px;
   background-color: black;
   border: 1px solid white;
   border-radius: 134px;
@@ -1581,7 +1593,117 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
   padding: 0px 3px 2px;
   font-size: 14px;
 }
+#ext_ichiba_shortcut .item .balloon {
+  display: none;
+  position: absolute;
+  cursor: default;
+  width: 181px;
+  height: 17px;
+  top: -48px;
+  left: -80px;
+  right: 0;
+  margin: 0 auto;
+  border: 1px solid white;
+  background-color: rgba(0, 0, 0, 0.941);
+  color: white;
+  font-size: 12px;
+  text-align: center;
+  line-height: 1.5;
+  padding: 10px;
+  border-radius: 5px;
+  z-index: 100000;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: translateY(-10px);
+}
+#ext_ichiba_shortcut .item .balloon.show {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
 
+#ext_ichiba_shortcut {
+  position: relative;
+}
+#ext_ichiba_shortcut .item {
+  transition: all 0.2s ease;
+  position: relative;
+}
+#ext_ichiba_shortcut .item.dragging {
+  cursor: grabbing;
+  opacity: 0.5;
+  transform: scale(0.95) rotate(2deg);
+  z-index: 1000;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+#ext_ichiba_shortcut .item.drag-after::before {
+  content: "";
+  position: absolute;
+  left: -2px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(to bottom, #007bff, #0056b3);
+  border-radius: 2px;
+  animation: pulse 1s infinite;
+}
+#ext_ichiba_shortcut .item[draggable=true] {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  /*
+  &::after {
+      content: '⋮⋮';
+      position: absolute;
+      right: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #ccc;
+      font-size: 12px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+  }
+  */
+}
+#ext_ichiba_shortcut .item[draggable=true]:active {
+  cursor: grabbing;
+}
+#ext_ichiba_shortcut .item[draggable=true]:hover::after {
+  opacity: 1;
+}
+#ext_ichiba_shortcut .item:hover:not(.dragging) {
+  opacity: 0.8;
+}
+#ext_ichiba_shortcut.drag-over {
+  background: linear-gradient(135deg, rgba(0, 123, 255, 0.05) 0%, rgba(0, 123, 255, 0.02) 100%);
+  border: 2px dashed #007bff;
+  border-radius: 8px;
+}
+#ext_ichiba_shortcut.drag-over::before {
+  content: "ここにドロップ";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #007bff;
+  font-size: 14px;
+  font-weight: bold;
+  opacity: 0.7;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scaleY(0.95);
+  }
+}
 /* コテハン入力画面 */
 #ext_myKotehanBox {
   display: none;
