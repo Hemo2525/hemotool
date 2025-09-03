@@ -2975,6 +2975,9 @@ function addIchibaShortcut() {
                                         // タイムシフトの配信を見ているときにも発生するエラー
                                         errorMessage = "リクエストに失敗しました";
                                         break;
+                                    case "NOT_PREMIUM_USER":
+                                        errorMessage = "プレミアム会員が必要です";
+                                        break;
                                     default:
                                         break;
                                 }
