@@ -1531,14 +1531,24 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
 #addHemoTool {
     display: none;
     position: absolute;
+
+
+    background-color: #4990e2;
+    border: none;
+    border-radius: 5px;
+    bottom: 16px;
     left: 109px;
-    bottom: 14px;
-    border: 1px solid;
-    background-color: black;
-    border-radius: 34px;
+    font-size: 12px;
+    padding: 5px 8px;
+
     color: white;
-    padding: 3px 19px 4px;
     cursor: pointer;
+
+    transition: opacity 0.3s ease;
+
+    &:hover {
+        opacity: 0.5;
+    }
 }
 [class^=___ichiba-balloon___][data-size] #addHemoTool {
     display: block;
@@ -1571,6 +1581,14 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
                 opacity: 0.5;
             }
         }
+    }
+
+    .item-box {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 8px;
     }
 
     .item {
