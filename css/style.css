@@ -1899,6 +1899,9 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
   font-size: 12px;
   line-height: 1;
 }
+#ext_ichiba_info .description-box {
+  text-align: justify;
+}
 #ext_ichiba_info .hideBtn {
   position: absolute;
   top: 0;
