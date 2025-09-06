@@ -1538,7 +1538,7 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
   bottom: 16px;
   left: 109px;
   font-size: 12px;
-  padding: 5px 8px;
+  padding: 4px 8px 6px;
   color: white;
   cursor: pointer;
   transition: opacity 0.3s ease;
@@ -1551,10 +1551,37 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
   display: block;
 }
 
+#infoHemoToolBtn {
+  position: absolute;
+  background-color: rgb(73, 144, 226);
+  bottom: 16px;
+  left: 224px;
+  font-size: 12px;
+  color: white;
+  cursor: pointer;
+  border-width: initial;
+  border-style: none;
+  border-color: initial;
+  -o-border-image: initial;
+     border-image: initial;
+  border-radius: 5px;
+  padding: 4px 8px 6px;
+  transition: opacity 0.3s ease;
+}
+#infoHemoToolBtn:hover {
+  opacity: 0.5;
+}
+
+[class^=___ichiba-balloon___][data-size] #infoHemoToolBtn {
+  display: block;
+}
+
 #ext_ichiba_shortcut {
   display: none;
-  align-items: center;
-  justify-content: flex-end;
+  align-items: stretch;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 8px;
   width: 100%;
   padding: 8px 7px 10px 4px;
   border-top: 1px solid #535353;
@@ -1563,8 +1590,6 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
 }
 #ext_ichiba_shortcut.show {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
 }
 #ext_ichiba_shortcut.disabled {
   opacity: 0.5;
@@ -1575,26 +1600,65 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
 #ext_ichiba_shortcut.disabled .item:hover {
   opacity: 0.5;
 }
+#ext_ichiba_shortcut .time-box {
+  flex-basis: 160px;
+  text-align: center;
+  background-color: #2d2d2d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-size: 13px;
+  line-height: 1.3;
+}
 #ext_ichiba_shortcut .item-box {
+  flex-basis: calc(100% - 160px);
   display: flex;
   align-items: center;
   justify-content: flex-end;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 9px;
 }
 #ext_ichiba_shortcut .item {
-  flex-basis: 40px;
+  flex-basis: 34px;
   position: relative;
   background-color: white;
   cursor: pointer;
   border: 1px solid #ffffff;
   border-radius: 4px;
 }
+#ext_ichiba_shortcut .item:before {
+  filter: drop-shadow(0 0 3px rgba(26, 26, 26, 0.3));
+  content: attr(aria-label);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  background-color: white;
+  color: #1a1a1a;
+  text-overflow: ellipsis;
+  z-index: 10000;
+  border-radius: 4px;
+  max-width: 14em;
+  margin-bottom: 6px;
+  padding: 2px 8px;
+  font-size: 12px;
+  transition: opacity 0.1s;
+  display: block;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  overflow: hidden;
+  pointer-events: none;
+  transform: translate(-50%);
+}
+#ext_ichiba_shortcut .item:hover:before {
+  opacity: 1;
+}
 #ext_ichiba_shortcut .item img {
   -o-object-fit: cover;
      object-fit: cover;
-  height: 40px;
-  width: 40px;
+  height: 34px;
+  width: 34px;
   border-radius: 3px;
   display: block;
 }
@@ -1613,6 +1677,31 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
   line-height: 1;
   padding: 0px 3px 2px;
   font-size: 14px;
+  transition: background-color 0.15s ease;
+}
+#ext_ichiba_shortcut .item .delete-btn:hover {
+  background-color: rgb(85, 156, 255);
+}
+#ext_ichiba_shortcut .item .info-btn {
+  position: absolute;
+  cursor: pointer;
+  color: white;
+  top: 15px;
+  right: -8px;
+  background-color: black;
+  line-height: 1;
+  font-size: 11px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: white;
+  -o-border-image: initial;
+     border-image: initial;
+  border-radius: 134px;
+  padding: 2px 6px 2px;
+  transition: background-color 0.15s ease;
+}
+#ext_ichiba_shortcut .item .info-btn:hover {
+  background-color: rgb(85, 156, 255);
 }
 #ext_ichiba_shortcut .item .balloon {
   pointer-events: none;
@@ -1672,6 +1761,8 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
   background: linear-gradient(to bottom, #007bff, #0056b3);
   border-radius: 2px;
   animation: pulse 1s infinite;
+  height: 100%;
+  padding: 0;
 }
 #ext_ichiba_shortcut .item[draggable=true] {
   -webkit-user-select: none;
@@ -1697,26 +1788,28 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
 #ext_ichiba_shortcut .item[draggable=true]:hover::after {
   opacity: 1;
 }
-#ext_ichiba_shortcut .item:hover:not(.dragging) {
+#ext_ichiba_shortcut .item:hover:not(.dragging) img {
   opacity: 0.8;
 }
 #ext_ichiba_shortcut.drag-over {
   background: linear-gradient(135deg, rgba(0, 123, 255, 0.05) 0%, rgba(0, 123, 255, 0.02) 100%);
   border: 2px dashed #007bff;
   border-radius: 8px;
-}
-#ext_ichiba_shortcut.drag-over::before {
-  content: "ここにドロップ";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #007bff;
-  font-size: 14px;
-  font-weight: bold;
-  opacity: 0.7;
-  pointer-events: none;
-  z-index: -1;
+  /*
+  &::before {
+      content: 'ここにドロップ';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #007bff;
+      font-size: 14px;
+      font-weight: bold;
+      opacity: 0.7;
+      pointer-events: none;
+      z-index: -1;
+  }
+      */
 }
 
 @keyframes pulse {
@@ -1729,6 +1822,94 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
     transform: scaleY(0.95);
   }
 }
+#ext_ichiba_info {
+  box-sizing: border-box;
+  display: none;
+  position: absolute;
+  z-index: 1;
+  right: 15px;
+  width: 320px;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.9);
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 20px;
+  border-radius: 6px;
+  border: 1px solid white;
+}
+#ext_ichiba_info.show {
+  display: block;
+}
+#ext_ichiba_info .game-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+#ext_ichiba_info .game-box .left {
+  flex-basis: 50px;
+  border-radius: 6px;
+  background-color: white;
+  height: 50px;
+}
+#ext_ichiba_info .game-box .left img {
+  width: 50px;
+  height: 50px;
+  -o-object-fit: fill;
+     object-fit: fill;
+}
+#ext_ichiba_info .game-box .right {
+  flex-basis: calc(100% - 50px);
+  font-size: 19px;
+  line-height: 1.3;
+}
+#ext_ichiba_info .author-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  border: 1px solid white;
+  padding: 5px 10px 3px;
+  border-radius: 5px;
+}
+#ext_ichiba_info .author-box.hide {
+  display: none;
+}
+#ext_ichiba_info .author-box .left {
+  flex-basis: 40px;
+}
+#ext_ichiba_info .author-box .left img {
+  width: 100%;
+  border-radius: 100px;
+}
+#ext_ichiba_info .author-box .right {
+  flex-basis: calc(100% - 40px);
+  font-size: 19px;
+  line-height: 1.3;
+}
+#ext_ichiba_info .author-box .right .author-name {
+  display: block;
+  font-size: 14px;
+  line-height: 1;
+  color: rgb(158, 158, 255);
+}
+#ext_ichiba_info .author-box .right .level {
+  font-size: 12px;
+  line-height: 1;
+}
+#ext_ichiba_info .hideBtn {
+  position: absolute;
+  top: 0;
+  right: 10px;
+  cursor: pointer;
+  font-size: 28px;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+}
+
 /* コテハン入力画面 */
 #ext_myKotehanBox {
   display: none;

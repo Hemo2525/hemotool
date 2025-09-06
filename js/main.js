@@ -340,7 +340,6 @@ function setExtSettingMenuHeight() {
     //let maxHeight = document.querySelectorAll('.ext-setting-menu > div').length * ITEM_HEIGHT;
     if(document.querySelector('.ext-setting-menu'))
         document.querySelector('.ext-setting-menu').style.maxHeight  = maxHeight + "px";
-
 }
 
 function setExtPopupHeight() {
@@ -349,6 +348,7 @@ function setExtPopupHeight() {
     if(height > 400) {
         height = 400;
     }
+
     if(document.querySelector('.ext-popup')){
         document.querySelector('.ext-popup').style.height = height + "px";
         document.querySelector('.ext-popup').style.top = -height - 60 + "px";    
@@ -535,6 +535,31 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
     document.querySelector('[class^=___player-controller___]').append(ichibaShortcut);
     // 市場ショートカット用のDOMに各ショートカットを追加する
     addIchibaShortcut();
+
+
+    // 市場情報用のDOMを作成しておく
+    const ichibaInfo = document.createElement('div');
+    ichibaInfo.id = "ext_ichiba_info";
+    ichibaInfo.innerHTML = '<div class="game-box">'
+                         +   '<div class="left"></div>'
+                         +   '<div class="right"></div>'
+                         + '</div>'
+                         + '<div class="author-box">'
+                         +   '<div class="left">'
+                         +     '<img src="">'
+                         +   '</div>'
+                         +   '<div class="right">'
+                         +     '<a class="author-name" href="" target="_blank"></a>'
+                         +     '<span class="level"></span>'
+                         +   '</div>'
+                         + '</div>'
+                         + '<div class="description-box"></div>'
+                         + '<div class="hideBtn">×</div>';
+    document.querySelector('[class^=___player-controller___]').append(ichibaInfo);
+    const hideBtn = document.querySelector("#ext_ichiba_info .hideBtn");
+    hideBtn.addEventListener('click', function(){
+        document.querySelector("#ext_ichiba_info").classList.remove("show");
+    });
     
 
     chrome.storage.local.get("ext_viewoff_array", function (value) {

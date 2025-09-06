@@ -50,11 +50,14 @@ function watchIchibaBaloon(mutationsList, observer) {
         if(mutation.type === "childList"){
             console.log(mutation);
 
-            // バルーンが追加されたことを確認
+            // バルーンが表示されたことを確認
             mutation.addedNodes.forEach((currentNode) => {
                 if(currentNode.id === "BALLOON-IFRAME"){
 
-
+                    // へもツールの他のウインドウを非表示
+                    document.querySelector("#ext_overlay").style.display = "none";
+                    document.querySelector('.ext-setting-menu').removeAttribute("ext-attr-show");
+                    document.querySelector('.ext-popup').classList.remove('show');
 
                     // イチバのバルーンDOMのiframeの監視を開始
                     const ichibaBaloonAreaIFrame = document.querySelector("#BALLOON-IFRAME"); // コメントDOMの大元の親DOMを指定
@@ -64,16 +67,7 @@ function watchIchibaBaloon(mutationsList, observer) {
                         });
                         obsIFrame.observe(ichibaBaloonAreaIFrame, ichibaOption);
                     }
-                    
-
-
                     addHemoToolToIchibaBaloon(currentNode);
-
-
-
-
-
-
                 }
             });
 
@@ -85,6 +79,10 @@ function watchIchibaBaloon(mutationsList, observer) {
                     if(addHemoTool){
                         addHemoTool.remove();
                     }
+                    const infoBtn = document.querySelector("#infoHemoToolBtn");
+                    if(infoBtn){
+                        infoBtn.remove();
+                    }
                 }
             });
         }
@@ -93,9 +91,16 @@ function watchIchibaBaloon(mutationsList, observer) {
 
 function addHemoToolToIchibaBaloon(currentNode) {
 
+    // [へもツールに追加]を削除
     const existAddHemoTool = document.querySelector("#addHemoTool");
     if(existAddHemoTool){
         existAddHemoTool.remove();
+    }
+
+    // [説明]を削除
+    const infoGameBtn = document.querySelector("#infoHemoToolBtn");
+    if(infoGameBtn){
+        infoGameBtn.remove();
     }
 
     /*
@@ -121,7 +126,7 @@ function addHemoToolToIchibaBaloon(currentNode) {
     const addHemoTool = document.createElement("button");
     addHemoTool.id = "addHemoTool";
     addHemoTool.setAttribute("data-ichiba-id", id);
-    addHemoTool.textContent = "へもツールに追加する";
+    addHemoTool.textContent = "へもツールに追加";
     ichibaBaloon.appendChild(addHemoTool);
     addHemoTool.addEventListener("click", function(){
         console.log(this.getAttribute("data-ichiba-id"));
@@ -160,7 +165,7 @@ function addHemoToolToIchibaBaloon(currentNode) {
 
                     // 既に追加済みなら追加しない
                     if(value.ichibaList.find(item => item.itemId === id && item.folderName === folderName)){
-                        addHemoTool.textContent = "追加済みのアイテムです";
+                        addHemoTool.textContent = "追加済みアイテム";
                         console.log("既に追加済みのアイテムです");
                         return;
                     }
@@ -210,6 +215,13 @@ function addHemoToolToIchibaBaloon(currentNode) {
             console.error("アイコンが選択されていません");
         }
     });
+
+    const infoBtn = document.createElement("button");
+    infoBtn.id = "infoHemoToolBtn";
+    //infoBtn.setAttribute("data-ichiba-id", id);
+    infoBtn.textContent = "説明";
+    ichibaBaloon.appendChild(infoBtn);
+    infoBtn.addEventListener("click", function() {showIchibaInfo(id, folderName)});
 }
 
 function addIchibaShortcut() {
@@ -298,6 +310,12 @@ function addIchibaShortcut() {
                         dom.remove();
                     }
                 });
+
+                let infoBtn = document.createElement('span');
+                infoBtn.className = "info-btn";
+                infoBtn.textContent = "i";
+                dom.appendChild(infoBtn);
+                infoBtn.addEventListener('click', function(){showIchibaInfo(item.itemId, item.folderName)});
 
                 let balloon = document.createElement('div');
                 balloon.classList.add("balloon");
@@ -439,6 +457,8 @@ function addIchibaShortcut() {
                                         const minutes = Math.floor(product.data.cooldownTime / 60);
                                         const seconds = product.data.cooldownTime % 60;
                                         errorMessage =  "残り " + minutes + "分" + seconds + "秒 待機が必要です";
+                                        
+                                        setIchibaWaitTime(minutes, seconds);
                                         break;
                                     case "ITEM_ALREADY_EXISTS":
                                         errorMessage = "既にリクエストされています";
@@ -601,4 +621,235 @@ function addIchibaShortcut() {
             ichibaShortcut.textContent = "ここにゲームが登録されます。リクエスト済みのゲームをクリックするとショートカットに登録できます。";
         }
     });
+}
+
+async function showIchibaInfo(itemId, folderName){
+
+    const extIchibaInfo = document.querySelector("#ext_ichiba_info");
+
+    // 既に同じアイテムが表示されている場合は、表示を解除
+    if(extIchibaInfo.classList.contains("show")){
+        if(extIchibaInfo.getAttribute("data-item-id") === folderName + "-" + itemId){
+            extIchibaInfo.classList.remove("show");
+            return;
+        }
+    }
+
+    // 情報ウインドウの位置と高さを設定
+    const  playerHeight = document.querySelector('[class^=___player-display-screen___]').clientHeight * 0.9;
+    const playerController = document.querySelector('[class^=___player-controller___]');
+    extIchibaInfo.style.bottom = playerController.clientHeight + "px";
+    extIchibaInfo.style.maxHeight = playerHeight + "px";
+
+
+    extIchibaInfo.setAttribute("data-item-id", folderName + "-" + itemId);
+
+    const data = await getIchibaProductInfo(folderName, itemId, _embeddedDataJson.program.nicoliveProgramId);
+    console.log(data);
+
+
+    const owner = await getOwner(data.data.id);
+    console.log(owner);
+
+    /*
+    
+    以下のDOMに、データを追加する
+
+    <div id="ext_ichiba_info" class="show">
+        <div class="game-box">
+            <div class="left">
+                <img src="画像URL" alt="アイテムタイトル">
+            </div>
+            <div class="right">
+                <div class="title">アイテムタイトル</div>
+            </div>
+        </div>
+        <div class="author-box">
+            <div class="left">
+                <img src="アイコンURL" alt="アイコンタイトル">
+            </div>
+            <div class="right">
+                <a class="author-name" href="ユーザーURL" target="_blank">ドワンゴ</a>
+                <span class="level">Lv.10</span>
+            </div>
+        </div>
+        <div class="description-box">みんなで交互にストーンを投げてフィールドのストーンをこわしましょう。「ココ」機能無し版</div>
+    </div>
+
+    */
+
+    const gameBox = document.querySelector("#ext_ichiba_info .game-box");
+    gameBox.innerHTML = '<div class="left"></div><div class="right"></div></div>';
+
+    const left = document.querySelector("#ext_ichiba_info .game-box .left");
+    const leftImg = document.createElement('img');
+    leftImg.src = data.data.thumbnailUrl;
+    left.appendChild(leftImg);
+
+    const right = document.querySelector("#ext_ichiba_info .game-box .right");
+    const title = document.createElement('div');
+    title.innerText = data.data.title;
+    right.appendChild(title);
+
+    const authorBox = document.querySelector("#ext_ichiba_info .author-box");
+
+    if(owner.meta.status === 200) {
+        authorBox.classList.remove("hide");
+
+        // 作者のアイコン
+        const authorIcon = document.querySelector("#ext_ichiba_info .author-box .left img");
+        authorIcon.src = owner.data.niconicoUserInfo.icons.urls["150x150"] || owner.data.niconicoUserInfo.icons.urls["50x50"];
+        authorIcon.alt = owner.data.niconicoUserInfo.displayName;
+
+        // 作者の名前
+        const authorName = document.querySelector("#ext_ichiba_info .author-box .author-name");
+        authorName.href = "https://www.nicovideo.jp/user/" + owner.data.niconicoUserInfo.id;
+        authorName.innerText = owner.data.displayName;
+
+        // 作者のレベル
+        const authorLevel = document.querySelector("#ext_ichiba_info .author-box .level");
+        authorLevel.innerText = "Lv." + owner.data.niconicoUserInfo.level;
+    } else {
+        authorBox.classList.add("hide");
+    }
+
+    console.log("説明" + data.data.description);
+    const descriptionBox = document.querySelector("#ext_ichiba_info .description-box");
+    descriptionBox.innerText = data.data.description;
+
+
+    // 表示する
+    extIchibaInfo.classList.add("show");
+    
+}
+
+async function getOwner(ownerId) {
+    const url = "https://eapi.spi.nicovideo.jp/v2/products/products/" + ownerId + "/owner";
+
+    // fetchに渡す設定情報
+    const options = {
+        "headers": {
+            "accept": "application/json",
+            "accept-language": "ja,en-US;q=0.9,en;q=0.8,yi;q=0.7,zh-TW;q=0.6,zh;q=0.5",
+            "content-type": "application/json",
+            "sec-ch-ua": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-site"
+        },
+        "referrer": "https://spi.nicovideo.jp/",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "method": "GET",
+        "mode": "cors",
+        "credentials": "include"
+    };
+
+    const response = await fetch(url, options);
+
+    // response.ok はステータスコードが200-299の範囲にあるかを示す
+    // falseの場合、サーバーがエラーを返したことを意味する
+    if (!response.ok) {
+        console.error(`HTTPエラーが発生しました: ${response.status} ${response.statusText}`);
+        
+        let errorBody;
+        try {
+            // エラーレスポンスの本体をJSONとして解析試行
+            errorBody = await response.json();
+        } catch (e) {
+            // JSONでなければテキストとして取得
+            errorBody = await response.text();
+        }
+        
+        // サーバーから返されたエラーの詳細をコンソールに表示
+        console.error("サーバーからのエラー詳細:", errorBody);
+        
+        // エラーなのでここで処理を中断
+        return errorBody; 
+    }
+
+    // 通信が成功した場合、応答をJSONとして解析
+    const data = await response.json();
+    console.log("成功:", data);
+
+    return data;
+}
+
+async function getIchibaProductInfo(folderName, itemId, programId) {
+                
+    const url =  "https://eapi.spi.nicovideo.jp/v2/services/" + folderName + "/products/" + itemId + "?exclude_registered=false&tmp_page_id=detail&contentId=" + programId;
+
+    // fetchに渡す設定情報
+    const options = {
+        "headers": {
+            "accept": "application/json",
+            "accept-language": "ja,en-US;q=0.9,en;q=0.8,yi;q=0.7,zh-TW;q=0.6,zh;q=0.5",
+            "content-type": "application/json",
+            "sec-ch-ua": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-site"
+        },
+        "referrer": "https://spi.nicovideo.jp/",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "method": "GET",
+        "mode": "cors",
+        "credentials": "include"
+    };
+    const response = await fetch(url, options);
+
+    // response.ok はステータスコードが200-299の範囲にあるかを示す
+    // falseの場合、サーバーがエラーを返したことを意味する
+    if (!response.ok) {
+        console.error(`HTTPエラーが発生しました: ${response.status} ${response.statusText}`);
+        
+        let errorBody;
+        try {
+            // エラーレスポンスの本体をJSONとして解析試行
+            errorBody = await response.json();
+        } catch (e) {
+            // JSONでなければテキストとして取得
+            errorBody = await response.text();
+        }
+        
+        // サーバーから返されたエラーの詳細をコンソールに表示
+        console.error("サーバーからのエラー詳細:", errorBody);
+        
+        // エラーなのでここで処理を中断
+        return; 
+    }
+
+    // 通信が成功した場合、応答をJSONとして解析
+    const data = await response.json();
+    console.log("成功:", data);
+
+    return data;
+}
+
+
+let _ichibaInterval = null;
+
+function setIchibaWaitTime(minutes, seconds) {
+    if(_ichibaInterval) {
+        clearInterval(_ichibaInterval);
+        _ichibaInterval = null;
+    }
+
+    const waitTime = document.querySelector('#ext_ichiba_shortcut .time-box');
+    waitTime.innerText = "次のリクエストまで\n残り" + minutes + "分" + seconds + "秒";
+
+    // 受け取った分と秒数を1秒毎にカウントダウンさせて表示する
+    let count = minutes * 60 + seconds;
+    _ichibaInterval = setInterval(function() {
+        count--;
+        waitTime.innerText = "次のリクエストまで\n残り" + Math.floor(count / 60) + "分" + count % 60 + "秒";
+        if(count <= 0) {
+            clearInterval(_ichibaInterval);
+            _ichibaInterval = null;
+            waitTime.innerText = "次のリクエストが可能です";
+        }
+    }, 1000);
 }

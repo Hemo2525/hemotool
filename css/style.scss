@@ -1539,7 +1539,7 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
     bottom: 16px;
     left: 109px;
     font-size: 12px;
-    padding: 5px 8px;
+    padding: 4px 8px 6px;
 
     color: white;
     cursor: pointer;
@@ -1555,10 +1555,39 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
 }
 
 
+#infoHemoToolBtn {
+    position: absolute;
+    background-color: rgb(73, 144, 226);
+    bottom: 16px;
+    left: 224px;
+    font-size: 12px;
+    color: white;
+    cursor: pointer;
+    border-width: initial;
+    border-style: none;
+    border-color: initial;
+    border-image: initial;
+    border-radius: 5px;
+    padding: 4px 8px 6px;
+
+    transition: opacity 0.3s ease;
+
+    &:hover {
+        opacity: 0.5;
+    }
+}
+[class^=___ichiba-balloon___][data-size] #infoHemoToolBtn {
+    display: block;
+}
+
+$ichibaItemSize: 34px;
+
 #ext_ichiba_shortcut {
     display: none;
-    align-items: center;
-    justify-content: flex-end;
+    align-items: stretch;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: 8px;
 
     width: 100%;
     padding: 8px 7px 10px 4px;
@@ -1569,8 +1598,6 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
 
     &.show {
         display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
     }
 
     &.disabled {
@@ -1583,16 +1610,30 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
         }
     }
 
+    .time-box {
+        flex-basis: 160px;
+        text-align: center;
+        background-color: #2d2d2d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        font-size: 13px;
+        
+        line-height: 1.3;
+    }
+
     .item-box {
+        flex-basis: calc(100% - 160px);
         display: flex;
         align-items: center;
         justify-content: flex-end;
         flex-wrap: wrap;
-        gap: 8px;
+        gap: 9px;
     }
 
     .item {
-        flex-basis: 40px;
+        flex-basis: $ichibaItemSize;
         position: relative;
         background-color: white;
         // margin-left: 10px;
@@ -1602,12 +1643,41 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
         border-radius: 4px;
         // overflow: hidden;
 
+        &:before {
+            filter: drop-shadow(0 0 3px rgba(26, 26, 26, .3));
+            content: attr(aria-label);
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            background-color: white;
+            color: #1a1a1a;
+            text-overflow: ellipsis;
+            z-index: 10000;
+            border-radius: 4px;
+            max-width: 14em;
+            margin-bottom: 6px;
+            padding: 2px 8px;
+            font-size: 12px;
+            transition: opacity .1s;
+            display: block;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            overflow: hidden;
+            pointer-events: none;
+            transform: translate(-50%);   
+        }
+
+        &:hover:before {
+            opacity: 1;
+        }
+
 
 
         img {
             object-fit: cover;
-            height: 40px;
-            width: 40px;
+            height: $ichibaItemSize;
+            width: $ichibaItemSize;
             border-radius: 3px;
 
             display: block;
@@ -1628,6 +1698,32 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
             line-height: 1;
             padding: 0px 3px 2px;
             font-size: 14px;
+            transition: background-color 0.15s ease;
+            &:hover {
+                background-color: rgb(85, 156, 255);
+            }
+
+        }
+
+        .info-btn {
+            position: absolute;
+            cursor: pointer;
+            color: white;
+            top: 15px;
+            right: -8px;
+            background-color: black;
+            line-height: 1;
+            font-size: 11px;
+            border-width: 1px;
+            border-style: solid;
+            border-color: white;
+            border-image: initial;
+            border-radius: 134px;
+            padding: 2px 6px 2px;
+            transition: background-color 0.15s ease;
+            &:hover {
+                background-color: rgb(85, 156, 255);
+            }
         }
 
         .balloon {
@@ -1701,6 +1797,8 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
             background: linear-gradient(to bottom, #007bff, #0056b3);
             border-radius: 2px;
             animation: pulse 1s infinite;
+            height: 100%;
+            padding: 0;
         }
         
         // ドラッグ可能スタイル
@@ -1736,7 +1834,9 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
         &:hover:not(.dragging) {
             // transform: translateY(-2px);
             // box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            opacity: 0.8;
+            img {
+                opacity: 0.8;
+            }
         }
     }
     
@@ -1747,7 +1847,7 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
             rgba(0, 123, 255, 0.02) 100%);
         border: 2px dashed #007bff;
         border-radius: 8px;
-        
+        /*
         &::before {
             content: 'ここにドロップ';
             position: absolute;
@@ -1761,6 +1861,7 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
             pointer-events: none;
             z-index: -1;
         }
+            */
     }
 }
 
@@ -1776,6 +1877,98 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
     }
 }
 
+#ext_ichiba_info {
+    box-sizing: border-box;
+    display: none;
+    position: absolute;
+    z-index: 1;
+    // top: -432px;
+    right: 15px;
+    width: 320px;
+    // height: 380px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.9);
+    overflow: auto;
+    overscroll-behavior: contain; // スクロールの挙動をコンテナ内に限定
+    padding: 20px;
+    border-radius: 6px;
+    border: 1px solid white;
+
+    &.show {
+        display: block;
+    }
+
+    .game-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 10px;
+        .left {
+            flex-basis: 50px;
+            border-radius: 6px;
+            background-color: white;
+            height: 50px;
+            img {
+                width: 50px;
+                height: 50px;
+                object-fit: fill;
+            }
+        }
+        .right {
+            flex-basis: calc(100% - 50px);
+            font-size: 19px;
+            line-height: 1.3;
+        }
+    }
+    .author-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 10px;
+        // background-color: rgba(255, 255, 255, 0.239);
+        border: 1px solid white;
+        padding: 5px 10px 3px;
+        border-radius: 5px;
+
+        &.hide {
+            display: none;
+        }
+
+        .left {
+            flex-basis: 40px;
+            img {
+                width: 100%;
+                border-radius: 100px
+            }
+        }
+        .right {
+            flex-basis: calc(100% - 40px);
+            font-size: 19px;
+            line-height: 1.3;
+            .author-name {
+                display: block;
+                font-size: 14px;
+                line-height: 1;
+                color: rgb(158, 158, 255);
+            }
+            .level {
+                font-size: 12px;
+                line-height: 1;
+            }
+        }
+    }
+
+    .hideBtn {
+        position: absolute;
+        top: 0;
+        right: 10px;
+        cursor: pointer;
+        font-size: 28px;
+        user-select: none;
+    }
+}
 
 
 
