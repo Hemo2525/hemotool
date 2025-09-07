@@ -1904,6 +1904,9 @@ $ichibaItemSize: 34px;
         justify-content: space-between;
         gap: 10px;
         margin-bottom: 10px;
+        &.hide {
+            display: none;
+        }
         .left {
             flex-basis: 50px;
             border-radius: 6px;
@@ -1919,6 +1922,13 @@ $ichibaItemSize: 34px;
             flex-basis: calc(100% - 50px);
             font-size: 19px;
             line-height: 1.3;
+        }
+    }
+    .game-info-box {
+        margin-bottom: 11px;
+        color: #ffa0a0;
+        &.hide {
+            display: none;
         }
     }
     .author-box {
@@ -1948,20 +1958,45 @@ $ichibaItemSize: 34px;
             font-size: 19px;
             line-height: 1.3;
             .author-name {
-                display: block;
+                display: inline-block;
+                margin-left: 9px;
                 font-size: 14px;
                 line-height: 1;
                 color: rgb(158, 158, 255);
+                transition: opacity 0.15s ease;
+                &:hover {
+                    opacity: 0.8;
+                }
             }
             .level {
                 font-size: 12px;
                 line-height: 1;
+            }
+            a.more-info {
+                font-size: 12px;
+                line-height: 1;
+                display: block;
+                background-color: rgb(227, 227, 227);
+                text-decoration: none;
+                border-radius: 100px;
+                color: #000000;
+                padding: 4px 10px;
+                text-align: center;
+                margin-top: 5px;
+                margin-bottom: 7px;
+                transition: opacity 0.15s ease;
+                &:hover {
+                    opacity: 0.8;
+                }
             }
         }
     }
 
     .description-box {
         text-align: justify;
+        &.hide {
+            display: none;
+        }
     }
 
     .hideBtn {
@@ -1972,10 +2007,24 @@ $ichibaItemSize: 34px;
         font-size: 28px;
         user-select: none;
     }
+    .loading-box {
+        display: none;
+        &.show {
+            display: block;
+        }
+        /* HTML: <div class="loader"></div> */
+        .loader {
+            width: 30px;
+            aspect-ratio: 4;
+            background: radial-gradient(circle closest-side,rgba(255, 255, 255, 0.596) 90%,rgba(255, 255, 255, 0)) 0/calc(100%/3) 100% no-repeat;
+            animation: l2 0.8s steps(4) infinite;
+
+            margin: 0 auto;
+          }
+    }
 }
 
-
-
+@keyframes l2 {to{background-position: 150%}}
 
 /* コテハン入力画面 */
 #ext_myKotehanBox {

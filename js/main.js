@@ -544,17 +544,22 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
                          +   '<div class="left"></div>'
                          +   '<div class="right"></div>'
                          + '</div>'
+                         + '<div class="game-info-box">'
+                         +   '<div class="count"></div>'
+                         +   '<div class="update-date"></div>'
+                         + '</div>'
                          + '<div class="author-box">'
                          +   '<div class="left">'
                          +     '<img src="">'
                          +   '</div>'
                          +   '<div class="right">'
-                         +     '<a class="author-name" href="" target="_blank"></a>'
-                         +     '<span class="level"></span>'
+                         +     '<span class="level"></span><a class="author-name" href="" target="_blank"></a>'
+                         +     '<a class="more-info" href="" target="_blank">この作者の他のゲームを見る</a>'
                          +   '</div>'
                          + '</div>'
                          + '<div class="description-box"></div>'
-                         + '<div class="hideBtn">×</div>';
+                         + '<div class="hideBtn">×</div>'
+                         + '<div class="loading-box"><div class="loader"></div></div>';
     document.querySelector('[class^=___player-controller___]').append(ichibaInfo);
     const hideBtn = document.querySelector("#ext_ichiba_info .hideBtn");
     hideBtn.addEventListener('click', function(){

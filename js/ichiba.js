@@ -623,6 +623,33 @@ function addIchibaShortcut() {
     });
 }
 
+function extShowLoading() {
+    const gameBox = document.querySelector("#ext_ichiba_info .game-box");
+    gameBox.classList.add("hide");
+    const gameInfoBox = document.querySelector("#ext_ichiba_info .game-info-box");
+    gameInfoBox.classList.add("hide");
+    const authorBox = document.querySelector("#ext_ichiba_info .author-box");
+    authorBox.classList.add("hide");
+    const descriptionBox = document.querySelector("#ext_ichiba_info .description-box");
+    descriptionBox.classList.add("hide");
+
+    const loadingBox = document.querySelector("#ext_ichiba_info .loading-box");
+    loadingBox.classList.add("show");
+}
+
+function extHideLoading() {
+    const gameBox = document.querySelector("#ext_ichiba_info .game-box");
+    gameBox.classList.remove("hide");
+    const gameInfoBox = document.querySelector("#ext_ichiba_info .game-info-box");
+    gameInfoBox.classList.remove("hide");
+    const authorBox = document.querySelector("#ext_ichiba_info .author-box");
+    authorBox.classList.remove("hide");
+    const descriptionBox = document.querySelector("#ext_ichiba_info .description-box");
+    descriptionBox.classList.remove("hide");
+    const loadingBox = document.querySelector("#ext_ichiba_info .loading-box");
+    loadingBox.classList.remove("show");
+}
+
 async function showIchibaInfo(itemId, folderName){
 
     const extIchibaInfo = document.querySelector("#ext_ichiba_info");
@@ -635,6 +662,9 @@ async function showIchibaInfo(itemId, folderName){
         }
     }
 
+    // ローディングを表示
+    extShowLoading();
+
     // 情報ウインドウの位置と高さを設定
     const  playerHeight = document.querySelector('[class^=___player-display-screen___]').clientHeight * 0.9;
     const playerController = document.querySelector('[class^=___player-controller___]');
@@ -642,14 +672,42 @@ async function showIchibaInfo(itemId, folderName){
     extIchibaInfo.style.maxHeight = playerHeight + "px";
 
 
+    // 表示する
+    extIchibaInfo.classList.add("show");
+
+
     extIchibaInfo.setAttribute("data-item-id", folderName + "-" + itemId);
 
-    const data = await getIchibaProductInfo(folderName, itemId, _embeddedDataJson.program.nicoliveProgramId);
-    console.log(data);
+    // Product情報を取得
+    console.log("Product情報を取得します");
+    const product = await getIchibaProductInfo(folderName, itemId, _embeddedDataJson.program.nicoliveProgramId);
+    console.log(product);
 
 
-    const owner = await getOwner(data.data.id);
-    console.log(owner);
+    
+    let service;
+    let game;
+    let owner;
+
+    // 投稿ゲームの場合
+    if(product.data.categoryName == "akasha"){
+        // Service情報を取得
+        console.log("Service情報を取得します");
+        service = await getIchibaServiceInfo(folderName, itemId, _embeddedDataJson.program.nicoliveProgramId);
+        console.log(service);
+
+        // Game情報を取得
+        console.log("Game情報を取得します");
+        game = await getIchibaGameInfo(service.data.content.originContentId);
+        console.log(game);
+
+        // Owner情報を取得
+        console.log("Owner情報を取得します");
+        owner = await getOwner(product.data.id);
+        console.log(owner);
+
+    }
+
 
     /*
     
@@ -678,22 +736,40 @@ async function showIchibaInfo(itemId, folderName){
 
     */
 
+    /*--------------------------------
+    // ゲーム情報
+    --------------------------------*/
+
     const gameBox = document.querySelector("#ext_ichiba_info .game-box");
     gameBox.innerHTML = '<div class="left"></div><div class="right"></div></div>';
 
     const left = document.querySelector("#ext_ichiba_info .game-box .left");
     const leftImg = document.createElement('img');
-    leftImg.src = data.data.thumbnailUrl;
+    leftImg.src = product.data.thumbnailUrl;
     left.appendChild(leftImg);
 
     const right = document.querySelector("#ext_ichiba_info .game-box .right");
     const title = document.createElement('div');
-    title.innerText = data.data.title;
+    title.innerText = product.data.title;
     right.appendChild(title);
 
+    
+    if(game) {
+        const count = document.querySelector("#ext_ichiba_info .game-info-box .count");
+        count.innerText = "起動回数：" + game.playCount + "回";
+        const updateDate = document.querySelector("#ext_ichiba_info .game-info-box .update-date");
+        updateDate.innerText = "更新日時：" + game.updateDate;    
+    }
+    
+    
+
+
+    /*--------------------------------
+    // 作者情報
+    --------------------------------*/
     const authorBox = document.querySelector("#ext_ichiba_info .author-box");
 
-    if(owner.meta.status === 200) {
+    if(owner && owner.meta.status === 200) {
         authorBox.classList.remove("hide");
 
         // 作者のアイコン
@@ -709,18 +785,132 @@ async function showIchibaInfo(itemId, folderName){
         // 作者のレベル
         const authorLevel = document.querySelector("#ext_ichiba_info .author-box .level");
         authorLevel.innerText = "Lv." + owner.data.niconicoUserInfo.level;
-    } else {
-        authorBox.classList.add("hide");
+
+        // 作者の他のゲームを見る
+        const moreInfo = document.querySelector("#ext_ichiba_info .author-box .more-info");
+        moreInfo.href = "https://namagame.coe.nicovideo.jp/users/" + owner.data.niconicoUserInfo.id + "/games";
+        moreInfo.innerText = "この作者の他のゲームを見る";
+
     }
 
-    console.log("説明" + data.data.description);
+    // console.log("説明" + product.data.description);
     const descriptionBox = document.querySelector("#ext_ichiba_info .description-box");
-    descriptionBox.innerText = data.data.description;
+    descriptionBox.innerText = product.data.description;
 
 
-    // 表示する
-    extIchibaInfo.classList.add("show");
+    // ローディングを非表示
+    extHideLoading();
+
+    // 作者情報が取得できなかった場合は最後に非表示
+    if(!owner || owner.meta.status != 200) {
+        authorBox.classList.add("hide");
+    }
+    // ゲーム情報が取得できなかった場合は最後に非表示
+    if(!game || game.meta.status != 200) {
+        const gameInfoBox = document.querySelector("#ext_ichiba_info .game-info-box");
+        gameInfoBox.classList.add("hide");
+    }
+}
+
+
+async function getIchibaGameInfo(lgId) {
+
+    // 以下のURLからHTMLを取得して特定のタグのテキストを取得する
+    // https://namagame.coe.nicovideo.jp/games/lg0000
+
+    const url = "https://namagame.coe.nicovideo.jp/games/" + lgId;
+    const response = await fetch(url);
     
+    // response.ok はステータスコードが200-299の範囲にあるかを示す
+    // falseの場合、サーバーがエラーを返したことを意味する
+    if (!response.ok) {
+        console.error(`HTTPエラーが発生しました: ${response.status} ${response.statusText}`);
+        
+        let errorBody;
+        try {
+            // エラーレスポンスの本体をJSONとして解析試行
+            errorBody = await response.json();
+        } catch (e) {
+            // JSONでなければテキストとして取得
+            errorBody = await response.text();
+        }
+        
+        // サーバーから返されたエラーの詳細をコンソールに表示
+        console.error("サーバーからのエラー詳細:", errorBody);
+        
+        // エラーなのでここで処理を中断
+        return errorBody; 
+    }
+
+    // 通信が成功した場合、DOMを解析してデータを取得
+    const html = await response.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+    const playCount = doc.querySelectorAll(".latest-game-information-value")[0]; // 起動回数
+    const updateDate = doc.querySelectorAll(".latest-game-information-value")[2]; // 更新日時
+
+    const data = {
+        playCount: playCount.innerText,
+        updateDate: updateDate.innerText
+    };
+    
+    return data;
+}
+
+
+
+async function getIchibaServiceInfo(folderName, itemId, programId) {
+
+    const url ="https://services-eapi.spi.nicovideo.jp/v1/services/" + folderName + "/services/program/programs/" + programId + "/contents/" + itemId;
+    // fetchに渡す設定情報
+    const options = {
+        "headers": {
+            "accept": "application/json",
+            "accept-language": "ja,en-US;q=0.9,en;q=0.8,yi;q=0.7,zh-TW;q=0.6,zh;q=0.5",
+            "content-type": "application/json",
+            "sec-ch-ua": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-site"
+        },
+        "referrer": "https://spi.nicovideo.jp/",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "method": "GET",
+        "mode": "cors",
+        "credentials": "include"
+    };
+
+    const response = await fetch(url, options);
+
+    // response.ok はステータスコードが200-299の範囲にあるかを示す
+    // falseの場合、サーバーがエラーを返したことを意味する
+    if (!response.ok) {
+        console.error(`HTTPエラーが発生しました: ${response.status} ${response.statusText}`);
+        
+        let errorBody;
+        try {
+            // エラーレスポンスの本体をJSONとして解析試行
+            errorBody = await response.json();
+        } catch (e) {
+            // JSONでなければテキストとして取得
+            errorBody = await response.text();
+        }
+        
+        // サーバーから返されたエラーの詳細をコンソールに表示
+        console.error("サーバーからのエラー詳細:", errorBody);
+        
+        // エラーなのでここで処理を中断
+        return errorBody; 
+    }
+
+    // 通信が成功した場合、応答をJSONとして解析
+    const data = await response.json();
+    console.log("成功:", data);
+
+    return data;
+
 }
 
 async function getOwner(ownerId) {
@@ -771,7 +961,7 @@ async function getOwner(ownerId) {
 
     // 通信が成功した場合、応答をJSONとして解析
     const data = await response.json();
-    console.log("成功:", data);
+    // console.log("成功:", data);
 
     return data;
 }
@@ -824,7 +1014,7 @@ async function getIchibaProductInfo(folderName, itemId, programId) {
 
     // 通信が成功した場合、応答をJSONとして解析
     const data = await response.json();
-    console.log("成功:", data);
+    // console.log("成功:", data);
 
     return data;
 }
