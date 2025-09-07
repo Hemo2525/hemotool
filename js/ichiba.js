@@ -696,10 +696,13 @@ async function showIchibaInfo(itemId, folderName){
         service = await getIchibaServiceInfo(folderName, itemId, _embeddedDataJson.program.nicoliveProgramId);
         console.log(service);
 
-        // Game情報を取得
-        console.log("Game情報を取得します");
-        game = await getIchibaGameInfo(service.data.content.originContentId);
-        console.log(game);
+        // 作者が非表示(HIDDEN)状態にしているゲームはゲームページが存在しないので、ゲーム情報を取得できない
+        if(product.data.usableState === "USABLE") {
+            // Game情報を取得
+            console.log("Game情報を取得します");
+            game = await getIchibaGameInfo(service.data.content.originContentId);
+            console.log(game);
+        }
 
         // Owner情報を取得
         console.log("Owner情報を取得します");
