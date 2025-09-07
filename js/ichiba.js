@@ -700,6 +700,7 @@ async function showIchibaInfo(itemId, folderName){
         // "HIDDEN"...非公開状態（でも作者は起動できる）
         // "USABLE"...通常公開状態
         // "ONLY_PREMIUM_USER"...プレミアム会員のみ起動可能？
+        // "DUPLICATED"...？
         if(product.data.usableState !== "HIDDEN") {
             // Game情報を取得
             console.log("Game情報を取得します");
