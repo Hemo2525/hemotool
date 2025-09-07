@@ -697,7 +697,10 @@ async function showIchibaInfo(itemId, folderName){
         console.log(service);
 
         // 作者が非表示(HIDDEN)状態にしているゲームはゲームページが存在しないので、ゲーム情報を取得できない
-        if(product.data.usableState === "USABLE") {
+        // "HIDDEN"...非公開状態（でも作者は起動できる）
+        // "USABLE"...通常公開状態
+        // "ONLY_PREMIUM_USER"...プレミアム会員のみ起動可能？
+        if(product.data.usableState !== "HIDDEN") {
             // Game情報を取得
             console.log("Game情報を取得します");
             game = await getIchibaGameInfo(service.data.content.originContentId);
@@ -910,7 +913,6 @@ async function getIchibaServiceInfo(folderName, itemId, programId) {
 
     // 通信が成功した場合、応答をJSONとして解析
     const data = await response.json();
-    console.log("成功:", data);
 
     return data;
 
