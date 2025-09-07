@@ -329,6 +329,20 @@ function addIchibaShortcut() {
                         return;
                     }
 
+                    // 放送ネタが禁止になっている配信では、「動画・生」タブのリクエストは禁止
+                    if(_embeddedDataJson.programSuperichiba.programIsPermittedToRequestSpecificNeta === false && item.folderName === "quotation"){
+                        
+                        // balloonにエラーメッセージを表示
+                        document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).textContent = "放送ネタが許可されていません";
+                        document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).classList.add("show");
+                        // 数ミリ秒後に非表示
+                        setTimeout(function(){
+                            document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).classList.remove("show");
+                            document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).style.pointerEvents = "none";
+                        }, 900);
+                        return
+                    }
+
                     const itemIcon = document.querySelector(".item.ichiba:has(.item-" + item.folderName + "-" + item.itemId + ") img");
                     itemIcon.classList.add("loading");
 

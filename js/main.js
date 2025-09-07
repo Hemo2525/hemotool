@@ -115,6 +115,7 @@ function getEmbeddedDataJson(){
         if(jsonString){
             try {
                 _embeddedDataJson = JSON.parse(jsonString);
+                console.log("ニコ生の埋込データを取得しました", _embeddedDataJson);
             } catch (err) {
                 console.error("ニコ生の埋込データを取得できませんでした", err);
             }
