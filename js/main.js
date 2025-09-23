@@ -332,11 +332,12 @@ function setExtSettingMenuHeight() {
     maxHeight += MENU_HEIGHT;
 
     maxHeight += document.querySelectorAll('.ext-setting-menu .ext-item.border-bottom').length * BORDER_HEIGHT;
-    
+    /*
     console.log("ボーダーの数：" + document.querySelectorAll('.ext-setting-menu .ext-item.border-bottom').length);
     console.log("アイテムの数：" + document.querySelectorAll('.ext-setting-menu .ext-item:not([ext-view-item-off])').length);
     console.log("メニューの高さ：" + document.querySelector('.ext-setting-menu .item.info')?.clientHeight);
     console.log("メニューの高さ：" + maxHeight);
+    */
 
     //let maxHeight = document.querySelectorAll('.ext-setting-menu > div').length * ITEM_HEIGHT;
     if(document.querySelector('.ext-setting-menu'))
@@ -417,7 +418,7 @@ function initialize(callback, timeoutMiliSec) {
 
 
 // ニコニコプレイヤーにボタンのDOMを挿入
-function insertBtnToPlayer(partsHtml, infoHtml) {
+async function insertBtnToPlayer(partsHtml, infoHtml) {
 
     // 拡張機能ボタンの挿入
     let settingMenu = document.querySelector("[class^=___comment-button___]");
@@ -530,12 +531,15 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
     //     <div class="time"></div>
     //     <div class="item-box"></div>
     // </div>
+    const plusIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path style="fill-rule:evenodd" d="M13.18 13.1h4.6v-2.33h-4.6V6.26h-2.36v4.51h-4.6v2.33h4.6v4.64h2.36V13.1z" fill="#fff"/></svg>';
     const ichibaShortcut = document.createElement('div');
     ichibaShortcut.id = "ext_ichiba_shortcut";
-    ichibaShortcut.innerHTML = '<div class="time-box"></div><div class="item-box"></div>';
+    ichibaShortcut.innerHTML = '<div class="time-box"></div><div class="hemo-view-game-btn">' + plusIcon + '</div><div class="item-box"></div>';
     document.querySelector('[class^=___player-controller___]').append(ichibaShortcut);
     // 市場ショートカット用のDOMに各ショートカットを追加する
     addIchibaShortcut();
+
+
 
 
     // 市場情報用のDOMを作成しておく
@@ -547,6 +551,7 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
                          + '</div>'
                          + '<div class="game-info-box">'
                          +   '<div class="count"></div>'
+                         +   '<div class="refCount"></div>'
                          +   '<div class="update-date"></div>'
                          + '</div>'
                          + '<div class="author-box">'
@@ -558,14 +563,30 @@ function insertBtnToPlayer(partsHtml, infoHtml) {
                          +     '<a class="more-info" href="" target="_blank">この作者の他のゲームを見る</a>'
                          +   '</div>'
                          + '</div>'
+                         + '<div class="pr-photo-box"><img src=""></div>'
                          + '<div class="description-box"></div>'
                          + '<div class="hideBtn">×</div>'
                          + '<div class="loading-box"><div class="loader"></div></div>';
     document.querySelector('[class^=___player-controller___]').append(ichibaInfo);
+
     const hideBtn = document.querySelector("#ext_ichiba_info .hideBtn");
     hideBtn.addEventListener('click', function(){
         document.querySelector("#ext_ichiba_info").classList.remove("show");
     });
+
+
+
+    const response = await fetch(chrome.runtime.getURL("/html/game-launcher.html"));
+    const gameLauncherHtml = await response.text();
+
+    // ニコ生ゲームランチャー用のオーバーレイ用のDOMを作成しておく
+    const nicoGameLauncherOverlay = document.createElement('div');
+    nicoGameLauncherOverlay.id = "ext_nico_game_launcher_overlay";
+    nicoGameLauncherOverlay.innerHTML = gameLauncherHtml;
+    document.querySelector('body').appendChild(nicoGameLauncherOverlay);
+    setEventGameLauncher();
+
+
     
 
     chrome.storage.local.get("ext_viewoff_array", function (value) {

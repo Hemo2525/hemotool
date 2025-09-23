@@ -95,7 +95,7 @@ function initBouyomiChan(selectedVoiceId) {
             });            
         })
         .catch(error => {
-            console.error('エラー:', error);
+            console.log('棒読みちゃんに接続できません', error);
         });
 }
 

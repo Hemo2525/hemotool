@@ -1,3 +1,23 @@
+
+const _fetchOptions = {
+    "headers": {
+        "accept": "application/json",
+        "accept-language": "ja,en-US;q=0.9,en;q=0.8,yi;q=0.7,zh-TW;q=0.6,zh;q=0.5",
+        "content-type": "application/json",
+        "sec-ch-ua": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\"",
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-site"
+    },
+    "referrer": "https://spi.nicovideo.jp/",
+    "referrerPolicy": "strict-origin-when-cross-origin",
+    "method": "POST",
+    "mode": "cors",
+    "credentials": "include"
+};
+
 function ichibaShortcutToggle() {
     console.log("ichibaShortcut------------------------");
 
@@ -102,6 +122,9 @@ function addHemoToolToIchibaBaloon(currentNode) {
     if(infoGameBtn){
         infoGameBtn.remove();
     }
+
+
+
 
     /*
     以下のURLから、id=521 を取得する
@@ -224,21 +247,36 @@ function addHemoToolToIchibaBaloon(currentNode) {
     infoBtn.addEventListener("click", function() {showIchibaInfo(id, folderName)});
 }
 
-function addIchibaShortcut() {
-    const ichibaShortcut = document.querySelector("#ext_ichiba_shortcut .item-box");
-    ichibaShortcut.innerHTML = "";
+async function addIchibaShortcut() {
+    const ichibaItemBox = document.querySelector("#ext_ichiba_shortcut .item-box");
+    ichibaItemBox.innerHTML = "";
 
     // タイムシフトなどで、ゲームを追加できない場合は、ショートカットを無効化
+    const waitTime = document.querySelector('#ext_ichiba_shortcut .time-box');
     const ichibaAddBtn = document.querySelector("[class^=___ichiba-counter-section___] [class^=___add-button___]");
     const bIsDisableIchiba = ichibaAddBtn && ichibaAddBtn.hasAttribute("disabled");
     if(bIsDisableIchiba){
+        const ichibaShortcut = document.querySelector("#ext_ichiba_shortcut");
         ichibaShortcut.classList.add("disabled");
+        waitTime.innerText = "リクエストできません";
+    } else {
+
+        const product = await getProduct(_embeddedDataJson.program.nicoliveProgramId);
+        if(product.data.cooldownTime > 0) {
+            // 秒数から、n分m秒を取得
+            const minutes = Math.floor(product.data.cooldownTime / 60);
+            const seconds = product.data.cooldownTime % 60;            
+            setIchibaWaitTime(minutes, seconds);
+        } else {
+            waitTime.innerText = "リクエストが可能です";
+        }
+
     }
 
-    /*
+    
     console.log("--------------------------------");
     console.log(_embeddedDataJson);
-    */
+    
 
     let frontendId = "9";
     if(_embeddedDataJson && _embeddedDataJson.site && _embeddedDataJson.site.frontendId){
@@ -265,7 +303,7 @@ function addIchibaShortcut() {
     chrome.storage.local.get("ichibaList", function (value) {
         if(value && value.ichibaList && Array.isArray(value.ichibaList)) {
 
-            ichibaShortcut.textContent = "";
+            ichibaItemBox.textContent = "";
 
             // DOMに各アイテムを追加していく
             value.ichibaList.forEach(function(item){
@@ -322,7 +360,7 @@ function addIchibaShortcut() {
                 balloon.classList.add("item-" + item.folderName + "-" + item.itemId);
                 dom.appendChild(balloon);
                 
-                ichibaShortcut.appendChild(dom);
+                ichibaItemBox.appendChild(dom);
 
                 img.addEventListener('click', function(){
                     if(bIsDisableIchiba){
@@ -359,176 +397,8 @@ function addIchibaShortcut() {
                     console.log("itemId:", item.itemId);
                     console.log("programId:", programId);
 
-
-                    async function getProduct(programId, folderName, itemId) {
-                        const url = "https://eapi.spi.nicovideo.jp/v1/users/self/authority?contentId=" + programId;                        
-
-                        // fetchに渡す設定情報
-                        const options = {
-                        "headers": {
-                            "accept": "application/json",
-                            "accept-language": "ja,en-US;q=0.9,en;q=0.8,yi;q=0.7,zh-TW;q=0.6,zh;q=0.5",
-                            "content-type": "application/json",
-                            "sec-ch-ua": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"",
-                            "sec-ch-ua-mobile": "?0",
-                            "sec-ch-ua-platform": "\"Windows\"",
-                            "sec-fetch-dest": "empty",
-                            "sec-fetch-mode": "cors",
-                            "sec-fetch-site": "same-site"
-                        },
-                        "referrer": "https://spi.nicovideo.jp/",
-                        "referrerPolicy": "strict-origin-when-cross-origin",
-                        "method": "GET",
-                        "mode": "cors",
-                        "credentials": "include"
-                        };
-                        const response = await fetch(url, options);
-                    
-                        // response.ok はステータスコードが200-299の範囲にあるかを示す
-                        // falseの場合、サーバーがエラーを返したことを意味する
-                        if (!response.ok) {
-                            console.error(`HTTPエラーが発生しました: ${response.status} ${response.statusText}`);
-                            
-                            let errorBody;
-                            try {
-                                // エラーレスポンスの本体をJSONとして解析試行
-                                errorBody = await response.json();
-                            } catch (e) {
-                                // JSONでなければテキストとして取得
-                                errorBody = await response.text();
-                            }
-                            
-                            // サーバーから返されたエラーの詳細をコンソールに表示
-                            console.error("サーバーからのエラー詳細:", errorBody);
-                            
-                            // エラーなのでここで処理を中断
-                            return; 
-                        }
-
-                        // 通信が成功した場合、応答をJSONとして解析
-                        const data = await response.json();
-                        console.log("成功:", data);
-                        return data;                        
-                    }
-
-
-                    // 通信を実行し、結果を処理する非同期関数
-                    async function postDataAndHandleErrors(programId, folderName, itemId) {
-                        
-                        const url = "https://eapi.spi.nicovideo.jp/v1/ichibas/" + programId + "/products";
-                        
-                        
-                        // fetchに渡す設定情報
-                        const options = {
-                        "headers": {
-                            "accept": "application/json",
-                            "accept-language": "ja,en-US;q=0.9,en;q=0.8,yi;q=0.7,zh-TW;q=0.6,zh;q=0.5",
-                            "content-type": "application/json",
-                            "sec-ch-ua": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"",
-                            "sec-ch-ua-mobile": "?0",
-                            "sec-ch-ua-platform": "\"Windows\"",
-                            "sec-fetch-dest": "empty",
-                            "sec-fetch-mode": "cors",
-                            "sec-fetch-site": "same-site"
-                        },
-                        "referrer": "https://spi.nicovideo.jp/",
-                        "referrerPolicy": "strict-origin-when-cross-origin",
-                        "body": "{\"serviceName\":\"" + folderName + "\",\"serviceProductId\":\"" + itemId + "\",\"frontendId\":" + frontendId + ",\"frontendVersion\":\"" + frontendVersion + "\",\"expectedGrade\":5}",
-                        "method": "POST",
-                        "mode": "cors",
-                        "credentials": "include"
-                        };
-                        
-                        try {
-                            // fetchリクエストを送信し、サーバーからの応答を待つ
-                            const response = await fetch(url, options);
-
-                            // response.ok はステータスコードが200-299の範囲にあるかを示す
-                            // falseの場合、サーバーがエラーを返したことを意味する
-                            if (!response.ok) {
-                                console.error(`HTTPエラーが発生しました: ${response.status} ${response.statusText}`);
-                                
-                                let errorBody;
-                                try {
-                                    // エラーレスポンスの本体をJSONとして解析試行
-                                    errorBody = await response.json();
-                                } catch (e) {
-                                    // JSONでなければテキストとして取得
-                                    errorBody = await response.text();
-                                }
-                                
-                                // サーバーから返されたエラーの詳細をコンソールに表示
-                                console.error("サーバーからのエラー詳細:", errorBody);
-
-
-
-                                let errorMessage = "リクエストに失敗しました";
-                                console.log("エラーコード: ", errorBody.meta.errorCode);
-                                switch(errorBody.meta.errorCode) {
-                                    case "NO_REMAINING_USE_RIGHT":
-                                        const product = await getProduct(programId, item.folderName, item.itemId);
-                                        // 秒数から、n分m秒を取得
-                                        const minutes = Math.floor(product.data.cooldownTime / 60);
-                                        const seconds = product.data.cooldownTime % 60;
-                                        errorMessage =  "残り " + minutes + "分" + seconds + "秒 待機が必要です";
-                                        
-                                        setIchibaWaitTime(minutes, seconds);
-                                        break;
-                                    case "ITEM_ALREADY_EXISTS":
-                                        errorMessage = "既にリクエストされています";
-                                        break;
-                                    case "BAD_REQUEST":
-                                        // タイムシフトの配信を見ているときにも発生するエラー
-                                        errorMessage = "リクエストに失敗しました";
-                                        break;
-                                    case "NOT_PREMIUM_USER":
-                                        errorMessage = "プレミアム会員が必要です";
-                                        break;
-                                    default:
-                                        break;
-                                }
-    
-                                // balloonにエラーメッセージを表示
-                                document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).textContent = errorMessage;
-                                document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).classList.add("show");
-                                // 数ミリ秒後に非表示
-                                setTimeout(function(){
-                                    document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).classList.remove("show");
-                                    document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).style.pointerEvents = "none";
-                                }, 900);
-
-                                itemIcon.classList.remove("loading");
-                                
-                                // エラーなのでここで処理を中断
-                                return; 
-                            }
-
-                            // 通信が成功した場合、応答をJSONとして解析
-                            const data = await response.json();
-                            console.log("成功:", data);
-
-                            // balloonに成功メッセージを表示
-                            document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).textContent = "リクエストしました";
-                            document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).classList.add("show");
-                            // 数ミリ秒後に非表示
-                            setTimeout(function(){
-                                document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).classList.remove("show");
-                            }, 900);
-
-                            itemIcon.classList.remove("loading");
-
-
-                        } catch (networkError) {
-                            // ネットワーク接続の問題やCORSエラーなど、通信自体が失敗した場合
-                            console.error("通信エラー:", networkError);
-                            itemIcon.classList.remove("loading");
-                        }
-                    }
-
-                    // 作成した関数を実行
-                    postDataAndHandleErrors(programId, item.folderName, item.itemId);
-
-
+                    // アイテムをリクエスト
+                    requestIchibaItem(programId, item, frontendId, frontendVersion);
 
                 });
                 
@@ -536,7 +406,7 @@ function addIchibaShortcut() {
 
             // 追加したアイテムはドラッグで並び替えできるようにする
             const items = document.querySelectorAll('#ext_ichiba_shortcut .item-box .item');
-            const dropbox = document.querySelector('#ext_ichiba_shortcut .item-box');
+            // const dropbox = document.querySelector('#ext_ichiba_shortcut .item-box');
             let draggedElement = null;
 
             items.forEach(function(item){
@@ -551,12 +421,12 @@ function addIchibaShortcut() {
                 });
             });
 
-            dropbox.addEventListener('dragover', function(event){
+            ichibaItemBox.addEventListener('dragover', function(event){
                 event.preventDefault();
                 
                 // ドロップ可能な位置を視覚的に示す
-                const afterElement = getDragAfterElement(dropbox, event.clientX);
-                const draggables = [...dropbox.querySelectorAll('.item:not(.dragging)')];
+                const afterElement = getDragAfterElement(ichibaItemBox, event.clientX);
+                const draggables = [...ichibaItemBox.querySelectorAll('.item:not(.dragging)')];
                 
                 // 既存のインジケーターを削除
                 draggables.forEach(item => item.classList.remove('drag-after'));
@@ -566,24 +436,24 @@ function addIchibaShortcut() {
                 }
             });
 
-            dropbox.addEventListener('drop', function(event){
+            ichibaItemBox.addEventListener('drop', function(event){
                 event.preventDefault();
                 
                 if (!draggedElement) return;
                 
                 // ドロップ位置を計算
-                const afterElement = getDragAfterElement(dropbox, event.clientX);
+                const afterElement = getDragAfterElement(ichibaItemBox, event.clientX);
                 
                 if (afterElement == null) {
                     // 末尾に挿入
-                    dropbox.appendChild(draggedElement);
+                    ichibaItemBox.appendChild(draggedElement);
                 } else {
                     // 指定した要素の前に挿入
-                    dropbox.insertBefore(draggedElement, afterElement);
+                    ichibaItemBox.insertBefore(draggedElement, afterElement);
                 }
                 
                 // 視覚的インジケーターをクリア
-                [...dropbox.querySelectorAll('.item')].forEach(item => 
+                [...ichibaItemBox.querySelectorAll('.item')].forEach(item => 
                     item.classList.remove('drag-after')
                 );
                 
@@ -632,9 +502,254 @@ function addIchibaShortcut() {
                 });
             }
         } else {
-            ichibaShortcut.textContent = "ここにゲームが登録されます。リクエスト済みのゲームをクリックするとショートカットに登録できます。";
+            ichibaItemBox.textContent = "ここにゲームが登録されます。リクエスト済みのゲームをクリックするとショートカットに登録できます。";
         }
     });
+}
+
+async function getProduct(programId) {
+    const url = "https://eapi.spi.nicovideo.jp/v1/users/self/authority?contentId=" + programId;                        
+
+    // fetchに渡す設定情報
+    const options = {
+        "headers": {
+            "accept": "application/json",
+            "accept-language": "ja,en-US;q=0.9,en;q=0.8,yi;q=0.7,zh-TW;q=0.6,zh;q=0.5",
+            "content-type": "application/json",
+            "sec-ch-ua": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-site"
+        },
+        "referrer": "https://spi.nicovideo.jp/",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "method": "GET",
+        "mode": "cors",
+        "credentials": "include"
+    };
+
+    const response = await fetch(url, options);
+
+    // response.ok はステータスコードが200-299の範囲にあるかを示す
+    // falseの場合、サーバーがエラーを返したことを意味する
+    if (!response.ok) {
+        console.error(`HTTPエラーが発生しました: ${response.status} ${response.statusText}`);
+        
+        let errorBody;
+        try {
+            // エラーレスポンスの本体をJSONとして解析試行
+            errorBody = await response.json();
+        } catch (e) {
+            // JSONでなければテキストとして取得
+            errorBody = await response.text();
+        }
+        
+        // サーバーから返されたエラーの詳細をコンソールに表示
+        console.error("サーバーからのエラー詳細:", errorBody);
+        
+        // エラーなのでここで処理を中断
+        return; 
+    }
+
+    // 通信が成功した場合、応答をJSONとして解析
+    const data = await response.json();
+    console.log("成功:", data);
+    return data;                        
+}
+
+
+async function getGrade(programId) {
+    const url = "https://eapi.spi.nicovideo.jp/v1/contents/" + programId + "/grade";                        
+
+    // fetchに渡す設定情報
+    const options = {
+        "headers": {
+            "accept": "application/json",
+            "accept-language": "ja,en-US;q=0.9,en;q=0.8,yi;q=0.7,zh-TW;q=0.6,zh;q=0.5",
+            "content-type": "application/json",
+            "sec-ch-ua": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-site"
+        },
+        "referrer": "https://spi.nicovideo.jp/",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "method": "GET",
+        "mode": "cors",
+        "credentials": "include"
+    };
+
+    const response = await fetch(url, options);
+
+    // response.ok はステータスコードが200-299の範囲にあるかを示す
+    // falseの場合、サーバーがエラーを返したことを意味する
+    if (!response.ok) {
+        console.error(`HTTPエラーが発生しました: ${response.status} ${response.statusText}`);
+        
+        let errorBody;
+        try {
+            // エラーレスポンスの本体をJSONとして解析試行
+            errorBody = await response.json();
+        } catch (e) {
+            // JSONでなければテキストとして取得
+            errorBody = await response.text();
+        }
+        
+        // サーバーから返されたエラーの詳細をコンソールに表示
+        console.error("サーバーからのエラー詳細:", errorBody);
+        
+        // エラーなのでここで処理を中断
+        return; 
+    }
+
+    // 通信が成功した場合、応答をJSONとして解析
+    const data = await response.json();
+    console.log("成功:", data);
+    return data;                        
+}
+
+// 通信を実行し、結果を処理する非同期関数
+async function requestIchibaItem(programId, item, frontendId, frontendVersion) {
+
+    const itemIcon = document.querySelector(".item.ichiba:has(.item-" + item.folderName + "-" + item.itemId + ") img");
+    itemIcon.classList.add("loading");
+
+    // 番組グレードを取得
+    const grade = await getGrade(programId);
+    if(!grade || grade.meta.status != 200) {
+        console.error("番組グレードを取得できませんでした");
+        return;
+    }
+    console.log("番組グレード:", grade.data.programGrade);
+
+
+    
+    const url = "https://eapi.spi.nicovideo.jp/v1/ichibas/" + programId + "/products";
+    
+    
+    // fetchに渡す設定情報
+    const options = {
+        "headers": {
+            "accept": "application/json",
+            "accept-language": "ja,en-US;q=0.9,en;q=0.8,yi;q=0.7,zh-TW;q=0.6,zh;q=0.5",
+            "content-type": "application/json",
+            "sec-ch-ua": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-site"
+        },
+        "referrer": "https://spi.nicovideo.jp/",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "body": "{\"serviceName\":\"" + item.folderName + "\",\"serviceProductId\":\"" + item.itemId + "\",\"frontendId\":" + frontendId + ",\"frontendVersion\":\"" + frontendVersion + "\",\"expectedGrade\":" + grade.data.programGrade + "}",
+        "method": "POST",
+        "mode": "cors",
+        "credentials": "include"
+    };
+    
+    try {
+        // fetchリクエストを送信し、サーバーからの応答を待つ
+        const response = await fetch(url, options);
+
+        // response.ok はステータスコードが200-299の範囲にあるかを示す
+        // falseの場合、サーバーがエラーを返したことを意味する
+        if (!response.ok) {
+            console.error(`HTTPエラーが発生しました: ${response.status} ${response.statusText}`);
+            
+            let errorBody;
+            try {
+                // エラーレスポンスの本体をJSONとして解析試行
+                errorBody = await response.json();
+            } catch (e) {
+                // JSONでなければテキストとして取得
+                errorBody = await response.text();
+            }
+            
+            // サーバーから返されたエラーの詳細をコンソールに表示
+            console.error("サーバーからのエラー詳細:", errorBody);
+
+
+
+            let errorMessage = "リクエストに失敗しました";
+            console.log("エラーコード: ", errorBody.meta.errorCode);
+            switch(errorBody.meta.errorCode) {
+                case "NO_REMAINING_USE_RIGHT":
+
+                    const product = await getProduct(programId);
+                    // 秒数から、n分m秒を取得
+                    const minutes = Math.floor(product.data.cooldownTime / 60);
+                    const seconds = product.data.cooldownTime % 60;
+                    errorMessage =  "残り " + minutes + "分" + seconds + "秒 待機が必要です";
+                    
+                    setIchibaWaitTime(minutes, seconds);
+                    break;
+                case "ITEM_ALREADY_EXISTS":
+                    errorMessage = "既にリクエストされています";
+                    break;
+                case "BAD_REQUEST":
+                    // タイムシフトの配信を見ているときにも発生するエラー
+                    errorMessage = "リクエストに失敗しました";
+                    break;
+                case "NOT_PREMIUM_USER":
+                    errorMessage = "プレミアム会員が必要です";
+                    break;
+                case "GRADE_HAS_CHANGED":
+                    errorMessage = "グレードが変更されました";
+                    break;
+                case "NOT_FOUND":
+                    errorMessage = "アイテムが見つかりません";
+                    break;
+                default:
+                    break;
+            }
+
+            // balloonにエラーメッセージを表示
+            document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).textContent = errorMessage;
+            document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).classList.add("show");
+            // 数ミリ秒後に非表示
+            setTimeout(function(){
+                document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).classList.remove("show");
+                document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).style.pointerEvents = "none";
+            }, 900);
+
+            itemIcon.classList.remove("loading");
+            
+            // エラーなのでここで処理を中断
+            return; 
+        }
+
+        // 通信が成功した場合、応答をJSONとして解析
+        const data = await response.json();
+        console.log("成功:", data);
+
+        // balloonに成功メッセージを表示
+        document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).textContent = "リクエストしました";
+        document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).classList.add("show");
+        // 数ミリ秒後に非表示
+        setTimeout(function(){
+            document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).classList.remove("show");
+        }, 900);
+
+        itemIcon.classList.remove("loading");
+
+        // 番組グレードを取得し、次のリクエストまでの時間を取得して表示しておく
+        const gradeData = await getGrade(programId);
+        // 次のリクエストまでの時間を取得して表示しておく
+        const minutes = Math.floor(gradeData.data.freezeTime / 60);
+        const seconds = gradeData.data.freezeTime % 60;    
+        setIchibaWaitTime(minutes, seconds);
+
+
+    } catch (networkError) {
+        // ネットワーク接続の問題やCORSエラーなど、通信自体が失敗した場合
+        console.error("通信エラー:", networkError);
+        itemIcon.classList.remove("loading");
+    }
 }
 
 function extShowLoading() {
@@ -646,6 +761,8 @@ function extShowLoading() {
     authorBox.classList.add("hide");
     const descriptionBox = document.querySelector("#ext_ichiba_info .description-box");
     descriptionBox.classList.add("hide");
+    const prPhotoBox = document.querySelector("#ext_ichiba_info .pr-photo-box");
+    prPhotoBox.classList.add("hide");
 
     const loadingBox = document.querySelector("#ext_ichiba_info .loading-box");
     loadingBox.classList.add("show");
@@ -660,6 +777,9 @@ function extHideLoading() {
     authorBox.classList.remove("hide");
     const descriptionBox = document.querySelector("#ext_ichiba_info .description-box");
     descriptionBox.classList.remove("hide");
+    //const prPhotoBox = document.querySelector("#ext_ichiba_info .pr-photo-box");
+    //prPhotoBox.classList.remove("hide");
+
     const loadingBox = document.querySelector("#ext_ichiba_info .loading-box");
     loadingBox.classList.remove("show");
 }
@@ -778,8 +898,23 @@ async function showIchibaInfo(itemId, folderName){
     if(game) {
         const count = document.querySelector("#ext_ichiba_info .game-info-box .count");
         count.innerText = "起動回数：" + game.playCount + "回";
+        const refCount = document.querySelector("#ext_ichiba_info .game-info-box .refCount");
+
+        // 参照カウントの数字を3桁区切りにして表示
+        const refCountText = product.data.refCount.toLocaleString();
+        refCount.innerText = "親作品登録：" + refCountText + "件";
+
         const updateDate = document.querySelector("#ext_ichiba_info .game-info-box .update-date");
-        updateDate.innerText = "更新日時：" + game.updateDate;    
+        updateDate.innerText = "更新日時：" + game.updateDate;
+
+        if(game.prPhotoUrl) {
+            document.querySelector("#ext_ichiba_info .pr-photo-box").classList.remove("hide");
+            const prPhoto = document.querySelector("#ext_ichiba_info .pr-photo-box img");
+            prPhoto.src = game.prPhotoUrl;
+        } else {
+            const prPhoto = document.querySelector("#ext_ichiba_info .pr-photo-box");
+            prPhoto.classList.add("hide");
+        }
     }
     
     
@@ -827,7 +962,7 @@ async function showIchibaInfo(itemId, folderName){
         authorBox.classList.add("hide");
     }
     // ゲーム情報が取得できなかった場合は最後に非表示
-    if(!game || game.meta.status != 200) {
+    if(!game) {
         const gameInfoBox = document.querySelector("#ext_ichiba_info .game-info-box");
         gameInfoBox.classList.add("hide");
     }
@@ -846,7 +981,7 @@ async function getIchibaGameInfo(lgId) {
     // falseの場合、サーバーがエラーを返したことを意味する
     if (!response.ok) {
         console.error(`HTTPエラーが発生しました: ${response.status} ${response.statusText}`);
-        
+        /*
         let errorBody;
         try {
             // エラーレスポンスの本体をJSONとして解析試行
@@ -861,6 +996,8 @@ async function getIchibaGameInfo(lgId) {
         
         // エラーなのでここで処理を中断
         return errorBody; 
+        */
+       return {};
     }
 
     // 通信が成功した場合、DOMを解析してデータを取得
@@ -870,10 +1007,22 @@ async function getIchibaGameInfo(lgId) {
     const playCount = doc.querySelectorAll(".latest-game-information-value")[0]; // 起動回数
     const updateDate = doc.querySelectorAll(".latest-game-information-value")[2]; // 更新日時
 
-    const data = {
-        playCount: playCount.innerText,
-        updateDate: updateDate.innerText
+    let prPhotoUrl = "";
+    const prPhoto =doc.querySelector(".promotion-photos-area img");
+    if(prPhoto){
+        prPhotoUrl = prPhoto.src;
+    }
+
+    let data = {
+        playCount: playCount ? playCount.innerText : "",
+        updateDate: updateDate ? updateDate.innerText : "",
+        prPhotoUrl: prPhotoUrl || ""
     };
+
+    if(!playCount) {
+        console.log("ゲームのネタ詳細ページが非公開か削除されたようです");
+        data = null;
+    }
     
     return data;
 }
@@ -1059,7 +1208,262 @@ function setIchibaWaitTime(minutes, seconds) {
         if(count <= 0) {
             clearInterval(_ichibaInterval);
             _ichibaInterval = null;
-            waitTime.innerText = "次のリクエストが可能です";
+            waitTime.innerText = "リクエストが可能です";
         }
     }, 1000);
 }
+
+
+function setEventGameLauncher() {
+    const overlay = document.querySelector("#ext_nico_game_launcher_overlay");
+    const gameLauncher = document.querySelector(".hemo-view-game-btn");
+
+    gameLauncher.addEventListener("click", function() {
+        overlay.classList.toggle("show");
+        document.querySelector("body").style.overflow = "hidden";
+    });
+
+    overlay.addEventListener("click", function(e) {
+        // クリックされた要素（event.target）が、
+        // イベントリスナーを設定した要素（overlay）自身であった場合
+        if (e.target === overlay) {
+            // showクラスを削除する
+            overlay.classList.remove('show');
+            document.querySelector("body").style.overflow = "auto";
+        }
+    });
+
+
+    const tabList = document.querySelector("#ext_nico_game_launcher .tab-list");
+    tabList.addEventListener("click", function(e) {
+        
+        // タブをクリックしたら、タブのアクティブクラスを追加する
+        const tab = e.target;
+        tabList.querySelectorAll(".tab-item").forEach(function(tab) {
+            tab.classList.remove("active");
+        });
+        tab.classList.add("active");
+
+        // 表示する画面を切り替える
+        const screens = document.querySelectorAll("#ext_nico_game_launcher .screen");
+        screens.forEach(function(screen) {
+            screen.classList.remove("active");
+        });
+        const screen = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='" + tab.getAttribute("data-hemo-game-tab") + "']");
+        screen.classList.add("active");
+    });
+}
+
+
+async function getUserGameList(){
+
+}
+
+
+/*
+https://eapi.spi.nicovideo.jp/v2/contents/lv348703573/sections/top
+
+{
+    "meta": {
+        "status": 200
+    },
+    "data": {
+        "sections": [
+            {
+                "contents": [
+                    {
+                        "author": "ドワンゴ",
+                        "id": 65583,
+                        "serviceName": "game",
+                        "serviceProductId": "848",
+                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/spi/product/thumbnails/game-848-320x320-660bb94b3cfdb.png",
+                        "title": "姫プタワーR 2025.09",
+                        "usableState": "DUPLICATED"
+                    }
+                ],
+                "id": 279,
+                "isPrivate": false,
+                "score": 24.3,
+                "title": "イベント開催中!"
+            },
+            {
+                "contents": [
+                    {
+                        "author": "提供: ドワンゴ",
+                        "id": 80739,
+                        "serviceName": "game",
+                        "serviceProductId": "911",
+                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/spi/product/thumbnails/game-911-320x320-68b65f6f7d010.png",
+                        "title": "わかせ！まき割りつりっくま",
+                        "usableState": "DUPLICATED"
+                    }
+                ],
+                "id": 282,
+                "isPrivate": false,
+                "score": 24.6,
+                "title": "新作ニコ生ゲームリリース！"
+            },
+            {
+                "contents": [
+                    {
+                        "author": "nm",
+                        "id": 80740,
+                        "serviceName": "akasha",
+                        "serviceProductId": "17757",
+                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/akasha/thumbnails/ec791df6ddd96a808a09a0f91a3fda6b31a66a4af9b76afcf89c4ff743499fce",
+                        "title": "ディジチェーン",
+                        "usableState": "ONLY_PREMIUM_USER"
+                    },
+                    {
+                        "author": "スタイルズ・クラッシュ",
+                        "id": 80742,
+                        "serviceName": "akasha",
+                        "serviceProductId": "17837",
+                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/akasha/thumbnails/deadf75ec4d268bcded45518544cd4e632692fcce0418461910cf981be11fbe1",
+                        "title": "Getout PIGEON",
+                        "usableState": "ONLY_PREMIUM_USER"
+                    },
+                    {
+                        "author": "きゃん。",
+                        "id": 80743,
+                        "serviceName": "akasha",
+                        "serviceProductId": "17749",
+                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/akasha/thumbnails/1a57a40f00e845a4c4cf74b8ec2ae53076ea3f154f1084b4250937f65a1412ed",
+                        "title": "コメント使ってみんなでお題あて",
+                        "usableState": "ONLY_PREMIUM_USER"
+                    }
+                ],
+                "id": 278,
+                "isPrivate": false,
+                "score": 24.8,
+                "title": "新作おすすめゲーム"
+            },
+            {
+                "contents": [
+                    {
+                        "author": "shink＠らむ",
+                        "id": 80744,
+                        "serviceName": "akasha",
+                        "serviceProductId": "17611",
+                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/akasha/thumbnails/6a8ce05af3740f2b2f9acaab1475a76dbc45102284b2197c3f61bfd1341bd1e9",
+                        "title": "イス取りゲーム",
+                        "usableState": "ONLY_PREMIUM_USER"
+                    },
+                    {
+                        "author": "にばっち",
+                        "id": 80745,
+                        "serviceName": "akasha",
+                        "serviceProductId": "17189",
+                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/akasha/thumbnails/9a7493b03c1f7a405d083beb6a7ca68c266ea7290b85987a3e5557c66e5e1b7e",
+                        "title": "潜海",
+                        "usableState": "ONLY_PREMIUM_USER"
+                    },
+                    {
+                        "author": "岩尾",
+                        "id": 80746,
+                        "serviceName": "akasha",
+                        "serviceProductId": "17561",
+                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/akasha/thumbnails/12bf609e6bbdc4ce1582c575b5c1147fd635d86b025aff32fad2c9c1a0cab57d",
+                        "title": "どうぶつイコカ",
+                        "usableState": "ONLY_PREMIUM_USER"
+                    },
+                    {
+                        "author": "カフェ142mg",
+                        "id": 80747,
+                        "serviceName": "akasha",
+                        "serviceProductId": "17973",
+                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/akasha/thumbnails/e87926ccbfd8c47a4769b44199d0871cad04ce200e07e09a6e63234a8db39341",
+                        "title": "けだまど（β）毛玉vs魔道士",
+                        "usableState": "ONLY_PREMIUM_USER"
+                    },
+                    {
+                        "author": "たかしうむ",
+                        "id": 80748,
+                        "serviceName": "akasha",
+                        "serviceProductId": "16885",
+                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/akasha/thumbnails/7d60c89e75385f7af91091594994430a908889e590e829922ca594111dff2198",
+                        "title": "ボウリングラン",
+                        "usableState": "ONLY_PREMIUM_USER"
+                    },
+                    {
+                        "author": "かーーーぼん ☆",
+                        "id": 80749,
+                        "serviceName": "akasha",
+                        "serviceProductId": "17578",
+                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/akasha/thumbnails/0057db2f3b2dd03115f1ef4aba0a742bfb40b866949916fdd9f5337e2f202383",
+                        "title": "井戸祓い -ｲﾄﾞﾊﾞﾗｲ-　　※ホラー注意",
+                        "usableState": "ONLY_PREMIUM_USER"
+                    }
+                ],
+                "id": 190,
+                "isPrivate": false,
+                "score": 24.9,
+                "title": "急上昇自作ゲームランキング"
+            },
+            {
+                "contents": [
+                    {
+                        "author": "提供: ドワンゴ",
+                        "id": 80750,
+                        "serviceName": "game",
+                        "serviceProductId": "524",
+                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/officialContent/thumbnails/5e8ad86e0e171-320x320.png",
+                        "title": "ニコニコタワー",
+                        "usableState": "DUPLICATED"
+                    },
+                    {
+                        "author": "提供: ドワンゴ",
+                        "id": 80751,
+                        "serviceName": "game",
+                        "serviceProductId": "91",
+                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/spi/product/thumbnails/game-91-320x320-5b7f8c031ece3.png",
+                        "title": "ドレミファメモリー",
+                        "usableState": "ONLY_PREMIUM_USER"
+                    },
+                    {
+                        "author": "提供: ドワンゴ",
+                        "id": 80752,
+                        "serviceName": "game",
+                        "serviceProductId": "76",
+                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/spi/product/thumbnails/game-76-320x320-5c53cc527c48d.png",
+                        "title": "どすこいちゃんこ",
+                        "usableState": "ONLY_PREMIUM_USER"
+                    },
+                    {
+                        "author": "ラック",
+                        "id": 80753,
+                        "serviceName": "akasha",
+                        "serviceProductId": "2529",
+                        "thumbnailUrl": "https://dcdn.cdn.nimg.jp/spi/assets/atsumaru/5a9993279334809c858681b574cf9ee93e83f9de4dda5ca37ed3b15e1facd915",
+                        "title": "スピード伐採",
+                        "usableState": "ONLY_PREMIUM_USER"
+                    },
+                    {
+                        "author": "ラック",
+                        "id": 80754,
+                        "serviceName": "akasha",
+                        "serviceProductId": "3066",
+                        "thumbnailUrl": "https://dcdn.cdn.nimg.jp/spi/assets/atsumaru/0ac903012201fea92fb384e7235abc9c4ef85be3d451bddbbadbc0f42d0ba2cd",
+                        "title": "スーパーボールすくい",
+                        "usableState": "ONLY_PREMIUM_USER"
+                    },
+                    {
+                        "author": "5.0 ★★★★★",
+                        "id": 80755,
+                        "serviceName": "akasha",
+                        "serviceProductId": "12532",
+                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/akasha/thumbnails/d6ec98736a4f0244f7cff3fded0c8751bd312ebfdd854f6f42d9f37f1741937d",
+                        "title": "つりクッマ",
+                        "usableState": "ONLY_PREMIUM_USER"
+                    }
+                ],
+                "id": 192,
+                "isPrivate": false,
+                "score": 25,
+                "title": "定番ゲーム"
+            }
+        ]
+    }
+}
+
+*/
