@@ -50,6 +50,7 @@
         "/js/rightClick.js",
         "/js/lib/encode-worker.js",
         "/js/lib/mp4-muxer.min.js",
+        "/js/lib/purify.min.js",
         "/js/pip.js",
         "/js/akashic.js",
         "/js/ichiba.js",

@@ -13,7 +13,7 @@ const _fetchOptions = {
     },
     "referrer": "https://spi.nicovideo.jp/",
     "referrerPolicy": "strict-origin-when-cross-origin",
-    "method": "POST",
+    "method": "GET",
     "mode": "cors",
     "credentials": "include"
 };
@@ -507,110 +507,7 @@ async function addIchibaShortcut() {
     });
 }
 
-async function getProduct(programId) {
-    const url = "https://eapi.spi.nicovideo.jp/v1/users/self/authority?contentId=" + programId;                        
 
-    // fetchに渡す設定情報
-    const options = {
-        "headers": {
-            "accept": "application/json",
-            "accept-language": "ja,en-US;q=0.9,en;q=0.8,yi;q=0.7,zh-TW;q=0.6,zh;q=0.5",
-            "content-type": "application/json",
-            "sec-ch-ua": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"",
-            "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-platform": "\"Windows\"",
-            "sec-fetch-dest": "empty",
-            "sec-fetch-mode": "cors",
-            "sec-fetch-site": "same-site"
-        },
-        "referrer": "https://spi.nicovideo.jp/",
-        "referrerPolicy": "strict-origin-when-cross-origin",
-        "method": "GET",
-        "mode": "cors",
-        "credentials": "include"
-    };
-
-    const response = await fetch(url, options);
-
-    // response.ok はステータスコードが200-299の範囲にあるかを示す
-    // falseの場合、サーバーがエラーを返したことを意味する
-    if (!response.ok) {
-        console.error(`HTTPエラーが発生しました: ${response.status} ${response.statusText}`);
-        
-        let errorBody;
-        try {
-            // エラーレスポンスの本体をJSONとして解析試行
-            errorBody = await response.json();
-        } catch (e) {
-            // JSONでなければテキストとして取得
-            errorBody = await response.text();
-        }
-        
-        // サーバーから返されたエラーの詳細をコンソールに表示
-        console.error("サーバーからのエラー詳細:", errorBody);
-        
-        // エラーなのでここで処理を中断
-        return; 
-    }
-
-    // 通信が成功した場合、応答をJSONとして解析
-    const data = await response.json();
-    console.log("成功:", data);
-    return data;                        
-}
-
-
-async function getGrade(programId) {
-    const url = "https://eapi.spi.nicovideo.jp/v1/contents/" + programId + "/grade";                        
-
-    // fetchに渡す設定情報
-    const options = {
-        "headers": {
-            "accept": "application/json",
-            "accept-language": "ja,en-US;q=0.9,en;q=0.8,yi;q=0.7,zh-TW;q=0.6,zh;q=0.5",
-            "content-type": "application/json",
-            "sec-ch-ua": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"",
-            "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-platform": "\"Windows\"",
-            "sec-fetch-dest": "empty",
-            "sec-fetch-mode": "cors",
-            "sec-fetch-site": "same-site"
-        },
-        "referrer": "https://spi.nicovideo.jp/",
-        "referrerPolicy": "strict-origin-when-cross-origin",
-        "method": "GET",
-        "mode": "cors",
-        "credentials": "include"
-    };
-
-    const response = await fetch(url, options);
-
-    // response.ok はステータスコードが200-299の範囲にあるかを示す
-    // falseの場合、サーバーがエラーを返したことを意味する
-    if (!response.ok) {
-        console.error(`HTTPエラーが発生しました: ${response.status} ${response.statusText}`);
-        
-        let errorBody;
-        try {
-            // エラーレスポンスの本体をJSONとして解析試行
-            errorBody = await response.json();
-        } catch (e) {
-            // JSONでなければテキストとして取得
-            errorBody = await response.text();
-        }
-        
-        // サーバーから返されたエラーの詳細をコンソールに表示
-        console.error("サーバーからのエラー詳細:", errorBody);
-        
-        // エラーなのでここで処理を中断
-        return; 
-    }
-
-    // 通信が成功した場合、応答をJSONとして解析
-    const data = await response.json();
-    console.log("成功:", data);
-    return data;                        
-}
 
 // 通信を実行し、結果を処理する非同期関数
 async function requestIchibaItem(programId, item, frontendId, frontendVersion) {
@@ -627,30 +524,13 @@ async function requestIchibaItem(programId, item, frontendId, frontendVersion) {
     console.log("番組グレード:", grade.data.programGrade);
 
 
-    
     const url = "https://eapi.spi.nicovideo.jp/v1/ichibas/" + programId + "/products";
-    
-    
-    // fetchに渡す設定情報
-    const options = {
-        "headers": {
-            "accept": "application/json",
-            "accept-language": "ja,en-US;q=0.9,en;q=0.8,yi;q=0.7,zh-TW;q=0.6,zh;q=0.5",
-            "content-type": "application/json",
-            "sec-ch-ua": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"",
-            "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-platform": "\"Windows\"",
-            "sec-fetch-dest": "empty",
-            "sec-fetch-mode": "cors",
-            "sec-fetch-site": "same-site"
-        },
-        "referrer": "https://spi.nicovideo.jp/",
-        "referrerPolicy": "strict-origin-when-cross-origin",
-        "body": "{\"serviceName\":\"" + item.folderName + "\",\"serviceProductId\":\"" + item.itemId + "\",\"frontendId\":" + frontendId + ",\"frontendVersion\":\"" + frontendVersion + "\",\"expectedGrade\":" + grade.data.programGrade + "}",
-        "method": "POST",
-        "mode": "cors",
-        "credentials": "include"
-    };
+
+    // POSTリクエストの場合は、メソッドをPOSTに、ボディを指定する（但し_fetchOptionsは修正しない）
+    const options = {..._fetchOptions};
+    options.method = "POST";
+    options.body = "{\"serviceName\":\"" + item.folderName + "\",\"serviceProductId\":\"" + item.itemId + "\",\"frontendId\":" + frontendId + ",\"frontendVersion\":\"" + frontendVersion + "\",\"expectedGrade\":" + grade.data.programGrade + "}";
+
     
     try {
         // fetchリクエストを送信し、サーバーからの応答を待つ
@@ -850,33 +730,6 @@ async function showIchibaInfo(itemId, folderName){
     }
 
 
-    /*
-    
-    以下のDOMに、データを追加する
-
-    <div id="ext_ichiba_info" class="show">
-        <div class="game-box">
-            <div class="left">
-                <img src="画像URL" alt="アイテムタイトル">
-            </div>
-            <div class="right">
-                <div class="title">アイテムタイトル</div>
-            </div>
-        </div>
-        <div class="author-box">
-            <div class="left">
-                <img src="アイコンURL" alt="アイコンタイトル">
-            </div>
-            <div class="right">
-                <a class="author-name" href="ユーザーURL" target="_blank">ドワンゴ</a>
-                <span class="level">Lv.10</span>
-            </div>
-        </div>
-        <div class="description-box">みんなで交互にストーンを投げてフィールドのストーンをこわしましょう。「ココ」機能無し版</div>
-    </div>
-
-    */
-
     /*--------------------------------
     // ゲーム情報
     --------------------------------*/
@@ -977,26 +830,8 @@ async function getIchibaGameInfo(lgId) {
     const url = "https://namagame.coe.nicovideo.jp/games/" + lgId;
     const response = await fetch(url);
     
-    // response.ok はステータスコードが200-299の範囲にあるかを示す
-    // falseの場合、サーバーがエラーを返したことを意味する
     if (!response.ok) {
         console.error(`HTTPエラーが発生しました: ${response.status} ${response.statusText}`);
-        /*
-        let errorBody;
-        try {
-            // エラーレスポンスの本体をJSONとして解析試行
-            errorBody = await response.json();
-        } catch (e) {
-            // JSONでなければテキストとして取得
-            errorBody = await response.text();
-        }
-        
-        // サーバーから返されたエラーの詳細をコンソールに表示
-        console.error("サーバーからのエラー詳細:", errorBody);
-        
-        // エラーなのでここで処理を中断
-        return errorBody; 
-        */
        return {};
     }
 
@@ -1027,91 +862,50 @@ async function getIchibaGameInfo(lgId) {
     return data;
 }
 
+async function getProduct(programId) {
+    const url = "https://eapi.spi.nicovideo.jp/v1/users/self/authority?contentId=" + programId;
+    return runCommonFetch(url, _fetchOptions);
+}
 
+async function getGrade(programId) {
+    const url = "https://eapi.spi.nicovideo.jp/v1/contents/" + programId + "/grade";
+    return runCommonFetch(url, _fetchOptions);
+}
 
 async function getIchibaServiceInfo(folderName, itemId, programId) {
-
     const url ="https://services-eapi.spi.nicovideo.jp/v1/services/" + folderName + "/services/program/programs/" + programId + "/contents/" + itemId;
-    // fetchに渡す設定情報
-    const options = {
-        "headers": {
-            "accept": "application/json",
-            "accept-language": "ja,en-US;q=0.9,en;q=0.8,yi;q=0.7,zh-TW;q=0.6,zh;q=0.5",
-            "content-type": "application/json",
-            "sec-ch-ua": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"",
-            "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-platform": "\"Windows\"",
-            "sec-fetch-dest": "empty",
-            "sec-fetch-mode": "cors",
-            "sec-fetch-site": "same-site"
-        },
-        "referrer": "https://spi.nicovideo.jp/",
-        "referrerPolicy": "strict-origin-when-cross-origin",
-        "method": "GET",
-        "mode": "cors",
-        "credentials": "include"
-    };
-
-    const response = await fetch(url, options);
-
-    // response.ok はステータスコードが200-299の範囲にあるかを示す
-    // falseの場合、サーバーがエラーを返したことを意味する
-    if (!response.ok) {
-        console.error(`HTTPエラーが発生しました: ${response.status} ${response.statusText}`);
-        
-        let errorBody;
-        try {
-            // エラーレスポンスの本体をJSONとして解析試行
-            errorBody = await response.json();
-        } catch (e) {
-            // JSONでなければテキストとして取得
-            errorBody = await response.text();
-        }
-        
-        // サーバーから返されたエラーの詳細をコンソールに表示
-        console.error("サーバーからのエラー詳細:", errorBody);
-        
-        // エラーなのでここで処理を中断
-        return errorBody; 
-    }
-
-    // 通信が成功した場合、応答をJSONとして解析
-    const data = await response.json();
-
-    return data;
-
+    return runCommonFetch(url, _fetchOptions);
 }
 
 async function getOwner(ownerId) {
     const url = "https://eapi.spi.nicovideo.jp/v2/products/products/" + ownerId + "/owner";
+    return runCommonFetch(url, _fetchOptions);
+}
 
-    // fetchに渡す設定情報
-    const options = {
-        "headers": {
-            "accept": "application/json",
-            "accept-language": "ja,en-US;q=0.9,en;q=0.8,yi;q=0.7,zh-TW;q=0.6,zh;q=0.5",
-            "content-type": "application/json",
-            "sec-ch-ua": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"",
-            "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-platform": "\"Windows\"",
-            "sec-fetch-dest": "empty",
-            "sec-fetch-mode": "cors",
-            "sec-fetch-site": "same-site"
-        },
-        "referrer": "https://spi.nicovideo.jp/",
-        "referrerPolicy": "strict-origin-when-cross-origin",
-        "method": "GET",
-        "mode": "cors",
-        "credentials": "include"
-    };
+async function getIchibaProductInfo(folderName, itemId, programId) {
+    const url =  "https://eapi.spi.nicovideo.jp/v2/services/" + folderName + "/products/" + itemId + "?exclude_registered=false&tmp_page_id=detail&contentId=" + programId;
+    return runCommonFetch(url, _fetchOptions);
+}
 
+
+async function getUserGameList(nicoliveProgramId, sortKey, sortOrder, limit, launchTypes){
+    let url = "https://services-eapi.spi.nicovideo.jp/v1/services/akasha/services/content/contents?programID=" + nicoliveProgramId +"&sortKey=" + sortKey + "&sortOrder=" + sortOrder + "&limit=" + limit;
+    if(launchTypes) {
+        url += "&launchTypes=" + launchTypes;
+    }
+    return runCommonFetch(url, _fetchOptions);
+}
+
+
+
+
+async function runCommonFetch(url, options){
     const response = await fetch(url, options);
 
     // response.ok はステータスコードが200-299の範囲にあるかを示す
     // falseの場合、サーバーがエラーを返したことを意味する
     if (!response.ok) {
         console.error(`HTTPエラーが発生しました: ${response.status} ${response.statusText}`);
-        
         let errorBody;
         try {
             // エラーレスポンスの本体をJSONとして解析試行
@@ -1123,67 +917,11 @@ async function getOwner(ownerId) {
         
         // サーバーから返されたエラーの詳細をコンソールに表示
         console.error("サーバーからのエラー詳細:", errorBody);
-        
-        // エラーなのでここで処理を中断
         return errorBody; 
     }
 
     // 通信が成功した場合、応答をJSONとして解析
     const data = await response.json();
-    // console.log("成功:", data);
-
-    return data;
-}
-
-async function getIchibaProductInfo(folderName, itemId, programId) {
-                
-    const url =  "https://eapi.spi.nicovideo.jp/v2/services/" + folderName + "/products/" + itemId + "?exclude_registered=false&tmp_page_id=detail&contentId=" + programId;
-
-    // fetchに渡す設定情報
-    const options = {
-        "headers": {
-            "accept": "application/json",
-            "accept-language": "ja,en-US;q=0.9,en;q=0.8,yi;q=0.7,zh-TW;q=0.6,zh;q=0.5",
-            "content-type": "application/json",
-            "sec-ch-ua": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"",
-            "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-platform": "\"Windows\"",
-            "sec-fetch-dest": "empty",
-            "sec-fetch-mode": "cors",
-            "sec-fetch-site": "same-site"
-        },
-        "referrer": "https://spi.nicovideo.jp/",
-        "referrerPolicy": "strict-origin-when-cross-origin",
-        "method": "GET",
-        "mode": "cors",
-        "credentials": "include"
-    };
-    const response = await fetch(url, options);
-
-    // response.ok はステータスコードが200-299の範囲にあるかを示す
-    // falseの場合、サーバーがエラーを返したことを意味する
-    if (!response.ok) {
-        console.error(`HTTPエラーが発生しました: ${response.status} ${response.statusText}`);
-        
-        let errorBody;
-        try {
-            // エラーレスポンスの本体をJSONとして解析試行
-            errorBody = await response.json();
-        } catch (e) {
-            // JSONでなければテキストとして取得
-            errorBody = await response.text();
-        }
-        
-        // サーバーから返されたエラーの詳細をコンソールに表示
-        console.error("サーバーからのエラー詳細:", errorBody);
-        
-        // エラーなのでここで処理を中断
-        return; 
-    }
-
-    // 通信が成功した場合、応答をJSONとして解析
-    const data = await response.json();
-    // console.log("成功:", data);
 
     return data;
 }
@@ -1218,11 +956,13 @@ function setEventGameLauncher() {
     const overlay = document.querySelector("#ext_nico_game_launcher_overlay");
     const gameLauncher = document.querySelector(".hemo-view-game-btn");
 
+    // ランチャー起動ボタン
     gameLauncher.addEventListener("click", function() {
         overlay.classList.toggle("show");
         document.querySelector("body").style.overflow = "hidden";
     });
 
+    // オーバーレイ
     overlay.addEventListener("click", function(e) {
         // クリックされた要素（event.target）が、
         // イベントリスナーを設定した要素（overlay）自身であった場合
@@ -1234,6 +974,7 @@ function setEventGameLauncher() {
     });
 
 
+    // タブのリスト
     const tabList = document.querySelector("#ext_nico_game_launcher .tab-list");
     tabList.addEventListener("click", function(e) {
         
@@ -1249,221 +990,128 @@ function setEventGameLauncher() {
         screens.forEach(function(screen) {
             screen.classList.remove("active");
         });
-        const screen = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='" + tab.getAttribute("data-hemo-game-tab") + "']");
-        screen.classList.add("active");
+        const currentTabId = tab.getAttribute("data-hemo-game-tab");
+        const screen = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='" + currentTabId + "']");
+        screen?.classList?.add("active");
+
+        // 画面が切り替わったら、データを取得
+        switch(currentTabId) {
+            case "top":
+                break;
+            case "official":
+                break;
+            case "user":
+                viewUserGameList();
+                break;
+        }
+    });
+
+
+    // 自作ゲーム画面のフィルター(並び順)
+    const sortInputs = document.querySelectorAll("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .search-box .radio-group .radio-item input[name='sort']");
+    sortInputs.forEach(function(input) {
+        input.addEventListener("change", function() {
+            // 他のinputのcheckedをfalseにする
+            sortInputs.forEach(function(input) {
+                if(input !== this) {
+                    input.setAttribute("checked", "false");
+                }
+            });
+            // checkedを設定
+            input.setAttribute("checked", "true");
+            // フィルターを適用
+            viewUserGameList();
+        });
+    });
+
+    // 自作ゲーム画面のフィルター(ゲームタイプ)
+    const gameTypeInputs = document.querySelectorAll("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .search-box .radio-group .radio-item input[name='game_type']");
+    gameTypeInputs.forEach(function(input) {
+        input.addEventListener("change", function() {
+            // 他のinputのcheckedをfalseにする
+            gameTypeInputs.forEach(function(input) {
+                if(input !== this) {
+                    input.setAttribute("checked", "false");
+                }
+            });
+            // checkedを設定
+            input.setAttribute("checked", "true");
+            // フィルターを適用
+            viewUserGameList();
+        });
     });
 }
 
+async function viewUserGameList() {
+    // getUserGameList(nicoliveProgramId, sortKey, sortOrder, limit, launchTypes){
 
-async function getUserGameList(){
+    // 現在のフィルターの設定を取得
+    const sortKey = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .search-box .radio-group .radio-item input[name='sort'][checked='true']").getAttribute('value');
+    const launchTypes = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .search-box .radio-group .radio-item input[name='game_type'][checked='true']").getAttribute('value');
+    
+    console.log("自作ゲームの一覧を取得");
+    const res = await getUserGameList(_embeddedDataJson.program.nicoliveProgramId, sortKey, "DESC", "20", launchTypes);
+    console.log(res);
+
+    let itemListHtml = "";
+
+    res.data.contents.forEach(function(item) {
+
+        let launchType = "";
+        switch(item.launchType) {
+            case "multi":
+                launchType = "協力・対戦";
+                break;
+            case "podium":
+                launchType = "全員対戦";
+                break;
+            case "self":
+                launchType = "その他";
+                break;
+        }
+
+        // "2025-09-23T05:39:58.000Z" を、 "2025/09/23" に変換
+        let createdDate = item.createdAt.split("T")[0].replace(/-/g, "/");
+
+        let itemHtml = `
+                    <div class="item" data-lg-id="${DOMPurify.sanitize(item.originContentID)}" data-id="${DOMPurify.sanitize(item.id)}">
+                        <div class="title-box">
+                            <div class="left">
+                                <img src="${DOMPurify.sanitize(item.thumbnailUrl)}" alt="${DOMPurify.sanitize(item.title)}">
+                            </div>
+                            <div class="right">
+                                <div class="title">${DOMPurify.sanitize(item.title)}</div>
+                            </div>
+                        </div>
+                        <div class="btnBox">
+                            <div class="info">
+                                <div class="launchType">${launchType}</div>
+                                <div class="author"><span class="category">作者</span><span class="author-name">${DOMPurify.sanitize(item.authorName)}</span></div>
+                            </div>    
+                            <div class="btn big">リクエスト</div>
+                        </div>
+                        <div class="bookmarkAdd">
+                             <svg width="32px" height="32px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="" stroke-width="0"></g><g id="" stroke-linecap="round" stroke-linejoin="round"></g><g id=""> <path d="M9.15316 5.40838C10.4198 3.13613 11.0531 2 12 2C12.9469 2 13.5802 3.13612 14.8468 5.40837L15.1745 5.99623C15.5345 6.64193 15.7144 6.96479 15.9951 7.17781C16.2757 7.39083 16.6251 7.4699 17.3241 7.62805L17.9605 7.77203C20.4201 8.32856 21.65 8.60682 21.9426 9.54773C22.2352 10.4886 21.3968 11.4691 19.7199 13.4299L19.2861 13.9372C18.8096 14.4944 18.5713 14.773 18.4641 15.1177C18.357 15.4624 18.393 15.8341 18.465 16.5776L18.5306 17.2544C18.7841 19.8706 18.9109 21.1787 18.1449 21.7602C17.3788 22.3417 16.2273 21.8115 13.9243 20.7512L13.3285 20.4768C12.6741 20.1755 12.3469 20.0248 12 20.0248C11.6531 20.0248 11.3259 20.1755 10.6715 20.4768L10.0757 20.7512C7.77268 21.8115 6.62118 22.3417 5.85515 21.7602C5.08912 21.1787 5.21588 19.8706 5.4694 17.2544L5.53498 16.5776C5.60703 15.8341 5.64305 15.4624 5.53586 15.1177C5.42868 14.773 5.19043 14.4944 4.71392 13.9372L4.2801 13.4299C2.60325 11.4691 1.76482 10.4886 2.05742 9.54773C2.35002 8.60682 3.57986 8.32856 6.03954 7.77203L6.67589 7.62805C7.37485 7.4699 7.72433 7.39083 8.00494 7.17781C8.28555 6.96479 8.46553 6.64194 8.82547 5.99623L9.15316 5.40838Z" fill="#dddddd"></path> </g></svg>
+                             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="" stroke-width="0"></g><g id="" stroke-linecap="round" stroke-linejoin="round"></g><g id=""> <path d="M13 5C13 4.44772 12.5523 4 12 4C11.4477 4 11 4.44772 11 5C11 5.55228 11.4477 6 12 6C12.5523 6 13 5.55228 13 5Z" stroke="#333333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13C12.5523 13 13 12.5523 13 12Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M13 19C13 18.4477 12.5523 18 12 18C11.4477 18 11 18.4477 11 19C11 19.5523 11.4477 20 12 20C12.5523 20 13 19.5523 13 19Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></g></svg>
+                        </div>
+                        <div class="popup-box">
+                            <div class="desc">${DOMPurify.sanitize(item.description)}</div>
+                            <div class="date"><span class="category">更新日</span>${createdDate}</div>
+                            <div class="btn-area">
+                                <div class="btn">作者の作品をNG登録</div>
+                                <div class="btn">ショートカットに追加</div>    
+                            </div>
+                        </div>
+                    </div>
+        `;
+
+        itemListHtml += itemHtml;
+
+    });
+
+
+    const itemList = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .item-list");
+    itemList.innerHTML = itemListHtml;
+
 
 }
-
-
-/*
-https://eapi.spi.nicovideo.jp/v2/contents/lv348703573/sections/top
-
-{
-    "meta": {
-        "status": 200
-    },
-    "data": {
-        "sections": [
-            {
-                "contents": [
-                    {
-                        "author": "ドワンゴ",
-                        "id": 65583,
-                        "serviceName": "game",
-                        "serviceProductId": "848",
-                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/spi/product/thumbnails/game-848-320x320-660bb94b3cfdb.png",
-                        "title": "姫プタワーR 2025.09",
-                        "usableState": "DUPLICATED"
-                    }
-                ],
-                "id": 279,
-                "isPrivate": false,
-                "score": 24.3,
-                "title": "イベント開催中!"
-            },
-            {
-                "contents": [
-                    {
-                        "author": "提供: ドワンゴ",
-                        "id": 80739,
-                        "serviceName": "game",
-                        "serviceProductId": "911",
-                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/spi/product/thumbnails/game-911-320x320-68b65f6f7d010.png",
-                        "title": "わかせ！まき割りつりっくま",
-                        "usableState": "DUPLICATED"
-                    }
-                ],
-                "id": 282,
-                "isPrivate": false,
-                "score": 24.6,
-                "title": "新作ニコ生ゲームリリース！"
-            },
-            {
-                "contents": [
-                    {
-                        "author": "nm",
-                        "id": 80740,
-                        "serviceName": "akasha",
-                        "serviceProductId": "17757",
-                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/akasha/thumbnails/ec791df6ddd96a808a09a0f91a3fda6b31a66a4af9b76afcf89c4ff743499fce",
-                        "title": "ディジチェーン",
-                        "usableState": "ONLY_PREMIUM_USER"
-                    },
-                    {
-                        "author": "スタイルズ・クラッシュ",
-                        "id": 80742,
-                        "serviceName": "akasha",
-                        "serviceProductId": "17837",
-                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/akasha/thumbnails/deadf75ec4d268bcded45518544cd4e632692fcce0418461910cf981be11fbe1",
-                        "title": "Getout PIGEON",
-                        "usableState": "ONLY_PREMIUM_USER"
-                    },
-                    {
-                        "author": "きゃん。",
-                        "id": 80743,
-                        "serviceName": "akasha",
-                        "serviceProductId": "17749",
-                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/akasha/thumbnails/1a57a40f00e845a4c4cf74b8ec2ae53076ea3f154f1084b4250937f65a1412ed",
-                        "title": "コメント使ってみんなでお題あて",
-                        "usableState": "ONLY_PREMIUM_USER"
-                    }
-                ],
-                "id": 278,
-                "isPrivate": false,
-                "score": 24.8,
-                "title": "新作おすすめゲーム"
-            },
-            {
-                "contents": [
-                    {
-                        "author": "shink＠らむ",
-                        "id": 80744,
-                        "serviceName": "akasha",
-                        "serviceProductId": "17611",
-                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/akasha/thumbnails/6a8ce05af3740f2b2f9acaab1475a76dbc45102284b2197c3f61bfd1341bd1e9",
-                        "title": "イス取りゲーム",
-                        "usableState": "ONLY_PREMIUM_USER"
-                    },
-                    {
-                        "author": "にばっち",
-                        "id": 80745,
-                        "serviceName": "akasha",
-                        "serviceProductId": "17189",
-                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/akasha/thumbnails/9a7493b03c1f7a405d083beb6a7ca68c266ea7290b85987a3e5557c66e5e1b7e",
-                        "title": "潜海",
-                        "usableState": "ONLY_PREMIUM_USER"
-                    },
-                    {
-                        "author": "岩尾",
-                        "id": 80746,
-                        "serviceName": "akasha",
-                        "serviceProductId": "17561",
-                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/akasha/thumbnails/12bf609e6bbdc4ce1582c575b5c1147fd635d86b025aff32fad2c9c1a0cab57d",
-                        "title": "どうぶつイコカ",
-                        "usableState": "ONLY_PREMIUM_USER"
-                    },
-                    {
-                        "author": "カフェ142mg",
-                        "id": 80747,
-                        "serviceName": "akasha",
-                        "serviceProductId": "17973",
-                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/akasha/thumbnails/e87926ccbfd8c47a4769b44199d0871cad04ce200e07e09a6e63234a8db39341",
-                        "title": "けだまど（β）毛玉vs魔道士",
-                        "usableState": "ONLY_PREMIUM_USER"
-                    },
-                    {
-                        "author": "たかしうむ",
-                        "id": 80748,
-                        "serviceName": "akasha",
-                        "serviceProductId": "16885",
-                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/akasha/thumbnails/7d60c89e75385f7af91091594994430a908889e590e829922ca594111dff2198",
-                        "title": "ボウリングラン",
-                        "usableState": "ONLY_PREMIUM_USER"
-                    },
-                    {
-                        "author": "かーーーぼん ☆",
-                        "id": 80749,
-                        "serviceName": "akasha",
-                        "serviceProductId": "17578",
-                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/akasha/thumbnails/0057db2f3b2dd03115f1ef4aba0a742bfb40b866949916fdd9f5337e2f202383",
-                        "title": "井戸祓い -ｲﾄﾞﾊﾞﾗｲ-　　※ホラー注意",
-                        "usableState": "ONLY_PREMIUM_USER"
-                    }
-                ],
-                "id": 190,
-                "isPrivate": false,
-                "score": 24.9,
-                "title": "急上昇自作ゲームランキング"
-            },
-            {
-                "contents": [
-                    {
-                        "author": "提供: ドワンゴ",
-                        "id": 80750,
-                        "serviceName": "game",
-                        "serviceProductId": "524",
-                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/officialContent/thumbnails/5e8ad86e0e171-320x320.png",
-                        "title": "ニコニコタワー",
-                        "usableState": "DUPLICATED"
-                    },
-                    {
-                        "author": "提供: ドワンゴ",
-                        "id": 80751,
-                        "serviceName": "game",
-                        "serviceProductId": "91",
-                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/spi/product/thumbnails/game-91-320x320-5b7f8c031ece3.png",
-                        "title": "ドレミファメモリー",
-                        "usableState": "ONLY_PREMIUM_USER"
-                    },
-                    {
-                        "author": "提供: ドワンゴ",
-                        "id": 80752,
-                        "serviceName": "game",
-                        "serviceProductId": "76",
-                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/spi/product/thumbnails/game-76-320x320-5c53cc527c48d.png",
-                        "title": "どすこいちゃんこ",
-                        "usableState": "ONLY_PREMIUM_USER"
-                    },
-                    {
-                        "author": "ラック",
-                        "id": 80753,
-                        "serviceName": "akasha",
-                        "serviceProductId": "2529",
-                        "thumbnailUrl": "https://dcdn.cdn.nimg.jp/spi/assets/atsumaru/5a9993279334809c858681b574cf9ee93e83f9de4dda5ca37ed3b15e1facd915",
-                        "title": "スピード伐採",
-                        "usableState": "ONLY_PREMIUM_USER"
-                    },
-                    {
-                        "author": "ラック",
-                        "id": 80754,
-                        "serviceName": "akasha",
-                        "serviceProductId": "3066",
-                        "thumbnailUrl": "https://dcdn.cdn.nimg.jp/spi/assets/atsumaru/0ac903012201fea92fb384e7235abc9c4ef85be3d451bddbbadbc0f42d0ba2cd",
-                        "title": "スーパーボールすくい",
-                        "usableState": "ONLY_PREMIUM_USER"
-                    },
-                    {
-                        "author": "5.0 ★★★★★",
-                        "id": 80755,
-                        "serviceName": "akasha",
-                        "serviceProductId": "12532",
-                        "thumbnailUrl": "https://resource.spi.nicovideo.jp/akasha/thumbnails/d6ec98736a4f0244f7cff3fded0c8751bd312ebfdd854f6f42d9f37f1741937d",
-                        "title": "つりクッマ",
-                        "usableState": "ONLY_PREMIUM_USER"
-                    }
-                ],
-                "id": 192,
-                "isPrivate": false,
-                "score": 25,
-                "title": "定番ゲーム"
-            }
-        ]
-    }
-}
-
-*/

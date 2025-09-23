@@ -2121,6 +2121,9 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .search-box .search-left .radio-group .radio-item {
   display: inline-block;
   margin-right: 7px;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
   cursor: pointer;
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .search-box .search-left .radio-group .radio-item label {
