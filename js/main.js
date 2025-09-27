@@ -1,18 +1,26 @@
 let _obsLogBox;
 let _embeddedDataJson;
 
-window.addEventListener('load', function () {
 
 
+// 既にDOMの準備ができているかチェック
+if (document.readyState === 'loading') {
+    // まだ読み込み中の場合は、イベントリスナーを登録
+    document.addEventListener('DOMContentLoaded', runHemoTool);
+} else {
+    // 既に読み込みが終わっている場合は、直接関数を実行
+    runHemoTool();
+}
 
-
-
+//window.addEventListener('load', function () {
+function runHemoTool() {
 
     let currentURL = location.href;
     if (currentURL.startsWith("https://live.nicovideo.jp/")) {
         if(document.querySelector('[class^=___player-area___]')) {
 
             // ニコ生URLであり、かつニコ生プレイヤーがあれば。
+            console.log("へもツールの起動処理を開始");
 
             // 拡張機能の初期化処理
             initialize(function(ret){
@@ -71,7 +79,7 @@ window.addEventListener('load', function () {
     }, 25 * 1000);
 
 
-});
+};
 
 function getEmbeddedDataJson(){
 
@@ -385,6 +393,58 @@ function initialize(callback, timeoutMiliSec) {
 
 // ニコニコプレイヤーにボタンのDOMを挿入
 async function insertBtnToPlayer(partsHtml, infoHtml) {
+
+    // id属性で要素を取得
+    const targeteElement = document.querySelector("[class^=___player-area___]");
+
+    //-------------------------------------------------------
+    // コテハン情報の受け渡し用DOMを作成
+    //-------------------------------------------------------
+
+    // 新しいHTML要素を作成
+    const kotehanElement = document.createElement('div');
+    kotehanElement.id = "ext_kotehanBox";
+
+    // 指定した要素の中の末尾に挿入
+    targeteElement.appendChild(kotehanElement);
+
+
+    // 新しいHTML要素を作成
+    const kotehanToInject = document.createElement('div');
+    kotehanToInject.id = "ext_kotehanToInjectBox";
+
+    // 指定した要素の中の末尾に挿入
+    targeteElement.appendChild(kotehanToInject);
+
+    kotehanInitialize();
+    getKotehan();
+
+
+    //-------------------------------------------------------
+    // カラー情報の受け渡し用DOMを作成
+    //-------------------------------------------------------
+
+    // 新しいHTML要素を作成
+    const colorElement = document.createElement('div');
+    colorElement.id = "ext_colorBox";
+
+    // 指定した要素の中の末尾に挿入
+    targeteElement.appendChild(colorElement);
+
+
+    // 新しいHTML要素を作成
+    const colorToInject = document.createElement('div');
+    colorToInject.id = "ext_colorToInjectBox";
+
+    // 指定した要素の中の末尾に挿入
+    targeteElement.appendChild(colorToInject);
+
+    colorInitialize();
+    getColor();
+
+
+
+
 
     // 拡張機能ボタンの挿入
     let settingMenu = document.querySelector("[class^=___comment-button___]");
@@ -1613,9 +1673,6 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
     // 読み上げ情報の受け渡し用DOMを作成
     //-------------------------------------------------------
 
-    // id属性で要素を取得
-    var targeteElement = document.querySelector("[class^=___player-area___]");
-
     // 新しいHTML要素を作成
     var logElement = document.createElement('div');
     logElement.id = "ext_logBox";
@@ -1652,51 +1709,11 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
     bouyomiObserver.observe(targetBouyomiDom, bouyomiOption);    
 
 
-    //-------------------------------------------------------
-    // コテハン情報の受け渡し用DOMを作成
-    //-------------------------------------------------------
-
-    // 新しいHTML要素を作成
-    var kotehanElement = document.createElement('div');
-    kotehanElement.id = "ext_kotehanBox";
-
-    // 指定した要素の中の末尾に挿入
-    targeteElement.appendChild(kotehanElement);
-
-
-    // 新しいHTML要素を作成
-    var kotehanToInject = document.createElement('div');
-    kotehanToInject.id = "ext_kotehanToInjectBox";
-
-    // 指定した要素の中の末尾に挿入
-    targeteElement.appendChild(kotehanToInject);
-
-    kotehanInitialize();
-    getKotehan();
 
 
 
-    //-------------------------------------------------------
-    // カラー情報の受け渡し用DOMを作成
-    //-------------------------------------------------------
-
-    // 新しいHTML要素を作成
-    var colorElement = document.createElement('div');
-    colorElement.id = "ext_colorBox";
-
-    // 指定した要素の中の末尾に挿入
-    targeteElement.appendChild(colorElement);
 
 
-    // 新しいHTML要素を作成
-    var colorToInject = document.createElement('div');
-    colorToInject.id = "ext_colorToInjectBox";
-
-    // 指定した要素の中の末尾に挿入
-    targeteElement.appendChild(colorToInject);
-
-    colorInitialize();
-    getColor();
 
 
     // へもツールのバージョン情報を取得

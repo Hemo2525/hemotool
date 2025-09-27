@@ -1208,7 +1208,7 @@ function startWatchCommentDOM(mutationsList, observer) {
 
   if(!mutationsList || mutationsList[0].addedNodes.length > 0) {
 
-    console.log("startWatchCommentDOM", mutationsList);
+    // console.log("startWatchCommentDOM", mutationsList);
 
     startWatchGridDOM();
 
@@ -1784,7 +1784,17 @@ function startWatchGridDOM() {
 let _yomiage_menu;
 let _bouyomi_menu;
 
-window.addEventListener('load', function () {
+
+// 既にDOMの準備ができているかチェック
+if (document.readyState === 'loading') {
+  // まだ読み込み中の場合は、イベントリスナーを登録
+  document.addEventListener('DOMContentLoaded', runComeviewInject);
+} else {
+  // 既に読み込みが終わっている場合は、直接関数を実行
+  runComeviewInject();
+}
+
+function runComeviewInject() {
   
   
 
@@ -1921,10 +1931,7 @@ window.addEventListener('load', function () {
 
   }, 6000 * 10 * 5); // 5分
 
-
-
-
-});
+};
 
 function watchTime(mutationRecords, observer){ 
   // 一度に2つ以上のDOM追加にも対応
