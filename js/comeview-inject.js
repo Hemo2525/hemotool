@@ -1785,12 +1785,21 @@ let _yomiage_menu;
 let _bouyomi_menu;
 
 
-// 既にDOMの準備ができているかチェック
+/*
+    ----------------------------------------------------------------------
+    loadイベントは遅すぎるが、DOMContentLoadedイベントは早くて検知できない問題
+    ----------------------------------------------------------------------
+    Chrome拡張機能のスクリプト（特にContent Script）は、デフォルトではページの読み込みがある程度完了した後に実行される。
+    DOMContentLoadedイベントが既に発生後の場合は、拡張機能側ではDOMContentLoadedイベントを受け取ることはできない。
+    スクリプトの実行が DOMContentLoaded の前か後か分からないため、どちらの状況でも対応できるように条件分岐を使う。
+    document.readyStateプロパティをチェックして、現在のページの読み込み状態を確認。
+*/
+// DOMContentLoadedイベントが既に発生後かチェック
 if (document.readyState === 'loading') {
-  // まだ読み込み中の場合は、イベントリスナーを登録
+  // まだDOMContentLoadedイベントが発生していない場合はイベントリスナーを登録
   document.addEventListener('DOMContentLoaded', runComeviewInject);
 } else {
-  // 既に読み込みが終わっている場合は、直接関数を実行
+  // DOMContentLoadedイベントが既に発生後の場合は直接関数を実行
   runComeviewInject();
 }
 

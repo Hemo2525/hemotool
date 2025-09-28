@@ -56,7 +56,7 @@
         "/js/ichiba.js",
         "/js/other.js"
       ],
-      "css": ["/css/style.css"]
+      "css": ["/css/style.css", "/css/game-launcher.css"]
     }
   ]
 }

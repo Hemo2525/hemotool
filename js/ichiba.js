@@ -664,6 +664,7 @@ function extHideLoading() {
     loadingBox.classList.remove("show");
 }
 
+// ゲームの詳細情報を映像画面に表示
 async function showIchibaInfo(itemId, folderName){
 
     const extIchibaInfo = document.querySelector("#ext_ichiba_info");
@@ -821,6 +822,165 @@ async function showIchibaInfo(itemId, folderName){
     }
 }
 
+// ゲームの詳細情報をゲームランチャーに表示
+async function showIchibaInfoToGameLauncher(itemId, folderName){
+
+    // 既に同じアイテムが表示されている場合は、表示を解除
+    /*
+    if(extIchibaInfo.classList.contains("show")){
+        if(extIchibaInfo.getAttribute("data-item-id") === folderName + "-" + itemId){
+            extIchibaInfo.classList.remove("show");
+            return;
+        }
+    }
+    */
+
+    // ローディングを表示
+    // extShowLoading();
+
+    // Product情報を取得
+    console.log("Product情報を取得します");
+    const product = await getIchibaProductInfo(folderName, itemId, _embeddedDataJson.program.nicoliveProgramId);
+    console.log(product);
+
+
+
+    let service;
+    let game;
+    let owner;
+
+    // 投稿ゲームの場合
+    if(product.data.categoryName == "akasha"){
+        // Service情報を取得
+        console.log("Service情報を取得します");
+        service = await getIchibaServiceInfo(folderName, itemId, _embeddedDataJson.program.nicoliveProgramId);
+        console.log(service);
+
+        // 作者が非表示(HIDDEN)状態にしているゲームはゲームページが存在しないので、ゲーム情報を取得できない
+        // "HIDDEN"...非公開状態（でも作者は起動できる）
+        // "USABLE"...通常公開状態
+        // "ONLY_PREMIUM_USER"...プレミアム会員のみ起動可能？
+        // "DUPLICATED"...？
+        if(product.data.usableState !== "HIDDEN") {
+            // Game情報を取得
+            console.log("Game情報を取得します");
+            game = await getIchibaGameInfo(service.data.content.originContentId);
+            console.log(game);
+        }
+
+        // Owner情報を取得
+        console.log("Owner情報を取得します");
+        owner = await getOwner(product.data.id);
+        console.log(owner);
+
+    }
+
+
+    /*--------------------------------
+    // ゲーム情報
+    --------------------------------*/
+
+    const thumbnailUrl = DOMPurify.sanitize(product.data.thumbnailUrl);
+    const title = DOMPurify.sanitize(product.data.title);
+    const description = DOMPurify.sanitize(product.data.description.replace(/\n/g, '<br>'));
+    let playCount = "";
+    let refCount = "";
+    let updateDate = "";
+    let prPhotoUrl = "";
+    let authorIcon = "";
+    let authorIconName = "";
+    let authorName = "";
+    let authorPageUrl = "";
+    let authorGamePageUrl = "";
+    let authorLevel = "";
+
+    if(game) {
+        playCount = game.playCount;
+        refCount = product.data.refCount.toLocaleString();
+        updateDate = game.updateDate;
+
+        if(game.prPhotoUrl) {
+            prPhotoUrl = game.prPhotoUrl;
+        }
+    }
+
+    /*--------------------------------
+    // 作者情報
+    --------------------------------*/
+    if(owner && owner.meta.status === 200) {
+        //authorBox.classList.remove("hide");
+
+        // 作者のアイコン
+        authorIcon = owner.data.niconicoUserInfo.icons.urls["150x150"] || owner.data.niconicoUserInfo.icons.urls["50x50"];
+        authorIconName = DOMPurify.sanitize(owner.data.niconicoUserInfo.displayName);
+
+        // 作者の名前
+        authorPageUrl= "https://www.nicovideo.jp/user/" + owner.data.niconicoUserInfo.id;
+        authorName = DOMPurify.sanitize(owner.data.displayName);
+
+        // 作者のレベル
+        authorLevel = owner.data.niconicoUserInfo.level;
+
+        // 作者の他のゲームを見る
+        authorGamePageUrl = "https://namagame.coe.nicovideo.jp/users/" + owner.data.niconicoUserInfo.id + "/games";
+    }
+
+    const insertHtml = `
+        <div class="game-box">
+            <div class="left">
+                <img src="${thumbnailUrl}">
+            </div>
+            <div class="right">
+                <div>${title}</div>
+            </div>
+        </div>
+        <div class="game-info-box">
+            <div class="count">起動回数：${playCount}回</div>
+            <div class="refCount">親作品登録：${refCount}件</div>
+            <div class="update-date">更新日時：${updateDate}</div>
+        </div>
+        <div class="author-box">
+            <div class="left">
+                <img src="${authorIcon}" alt="${authorIconName}">
+            </div>
+            <div class="right">
+                <span class="level">Lv.${authorLevel}</span>
+                <a class="author-name" href="${authorPageUrl}" target="_blank">${authorName}</a>
+                <a class="more-info" href="${authorGamePageUrl}" target="_blank">この作者の他のゲームを見る</a>
+            </div>
+        </div>
+        <div class="pr-photo-box">
+            <img src="${prPhotoUrl}">
+        </div>
+        <div class="description-box">
+            ${description}
+        </div>
+        <div class="loading-box">
+            <div class="loader"></div>
+        </div>
+    `;
+
+    document.querySelector("#HemoUserGameScreen .content-right").innerHTML = insertHtml;
+
+
+    // ローディングを非表示
+    //extHideLoading();
+
+    // 作者情報が取得できなかった場合は最後に非表示
+    /*
+    if(!owner || owner.meta.status != 200) {
+        authorBox.classList.add("hide");
+    }
+    // ゲーム情報が取得できなかった場合は最後に非表示
+    if(!game) {
+        const gameInfoBox = document.querySelector("#ext_ichiba_info .game-info-box");
+        gameInfoBox.classList.add("hide");
+    }
+    */
+
+    return;
+
+}
 
 async function getIchibaGameInfo(lgId) {
 
@@ -887,9 +1047,8 @@ async function getIchibaProductInfo(folderName, itemId, programId) {
     return runCommonFetch(url, _fetchOptions);
 }
 
-
-async function getUserGameList(nicoliveProgramId, sortKey, sortOrder, limit, launchTypes){
-    let url = "https://services-eapi.spi.nicovideo.jp/v1/services/akasha/services/content/contents?programID=" + nicoliveProgramId +"&sortKey=" + sortKey + "&sortOrder=" + sortOrder + "&limit=" + limit;
+async function getUserGameList(nicoliveProgramId, sortKey, sortOrder, limit, offset, launchTypes){
+    let url = "https://services-eapi.spi.nicovideo.jp/v1/services/akasha/services/content/contents?programID=" + nicoliveProgramId +"&sortKey=" + sortKey + "&sortOrder=" + sortOrder + "&limit=" + limit + "&offset=" + offset;
     if(launchTypes) {
         url += "&launchTypes=" + launchTypes;
     }
@@ -1040,78 +1199,129 @@ function setEventGameLauncher() {
             viewUserGameList();
         });
     });
+
+
+    // 自作ゲームの一覧をクリックしたら、ゲームの詳細情報を表示
+    const itemList = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .item-list");
+    itemList.addEventListener("click", function(e) {
+        // .closest('.item')で、その要素から一番近い親の.itemを探す
+        const itemElement = e.target.closest('.item');
+        if(itemElement) {
+            showIchibaInfoToGameLauncher(itemElement.getAttribute("data-id"), "akasha");
+        }
+    });
 }
 
+
+// 「自作ゲーム」タブがクリックされたらデータを表示する
 async function viewUserGameList() {
-    // getUserGameList(nicoliveProgramId, sortKey, sortOrder, limit, launchTypes){
 
     // 現在のフィルターの設定を取得
     const sortKey = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .search-box .radio-group .radio-item input[name='sort'][checked='true']").getAttribute('value');
     const launchTypes = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .search-box .radio-group .radio-item input[name='game_type'][checked='true']").getAttribute('value');
     
     console.log("自作ゲームの一覧を取得");
-    const res = await getUserGameList(_embeddedDataJson.program.nicoliveProgramId, sortKey, "DESC", "20", launchTypes);
+    const res = await getUserGameList(_embeddedDataJson.program.nicoliveProgramId, sortKey, "DESC", "21", "0", launchTypes);
     console.log(res);
 
     let itemListHtml = "";
+    let contentCount = res.data.contents.length;
 
-    res.data.contents.forEach(function(item) {
+    // ゲーム一覧のDOMを作成
+    itemListHtml = createItemHtml(res.data.contents);
 
-        let launchType = "";
+    let appendHtml = "";
+    appendHtml += '<div class="item dummy"></div>';
+    appendHtml += '<div class="item dummy"></div>';
+    appendHtml += '<div class="item dummy"></div>';
+    appendHtml += '<div class="more-btn">もっと見る</div>';
+
+    // ゲーム一覧のDOMを追加
+    const itemList = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .item-list");
+    itemList.innerHTML = itemListHtml + appendHtml;
+
+    // もっと見るボタン
+    const moreBtn = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .more-btn");
+    moreBtn.addEventListener("click", function() { moreBtnClick(itemListHtml, appendHtml, sortKey, launchTypes, contentCount); });
+}
+
+async function moreBtnClick(itemListHtml, appendHtml, sortKey, launchTypes, contentCount) {
+    console.log("自作ゲームの一覧を取得");
+    const res = await getUserGameList(_embeddedDataJson.program.nicoliveProgramId, sortKey, "DESC", "21", contentCount, launchTypes);
+    contentCount += res.data.contents.length;
+
+    
+    itemListHtml += createItemHtml(res.data.contents);
+
+    const itemList = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .item-list");
+    itemList.innerHTML = itemListHtml + appendHtml;
+
+    const moreBtn = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .more-btn");
+    moreBtn.addEventListener("click", function() { moreBtnClick(itemListHtml, appendHtml, sortKey, launchTypes, contentCount); });
+}
+
+function createItemHtml(contents) {
+    let itemListHtml = "";
+    contents.forEach(function(item) {
+
+        let launchTypeStr = "";
         switch(item.launchType) {
             case "multi":
-                launchType = "協力・対戦";
+                launchTypeStr = "協力・対戦";
                 break;
             case "podium":
-                launchType = "全員対戦";
+                launchTypeStr = "全員対戦";
                 break;
             case "self":
-                launchType = "その他";
+                launchTypeStr = "その他";
                 break;
         }
 
         // "2025-09-23T05:39:58.000Z" を、 "2025/09/23" に変換
-        let createdDate = item.createdAt.split("T")[0].replace(/-/g, "/");
+        // let createdDate = item.createdAt.split("T")[0].replace(/-/g, "/");
+
+        const lgId = DOMPurify.sanitize(item.originContentID);
+        const id = DOMPurify.sanitize(item.id);
+        const itemThumbnail = DOMPurify.sanitize(item.thumbnailUrl);
+        const itemTitle = DOMPurify.sanitize(item.title);
+        const itemDescription = DOMPurify.sanitize(item.description);
+        const authorName = DOMPurify.sanitize(item.authorName);
 
         let itemHtml = `
-                    <div class="item" data-lg-id="${DOMPurify.sanitize(item.originContentID)}" data-id="${DOMPurify.sanitize(item.id)}">
-                        <div class="title-box">
-                            <div class="left">
-                                <img src="${DOMPurify.sanitize(item.thumbnailUrl)}" alt="${DOMPurify.sanitize(item.title)}">
-                            </div>
-                            <div class="right">
-                                <div class="title">${DOMPurify.sanitize(item.title)}</div>
-                            </div>
-                        </div>
-                        <div class="btnBox">
-                            <div class="info">
-                                <div class="launchType">${launchType}</div>
-                                <div class="author"><span class="category">作者</span><span class="author-name">${DOMPurify.sanitize(item.authorName)}</span></div>
-                            </div>    
-                            <div class="btn big">リクエスト</div>
-                        </div>
-                        <div class="bookmarkAdd">
-                             <svg width="32px" height="32px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="" stroke-width="0"></g><g id="" stroke-linecap="round" stroke-linejoin="round"></g><g id=""> <path d="M9.15316 5.40838C10.4198 3.13613 11.0531 2 12 2C12.9469 2 13.5802 3.13612 14.8468 5.40837L15.1745 5.99623C15.5345 6.64193 15.7144 6.96479 15.9951 7.17781C16.2757 7.39083 16.6251 7.4699 17.3241 7.62805L17.9605 7.77203C20.4201 8.32856 21.65 8.60682 21.9426 9.54773C22.2352 10.4886 21.3968 11.4691 19.7199 13.4299L19.2861 13.9372C18.8096 14.4944 18.5713 14.773 18.4641 15.1177C18.357 15.4624 18.393 15.8341 18.465 16.5776L18.5306 17.2544C18.7841 19.8706 18.9109 21.1787 18.1449 21.7602C17.3788 22.3417 16.2273 21.8115 13.9243 20.7512L13.3285 20.4768C12.6741 20.1755 12.3469 20.0248 12 20.0248C11.6531 20.0248 11.3259 20.1755 10.6715 20.4768L10.0757 20.7512C7.77268 21.8115 6.62118 22.3417 5.85515 21.7602C5.08912 21.1787 5.21588 19.8706 5.4694 17.2544L5.53498 16.5776C5.60703 15.8341 5.64305 15.4624 5.53586 15.1177C5.42868 14.773 5.19043 14.4944 4.71392 13.9372L4.2801 13.4299C2.60325 11.4691 1.76482 10.4886 2.05742 9.54773C2.35002 8.60682 3.57986 8.32856 6.03954 7.77203L6.67589 7.62805C7.37485 7.4699 7.72433 7.39083 8.00494 7.17781C8.28555 6.96479 8.46553 6.64194 8.82547 5.99623L9.15316 5.40838Z" fill="#dddddd"></path> </g></svg>
-                             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="" stroke-width="0"></g><g id="" stroke-linecap="round" stroke-linejoin="round"></g><g id=""> <path d="M13 5C13 4.44772 12.5523 4 12 4C11.4477 4 11 4.44772 11 5C11 5.55228 11.4477 6 12 6C12.5523 6 13 5.55228 13 5Z" stroke="#333333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13C12.5523 13 13 12.5523 13 12Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M13 19C13 18.4477 12.5523 18 12 18C11.4477 18 11 18.4477 11 19C11 19.5523 11.4477 20 12 20C12.5523 20 13 19.5523 13 19Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></g></svg>
-                        </div>
-                        <div class="popup-box">
-                            <div class="desc">${DOMPurify.sanitize(item.description)}</div>
-                            <div class="date"><span class="category">更新日</span>${createdDate}</div>
-                            <div class="btn-area">
-                                <div class="btn">作者の作品をNG登録</div>
-                                <div class="btn">ショートカットに追加</div>    
-                            </div>
-                        </div>
+            <div class="item" data-lg-id="${lgId}" data-id="${id}">
+                <div class="title-box">
+                    <div class="left">
+                        <img src="${itemThumbnail}" alt="${itemTitle}">
                     </div>
+                    <div class="right">
+                        <div class="title">${itemTitle}</div>
+                    </div>
+                </div>
+                <div class="desc-box">${itemDescription}</div>
+                <div class="btnBox">
+                    <div class="info">
+                        <div class="launchType" data-launch-type="${item.launchType}">${launchTypeStr}</div>
+                        <div class="author">
+                            <span class="category">作者</span>
+                            <a href="https://namagame.coe.nicovideo.jp/users/${item.authorUserID}/games" target="_blank"><span class="author-name">${authorName}</span></a>
+                        </div>
+                    </div>    
+                    <div class="btn big">リクエスト</div>
+                </div>
+                <div class="bookmarkAdd">
+                        <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="" stroke-width="0"></g><g id="" stroke-linecap="round" stroke-linejoin="round"></g><g id=""> <path d="M9.15316 5.40838C10.4198 3.13613 11.0531 2 12 2C12.9469 2 13.5802 3.13612 14.8468 5.40837L15.1745 5.99623C15.5345 6.64193 15.7144 6.96479 15.9951 7.17781C16.2757 7.39083 16.6251 7.4699 17.3241 7.62805L17.9605 7.77203C20.4201 8.32856 21.65 8.60682 21.9426 9.54773C22.2352 10.4886 21.3968 11.4691 19.7199 13.4299L19.2861 13.9372C18.8096 14.4944 18.5713 14.773 18.4641 15.1177C18.357 15.4624 18.393 15.8341 18.465 16.5776L18.5306 17.2544C18.7841 19.8706 18.9109 21.1787 18.1449 21.7602C17.3788 22.3417 16.2273 21.8115 13.9243 20.7512L13.3285 20.4768C12.6741 20.1755 12.3469 20.0248 12 20.0248C11.6531 20.0248 11.3259 20.1755 10.6715 20.4768L10.0757 20.7512C7.77268 21.8115 6.62118 22.3417 5.85515 21.7602C5.08912 21.1787 5.21588 19.8706 5.4694 17.2544L5.53498 16.5776C5.60703 15.8341 5.64305 15.4624 5.53586 15.1177C5.42868 14.773 5.19043 14.4944 4.71392 13.9372L4.2801 13.4299C2.60325 11.4691 1.76482 10.4886 2.05742 9.54773C2.35002 8.60682 3.57986 8.32856 6.03954 7.77203L6.67589 7.62805C7.37485 7.4699 7.72433 7.39083 8.00494 7.17781C8.28555 6.96479 8.46553 6.64194 8.82547 5.99623L9.15316 5.40838Z" fill="#dddddd"></path> </g></svg>
+                    <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M4 6H20M4 12H20M4 18H20" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                </div>
+                <div class="popup-box">
+                    <div class="btn-area">
+                        <div class="btn">作者の作品をNG登録</div>
+                        <div class="btn">ショートカットに追加</div>    
+                    </div>
+                </div>
+            </div>
         `;
-
         itemListHtml += itemHtml;
-
     });
 
-
-    const itemList = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .item-list");
-    itemList.innerHTML = itemListHtml;
-
-
+    return itemListHtml;
 }
