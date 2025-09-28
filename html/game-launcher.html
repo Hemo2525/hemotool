@@ -6,8 +6,8 @@
         <div class="tab-item" data-hemo-game-tab="user">自作ゲーム</div>
         <div class="tab-item" data-hemo-game-tab="favorite">お気に入り</div>
         <div class="tab-item" data-hemo-game-tab="history">履歴</div>
-        <div class="tab-item">スコア</div>
-        <div class="tab-item">NGリスト</div>
+        <div class="tab-item" data-hemo-game-tab="score">スコア</div>
+        <div class="tab-item" data-hemo-game-tab="nglist">NGリスト</div>
     </div>
     <div id="HemoGameTopScreen" class="screen active" data-hemo-game-tab="top">
         <div class="content">
@@ -795,22 +795,27 @@
             <div class="content-left">
                 <div class="search-box">
                     <div class="search-left">
-                        <input type="text" placeholder="キーワードを入力">
+                        <input type="text" id="hemo-gamelauncher-keyword" placeholder="フリーワードを入力">
 
-                        <div class="radio-group">
+                        <div class="radio-group sort-type">
                             <div class="radio-item">
-                                <input type="radio" id="sort_new" name="sort" value="id" checked="true">
+                                <input type="radio" id="sort_new" name="sort_type" value="createdAt" checked>
                                 <label for="sort_new">新着順</label>
                             </div>
                             <div class="radio-item">
-                                <input type="radio" id="sort_popular" name="sort" value="popularity">
+                                <input type="radio" id="sort_id" name="sort_type" value="id">
+                                <label for="sort_id">更新日順</label>
+                            </div>
+
+                            <div class="radio-item">
+                                <input type="radio" id="sort_popular" name="sort_type" value="popularity">
                                 <label for="sort_popular">人気順</label>
                             </div>    
                         </div>
                 
-                        <div class="radio-group">
+                        <div class="radio-group game-type">
                             <div class="radio-item">
-                                <input type="radio" id="game_all" name="game_type" value="" checked="true">
+                                <input type="radio" id="game_all" name="game_type" value="" checked>
                                 <label for="game_all">すべて</label>
                             </div>
                             <div class="radio-item">
@@ -833,13 +838,35 @@
                     </div>
 
                 </div>
-                <div class="item-list active">
-                </div>
+                <div class="item-list active"></div>
                 <!-- /item-list -->
             </div>
             <div class="content-right">
                 
             </div>                
+        </div>
+        <!-- /HemoUserGameScreen -->
+    </div>
+
+    <div id="HemoNgListScreen" class="screen" data-hemo-game-tab="nglist">
+        <div class="ng-content">
+            <div class="header-title">NGリスト</div>
+            <p>自作ゲームの一覧から作者をNG登録することができます。NG登録した作者の作品は自作ゲームの一覧から表示されなくなります。</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>ユーザー名</th>
+                        <th>ユーザーID</th>
+                        <th>ゲーム一覧</th>
+                        <th>登録日時</th>
+                        <th>NGリストから削除</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        
         </div>
         <!-- /HemoUserGameScreen -->
     </div>

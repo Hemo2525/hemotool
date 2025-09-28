@@ -946,7 +946,9 @@ async function showIchibaInfoToGameLauncher(itemId, folderName){
             <div class="right">
                 <span class="level">Lv.${authorLevel}</span>
                 <a class="author-name" href="${authorPageUrl}" target="_blank">${authorName}</a>
-                <a class="more-info" href="${authorGamePageUrl}" target="_blank">この作者の他のゲームを見る</a>
+                <a class="more-info" href="${authorGamePageUrl}" target="_blank">作者の他のゲームを見る</a>
+                <div class="addShortcutBtn">ショートカットに追加</div>
+                <div class="addNgBtn" data-authorName="${authorName}" data-authorId="${owner.data.niconicoUserInfo.id}">作者の作品を全てNG登録</div>
             </div>
         </div>
         <div class="pr-photo-box">
@@ -1047,16 +1049,16 @@ async function getIchibaProductInfo(folderName, itemId, programId) {
     return runCommonFetch(url, _fetchOptions);
 }
 
-async function getUserGameList(nicoliveProgramId, sortKey, sortOrder, limit, offset, launchTypes){
-    let url = "https://services-eapi.spi.nicovideo.jp/v1/services/akasha/services/content/contents?programID=" + nicoliveProgramId +"&sortKey=" + sortKey + "&sortOrder=" + sortOrder + "&limit=" + limit + "&offset=" + offset;
+async function getUserGameList(nicoliveProgramId, keyword, sortKey, sortOrder, limit, launchTypes){
+    let url = "https://services-eapi.spi.nicovideo.jp/v1/services/akasha/services/content/contents?programID=" + nicoliveProgramId +"&sortKey=" + sortKey + "&sortOrder=" + sortOrder + "&limit=" + limit + "&offset=" + _userGameListOffsetCount;
     if(launchTypes) {
         url += "&launchTypes=" + launchTypes;
     }
+    if(keyword) {
+        url += "&keyword=" + keyword;
+    }
     return runCommonFetch(url, _fetchOptions);
 }
-
-
-
 
 async function runCommonFetch(url, options){
     const response = await fetch(url, options);
@@ -1110,7 +1112,7 @@ function setIchibaWaitTime(minutes, seconds) {
     }, 1000);
 }
 
-
+// MARK: イベント設定
 function setEventGameLauncher() {
     const overlay = document.querySelector("#ext_nico_game_launcher_overlay");
     const gameLauncher = document.querySelector(".hemo-view-game-btn");
@@ -1162,107 +1164,306 @@ function setEventGameLauncher() {
             case "user":
                 viewUserGameList();
                 break;
+            case "nglist":
+                viewNgList();
+                break;
+        }
+    });
+
+    // 自作ゲーム画面のフィルター（フリーワード）
+    const keywordContainer = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .search-box #hemo-gamelauncher-keyword");
+    keywordContainer.addEventListener("keydown", function(event) {
+        // Enterキーが押されたら、フィルターを適用
+        if (event.key === "Enter") {
+            
+            // 日本語入力変換中のEnterキー操作を無視する（推奨）
+            if (event.isComposing) {
+                return;
+            }
+
+            // デフォルトのEnterキーの動作（フォーム送信など）をキャンセル
+            event.preventDefault();
+
+            // フィルターを適用
+            viewUserGameList();
+        }
+    });
+
+    // 自作ゲーム画面のフィルター(並び順)
+    const sortTypeContainer = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .search-box .radio-group.sort-type");
+    sortTypeContainer.addEventListener("change", function(event) {
+
+        // イベントの発生元が目的のラジオボタンかを確認
+        if (event.target.name === 'sort_type') {            
+            // フィルターを適用
+            viewUserGameList();
+        }
+    });
+
+    // 自作ゲーム画面のフィルター(ゲームタイプ)
+    const gametypeContainer = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .search-box .radio-group.game-type");
+    gametypeContainer.addEventListener("change", function(event) {
+
+        // イベントの発生元が目的のラジオボタンかを確認
+        if (event.target.name === 'game_type') {
+            // フィルターを適用
+            viewUserGameList();
         }
     });
 
 
-    // 自作ゲーム画面のフィルター(並び順)
-    const sortInputs = document.querySelectorAll("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .search-box .radio-group .radio-item input[name='sort']");
-    sortInputs.forEach(function(input) {
-        input.addEventListener("change", function() {
-            // 他のinputのcheckedをfalseにする
-            sortInputs.forEach(function(input) {
-                if(input !== this) {
-                    input.setAttribute("checked", "false");
-                }
-            });
-            // checkedを設定
-            input.setAttribute("checked", "true");
-            // フィルターを適用
-            viewUserGameList();
-        });
-    });
-
-    // 自作ゲーム画面のフィルター(ゲームタイプ)
-    const gameTypeInputs = document.querySelectorAll("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .search-box .radio-group .radio-item input[name='game_type']");
-    gameTypeInputs.forEach(function(input) {
-        input.addEventListener("change", function() {
-            // 他のinputのcheckedをfalseにする
-            gameTypeInputs.forEach(function(input) {
-                if(input !== this) {
-                    input.setAttribute("checked", "false");
-                }
-            });
-            // checkedを設定
-            input.setAttribute("checked", "true");
-            // フィルターを適用
-            viewUserGameList();
-        });
-    });
-
-
-    // 自作ゲームの一覧をクリックしたら、ゲームの詳細情報を表示
+    // 自作ゲーム一覧のアイテムをクリックしたら、ゲームの詳細情報を表示
     const itemList = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .item-list");
     itemList.addEventListener("click", function(e) {
         // .closest('.item')で、その要素から一番近い親の.itemを探す
         const itemElement = e.target.closest('.item');
         if(itemElement) {
+
+            // .bookmarkAdd がクリックされたら、ブックマークを追加
+            if(e.target.classList.contains('bookmarkAdd') || e.target.closest('.bookmarkAdd')) {
+                console.log("ブックマークを追加");
+                addBookmark(itemElement);
+                return;
+            }
+            
             showIchibaInfoToGameLauncher(itemElement.getAttribute("data-id"), "akasha");
+            
+            itemList.querySelectorAll(".item.active").forEach(function(item) {
+                item.classList.remove("active");
+            });
+
+            itemElement.classList.add("active");
+
+
+
         }
+    });
+
+
+    // 自作ゲーム詳細情報内のクリック判定
+    const itemInfo = document.querySelector("#HemoUserGameScreen .content-right");
+    itemInfo.addEventListener("click", async function(e) {
+        // .addNgBtnがクリックされたら、作者の作品を全てNG登録
+        if(e.target.classList.contains('addNgBtn')) {
+
+            //確認画面を表示
+            if(confirm("NG登録を実行しますか？")){
+
+                const authorName = e.target.getAttribute("data-authorName");
+                const authorId = e.target.getAttribute("data-authorId");
+                // 現在の日時
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = now.getMonth() + 1;
+                const day = now.getDate();
+                const hour = now.getHours();
+                const minute = now.getMinutes();
+                const second = now.getSeconds();
+                const date = year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
+
+                // 拡張機能のストレージからNGリストを取得
+                const getNgList = await getStorageData(["ngList"]);
+
+                // 拡張機能のストレージに保存する
+                const ngList = getNgList.ngList || [];
+                ngList.push({authorName: authorName, authorId: authorId, date: date});
+                chrome.storage.local.set({"ngList": ngList}, function() {
+                    
+                    // 詳細情報を初期化
+                    itemInfo.innerHTML = "";
+
+                    // ゲーム一覧から作者の作品を全て削除
+                    const ngItemList = document.querySelectorAll("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .item-list .item[data-author-id='" + authorId + "']");
+                    ngItemList.forEach(function(item) {
+                        item.remove();
+                    });
+                });
+            }
+        }        
+    });
+
+    // NGリストのクリック判定
+    const ngList = document.querySelector("#HemoNgListScreen .ng-content table tbody");
+    ngList.addEventListener("click", async function(e) {
+        // .addNgBtnがクリックされたら、作者の作品を全てNG登録
+        if(e.target.classList.contains('btn')) {
+
+            // ダイアログで確認
+            if(confirm("削除を実行しますか？")){
+
+                const authorId = e.target.getAttribute("data-authorId");
+
+                // 拡張機能のストレージからNGリストを取得
+                const getNgList = await getStorageData(["ngList"]);
+
+                // 新しいNGリストを作成
+                const newNgList = getNgList.ngList.filter(item => item.authorId !== authorId);
+
+                // 拡張機能のストレージに保存する
+                chrome.storage.local.set({"ngList": newNgList}, function() {
+                    // NGリストを再表示
+                    viewNgList();
+                });
+            }
+        }        
     });
 }
 
+async function addBookmark(itemElement) {
+
+    const itemThumb = itemElement.querySelector(".title-box img").src;
+    const itemTitle = itemElement.querySelector(".title-box .title").innerText;
+    const lunchType = itemElement.querySelector(".launchType").getAttribute("data-launch-type");
+    const authorName = itemElement.querySelector(".author .author-name").innerText;
+    const authorId = itemElement.getAttribute("data-author-id");
+    const itemId = itemElement.getAttribute("data-id");
+    const itemLgId = itemElement.getAttribute("data-lg-id");
+
+    const getBookmarkList = await getStorageData(["bookmarkList"]);
+    const bookmarkList = getBookmarkList.bookmarkList || [];
+    bookmarkList.push({itemThumb: itemThumb, itemTitle: itemTitle, lunchType: lunchType, authorName: authorName, authorId: authorId, itemId: itemId, itemLgId: itemLgId});
+    chrome.storage.local.set({"bookmarkList": bookmarkList}, function() {
+        itemElement.classList.add("bookmarked");
+    });
+
+}
+
+
+let _userGameListHtml = "";
+let _userGameListOffsetCount = 0;
 
 // 「自作ゲーム」タブがクリックされたらデータを表示する
 async function viewUserGameList() {
 
     // 現在のフィルターの設定を取得
-    const sortKey = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .search-box .radio-group .radio-item input[name='sort'][checked='true']").getAttribute('value');
-    const launchTypes = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .search-box .radio-group .radio-item input[name='game_type'][checked='true']").getAttribute('value');
+    const sortKey = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .search-box .radio-group.sort-type .radio-item input[name='sort_type']:checked").getAttribute('value');
+    const launchTypes = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .search-box .radio-group.game-type .radio-item input[name='game_type']:checked").getAttribute('value');
+    const keyword = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .search-box #hemo-gamelauncher-keyword").value;
     
     console.log("自作ゲームの一覧を取得");
-    const res = await getUserGameList(_embeddedDataJson.program.nicoliveProgramId, sortKey, "DESC", "21", "0", launchTypes);
+    const res = await getUserGameList(_embeddedDataJson.program.nicoliveProgramId, keyword, sortKey, "DESC", "21", launchTypes);
     console.log(res);
 
-    let itemListHtml = "";
-    let contentCount = res.data.contents.length;
-
     // ゲーム一覧のDOMを作成
-    itemListHtml = createItemHtml(res.data.contents);
+    _userGameListHtml = await createItemListHtml(res.data.contents);
 
     let appendHtml = "";
     appendHtml += '<div class="item dummy"></div>';
     appendHtml += '<div class="item dummy"></div>';
     appendHtml += '<div class="item dummy"></div>';
-    appendHtml += '<div class="more-btn">もっと見る</div>';
 
-    // ゲーム一覧のDOMを追加
+    // ゲーム一覧のDOMを初期化
+    _userGameListHtml = "";
+    _userGameListOffsetCount = 0;
+
+    await userGameListAppend(res.data.contents, appendHtml);
+
+
+    // もっと見るボタンも初期化
+    const exsistMoreBtn = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .more-btn");
+    if(exsistMoreBtn) {
+        exsistMoreBtn.remove();
+    }
+    const moreBtn = document.createElement("div");
+    moreBtn.classList.add("more-btn");
+    moreBtn.innerText = "もっと見る";
     const itemList = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .item-list");
-    itemList.innerHTML = itemListHtml + appendHtml;
-
-    // もっと見るボタン
-    const moreBtn = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .more-btn");
-    moreBtn.addEventListener("click", function() { moreBtnClick(itemListHtml, appendHtml, sortKey, launchTypes, contentCount); });
+    moreBtn.addEventListener("click", function() { moreBtnClick(appendHtml, keyword, sortKey, launchTypes); });
+    // .item-listの兄弟要素の最後に追加
+    itemList.parentNode.insertBefore(moreBtn, itemList.nextSibling);
 }
 
-async function moreBtnClick(itemListHtml, appendHtml, sortKey, launchTypes, contentCount) {
-    console.log("自作ゲームの一覧を取得");
-    const res = await getUserGameList(_embeddedDataJson.program.nicoliveProgramId, sortKey, "DESC", "21", contentCount, launchTypes);
-    contentCount += res.data.contents.length;
 
+// 「NGリスト」タブがクリックされたらデータを表示する
+async function viewNgList() {
+    console.log("NGリストを取得");
+    chrome.storage.local.get(["ngList"], function(result) {
+        const ngList = result.ngList || [];
+        if(ngList.length > 0) {
+            let itemHtml = "";
+
+            // ngListを最新の日付が先頭になるようにソートする
+            ngList.sort(function(a, b) {
+                return new Date(b.date) - new Date(a.date);
+            });
+
+            ngList.forEach(function(item) {    
+                itemHtml += `
+                    <tr>
+                        <td>${DOMPurify.sanitize(item.authorName)}</td>
+                        <td>${item.authorId}</td>
+                        <td><a href="https://namagame.coe.nicovideo.jp/users/${item.authorId}/games" target="_blank">ゲーム一覧</a></td>
+                        <td>${item.date}</td>
+                        <td><div class="btn" data-authorId="${item.authorId}">削除</div></td>
+                    </tr>
+                `;
+            });
+            const tableBody = document.querySelector("#HemoNgListScreen .ng-content table tbody");
+            tableBody.innerHTML = itemHtml;
+        }
+    });
+}
+
+async function moreBtnClick(appendHtml, keyword, sortKey, launchTypes) {
+    console.log("自作ゲームの一覧を取得(もっと見る)");
+    const res = await getUserGameList(_embeddedDataJson.program.nicoliveProgramId, keyword, sortKey, "DESC", "40", launchTypes);
+
+    await userGameListAppend(res.data.contents, appendHtml);
+
+    // const moreBtn = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .more-btn");
+    // moreBtn.addEventListener("click", function() { moreBtnClick(appendHtml, keyword, sortKey, launchTypes, contentCount); });
+}
+
+
+async function userGameListAppend(gameList, appendHtml) {
+
+    // ngListのデータを取得
+    let ngIdList = [];
+    const getNgList = await getStorageData(["ngList"]);
+    //console.log("NG",getNgList);
+    getNgList.ngList.forEach(function(item) {
+       ngIdList.push(item.authorId);
+    });
+
+    // 先にNGリストに含まれていない要素だけを抽出
+    const filteredContents = gameList.filter(item => !ngIdList.includes(item.authorUserID));
+    // offset用に、取得した要素の数を追加
+    _userGameListOffsetCount += gameList.length;
     
-    itemListHtml += createItemHtml(res.data.contents);
+    _userGameListHtml += await createItemListHtml(filteredContents);
 
     const itemList = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .item-list");
-    itemList.innerHTML = itemListHtml + appendHtml;
-
-    const moreBtn = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .more-btn");
-    moreBtn.addEventListener("click", function() { moreBtnClick(itemListHtml, appendHtml, sortKey, launchTypes, contentCount); });
+    itemList.innerHTML = _userGameListHtml + appendHtml;
 }
 
-function createItemHtml(contents) {
+/**
+ * chrome.storage.local.get を Promise を返す関数に変換するヘルパー
+ * @param {string | string[]} keys - 取得したいデータのキー
+ * @returns {Promise<Object>} - 取得結果を解決するPromise
+ */
+function getStorageData(keys) {
+    return new Promise((resolve) => {
+      chrome.storage.local.get(keys, (result) => {
+        resolve(result);
+      });
+    });
+  }
+
+// ゲームの一覧のHTMLを作成
+async function createItemListHtml(contents) {
+
+    // 拡張機能のストレージからブックマークリストを取得
+    const getBookmarkList = await getStorageData(["bookmarkList"]);
+    const bookmarkList = getBookmarkList.bookmarkList || [];
+        
     let itemListHtml = "";
     contents.forEach(function(item) {
+
+        // ブックマークリストに含まれているかを確認
+        const isBookmarked = bookmarkList.some(function(bookmark) {
+            return bookmark.itemId === item.id;
+        });
+
 
         let launchTypeStr = "";
         switch(item.launchType) {
@@ -1288,7 +1489,7 @@ function createItemHtml(contents) {
         const authorName = DOMPurify.sanitize(item.authorName);
 
         let itemHtml = `
-            <div class="item" data-lg-id="${lgId}" data-id="${id}">
+            <div class="item ${isBookmarked ? "bookmarked" : ""}" data-lg-id="${lgId}" data-id="${id}" data-author-id="${item.authorUserID}">
                 <div class="title-box">
                     <div class="left">
                         <img src="${itemThumbnail}" alt="${itemTitle}">
@@ -1308,15 +1509,8 @@ function createItemHtml(contents) {
                     </div>    
                     <div class="btn big">リクエスト</div>
                 </div>
-                <div class="bookmarkAdd">
-                        <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="" stroke-width="0"></g><g id="" stroke-linecap="round" stroke-linejoin="round"></g><g id=""> <path d="M9.15316 5.40838C10.4198 3.13613 11.0531 2 12 2C12.9469 2 13.5802 3.13612 14.8468 5.40837L15.1745 5.99623C15.5345 6.64193 15.7144 6.96479 15.9951 7.17781C16.2757 7.39083 16.6251 7.4699 17.3241 7.62805L17.9605 7.77203C20.4201 8.32856 21.65 8.60682 21.9426 9.54773C22.2352 10.4886 21.3968 11.4691 19.7199 13.4299L19.2861 13.9372C18.8096 14.4944 18.5713 14.773 18.4641 15.1177C18.357 15.4624 18.393 15.8341 18.465 16.5776L18.5306 17.2544C18.7841 19.8706 18.9109 21.1787 18.1449 21.7602C17.3788 22.3417 16.2273 21.8115 13.9243 20.7512L13.3285 20.4768C12.6741 20.1755 12.3469 20.0248 12 20.0248C11.6531 20.0248 11.3259 20.1755 10.6715 20.4768L10.0757 20.7512C7.77268 21.8115 6.62118 22.3417 5.85515 21.7602C5.08912 21.1787 5.21588 19.8706 5.4694 17.2544L5.53498 16.5776C5.60703 15.8341 5.64305 15.4624 5.53586 15.1177C5.42868 14.773 5.19043 14.4944 4.71392 13.9372L4.2801 13.4299C2.60325 11.4691 1.76482 10.4886 2.05742 9.54773C2.35002 8.60682 3.57986 8.32856 6.03954 7.77203L6.67589 7.62805C7.37485 7.4699 7.72433 7.39083 8.00494 7.17781C8.28555 6.96479 8.46553 6.64194 8.82547 5.99623L9.15316 5.40838Z" fill="#dddddd"></path> </g></svg>
-                    <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M4 6H20M4 12H20M4 18H20" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
-                </div>
-                <div class="popup-box">
-                    <div class="btn-area">
-                        <div class="btn">作者の作品をNG登録</div>
-                        <div class="btn">ショートカットに追加</div>    
-                    </div>
+                <div class="bookmarkAdd" title="お気に入りに追加">
+                    <svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="" stroke-width="0"></g><g id="" stroke-linecap="round" stroke-linejoin="round"></g><g id=""> <path d="M9.15316 5.40838C10.4198 3.13613 11.0531 2 12 2C12.9469 2 13.5802 3.13612 14.8468 5.40837L15.1745 5.99623C15.5345 6.64193 15.7144 6.96479 15.9951 7.17781C16.2757 7.39083 16.6251 7.4699 17.3241 7.62805L17.9605 7.77203C20.4201 8.32856 21.65 8.60682 21.9426 9.54773C22.2352 10.4886 21.3968 11.4691 19.7199 13.4299L19.2861 13.9372C18.8096 14.4944 18.5713 14.773 18.4641 15.1177C18.357 15.4624 18.393 15.8341 18.465 16.5776L18.5306 17.2544C18.7841 19.8706 18.9109 21.1787 18.1449 21.7602C17.3788 22.3417 16.2273 21.8115 13.9243 20.7512L13.3285 20.4768C12.6741 20.1755 12.3469 20.0248 12 20.0248C11.6531 20.0248 11.3259 20.1755 10.6715 20.4768L10.0757 20.7512C7.77268 21.8115 6.62118 22.3417 5.85515 21.7602C5.08912 21.1787 5.21588 19.8706 5.4694 17.2544L5.53498 16.5776C5.60703 15.8341 5.64305 15.4624 5.53586 15.1177C5.42868 14.773 5.19043 14.4944 4.71392 13.9372L4.2801 13.4299C2.60325 11.4691 1.76482 10.4886 2.05742 9.54773C2.35002 8.60682 3.57986 8.32856 6.03954 7.77203L6.67589 7.62805C7.37485 7.4699 7.72433 7.39083 8.00494 7.17781C8.28555 6.96479 8.46553 6.64194 8.82547 5.99623L9.15316 5.40838Z" fill="#dddddd"></path> </g></svg>
                 </div>
             </div>
         `;
