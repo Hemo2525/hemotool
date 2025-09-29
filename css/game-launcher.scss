@@ -729,6 +729,9 @@ $ichibaItemSize: 34px;
                                 fill: #ffb934;
                             }
                         }
+                        &.ng {
+                            display: none;
+                        }
 
                         .title-box {
                             display: flex;

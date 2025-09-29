@@ -641,6 +641,9 @@
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item.bookmarked .bookmarkAdd svg path {
   fill: #ffb934;
 }
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item.ng {
+  display: none;
+}
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .title-box {
   display: flex;
   align-items: center;

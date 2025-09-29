@@ -823,7 +823,7 @@ async function showIchibaInfo(itemId, folderName){
 }
 
 // ゲームの詳細情報をゲームランチャーに表示
-async function showIchibaInfoToGameLauncher(itemId, folderName){
+async function showIchibaInfoToGameLauncher(itemId, folderName, authorId){
 
     // 既に同じアイテムが表示されている場合は、表示を解除
     /*
@@ -910,20 +910,28 @@ async function showIchibaInfoToGameLauncher(itemId, folderName){
     if(owner && owner.meta.status === 200) {
         //authorBox.classList.remove("hide");
 
-        // 作者のアイコン
-        authorIcon = owner.data.niconicoUserInfo.icons.urls["150x150"] || owner.data.niconicoUserInfo.icons.urls["50x50"];
-        authorIconName = DOMPurify.sanitize(owner.data.niconicoUserInfo.displayName);
+        // アカウントによってはniconicoUserInfoが存在しない場合がある
+        if(owner.data.niconicoUserInfo){
+
+            // 作者のアイコン
+            authorIcon = owner.data.niconicoUserInfo.icons.urls["150x150"] || owner.data.niconicoUserInfo.icons.urls["50x50"];
+            authorIconName = DOMPurify.sanitize(owner.data.niconicoUserInfo.displayName);
+        
+            // 作者のレベル
+            authorLevel = owner.data.niconicoUserInfo.level;
+
+        }
 
         // 作者の名前
-        authorPageUrl= "https://www.nicovideo.jp/user/" + owner.data.niconicoUserInfo.id;
         authorName = DOMPurify.sanitize(owner.data.displayName);
-
-        // 作者のレベル
-        authorLevel = owner.data.niconicoUserInfo.level;
-
-        // 作者の他のゲームを見る
-        authorGamePageUrl = "https://namagame.coe.nicovideo.jp/users/" + owner.data.niconicoUserInfo.id + "/games";
     }
+
+    // 作者のユーザーページ
+    authorPageUrl= "https://www.nicovideo.jp/user/" + authorId;
+
+    // 作者の他のゲームを見る
+    authorGamePageUrl = "https://namagame.coe.nicovideo.jp/users/" + authorId + "/games";
+
 
     const insertHtml = `
         <div class="game-box">
@@ -948,7 +956,7 @@ async function showIchibaInfoToGameLauncher(itemId, folderName){
                 <a class="author-name" href="${authorPageUrl}" target="_blank">${authorName}</a>
                 <a class="more-info" href="${authorGamePageUrl}" target="_blank">作者の他のゲームを見る</a>
                 <div class="addShortcutBtn">ショートカットに追加</div>
-                <div class="addNgBtn" data-authorName="${authorName}" data-authorId="${owner.data.niconicoUserInfo.id}">作者の作品を全てNG登録</div>
+                <div class="addNgBtn" data-authorName="${authorName}" data-authorId="${authorId}">作者の作品を全てNG登録</div>
             </div>
         </div>
         <div class="pr-photo-box">
@@ -1049,8 +1057,8 @@ async function getIchibaProductInfo(folderName, itemId, programId) {
     return runCommonFetch(url, _fetchOptions);
 }
 
-async function getUserGameList(nicoliveProgramId, keyword, sortKey, sortOrder, limit, launchTypes){
-    let url = "https://services-eapi.spi.nicovideo.jp/v1/services/akasha/services/content/contents?programID=" + nicoliveProgramId +"&sortKey=" + sortKey + "&sortOrder=" + sortOrder + "&limit=" + limit + "&offset=" + _userGameListOffsetCount;
+async function getUserGameList(nicoliveProgramId, keyword, sortKey, sortOrder, limit, offset, launchTypes){
+    let url = "https://services-eapi.spi.nicovideo.jp/v1/services/akasha/services/content/contents?programID=" + nicoliveProgramId +"&sortKey=" + sortKey + "&sortOrder=" + sortOrder + "&limit=" + limit + "&offset=" + offset;
     if(launchTypes) {
         url += "&launchTypes=" + launchTypes;
     }
@@ -1162,7 +1170,7 @@ function setEventGameLauncher() {
             case "official":
                 break;
             case "user":
-                viewUserGameList();
+                viewUserGameList(false);
                 break;
             case "nglist":
                 viewNgList();
@@ -1185,7 +1193,7 @@ function setEventGameLauncher() {
             event.preventDefault();
 
             // フィルターを適用
-            viewUserGameList();
+            viewUserGameList(true);
         }
     });
 
@@ -1196,7 +1204,7 @@ function setEventGameLauncher() {
         // イベントの発生元が目的のラジオボタンかを確認
         if (event.target.name === 'sort_type') {            
             // フィルターを適用
-            viewUserGameList();
+            viewUserGameList(true);
         }
     });
 
@@ -1207,7 +1215,7 @@ function setEventGameLauncher() {
         // イベントの発生元が目的のラジオボタンかを確認
         if (event.target.name === 'game_type') {
             // フィルターを適用
-            viewUserGameList();
+            viewUserGameList(true);
         }
     });
 
@@ -1226,7 +1234,7 @@ function setEventGameLauncher() {
                 return;
             }
             
-            showIchibaInfoToGameLauncher(itemElement.getAttribute("data-id"), "akasha");
+            showIchibaInfoToGameLauncher(itemElement.getAttribute("data-id"), "akasha", itemElement.getAttribute("data-author-id"));
             
             itemList.querySelectorAll(".item.active").forEach(function(item) {
                 item.classList.remove("active");
@@ -1272,10 +1280,10 @@ function setEventGameLauncher() {
                     // 詳細情報を初期化
                     itemInfo.innerHTML = "";
 
-                    // ゲーム一覧から作者の作品を全て削除
+                    // ゲーム一覧から作者の作品を全て非表示にする(.ngクラスを追加)
                     const ngItemList = document.querySelectorAll("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .item-list .item[data-author-id='" + authorId + "']");
                     ngItemList.forEach(function(item) {
-                        item.remove();
+                        item.classList.add("ng");
                     });
                 });
             }
@@ -1329,34 +1337,49 @@ async function addBookmark(itemElement) {
 }
 
 
-let _userGameListHtml = "";
-let _userGameListOffsetCount = 0;
+//let _userGameListHtml = "";
+//let _userGameListOffsetCount = 0;
 
 // 「自作ゲーム」タブがクリックされたらデータを表示する
-async function viewUserGameList() {
+async function viewUserGameList(bIsRefresh = false) {
+
+    const itemList = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .item-list");
+
+    // リフレッシュフラグが有効な場合、既に表示されているアイテムを削除
+    if(bIsRefresh) {
+        while (itemList.firstChild) {
+            itemList.removeChild(itemList.firstChild);
+        }
+    }
 
     // 現在のフィルターの設定を取得
     const sortKey = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .search-box .radio-group.sort-type .radio-item input[name='sort_type']:checked").getAttribute('value');
     const launchTypes = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .search-box .radio-group.game-type .radio-item input[name='game_type']:checked").getAttribute('value');
     const keyword = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .search-box #hemo-gamelauncher-keyword").value;
     
+    // 現在表示されているアイテムの数を取得
+    const itemOffset = itemList.querySelectorAll(".item:not(.dummy)").length;
+
+    // 既に表示されているアイテムがある場合はデータを取得しない（例えば一度自作ゲームタブが押されてから、別のタブに行ってから戻ってきた場合）
+    if(itemOffset > 0) {
+        return;
+    }
+
+    // 既に表示されているアイテムが無い場合はデータを新規で取得する
     console.log("自作ゲームの一覧を取得");
-    const res = await getUserGameList(_embeddedDataJson.program.nicoliveProgramId, keyword, sortKey, "DESC", "21", launchTypes);
+    const res = await getUserGameList(_embeddedDataJson.program.nicoliveProgramId, keyword, sortKey, "DESC", "50", itemOffset, launchTypes);
     console.log(res);
 
     // ゲーム一覧のDOMを作成
-    _userGameListHtml = await createItemListHtml(res.data.contents);
+    //const newGameListHtml = await createItemListHtml(res.data.contents);
 
-    let appendHtml = "";
-    appendHtml += '<div class="item dummy"></div>';
-    appendHtml += '<div class="item dummy"></div>';
-    appendHtml += '<div class="item dummy"></div>';
+
 
     // ゲーム一覧のDOMを初期化
-    _userGameListHtml = "";
-    _userGameListOffsetCount = 0;
+    //_userGameListHtml = "";
+    //_userGameListOffsetCount = 0;
 
-    await userGameListAppend(res.data.contents, appendHtml);
+    await userGameListAppend(res.data.contents);
 
 
     // もっと見るボタンも初期化
@@ -1367,8 +1390,8 @@ async function viewUserGameList() {
     const moreBtn = document.createElement("div");
     moreBtn.classList.add("more-btn");
     moreBtn.innerText = "もっと見る";
-    const itemList = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .item-list");
-    moreBtn.addEventListener("click", function() { moreBtnClick(appendHtml, keyword, sortKey, launchTypes); });
+    // const itemList = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .item-list");
+    moreBtn.addEventListener("click", function() { moreBtnClick(keyword, sortKey, launchTypes); });
     // .item-listの兄弟要素の最後に追加
     itemList.parentNode.insertBefore(moreBtn, itemList.nextSibling);
 }
@@ -1404,36 +1427,48 @@ async function viewNgList() {
     });
 }
 
-async function moreBtnClick(appendHtml, keyword, sortKey, launchTypes) {
-    console.log("自作ゲームの一覧を取得(もっと見る)");
-    const res = await getUserGameList(_embeddedDataJson.program.nicoliveProgramId, keyword, sortKey, "DESC", "40", launchTypes);
+async function moreBtnClick(keyword, sortKey, launchTypes) {
 
-    await userGameListAppend(res.data.contents, appendHtml);
+    // 現在表示されているアイテムの数を取得
+    const itemList = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .item-list");
+    const itemOffset = itemList.querySelectorAll(".item:not(.dummy)").length;
+    
+    console.log("自作ゲームの一覧を取得(もっと見る)");        
+    const res = await getUserGameList(_embeddedDataJson.program.nicoliveProgramId, keyword, sortKey, "DESC", "50", itemOffset, launchTypes);
+    console.log(res);
+
+    await userGameListAppend(res.data.contents);
 
     // const moreBtn = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .more-btn");
     // moreBtn.addEventListener("click", function() { moreBtnClick(appendHtml, keyword, sortKey, launchTypes, contentCount); });
 }
 
 
-async function userGameListAppend(gameList, appendHtml) {
+async function userGameListAppend(gameList) {
 
-    // ngListのデータを取得
-    let ngIdList = [];
-    const getNgList = await getStorageData(["ngList"]);
-    //console.log("NG",getNgList);
-    getNgList.ngList.forEach(function(item) {
-       ngIdList.push(item.authorId);
-    });
 
-    // 先にNGリストに含まれていない要素だけを抽出
-    const filteredContents = gameList.filter(item => !ngIdList.includes(item.authorUserID));
-    // offset用に、取得した要素の数を追加
-    _userGameListOffsetCount += gameList.length;
     
-    _userGameListHtml += await createItemListHtml(filteredContents);
+    const newGameListHtml = await createItemListHtml(gameList);
 
     const itemList = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .item-list");
-    itemList.innerHTML = _userGameListHtml + appendHtml;
+
+    // 既に表示されているアイテムがある場合は末尾の.item.dummy を削除する
+    itemList.querySelectorAll(".item.dummy").forEach(function(item) {
+        item.remove();
+    });
+
+    let appendHtml = "";
+    appendHtml += '<div class="item dummy"></div>';
+    appendHtml += '<div class="item dummy"></div>';
+    appendHtml += '<div class="item dummy"></div>';
+
+    // .item-listの中身の一番うしろにnewGameListHtml（文字列）を追加
+    if (newGameListHtml) { // 追加するHTMLがある場合のみ実行
+        itemList.insertAdjacentHTML('beforeend', newGameListHtml);
+    }
+
+    // ダミー要素（文字列）も追加
+    itemList.insertAdjacentHTML('beforeend', appendHtml);
 }
 
 /**
@@ -1452,6 +1487,11 @@ function getStorageData(keys) {
 // ゲームの一覧のHTMLを作成
 async function createItemListHtml(contents) {
 
+
+    // ngListのデータを取得
+    const getNgList = await getStorageData(["ngList"]);
+    const ngList = getNgList.ngList || [];
+
     // 拡張機能のストレージからブックマークリストを取得
     const getBookmarkList = await getStorageData(["bookmarkList"]);
     const bookmarkList = getBookmarkList.bookmarkList || [];
@@ -1462,6 +1502,11 @@ async function createItemListHtml(contents) {
         // ブックマークリストに含まれているかを確認
         const isBookmarked = bookmarkList.some(function(bookmark) {
             return bookmark.itemId === item.id;
+        });
+
+        // NGリストに含まれているかを確認
+        const isNg = ngList.some(function(ng) {
+            return ng.authorId === item.authorUserID;
         });
 
 
@@ -1489,7 +1534,7 @@ async function createItemListHtml(contents) {
         const authorName = DOMPurify.sanitize(item.authorName);
 
         let itemHtml = `
-            <div class="item ${isBookmarked ? "bookmarked" : ""}" data-lg-id="${lgId}" data-id="${id}" data-author-id="${item.authorUserID}">
+            <div class="item ${isBookmarked ? "bookmarked" : ""} ${isNg ? "ng" : ""}" data-lg-id="${lgId}" data-id="${id}" data-author-id="${item.authorUserID}">
                 <div class="title-box">
                     <div class="left">
                         <img src="${itemThumbnail}" alt="${itemTitle}">
