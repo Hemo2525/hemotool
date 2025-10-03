@@ -1,13 +1,15 @@
 <div id="ext_nico_game_launcher">
-    <div class="launcher-title">ニコ生ゲームランチャー</div>
-    <div class="tab-list">
-        <div class="tab-item active" data-hemo-game-tab="top">トップ</div>
-        <div class="tab-item" data-hemo-game-tab="official">公式ゲーム</div>
-        <div class="tab-item" data-hemo-game-tab="user">自作ゲーム</div>
-        <div class="tab-item" data-hemo-game-tab="bookmark">お気に入り</div>
-        <div class="tab-item" data-hemo-game-tab="history">履歴</div>
-        <div class="tab-item" data-hemo-game-tab="score">スコア</div>
-        <div class="tab-item" data-hemo-game-tab="nglist">NGリスト</div>
+    <div class="title-tab-box">
+        <div class="launcher-title">ニコ生ゲームランチャー</div>
+        <div class="tab-list">
+            <div class="tab-item active" data-hemo-game-tab="top">トップ</div>
+            <div class="tab-item" data-hemo-game-tab="official">公式ゲーム</div>
+            <div class="tab-item" data-hemo-game-tab="user">自作ゲーム</div>
+            <div class="tab-item" data-hemo-game-tab="bookmark">お気に入り</div>
+            <div class="tab-item" data-hemo-game-tab="history">履歴</div>
+            <div class="tab-item" data-hemo-game-tab="score">スコア</div>
+            <div class="tab-item" data-hemo-game-tab="nglist">NGリスト</div>
+        </div>    
     </div>
     <div id="HemoGameTopScreen" class="screen active" data-hemo-game-tab="top">
         <div class="content">
@@ -291,9 +293,9 @@
             </div>
             <div class="content-right"></div>
         </div>
-        <!-- /HemoUserGameScreen -->
     </div>
-
+    <!-- /HemoUserGameScreen -->
+     
     <div id="HemoBookmarkScreen" class="screen" data-hemo-game-tab="bookmark">
         <div class="content">
             <div class="content-left">
@@ -305,8 +307,18 @@
             </div>
             <div class="content-right"></div> 
         </div>
-        <!-- /HemoBookmarkScreen -->
     </div>
+    <!-- /HemoBookmarkScreen -->
+
+    <div id="HemoUseHistoryScreen" class="screen" data-hemo-game-tab="history">
+        <div class="content">
+            <div class="content-left">
+                <div class="item-list active"></div>
+            </div>
+            <div class="content-right"></div>
+        </div>
+    </div>
+    <!-- /HemoUseHistoryScreen -->
 
     <div id="HemoNgListScreen" class="screen" data-hemo-game-tab="nglist">
         <div class="ng-content">

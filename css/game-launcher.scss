@@ -561,35 +561,46 @@ $ichibaItemSize: 34px;
         box-sizing: border-box;
         overflow: hidden;
         padding: 30px 40px;
-        .launcher-title {
-            font-size: 18px;
-            font-weight: bold;
-        }
-        .tab-list {
-            display: flex;
-            align-items: stretch;
-            justify-content: flex-start;
-            margin-bottom: 14px;
-            margin-top: 20px;
-            margin-left: 7px;
 
-            .tab-item {
-                font-size: 15px;
-                padding: 5px 10px 8px;
-                background-color: rgb(155, 155, 155);
-                margin-right: 10px;
-                border-radius: 37px;
-                line-height: 1;
-                color: white;
-                user-select: none;
-                cursor: pointer;
-                &.active {
-                    background-color: white;
-                    color: inherit;
-                    box-shadow: #cbcbcb 0px 0px 10px;
-                }
+        .title-tab-box {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 20px;
+
+            .launcher-title {
+                font-size: 18px;
+                font-weight: bold;
+                margin-right: 30px;
+                margin-left: 10px;
             }
+            .tab-list {
+                display: flex;
+                align-items: stretch;
+                justify-content: flex-start;
+                // margin-bottom: 14px;
+                // margin-top: 20px;
+                margin-left: 7px;
+    
+                .tab-item {
+                    font-size: 15px;
+                    padding: 5px 10px 8px;
+                    background-color: rgb(155, 155, 155);
+                    margin-right: 10px;
+                    border-radius: 37px;
+                    line-height: 1;
+                    color: white;
+                    user-select: none;
+                    cursor: pointer;
+                    &.active {
+                        background-color: white;
+                        color: inherit;
+                        box-shadow: #cbcbcb 0px 0px 10px;
+                    }
+                }
+            }    
         }
+
 
         .screen {
             display: none;
@@ -604,7 +615,7 @@ $ichibaItemSize: 34px;
             align-items: flex-start;
             justify-content: space-between;
             gap: 10px;
-            height: calc(100% - 80px);
+            height: calc(100% - 50px);
 
             .content-left {
                 flex-basis: calc(100% - 500px);
@@ -644,7 +655,8 @@ $ichibaItemSize: 34px;
                 }
 
                 .search-box {
-                    margin-bottom: 20px;
+                    margin-top: 10px;
+                    margin-bottom: 10px;
                     .search-left {
                         input[type="text"] {
                             display: block;
@@ -684,7 +696,7 @@ $ichibaItemSize: 34px;
                     flex-wrap: wrap;
                     height: 100%;
                     padding: 12px 15px;
-                    margin-top: 20px;
+                    // margin-top: 20px;
 
                     &.active {
                         display: flex;

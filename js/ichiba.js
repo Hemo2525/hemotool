@@ -1032,6 +1032,7 @@ async function showIchibaInfoToGameLauncher(item, folderName){
 
 }
 
+// MARK: 通信：ゲームの詳細情報を取得
 async function getIchibaGameInfo(lgId) {
 
     // 以下のURLからHTMLを取得して特定のタグのテキストを取得する
@@ -1072,6 +1073,7 @@ async function getIchibaGameInfo(lgId) {
     return data;
 }
 
+// MARK: 通信：公式ゲームの一覧を取得
 async function getOfficalGameList(programId, section) {
     /* 対戦・協力ゲーム
         全員対戦：vsall
@@ -1083,31 +1085,37 @@ async function getOfficalGameList(programId, section) {
     return runCommonFetch(url, _fetchOptions);
 }
 
+// MARK: 通信：公式ゲームの詳細情報を取得
 async function getProduct(programId) {
     const url = "https://eapi.spi.nicovideo.jp/v1/users/self/authority?contentId=" + programId;
     return runCommonFetch(url, _fetchOptions);
 }
 
+// MARK: 通信：番組グレード情報を取得
 async function getGrade(programId) {
     const url = "https://eapi.spi.nicovideo.jp/v1/contents/" + programId + "/grade";
     return runCommonFetch(url, _fetchOptions);
 }
 
+// MARK: 通信：サービス情報を取得
 async function getIchibaServiceInfo(folderName, itemId, programId) {
     const url ="https://services-eapi.spi.nicovideo.jp/v1/services/" + folderName + "/services/program/programs/" + programId + "/contents/" + itemId;
     return runCommonFetch(url, _fetchOptions);
 }
 
+// MARK: 通信：オーナー情報を取得
 async function getOwner(ownerId) {
     const url = "https://eapi.spi.nicovideo.jp/v2/products/products/" + ownerId + "/owner";
     return runCommonFetch(url, _fetchOptions);
 }
 
+// MARK: 通信：ゲームの詳細情報を取得
 async function getIchibaProductInfo(folderName, itemId, programId) {
     const url =  "https://eapi.spi.nicovideo.jp/v2/services/" + folderName + "/products/" + itemId + "?exclude_registered=false&tmp_page_id=detail&contentId=" + programId;
     return runCommonFetch(url, _fetchOptions);
 }
 
+// MARK: 通信：自作ゲームの一覧を取得
 async function getUserGameList(nicoliveProgramId, keyword, sortKey, sortOrder, limit, offset, launchTypes){
     let url = "https://services-eapi.spi.nicovideo.jp/v1/services/akasha/services/content/contents?programID=" + nicoliveProgramId +"&sortKey=" + sortKey + "&sortOrder=" + sortOrder + "&limit=" + limit + "&offset=" + offset;
     if(launchTypes) {
@@ -1119,6 +1127,13 @@ async function getUserGameList(nicoliveProgramId, keyword, sortKey, sortOrder, l
     return runCommonFetch(url, _fetchOptions);
 }
 
+// MARK: 通信：履歴情報を取得
+async function getIchibaUseHistory(itemId) {
+    const url =  "https://eapi.spi.nicovideo.jp/v2/use_histories/self?contentId=" + itemId;
+    return runCommonFetch(url, _fetchOptions);
+}
+
+// MARK: 通信：共通処理
 async function runCommonFetch(url, options){
     const response = await fetch(url, options);
 
@@ -1226,6 +1241,9 @@ function setEventGameLauncher() {
                 break;
             case "bookmark":
                 viewBookmarkList();
+                break;
+            case "history":
+                viewUseHistoryList();
                 break;
             case "nglist":
                 viewNgList();
@@ -1616,6 +1634,59 @@ async function viewBookmarkList() {
     itemListOfficial.insertAdjacentHTML('beforeend', appendHtml);
 }
 
+// 「履歴」タブがクリックされたらデータを表示する
+async function viewUseHistoryList() {
+
+    // 既に表示されているアイテムを削除
+    const itemList = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='history'] .item-list");
+    while (itemList.firstChild) {
+        itemList.removeChild(itemList.firstChild);
+    }
+
+    // 既に表示されているアイテムが無い場合はデータを新規で取得する
+    console.log("履歴の一覧を取得");
+    const res = await getIchibaUseHistory(_embeddedDataJson.program.nicoliveProgramId);
+    console.log(res);
+
+    /*
+    map()を使って、以下のような構造を、
+    const res.data = [
+        { content: { id: "1", name: "りんご", price: 100 } },
+        { content: { id: "2", name: "みかん", price: 50 } },
+        { content: { id: "3", name: "バナナ", price: 80 } }
+    ];
+    以下のような構造に作成しなおす。
+    const newArray = [
+        { id: "1", name: "りんご", price: 100 },
+        { id: "2", name: "みかん", price: 50 },
+        { id: "3", name: "バナナ", price: 80 }
+    ]
+    */
+    const newGameList = res.data.map(item => item.content);
+
+    console.log("newGameList", newGameList);
+
+    // awaitを待つために for..ofを使う
+    for (const item of newGameList) {
+        if(item.serviceName === "akasha") {
+            const product = await getIchibaProductInfo(item.serviceName, item.serviceProductId, _embeddedDataJson.program.nicoliveProgramId);
+            item.id = product.data.id;
+            item.description = product.data.description;
+
+            const service = await getIchibaServiceInfo(item.serviceName, item.serviceProductId, _embeddedDataJson.program.nicoliveProgramId);
+            item.authorUserID = service.data.userId;
+            item.originContentId = service.data.content.originContentId;
+
+            console.log("item", item);
+        }
+    }
+
+    console.log("newGameList_after", newGameList);
+
+    await gameListAppend('history', itemList, newGameList);
+
+}
+
 // 「NGリスト」タブがクリックされたらデータを表示する
 async function viewNgList() {
     console.log("NGリストを取得");
@@ -1704,24 +1775,48 @@ async function createItemListHtml(tabId, contents) {
     const ngList = getNgList.ngList || [];
 
     // 拡張機能のストレージからブックマークリストを取得
-    const getBookmarkList = await chrome.storage.local.get([`bookmarkList-${tabId}`]);
-    const bookmarkList = getBookmarkList[`bookmarkList-${tabId}`] || [];
-    console.log("bookmarkList", bookmarkList);
+    const getBookmarkListUser = await chrome.storage.local.get([`bookmarkList-user`]);
+    const bookmarkListUser = getBookmarkListUser[`bookmarkList-user`] || [];
+    const getBookmarkListOfficial = await chrome.storage.local.get([`bookmarkList-official`]);
+    const bookmarkListOfficial = getBookmarkListOfficial[`bookmarkList-official`] || [];
+
+
         
     let itemListHtml = "";
     contents.forEach(function(item) {
-
+/*
+        // 履歴タブの場合は、serviceNameによってtabIdを変更
+        if(tabId === "history") {
+            if(item.serviceName === "akasha") {
+                tabId = "user";
+            } else if(item.serviceName === "game") {
+                tabId = "official";
+            }
+        }
+*/
         // ブックマークリストに含まれているかを確認
         let isBookmarked = false;
         if(tabId === "user") {
-            isBookmarked = bookmarkList.some(function(bookmark) {
+            isBookmarked = bookmarkListUser.some(function(bookmark) {
                 return bookmark.id === item.id; // 自作ゲームの場合はidで判断
             });
         } else if(tabId === "official") {
-            isBookmarked = bookmarkList.some(function(bookmark) {
+            isBookmarked = bookmarkListOfficial.some(function(bookmark) {
                 return bookmark.serviceProductId === item.serviceProductId; // 公式ゲームの場合はserviceProductIdで判断
             });
+        } 
+/*        else if(tabId === "history") {
+            if(item.serviceName === "akasha") {
+                isBookmarked = bookmarkListUser.some(function(bookmark) {
+                    return bookmark.id === item.serviceProductId; // 自作ゲームの場合はidで判断
+                });
+            } else if(item.serviceName === "game") {
+                isBookmarked = bookmarkListOfficial.some(function(bookmark) {
+                    return bookmark.serviceProductId === item.serviceProductId; // 公式ゲームの場合はserviceProductIdで判断
+                });
+            }
         }
+*/
 
         // NGリストに含まれているかを確認
         const isNg = ngList.some(function(ng) {
@@ -1755,12 +1850,14 @@ async function createItemListHtml(tabId, contents) {
         const itemDescription = DOMPurify.sanitize(item.description);
         const authorName = DOMPurify.sanitize(item.authorName);
 
+
+
         // 公式ゲームの場合
         if(tabId === "official") {
-            let itemHtml = `
-                <div class="item ${isBookmarked ? "bookmarked" : ""} ${isNg ? "ng" : ""}" data-lg-id="${lgId}" 
-                data-id="${item.id}" data-author-id="${item.authorUserID}" data-service-name="game"
-                data-service-product-id="${item.serviceProductId}" data-category="official">
+            const itemHtml = `
+                <div class="item ${isBookmarked ? "bookmarked" : ""} ${isNg ? "ng" : ""}"
+                    data-id="${item.id}" data-service-name="game"
+                    data-service-product-id="${item.serviceProductId}" data-category="official">
                     <div class="title-box">
                         <div class="left">
                             <img src="${itemThumbnail}" alt="${itemTitle}">
@@ -1783,11 +1880,13 @@ async function createItemListHtml(tabId, contents) {
                 </div>
             `;
             itemListHtml += itemHtml;
-        } else {
+
+        } else if(tabId === "user") {
+            
             // 自作ゲームの場合
-            let itemHtml = `
+            const itemHtml = `
                 <div class="item ${isBookmarked ? "bookmarked" : ""} ${isNg ? "ng" : ""}" data-lg-id="${lgId}"
-                data-id="${id}" data-author-id="${item.authorUserID}" data-service-name="akasha" data-category="user">
+                    data-id="${id}" data-author-id="${item.authorUserID}" data-service-name="akasha" data-category="user">
                     <div class="title-box">
                         <div class="left">
                             <img src="${itemThumbnail}" alt="${itemTitle}">
