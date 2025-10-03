@@ -691,7 +691,7 @@ div#ext_dom_message {
   box-sizing: border-box;
 }
 #ext_shortcut:has([ext-pin-on]) {
-  padding: 2px 6px 14px 6px;
+  padding: 0px 6px 4px;
 }
 
 #ext_shortcut .item {

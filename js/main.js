@@ -569,6 +569,17 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
     ichibaShortcut.id = "ext_ichiba_shortcut";
     ichibaShortcut.innerHTML = '<div class="time-box"></div><div class="hemo-view-game-btn">' + plusIcon + '</div><div class="item-box"></div>';
     document.querySelector('[class^=___player-controller___]').append(ichibaShortcut);
+
+    // ニコ生ゲームランチャー用のオーバーレイ用のDOMを作成しておく
+    const response = await fetch(chrome.runtime.getURL("/html/game-launcher.html"));
+    const gameLauncherHtml = await response.text();
+    const nicoGameLauncherOverlay = document.createElement('div');
+    nicoGameLauncherOverlay.id = "ext_nico_game_launcher_overlay";
+    nicoGameLauncherOverlay.innerHTML = gameLauncherHtml;
+    document.querySelector('body').appendChild(nicoGameLauncherOverlay);
+    setEventGameLauncher();
+
+
     // 市場ショートカット用のDOMに各ショートカットを追加する
     addIchibaShortcut();
 
@@ -606,20 +617,7 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
     hideBtn.addEventListener('click', function(){
         document.querySelector("#ext_ichiba_info").classList.remove("show");
     });
-
-
-
-    const response = await fetch(chrome.runtime.getURL("/html/game-launcher.html"));
-    const gameLauncherHtml = await response.text();
-
-    // ニコ生ゲームランチャー用のオーバーレイ用のDOMを作成しておく
-    const nicoGameLauncherOverlay = document.createElement('div');
-    nicoGameLauncherOverlay.id = "ext_nico_game_launcher_overlay";
-    nicoGameLauncherOverlay.innerHTML = gameLauncherHtml;
-    document.querySelector('body').appendChild(nicoGameLauncherOverlay);
-    setEventGameLauncher();
-
-
+    
     
 
     chrome.storage.local.get("ext_viewoff_array", function (value) {

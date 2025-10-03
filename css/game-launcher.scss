@@ -571,7 +571,7 @@ $ichibaItemSize: 34px;
             .launcher-title {
                 font-size: 18px;
                 font-weight: bold;
-                margin-right: 30px;
+                margin-right: 40px;
                 margin-left: 10px;
             }
             .tab-list {
@@ -580,8 +580,7 @@ $ichibaItemSize: 34px;
                 justify-content: flex-start;
                 // margin-bottom: 14px;
                 // margin-top: 20px;
-                margin-left: 7px;
-    
+                margin-right: 20px;
                 .tab-item {
                     font-size: 15px;
                     padding: 5px 10px 8px;
@@ -598,7 +597,16 @@ $ichibaItemSize: 34px;
                         box-shadow: #cbcbcb 0px 0px 10px;
                     }
                 }
-            }    
+            }
+            .time-box {
+                font-size: 15px;
+                /* border: 1px solid gainsboro; */
+                padding: 5px 36px 8px;
+                line-height: 1;
+                background-color: #9d1616;
+                border-radius: 5px;
+                color: white;
+            }
         }
 
 
@@ -855,22 +863,12 @@ $ichibaItemSize: 34px;
                                 }
                             }
                             .btn {
+                                position: relative;
+
                                 flex-basis: 100px;
                                 max-width: 100px;
 
-                                border: 1px solid #f7931e;
-                                background-color: white;
-                                color: #f7931e;
-                                padding: 5px 11px;
-                                font-size: 12px;
-                                border-radius: 5px;
-                                transition: background-color 0.15s ease;
-                                user-select: none;
-                                &:hover {
-                                    background-color: #fff5e3;
-                                }
-
-                                &.big {
+                                .requestBtn {
                                     background-color: #f7931e;
                                     font-size: 15px;
                                     padding: 0px 11px 3px;
@@ -880,6 +878,46 @@ $ichibaItemSize: 34px;
                                     transition: background-color 0.15s ease;
                                     &:hover {
                                         background-color: #c16d00;
+                                    }
+                                }
+                                .balloon {
+                                    pointer-events: none; // baloonの後ろにある要素にクリックが効くようにする
+                                    display: block;
+                                    z-index: -10000000000;
+                        
+                                    position: absolute;
+                                    pointer-events: none;
+                        
+                                    cursor: default;
+                        
+                                    height: 38px;
+                                    width: 213px;
+                                    top: -48px;
+                                    right: -3px;
+                                    left: inherit;
+                                    margin: 0 auto;
+                                    border: 1px solid white;
+                        
+                                    background-color: rgba(0, 0, 0, 0.941);
+                                    color: white;
+                                    font-size: 12px;
+                                    text-align: center;
+                                    line-height: 1.5;
+                                    padding: 10px;
+                                    border-radius: 5px;
+                                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+                                    opacity: 0;
+                                    transition: opacity 0.3s ease, transform 0.9s ease;
+                                    transform: translateY(-10px);
+                        
+                                    &.hide {
+                                        display: none;
+                                    }
+                        
+                                    &.show {
+                                        z-index: 10000000000;
+                                        opacity: 1;
+                                        transform: translateY(0);
                                     }
                                 }
                             }

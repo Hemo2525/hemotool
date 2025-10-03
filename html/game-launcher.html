@@ -9,7 +9,8 @@
             <div class="tab-item" data-hemo-game-tab="history">履歴</div>
             <div class="tab-item" data-hemo-game-tab="score">スコア</div>
             <div class="tab-item" data-hemo-game-tab="nglist">NGリスト</div>
-        </div>    
+        </div>
+        <div class="time-box"></div>
     </div>
     <div id="HemoGameTopScreen" class="screen active" data-hemo-game-tab="top">
         <div class="content">
@@ -269,20 +270,28 @@
                 
                         <div class="radio-group game-type">
                             <div class="radio-item">
-                                <input type="radio" id="game_all" name="game_type" value="" checked>
-                                <label for="game_all">すべて</label>
+                                <input type="radio" id="全ゲーム" name="fixedTag" value="全ゲーム" checked>
+                                <label for="全ゲーム">全ゲーム</label>
                             </div>
                             <div class="radio-item">
-                                <input type="radio" id="game_battle_royale" name="game_type" value="podium">
-                                <label for="game_battle_royale">全員対戦</label>
+                                <input type="radio" id="アクション" name="fixedTag" value="アクション">
+                                <label for="アクション">アクション</label>
                             </div>
                             <div class="radio-item">
-                                <input type="radio" id="game_coop_vs" name="game_type" value="multi">
-                                <label for="game_coop_vs">協力・対戦</label>
+                                <input type="radio" id="パズル" name="fixedTag" value="パズル">
+                                <label for="パズル">パズル</label>
                             </div>
                             <div class="radio-item">
-                                <input type="radio" id="game_other" name="game_type" value="self">
-                                <label for="game_other">その他</label>
+                                <input type="radio" id="シューティング" name="fixedTag" value="シューティング">
+                                <label for="シューティング">シューティング</label>
+                            </div>    
+                            <div class="radio-item">
+                                <input type="radio" id="スポーツ" name="fixedTag" value="スポーツ">
+                                <label for="スポーツ">スポーツ</label>
+                            </div>    
+                            <div class="radio-item">
+                                <input type="radio" id="ツール" name="fixedTag" value="ツール">
+                                <label for="ツール">ツール</label>
                             </div>    
                         </div>
                     </div>

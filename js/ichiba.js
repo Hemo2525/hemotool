@@ -247,18 +247,42 @@ function addHemoToolToIchibaBaloon(currentNode) {
     infoBtn.addEventListener("click", function() {showIchibaInfo(id, folderName)});
 }
 
+function getFrontendId() {
+    let frontendId = "9";
+    if(_embeddedDataJson && _embeddedDataJson.site && _embeddedDataJson.site.frontendId){
+        console.log("frontendId:", _embeddedDataJson.site.frontendId);
+        frontendId = _embeddedDataJson.site.frontendId;
+    } else {
+        console.error("frontendIdが取得できませんでした");
+    }
+    return frontendId;
+}
+
+function getFrontendVersion() {
+    let frontendVersion = "600.0.0";
+    if(_embeddedDataJson && _embeddedDataJson.site && _embeddedDataJson.site.frontendVersion){
+        console.log("frontendVersion:", _embeddedDataJson.site.frontendVersion);
+        frontendVersion = _embeddedDataJson.site.frontendVersion;
+    } else {
+        console.error("frontendVersionが取得できませんでした");
+    }
+    return frontendVersion;
+}
+
 async function addIchibaShortcut() {
     const ichibaItemBox = document.querySelector("#ext_ichiba_shortcut .item-box");
     ichibaItemBox.innerHTML = "";
 
     // タイムシフトなどで、ゲームを追加できない場合は、ショートカットを無効化
     const waitTime = document.querySelector('#ext_ichiba_shortcut .time-box');
+    const watiTimeInLauncher = document.querySelector('#ext_nico_game_launcher .time-box');
     const ichibaAddBtn = document.querySelector("[class^=___ichiba-counter-section___] [class^=___add-button___]");
     const bIsDisableIchiba = ichibaAddBtn && ichibaAddBtn.hasAttribute("disabled");
     if(bIsDisableIchiba){
         const ichibaShortcut = document.querySelector("#ext_ichiba_shortcut");
         ichibaShortcut.classList.add("disabled");
         waitTime.innerText = "リクエストできません";
+        watiTimeInLauncher.innerText = "リクエストできません";
     } else {
 
         const product = await getProduct(_embeddedDataJson.program.nicoliveProgramId);
@@ -269,32 +293,9 @@ async function addIchibaShortcut() {
             setIchibaWaitTime(minutes, seconds);
         } else {
             waitTime.innerText = "リクエストが可能です";
+            watiTimeInLauncher.innerText = "リクエストが可能です";
         }
-
     }
-
-    
-    console.log("--------------------------------");
-    console.log(_embeddedDataJson);
-    
-
-    let frontendId = "9";
-    if(_embeddedDataJson && _embeddedDataJson.site && _embeddedDataJson.site.frontendId){
-        console.log("frontendId:", _embeddedDataJson.site.frontendId);
-        frontendId = _embeddedDataJson.site.frontendId;
-    } else {
-        console.error("frontendIdが取得できませんでした");
-    }
-
-    let frontendVersion = "600.0.0";
-    if(_embeddedDataJson && _embeddedDataJson.site && _embeddedDataJson.site.frontendVersion){
-        console.log("frontendVersion:", _embeddedDataJson.site.frontendVersion);
-        frontendVersion = _embeddedDataJson.site.frontendVersion;
-    } else {
-        console.error("frontendVersionが取得できませんでした");
-    }
-
-
 
     /*
     chrome.storage.local.getして、#ext_ichiba_shortcutに、以下のようにDOMを追加する
@@ -369,15 +370,7 @@ async function addIchibaShortcut() {
 
                     // 放送ネタが禁止になっている配信では、「動画・生」タブのリクエストは禁止
                     if(_embeddedDataJson.programSuperichiba.programIsPermittedToRequestSpecificNeta === false && item.folderName === "quotation"){
-                        
-                        // balloonにエラーメッセージを表示
-                        document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).textContent = "放送ネタが許可されていません";
-                        document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).classList.add("show");
-                        // 数ミリ秒後に非表示
-                        setTimeout(function(){
-                            document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).classList.remove("show");
-                            document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).style.pointerEvents = "none";
-                        }, 900);
+                        showBalloon(item.folderName, item.itemId, "放送ネタが許可されていません");
                         return
                     }
 
@@ -398,7 +391,7 @@ async function addIchibaShortcut() {
                     console.log("programId:", programId);
 
                     // アイテムをリクエスト
-                    requestIchibaItem(programId, item, frontendId, frontendVersion);
+                    requestIchibaItem(programId, item.folderName, item.itemId);
 
                 });
                 
@@ -509,128 +502,6 @@ async function addIchibaShortcut() {
 
 
 
-// 通信を実行し、結果を処理する非同期関数
-async function requestIchibaItem(programId, item, frontendId, frontendVersion) {
-
-    const itemIcon = document.querySelector(".item.ichiba:has(.item-" + item.folderName + "-" + item.itemId + ") img");
-    itemIcon.classList.add("loading");
-
-    // 番組グレードを取得
-    const grade = await getGrade(programId);
-    if(!grade || grade.meta.status != 200) {
-        console.error("番組グレードを取得できませんでした");
-        return;
-    }
-    console.log("番組グレード:", grade.data.programGrade);
-
-
-    const url = "https://eapi.spi.nicovideo.jp/v1/ichibas/" + programId + "/products";
-
-    // POSTリクエストの場合は、メソッドをPOSTに、ボディを指定する（但し_fetchOptionsは修正しない）
-    const options = {..._fetchOptions};
-    options.method = "POST";
-    options.body = "{\"serviceName\":\"" + item.folderName + "\",\"serviceProductId\":\"" + item.itemId + "\",\"frontendId\":" + frontendId + ",\"frontendVersion\":\"" + frontendVersion + "\",\"expectedGrade\":" + grade.data.programGrade + "}";
-
-    
-    try {
-        // fetchリクエストを送信し、サーバーからの応答を待つ
-        const response = await fetch(url, options);
-
-        // response.ok はステータスコードが200-299の範囲にあるかを示す
-        // falseの場合、サーバーがエラーを返したことを意味する
-        if (!response.ok) {
-            console.error(`HTTPエラーが発生しました: ${response.status} ${response.statusText}`);
-            
-            let errorBody;
-            try {
-                // エラーレスポンスの本体をJSONとして解析試行
-                errorBody = await response.json();
-            } catch (e) {
-                // JSONでなければテキストとして取得
-                errorBody = await response.text();
-            }
-            
-            // サーバーから返されたエラーの詳細をコンソールに表示
-            console.error("サーバーからのエラー詳細:", errorBody);
-
-
-
-            let errorMessage = "リクエストに失敗しました";
-            console.log("エラーコード: ", errorBody.meta.errorCode);
-            switch(errorBody.meta.errorCode) {
-                case "NO_REMAINING_USE_RIGHT":
-
-                    const product = await getProduct(programId);
-                    // 秒数から、n分m秒を取得
-                    const minutes = Math.floor(product.data.cooldownTime / 60);
-                    const seconds = product.data.cooldownTime % 60;
-                    errorMessage =  "残り " + minutes + "分" + seconds + "秒 待機が必要です";
-                    
-                    setIchibaWaitTime(minutes, seconds);
-                    break;
-                case "ITEM_ALREADY_EXISTS":
-                    errorMessage = "既にリクエストされています";
-                    break;
-                case "BAD_REQUEST":
-                    // タイムシフトの配信を見ているときにも発生するエラー
-                    errorMessage = "リクエストに失敗しました";
-                    break;
-                case "NOT_PREMIUM_USER":
-                    errorMessage = "プレミアム会員が必要です";
-                    break;
-                case "GRADE_HAS_CHANGED":
-                    errorMessage = "グレードが変更されました";
-                    break;
-                case "NOT_FOUND":
-                    errorMessage = "アイテムが見つかりません";
-                    break;
-                default:
-                    break;
-            }
-
-            // balloonにエラーメッセージを表示
-            document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).textContent = errorMessage;
-            document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).classList.add("show");
-            // 数ミリ秒後に非表示
-            setTimeout(function(){
-                document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).classList.remove("show");
-                document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).style.pointerEvents = "none";
-            }, 900);
-
-            itemIcon.classList.remove("loading");
-            
-            // エラーなのでここで処理を中断
-            return; 
-        }
-
-        // 通信が成功した場合、応答をJSONとして解析
-        const data = await response.json();
-        console.log("成功:", data);
-
-        // balloonに成功メッセージを表示
-        document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).textContent = "リクエストしました";
-        document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).classList.add("show");
-        // 数ミリ秒後に非表示
-        setTimeout(function(){
-            document.querySelector(".balloon.item-" + item.folderName + "-" + item.itemId).classList.remove("show");
-        }, 900);
-
-        itemIcon.classList.remove("loading");
-
-        // 番組グレードを取得し、次のリクエストまでの時間を取得して表示しておく
-        const gradeData = await getGrade(programId);
-        // 次のリクエストまでの時間を取得して表示しておく
-        const minutes = Math.floor(gradeData.data.freezeTime / 60);
-        const seconds = gradeData.data.freezeTime % 60;    
-        setIchibaWaitTime(minutes, seconds);
-
-
-    } catch (networkError) {
-        // ネットワーク接続の問題やCORSエラーなど、通信自体が失敗した場合
-        console.error("通信エラー:", networkError);
-        itemIcon.classList.remove("loading");
-    }
-}
 
 function extShowLoading() {
     const gameBox = document.querySelector("#ext_ichiba_info .game-box");
@@ -1032,6 +903,156 @@ async function showIchibaInfoToGameLauncher(item, folderName){
 
 }
 
+// MARK:通信：ゲームのリクエストを実行
+async function requestIchibaItem(programId, folderName, itemId) {
+
+    console.log("--------------------------------");
+    console.log(_embeddedDataJson);
+    
+    const frontendId = getFrontendId();
+    const frontendVersion = getFrontendVersion();
+
+    const itemIcon = document.querySelector(".item.ichiba:has(.item-" + folderName + "-" + itemId + ") img");
+    itemIcon?.classList.add("loading");
+
+    // 番組グレードを取得
+    const grade = await getGrade(programId);
+    if(!grade || grade.meta.status != 200) {
+        console.error("番組グレードを取得できませんでした");
+        return;
+    }
+    console.log("番組グレード:", grade.data.programGrade);
+
+
+    const url = "https://eapi.spi.nicovideo.jp/v1/ichibas/" + programId + "/products";
+
+    // POSTリクエストの場合は、メソッドをPOSTに、ボディを指定する（但し_fetchOptionsは修正しない）
+    const options = {..._fetchOptions};
+    options.method = "POST";
+    options.body = "{\"serviceName\":\"" + folderName + "\",\"serviceProductId\":\"" + itemId + "\",\"frontendId\":" + frontendId + ",\"frontendVersion\":\"" + frontendVersion + "\",\"expectedGrade\":" + grade.data.programGrade + "}";
+
+    
+    try {
+        // fetchリクエストを送信し、サーバーからの応答を待つ
+        const response = await fetch(url, options);
+
+        // response.ok はステータスコードが200-299の範囲にあるかを示す
+        // falseの場合、サーバーがエラーを返したことを意味する
+        if (!response.ok) {
+            console.error(`HTTPエラーが発生しました: ${response.status} ${response.statusText}`);
+            
+            let errorBody;
+            try {
+                // エラーレスポンスの本体をJSONとして解析試行
+                errorBody = await response.json();
+            } catch (e) {
+                // JSONでなければテキストとして取得
+                errorBody = await response.text();
+            }
+            
+            // サーバーから返されたエラーの詳細をコンソールに表示
+            console.error("サーバーからのエラー詳細:", errorBody);
+
+
+
+            let errorMessage = "リクエストに失敗しました";
+            console.log("エラーコード: ", errorBody.meta.errorCode);
+            switch(errorBody.meta.errorCode) {
+                case "NO_REMAINING_USE_RIGHT":
+
+                    const product = await getProduct(programId);
+                    // 秒数から、n分m秒を取得
+                    const minutes = Math.floor(product.data.cooldownTime / 60);
+                    const seconds = product.data.cooldownTime % 60;
+                    errorMessage =  "残り " + minutes + "分" + seconds + "秒 待機が必要です";
+                    
+                    setIchibaWaitTime(minutes, seconds);
+                    break;
+                case "ITEM_ALREADY_EXISTS":
+                    errorMessage = "既にリクエストされています";
+                    break;
+                case "BAD_REQUEST":
+                    // タイムシフトの配信を見ているときにも発生するエラー
+                    errorMessage = "リクエストに失敗しました";
+                    break;
+                case "NOT_PREMIUM_USER":
+                    errorMessage = "プレミアム会員が必要です";
+                    break;
+                case "GRADE_HAS_CHANGED":
+                    errorMessage = "グレードが変更されました";
+                    break;
+                case "NOT_FOUND":
+                    errorMessage = "アイテムが見つかりません";
+                    break;
+                default:
+                    break;
+            }
+
+            // balloonにエラーメッセージを表示
+            showBalloon(folderName, itemId, errorMessage);
+
+            itemIcon?.classList.remove("loading");
+            
+            // エラーなのでここで処理を中断
+            return; 
+        }
+
+        // 通信が成功した場合、応答をJSONとして解析
+        const data = await response.json();
+        console.log("成功:", data);
+
+        // balloonに成功メッセージを表示
+        showBalloon(folderName, itemId, "リクエストしました");
+
+        itemIcon?.classList.remove("loading");
+
+        // 番組グレードを取得し、次のリクエストまでの時間を取得して表示しておく
+        const gradeData = await getGrade(programId);
+        // 次のリクエストまでの時間を取得して表示しておく
+        const minutes = Math.floor(gradeData.data.freezeTime / 60);
+        const seconds = gradeData.data.freezeTime % 60;    
+        setIchibaWaitTime(minutes, seconds);
+
+
+    } catch (networkError) {
+        // ネットワーク接続の問題やCORSエラーなど、通信自体が失敗した場合
+        console.error("通信エラー:", networkError);
+        itemIcon?.classList.remove("loading");
+    }
+}
+
+function showBalloon(folderName, itemId, message) {
+    const balloon = document.querySelector("#ext_ichiba_shortcut .balloon.item-" + folderName + "-" + itemId);
+    const balloonInLauncher = document.querySelector("#ext_nico_game_launcher .balloon.item-" + folderName + "-" + itemId);
+    
+    if(balloon) {
+        balloon.textContent = message;
+        balloon.classList.add("show");
+    }
+    if(balloonInLauncher) {
+        balloonInLauncher.textContent = message;
+        balloonInLauncher.classList.add("show");
+    }
+
+    // 数ミリ秒後に非表示
+    setTimeout(function(){
+        if(balloon) {
+            balloon.classList.remove("show");
+            balloon.style.pointerEvents = "none";
+        }
+    }, 900);
+
+
+    setTimeout(function(){
+        if(balloonInLauncher) {
+            balloonInLauncher.classList.remove("show");
+            balloonInLauncher.style.pointerEvents = "none";
+        }
+    }, 1400);
+
+
+}
+
 // MARK: 通信：ゲームの詳細情報を取得
 async function getIchibaGameInfo(lgId) {
 
@@ -1116,11 +1137,8 @@ async function getIchibaProductInfo(folderName, itemId, programId) {
 }
 
 // MARK: 通信：自作ゲームの一覧を取得
-async function getUserGameList(nicoliveProgramId, keyword, sortKey, sortOrder, limit, offset, launchTypes){
-    let url = "https://services-eapi.spi.nicovideo.jp/v1/services/akasha/services/content/contents?programID=" + nicoliveProgramId +"&sortKey=" + sortKey + "&sortOrder=" + sortOrder + "&limit=" + limit + "&offset=" + offset;
-    if(launchTypes) {
-        url += "&launchTypes=" + launchTypes;
-    }
+async function getUserGameList(nicoliveProgramId, keyword, sortKey, sortOrder, limit, offset, fixedTag){
+    let url = "https://services-eapi.spi.nicovideo.jp/v1/services/akasha/services/content/contents?programID=" + nicoliveProgramId +"&sortKey=" + sortKey + "&sortOrder=" + sortOrder + "&limit=" + limit + "&offset=" + offset + "&fixedTag=" + fixedTag;
     if(keyword) {
         url += "&keyword=" + keyword;
     }
@@ -1173,15 +1191,20 @@ function setIchibaWaitTime(minutes, seconds) {
     const waitTime = document.querySelector('#ext_ichiba_shortcut .time-box');
     waitTime.innerText = "次のリクエストまで\n残り" + minutes + "分" + seconds + "秒";
 
+    const watiTimeInLauncher = document.querySelector('#ext_nico_game_launcher .time-box');
+    if(watiTimeInLauncher) { watiTimeInLauncher.innerText = "次のリクエストまで 残り" + minutes + "分" + seconds + "秒" };
+
     // 受け取った分と秒数を1秒毎にカウントダウンさせて表示する
     let count = minutes * 60 + seconds;
     _ichibaInterval = setInterval(function() {
         count--;
         waitTime.innerText = "次のリクエストまで\n残り" + Math.floor(count / 60) + "分" + count % 60 + "秒";
+        if(watiTimeInLauncher) { watiTimeInLauncher.innerText = "次のリクエストまで 残り" + Math.floor(count / 60) + "分" + count % 60 + "秒" };
         if(count <= 0) {
             clearInterval(_ichibaInterval);
             _ichibaInterval = null;
             waitTime.innerText = "リクエストが可能です";
+            if(watiTimeInLauncher) { watiTimeInLauncher.innerText = "リクエストが可能です" };
         }
     }, 1000);
 }
@@ -1314,7 +1337,7 @@ function setEventGameLauncher() {
     gametypeContainer.addEventListener("change", function(event) {
 
         // イベントの発生元が目的のラジオボタンかを確認
-        if (event.target.name === 'game_type') {
+        if (event.target.name === 'fixedTag') {
             // フィルターを適用
             viewUserGameList(true);
         }
@@ -1325,9 +1348,16 @@ function setEventGameLauncher() {
         const tabId = tab?.getAttribute("data-hemo-game-tab");
         const screen = e.target.closest('.screen');
         const itemElement = e.target.closest('.item');
+        const serviceName = itemElement.getAttribute("data-service-name");
+        const category = itemElement.getAttribute("data-category");
+        const itemId = itemElement.getAttribute("data-id");
+        const serviceProductId = itemElement.getAttribute("data-service-product-id");
+
         if(itemElement) {
-            // ブックマークボタンがクリックされた
+            
             if(e.target.classList.contains('bookmarkAdd') || e.target.closest('.bookmarkAdd')) {
+
+                // ブックマークボタンがクリックされた
                 if(itemElement.classList.contains('bookmarked')) {
                     console.log("ブックマークから削除");
                     await removeBookmark(itemElement);
@@ -1341,16 +1371,25 @@ function setEventGameLauncher() {
                     addBookmark(itemElement);    
                 }
                 return;
-            }
 
-            const serviceName = itemElement.getAttribute("data-service-name");
-            
-            // アイテム本体がクリックされた
-            showIchibaInfoToGameLauncher(itemElement, serviceName);
-            screen.querySelectorAll(".item.active").forEach(function(item) {
-                item.classList.remove("active");
-            });
-            itemElement.classList.add("active");
+            } else  if(e.target.classList.contains('requestBtn')) {
+
+                // リクエストボタンがクリックされた
+                if(category === "official") {
+                    requestIchibaItem(_embeddedDataJson.program.nicoliveProgramId, serviceName, serviceProductId);
+                } else {
+                    requestIchibaItem(_embeddedDataJson.program.nicoliveProgramId, serviceName, itemId);
+                }
+                return;
+
+            } else {            
+                // アイテム本体がクリックされた
+                showIchibaInfoToGameLauncher(itemElement, serviceName);
+                screen.querySelectorAll(".item.active").forEach(function(item) {
+                    item.classList.remove("active");
+                });
+                itemElement.classList.add("active");
+            }
         }
     }
 
@@ -1560,16 +1599,16 @@ async function viewUserGameList(bIsRefresh = false) {
 
     // 現在のフィルターの設定を取得
     const sortKey = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .search-box .radio-group.sort-type .radio-item input[name='sort_type']:checked").getAttribute('value');
-    const launchTypes = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .search-box .radio-group.game-type .radio-item input[name='game_type']:checked").getAttribute('value');
+    const fixedTag = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .search-box .radio-group.game-type .radio-item input[name='fixedTag']:checked").getAttribute('value');
     const keyword = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .search-box #hemo-gamelauncher-keyword").value;
     
 
 
     // 既に表示されているアイテムが無い場合はデータを新規で取得する
     console.log("自作ゲームの一覧を取得");
-    const res = await getUserGameList(_embeddedDataJson.program.nicoliveProgramId, keyword, sortKey, "DESC", "50", itemOffset, launchTypes);
+    const requestCount = 50;
+    const res = await getUserGameList(_embeddedDataJson.program.nicoliveProgramId, keyword, sortKey, "DESC", requestCount, itemOffset, fixedTag);
     console.log(res);
-
 
     await gameListAppend('user', itemList, res.data.contents);
 
@@ -1583,9 +1622,17 @@ async function viewUserGameList(bIsRefresh = false) {
     moreBtn.classList.add("more-btn");
     moreBtn.innerText = "もっと見る";
     // const itemList = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .item-list");
-    moreBtn.addEventListener("click", function() { moreBtnClick(keyword, sortKey, launchTypes); });
+    moreBtn.addEventListener("click", function() { moreBtnClick(keyword, sortKey, fixedTag); });
     // .item-listの兄弟要素の最後に追加
     itemList.parentNode.insertBefore(moreBtn, itemList.nextSibling);
+
+
+    // 取得できたアイテムの数が50未満の場合は、もっと見るボタンを非表示にする
+    if(res.data.contents.length < requestCount) {
+        moreBtn.style.display = "none";
+    } else {
+        moreBtn.style.display = "block";
+    }
 }
 
 // 「お気に入り」タブがクリックされたらデータを表示する
@@ -1717,15 +1764,22 @@ async function viewNgList() {
     });
 }
 
-async function moreBtnClick(keyword, sortKey, launchTypes) {
+async function moreBtnClick(keyword, sortKey, fixedTag) {
 
     // 現在表示されているアイテムの数を取得
     const itemList = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .item-list");
     const itemOffset = itemList.querySelectorAll(".item:not(.dummy)").length;
     
-    console.log("自作ゲームの一覧を取得(もっと見る)");        
-    const res = await getUserGameList(_embeddedDataJson.program.nicoliveProgramId, keyword, sortKey, "DESC", "50", itemOffset, launchTypes);
+    console.log("自作ゲームの一覧を取得(もっと見る)");
+    const requestCount = 50;    
+    const res = await getUserGameList(_embeddedDataJson.program.nicoliveProgramId, keyword, sortKey, "DESC", requestCount, itemOffset, fixedTag);
     console.log(res);
+
+    // 取得できたアイテムの数が50未満の場合は、もっと見るボタンを非表示にする
+    if(res.data.contents.length < requestCount) {
+        const moreBtn = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .more-btn");
+        moreBtn.style.display = "none";
+    }
 
     await gameListAppend('user', itemList, res.data.contents);
 }
@@ -1872,7 +1926,10 @@ async function createItemListHtml(tabId, contents) {
                                 <span class="author-name">${item.author}</span>
                             </div>
                         </div>    
-                        <div class="btn big">リクエスト</div>
+                        <div class="btn">
+                            <div class="requestBtn">リクエスト</div>
+                            <div class="balloon item-game-${item.serviceProductId}"></div>
+                        </div>
                     </div>
                     <div class="bookmarkAdd" title="お気に入りに追加">
                         <svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="" stroke-width="0"></g><g id="" stroke-linecap="round" stroke-linejoin="round"></g><g id=""> <path d="M9.15316 5.40838C10.4198 3.13613 11.0531 2 12 2C12.9469 2 13.5802 3.13612 14.8468 5.40837L15.1745 5.99623C15.5345 6.64193 15.7144 6.96479 15.9951 7.17781C16.2757 7.39083 16.6251 7.4699 17.3241 7.62805L17.9605 7.77203C20.4201 8.32856 21.65 8.60682 21.9426 9.54773C22.2352 10.4886 21.3968 11.4691 19.7199 13.4299L19.2861 13.9372C18.8096 14.4944 18.5713 14.773 18.4641 15.1177C18.357 15.4624 18.393 15.8341 18.465 16.5776L18.5306 17.2544C18.7841 19.8706 18.9109 21.1787 18.1449 21.7602C17.3788 22.3417 16.2273 21.8115 13.9243 20.7512L13.3285 20.4768C12.6741 20.1755 12.3469 20.0248 12 20.0248C11.6531 20.0248 11.3259 20.1755 10.6715 20.4768L10.0757 20.7512C7.77268 21.8115 6.62118 22.3417 5.85515 21.7602C5.08912 21.1787 5.21588 19.8706 5.4694 17.2544L5.53498 16.5776C5.60703 15.8341 5.64305 15.4624 5.53586 15.1177C5.42868 14.773 5.19043 14.4944 4.71392 13.9372L4.2801 13.4299C2.60325 11.4691 1.76482 10.4886 2.05742 9.54773C2.35002 8.60682 3.57986 8.32856 6.03954 7.77203L6.67589 7.62805C7.37485 7.4699 7.72433 7.39083 8.00494 7.17781C8.28555 6.96479 8.46553 6.64194 8.82547 5.99623L9.15316 5.40838Z" fill="#dddddd"></path> </g></svg>
@@ -1904,7 +1961,11 @@ async function createItemListHtml(tabId, contents) {
                                 <a href="https://namagame.coe.nicovideo.jp/users/${item.authorUserID}/games" target="_blank"><span class="author-name">${authorName}</span></a>
                             </div>
                         </div>    
-                        <div class="btn big">リクエスト</div>
+                        <div class="btn">
+                            <div class="requestBtn">リクエスト</div>
+                            <div class="balloon item-akasha-${id}"></div>
+                        </div>
+
                     </div>
                     <div class="bookmarkAdd" title="お気に入りに追加">
                         <svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="" stroke-width="0"></g><g id="" stroke-linecap="round" stroke-linejoin="round"></g><g id=""> <path d="M9.15316 5.40838C10.4198 3.13613 11.0531 2 12 2C12.9469 2 13.5802 3.13612 14.8468 5.40837L15.1745 5.99623C15.5345 6.64193 15.7144 6.96479 15.9951 7.17781C16.2757 7.39083 16.6251 7.4699 17.3241 7.62805L17.9605 7.77203C20.4201 8.32856 21.65 8.60682 21.9426 9.54773C22.2352 10.4886 21.3968 11.4691 19.7199 13.4299L19.2861 13.9372C18.8096 14.4944 18.5713 14.773 18.4641 15.1177C18.357 15.4624 18.393 15.8341 18.465 16.5776L18.5306 17.2544C18.7841 19.8706 18.9109 21.1787 18.1449 21.7602C17.3788 22.3417 16.2273 21.8115 13.9243 20.7512L13.3285 20.4768C12.6741 20.1755 12.3469 20.0248 12 20.0248C11.6531 20.0248 11.3259 20.1755 10.6715 20.4768L10.0757 20.7512C7.77268 21.8115 6.62118 22.3417 5.85515 21.7602C5.08912 21.1787 5.21588 19.8706 5.4694 17.2544L5.53498 16.5776C5.60703 15.8341 5.64305 15.4624 5.53586 15.1177C5.42868 14.773 5.19043 14.4944 4.71392 13.9372L4.2801 13.4299C2.60325 11.4691 1.76482 10.4886 2.05742 9.54773C2.35002 8.60682 3.57986 8.32856 6.03954 7.77203L6.67589 7.62805C7.37485 7.4699 7.72433 7.39083 8.00494 7.17781C8.28555 6.96479 8.46553 6.64194 8.82547 5.99623L9.15316 5.40838Z" fill="#dddddd"></path> </g></svg>

@@ -497,14 +497,14 @@
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .title-tab-box .launcher-title {
   font-size: 18px;
   font-weight: bold;
-  margin-right: 30px;
+  margin-right: 40px;
   margin-left: 10px;
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .title-tab-box .tab-list {
   display: flex;
   align-items: stretch;
   justify-content: flex-start;
-  margin-left: 7px;
+  margin-right: 20px;
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .title-tab-box .tab-list .tab-item {
   font-size: 15px;
@@ -523,6 +523,15 @@
   background-color: white;
   color: inherit;
   box-shadow: #cbcbcb 0px 0px 10px;
+}
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .title-tab-box .time-box {
+  font-size: 15px;
+  /* border: 1px solid gainsboro; */
+  padding: 5px 36px 8px;
+  line-height: 1;
+  background-color: #9d1616;
+  border-radius: 5px;
+  color: white;
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .screen {
   display: none;
@@ -751,23 +760,11 @@
   opacity: 0.5;
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .btn {
+  position: relative;
   flex-basis: 100px;
   max-width: 100px;
-  border: 1px solid #f7931e;
-  background-color: white;
-  color: #f7931e;
-  padding: 5px 11px;
-  font-size: 12px;
-  border-radius: 5px;
-  transition: background-color 0.15s ease;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
 }
-#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .btn:hover {
-  background-color: #fff5e3;
-}
-#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .btn.big {
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .btn .requestBtn {
   background-color: #f7931e;
   font-size: 15px;
   padding: 0px 11px 3px;
@@ -776,8 +773,42 @@
   border: none;
   transition: background-color 0.15s ease;
 }
-#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .btn.big:hover {
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .btn .requestBtn:hover {
   background-color: #c16d00;
+}
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .btn .balloon {
+  pointer-events: none;
+  display: block;
+  z-index: -10000000000;
+  position: absolute;
+  pointer-events: none;
+  cursor: default;
+  height: 38px;
+  width: 213px;
+  top: -48px;
+  right: -3px;
+  left: inherit;
+  margin: 0 auto;
+  border: 1px solid white;
+  background-color: rgba(0, 0, 0, 0.941);
+  color: white;
+  font-size: 12px;
+  text-align: center;
+  line-height: 1.5;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.9s ease;
+  transform: translateY(-10px);
+}
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .btn .balloon.hide {
+  display: none;
+}
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .btn .balloon.show {
+  z-index: 10000000000;
+  opacity: 1;
+  transform: translateY(0);
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .bookmarkAdd {
   position: absolute;
