@@ -13,6 +13,7 @@
   cursor: pointer;
   transition: opacity 0.3s ease;
 }
+
 #addHemoTool:hover {
   opacity: 0.5;
 }
@@ -23,7 +24,7 @@
 
 #infoHemoToolBtn {
   position: absolute;
-  background-color: rgb(73, 144, 226);
+  background-color: #4990e2;
   bottom: 16px;
   left: 224px;
   font-size: 12px;
@@ -32,12 +33,12 @@
   border-width: initial;
   border-style: none;
   border-color: initial;
-  -o-border-image: initial;
-     border-image: initial;
+  border-image: initial;
   border-radius: 5px;
   padding: 4px 8px 6px;
   transition: opacity 0.3s ease;
 }
+
 #infoHemoToolBtn:hover {
   opacity: 0.5;
 }
@@ -58,18 +59,23 @@
   box-sizing: border-box;
   color: #b3b3b3;
 }
+
 #ext_ichiba_shortcut.show {
   display: flex;
 }
+
 #ext_ichiba_shortcut.disabled {
   opacity: 0.5;
 }
+
 #ext_ichiba_shortcut.disabled .item {
   cursor: not-allowed;
 }
+
 #ext_ichiba_shortcut.disabled .item:hover {
   opacity: 0.5;
 }
+
 #ext_ichiba_shortcut .time-box {
   flex-basis: 160px;
   text-align: center;
@@ -81,6 +87,7 @@
   font-size: 13px;
   line-height: 1.3;
 }
+
 #ext_ichiba_shortcut .hemo-view-game-btn {
   flex-basis: 32px;
   cursor: pointer;
@@ -90,10 +97,12 @@
   border-radius: 4px;
   background-color: #fba300;
 }
+
 #ext_ichiba_shortcut .hemo-view-game-btn svg {
   width: 22px;
   height: 22px;
 }
+
 #ext_ichiba_shortcut .item-box {
   flex-basis: calc(100% - 160px - 32px);
   display: flex;
@@ -102,6 +111,7 @@
   flex-wrap: wrap;
   gap: 9px;
 }
+
 #ext_ichiba_shortcut .item {
   flex-basis: 34px;
   position: relative;
@@ -110,6 +120,7 @@
   border: 1px solid #ffffff;
   border-radius: 4px;
 }
+
 #ext_ichiba_shortcut .item:before {
   filter: drop-shadow(0 0 3px rgba(26, 26, 26, 0.3));
   content: attr(aria-label);
@@ -125,7 +136,7 @@
   margin-bottom: 6px;
   padding: 2px 8px;
   font-size: 12px;
-  transition: opacity 0.1s;
+  transition: opacity .1s;
   display: block;
   position: absolute;
   bottom: 100%;
@@ -134,20 +145,23 @@
   pointer-events: none;
   transform: translate(-50%);
 }
+
 #ext_ichiba_shortcut .item:hover:before {
   opacity: 1;
 }
+
 #ext_ichiba_shortcut .item img {
-  -o-object-fit: cover;
-     object-fit: cover;
+  object-fit: cover;
   height: 34px;
   width: 34px;
   border-radius: 3px;
   display: block;
 }
+
 #ext_ichiba_shortcut .item img.loading {
   opacity: 0.3;
 }
+
 #ext_ichiba_shortcut .item .delete-btn {
   position: absolute;
   cursor: pointer;
@@ -162,9 +176,11 @@
   font-size: 14px;
   transition: background-color 0.15s ease;
 }
+
 #ext_ichiba_shortcut .item .delete-btn:hover {
-  background-color: rgb(85, 156, 255);
+  background-color: #559cff;
 }
+
 #ext_ichiba_shortcut .item .info-btn {
   position: absolute;
   cursor: pointer;
@@ -177,15 +193,16 @@
   border-width: 1px;
   border-style: solid;
   border-color: white;
-  -o-border-image: initial;
-     border-image: initial;
+  border-image: initial;
   border-radius: 134px;
   padding: 2px 6px 2px;
   transition: background-color 0.15s ease;
 }
+
 #ext_ichiba_shortcut .item .info-btn:hover {
-  background-color: rgb(85, 156, 255);
+  background-color: #559cff;
 }
+
 #ext_ichiba_shortcut .item .balloon {
   pointer-events: none;
   display: block;
@@ -211,9 +228,11 @@
   transition: opacity 0.3s ease, transform 0.9s ease;
   transform: translateY(-10px);
 }
+
 #ext_ichiba_shortcut .item .balloon.hide {
   display: none;
 }
+
 #ext_ichiba_shortcut .item .balloon.show {
   z-index: 10000000000;
   opacity: 1;
@@ -223,10 +242,12 @@
 #ext_ichiba_shortcut {
   position: relative;
 }
+
 #ext_ichiba_shortcut .item {
   transition: all 0.2s ease;
   position: relative;
 }
+
 #ext_ichiba_shortcut .item.dragging {
   cursor: grabbing;
   opacity: 0.5;
@@ -234,8 +255,9 @@
   z-index: 1000;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
+
 #ext_ichiba_shortcut .item.drag-after::before {
-  content: "";
+  content: '';
   position: absolute;
   left: -2px;
   top: 0;
@@ -247,52 +269,55 @@
   height: 100%;
   padding: 0;
 }
-#ext_ichiba_shortcut .item[draggable=true] {
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+
+#ext_ichiba_shortcut .item[draggable="true"] {
+  user-select: none;
   /*
-  &::after {
-      content: '⋮⋮';
-      position: absolute;
-      right: 4px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #ccc;
-      font-size: 12px;
-      opacity: 0;
-      transition: opacity 0.2s ease;
-  }
-  */
+            &::after {
+                content: '⋮⋮';
+                position: absolute;
+                right: 4px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #ccc;
+                font-size: 12px;
+                opacity: 0;
+                transition: opacity 0.2s ease;
+            }
+            */
 }
-#ext_ichiba_shortcut .item[draggable=true]:active {
+
+#ext_ichiba_shortcut .item[draggable="true"]:active {
   cursor: grabbing;
 }
-#ext_ichiba_shortcut .item[draggable=true]:hover::after {
+
+#ext_ichiba_shortcut .item[draggable="true"]:hover::after {
   opacity: 1;
 }
+
 #ext_ichiba_shortcut .item:hover:not(.dragging) img {
   opacity: 0.8;
 }
+
 #ext_ichiba_shortcut.drag-over {
   background: linear-gradient(135deg, rgba(0, 123, 255, 0.05) 0%, rgba(0, 123, 255, 0.02) 100%);
   border: 2px dashed #007bff;
   border-radius: 8px;
   /*
-  &::before {
-      content: 'ここにドロップ';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: #007bff;
-      font-size: 14px;
-      font-weight: bold;
-      opacity: 0.7;
-      pointer-events: none;
-      z-index: -1;
-  }
-      */
+        &::before {
+            content: 'ここにドロップ';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #007bff;
+            font-size: 14px;
+            font-weight: bold;
+            opacity: 0.7;
+            pointer-events: none;
+            z-index: -1;
+        }
+            */
 }
 
 @keyframes pulse {
@@ -305,6 +330,7 @@
     transform: scaleY(0.95);
   }
 }
+
 #ext_ichiba_info {
   box-sizing: border-box;
   display: none;
@@ -320,9 +346,11 @@
   border-radius: 6px;
   border: 1px solid white;
 }
+
 #ext_ichiba_info.show {
   display: block;
 }
+
 #ext_ichiba_info .game-box {
   display: flex;
   align-items: center;
@@ -330,9 +358,11 @@
   gap: 10px;
   margin-bottom: 10px;
 }
+
 #ext_ichiba_info .game-box.hide {
   display: none;
 }
+
 #ext_ichiba_info .game-box .left {
   flex-basis: 50px;
   border-radius: 6px;
@@ -340,25 +370,29 @@
   height: 50px;
   overflow: hidden;
 }
+
 #ext_ichiba_info .game-box .left img {
   width: 50px;
   height: 50px;
-  -o-object-fit: cover;
-     object-fit: cover;
+  object-fit: cover;
 }
+
 #ext_ichiba_info .game-box .right {
   flex-basis: calc(100% - 50px);
   font-size: 19px;
   line-height: 1.3;
 }
+
 #ext_ichiba_info .game-info-box {
   margin-bottom: 11px;
   color: #ffa0a0;
   font-size: 13px;
 }
+
 #ext_ichiba_info .game-info-box.hide {
   display: none;
 }
+
 #ext_ichiba_info .author-box {
   display: flex;
   align-items: center;
@@ -369,41 +403,49 @@
   padding: 5px 10px 3px;
   border-radius: 5px;
 }
+
 #ext_ichiba_info .author-box.hide {
   display: none;
 }
+
 #ext_ichiba_info .author-box .left {
   flex-basis: 40px;
 }
+
 #ext_ichiba_info .author-box .left img {
   width: 100%;
   border-radius: 100px;
 }
+
 #ext_ichiba_info .author-box .right {
   flex-basis: calc(100% - 40px);
   font-size: 19px;
   line-height: 1.3;
 }
+
 #ext_ichiba_info .author-box .right .author-name {
   display: inline-block;
   margin-left: 9px;
   font-size: 14px;
   line-height: 1;
-  color: rgb(158, 158, 255);
+  color: #9e9eff;
   transition: opacity 0.15s ease;
 }
+
 #ext_ichiba_info .author-box .right .author-name:hover {
   opacity: 0.8;
 }
+
 #ext_ichiba_info .author-box .right .level {
   font-size: 12px;
   line-height: 1;
 }
+
 #ext_ichiba_info .author-box .right a.more-info {
   font-size: 12px;
   line-height: 1;
   display: block;
-  background-color: rgb(227, 227, 227);
+  background-color: #e3e3e3;
   text-decoration: none;
   border-radius: 100px;
   color: #000000;
@@ -413,42 +455,50 @@
   margin-bottom: 7px;
   transition: opacity 0.15s ease;
 }
+
 #ext_ichiba_info .author-box .right a.more-info:hover {
   opacity: 0.8;
 }
+
 #ext_ichiba_info .pr-photo-box.hide {
   display: none;
 }
+
 #ext_ichiba_info .pr-photo-box img {
   width: 100%;
 }
+
 #ext_ichiba_info .description-box {
   text-align: justify;
+  font-size: 13px;
 }
+
 #ext_ichiba_info .description-box.hide {
   display: none;
 }
+
 #ext_ichiba_info .hideBtn {
   position: absolute;
   top: 0;
   right: 10px;
   cursor: pointer;
   font-size: 28px;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
 }
+
 #ext_ichiba_info .loading-box {
   display: none;
   /* HTML: <div class="loader"></div> */
 }
+
 #ext_ichiba_info .loading-box.show {
   display: block;
 }
+
 #ext_ichiba_info .loading-box .loader {
   width: 30px;
   aspect-ratio: 4;
-  background: radial-gradient(circle closest-side, rgba(255, 255, 255, 0.596) 90%, rgba(255, 255, 255, 0)) 0/33.3333333333% 100% no-repeat;
+  background: radial-gradient(circle closest-side, rgba(255, 255, 255, 0.596) 90%, rgba(255, 255, 255, 0)) 0/calc(100%/3) 100% no-repeat;
   animation: l2 0.8s steps(4) infinite;
   margin: 0 auto;
 }
@@ -458,6 +508,7 @@
     background-position: 150%;
   }
 }
+
 #ext_nico_game_launcher_overlay {
   display: none;
   align-items: center;
@@ -469,17 +520,20 @@
   height: 100%;
   background-color: rgba(0, 0, 0, 0.6);
 }
+
 #ext_nico_game_launcher_overlay.show {
   display: flex;
   z-index: 999999;
 }
+
 #ext_nico_game_launcher_overlay * {
   box-sizing: border-box;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher {
   width: 90%;
   height: 90%;
-  background-color: rgb(255, 255, 255);
+  background-color: white;
   display: block;
   z-index: 1;
   border-radius: 20px;
@@ -488,58 +542,67 @@
   overflow: hidden;
   padding: 30px 40px;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .title-tab-box {
   display: flex;
   align-items: center;
   justify-content: flex-start;
   margin-bottom: 20px;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .title-tab-box .launcher-title {
   font-size: 18px;
   font-weight: bold;
-  margin-right: 40px;
+  margin-right: 18px;
   margin-left: 10px;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .title-tab-box .tab-list {
   display: flex;
   align-items: stretch;
   justify-content: flex-start;
   margin-right: 20px;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .title-tab-box .tab-list .tab-item {
   font-size: 15px;
   padding: 5px 10px 8px;
-  background-color: rgb(155, 155, 155);
-  margin-right: 10px;
+  width: 103px;
+  text-align: center;
+  margin-right: 7px;
+  background-color: #f7931e;
+  border: 1px solid #f7931e;
   border-radius: 37px;
   line-height: 1;
   color: white;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
   cursor: pointer;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .title-tab-box .tab-list .tab-item.active {
   background-color: white;
-  color: inherit;
-  box-shadow: #cbcbcb 0px 0px 10px;
+  color: #f7931e;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .title-tab-box .time-box {
-  font-size: 15px;
-  /* border: 1px solid gainsboro; */
   padding: 5px 36px 8px;
+  font-size: 15px;
+  font-weight: bold;
   line-height: 1;
-  background-color: #9d1616;
+  color: #9d1616;
+  border: 1px solid #9d1616;
   border-radius: 5px;
-  color: white;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .screen {
   display: none;
   height: 100%;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .screen.active {
   display: block;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content {
   display: flex;
   align-items: flex-start;
@@ -547,6 +610,7 @@
   gap: 10px;
   height: calc(100% - 50px);
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left {
   flex-basis: calc(100% - 500px);
   max-width: calc(100% - 500px);
@@ -554,6 +618,7 @@
   overflow: auto;
   overscroll-behavior: contain;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .header-title {
   display: block;
   font-size: 21px;
@@ -566,6 +631,7 @@
   margin: 0 auto;
   margin-bottom: 7px;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .category-list {
   display: flex;
   align-items: center;
@@ -573,21 +639,23 @@
   margin-bottom: 10px;
   margin-left: 10px;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .category-list .category-item {
   cursor: pointer;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
   margin-right: 20px;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .category-list .category-item.active {
   text-decoration: underline;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .search-box {
   margin-top: 10px;
   margin-bottom: 10px;
 }
-#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .search-box .search-left input[type=text] {
+
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .search-box .search-left input[type="text"] {
   display: block;
   padding: 10px 20px;
   border-radius: 100px;
@@ -598,24 +666,27 @@
   width: 100%;
   max-width: 590px;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .search-box .search-left .radio-group {
   display: inline-block;
   margin-right: 50px;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .search-box .search-left .radio-group:last-child {
   margin-right: 0;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .search-box .search-left .radio-group .radio-item {
   display: inline-block;
   margin-right: 7px;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
   cursor: pointer;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .search-box .search-left .radio-group .radio-item label {
   cursor: pointer;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list {
   display: none;
   align-items: stretch;
@@ -624,9 +695,11 @@
   height: 100%;
   padding: 12px 15px;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list.active {
   display: flex;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item {
   position: relative;
   display: flex;
@@ -643,6 +716,7 @@
   border: 3px solid transparent;
   transition: background-color 0.15s ease;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item.dummy {
   margin-bottom: 0;
   box-shadow: none;
@@ -650,35 +724,42 @@
   padding: 0;
   border: none;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item.active {
   border: 3px solid #f7931e;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item.bookmarked .bookmarkAdd svg path {
   fill: #ffb934;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item.ng {
   display: none;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .title-box {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .title-box .left {
   flex-basis: 42px;
   max-width: 42px;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .title-box .left img {
-  width: 100%;
-  height: 100%;
-  -o-object-fit: cover;
-     object-fit: cover;
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
   border-radius: 6px;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .title-box .right {
   flex-basis: calc(100% - 52px);
   max-width: calc(100% - 52px);
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .title-box .right .title {
   -webkit-box-orient: vertical;
   overflow: hidden;
@@ -691,29 +772,37 @@
   margin-bottom: 5px;
   padding-right: 30px;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .desc-box {
   flex-grow: 1;
   display: -webkit-box;
-  -webkit-box-orient: vertical; /* 垂直方向に配置 */
-  overflow: hidden; /* 溢れた部分を隠す */
-  text-overflow: ellipsis; /* 溢れた部分に「...」を表示 */
-  -webkit-line-clamp: 3; /* 最大行数を2行に設定 */
+  -webkit-box-orient: vertical;
+  /* 垂直方向に配置 */
+  overflow: hidden;
+  /* 溢れた部分を隠す */
+  text-overflow: ellipsis;
+  /* 溢れた部分に「...」を表示 */
+  -webkit-line-clamp: 3;
+  /* 最大行数を2行に設定 */
   word-break: break-all;
   line-height: 1.5;
   font-size: 13px;
   color: #656565;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .info {
   flex-basis: calc(100% - 100px);
   max-width: calc(100% - 100px);
   display: flex;
   align-items: center;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .info .launchType {
   display: inline-block;
   margin-right: 10px;
@@ -724,46 +813,56 @@
   font-size: 11px;
   text-align: center;
 }
-#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .info .launchType[data-launch-type=multi] {
+
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .info .launchType[data-launch-type="multi"] {
   background-color: #d14848;
 }
-#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .info .launchType[data-launch-type=podium] {
+
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .info .launchType[data-launch-type="podium"] {
   background-color: #2378a0;
 }
-#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .info .launchType[data-launch-type=self] {
+
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .info .launchType[data-launch-type="self"] {
   background-color: #24a54a;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .info .author {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
   width: calc(100% - 84px);
-  color: rgb(127, 127, 127);
+  color: #7f7f7f;
   display: inline-block;
   font-size: 13px;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .info .author .category {
   font-weight: bold;
   margin-right: 2px;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .info .author .author-name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .info .author a {
   color: inherit;
   text-decoration: underline;
   transition: opacity 0.15s ease;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .info .author a:hover {
   opacity: 0.5;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .btn {
   position: relative;
   flex-basis: 100px;
   max-width: 100px;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .btn .requestBtn {
   background-color: #f7931e;
   font-size: 15px;
@@ -773,9 +872,11 @@
   border: none;
   transition: background-color 0.15s ease;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .btn .requestBtn:hover {
   background-color: #c16d00;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .btn .balloon {
   pointer-events: none;
   display: block;
@@ -792,9 +893,9 @@
   border: 1px solid white;
   background-color: rgba(0, 0, 0, 0.941);
   color: white;
-  font-size: 12px;
+  font-size: 13px;
   text-align: center;
-  line-height: 1.5;
+  line-height: 1;
   padding: 10px;
   border-radius: 5px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
@@ -802,19 +903,23 @@
   transition: opacity 0.3s ease, transform 0.9s ease;
   transform: translateY(-10px);
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .btn .balloon.hide {
   display: none;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .btn .balloon.show {
   z-index: 10000000000;
   opacity: 1;
   transform: translateY(0);
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .bookmarkAdd {
   position: absolute;
   top: 8px;
   right: 12px;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .popup-box {
   display: none;
   position: absolute;
@@ -829,11 +934,13 @@
   border-radius: 10px;
   font-size: 14px;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .popup-box .btn-area {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .popup-box .btn-area .btn {
   background-color: #f7931e;
   color: white;
@@ -841,13 +948,13 @@
   font-size: 12px;
   border-radius: 5px;
   transition: background-color 0.15s ease;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .popup-box .btn-area .btn:hover {
   background-color: #c16d00;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .more-btn {
   background-color: #f7931e;
   cursor: pointer;
@@ -860,6 +967,7 @@
   display: block;
   margin: 0 auto;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right {
   flex-basis: 490px;
   max-width: 490px;
@@ -870,6 +978,7 @@
   max-height: 100%;
   overflow: auto;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .game-box {
   display: flex;
   align-items: center;
@@ -877,9 +986,11 @@
   gap: 10px;
   margin-bottom: 10px;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .game-box.hide {
   display: none;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .game-box .left {
   flex-basis: 50px;
   border-radius: 6px;
@@ -887,25 +998,29 @@
   height: 50px;
   overflow: hidden;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .game-box .left img {
   width: 50px;
   height: 50px;
-  -o-object-fit: cover;
-     object-fit: cover;
+  object-fit: cover;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .game-box .right {
   flex-basis: calc(100% - 50px);
   font-size: 19px;
   line-height: 1.3;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .game-info-box {
   margin-bottom: 11px;
   color: #cb3636;
   font-size: 13px;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .game-info-box.hide {
   display: none;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box {
   display: flex;
   align-items: flex-start;
@@ -916,36 +1031,44 @@
   padding: 5px 0px 3px;
   border-radius: 5px;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box.hide {
   display: none;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .left {
   flex-basis: 40px;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .left img {
   width: 100%;
   border-radius: 100px;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right {
   flex-basis: calc(100% - 40px);
   font-size: 19px;
   line-height: 1.3;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .author-name {
   display: inline-block;
   margin-left: 9px;
   font-size: 14px;
   line-height: 1;
-  color: rgb(47, 47, 189);
+  color: #2f2fbd;
   transition: opacity 0.15s ease;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .author-name:hover {
   opacity: 0.8;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .level {
   font-size: 12px;
   line-height: 1;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .addNgBtn,
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .addShortcutBtn,
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right a.more-info {
@@ -954,7 +1077,7 @@
   padding: 6px;
   line-height: 1;
   display: block;
-  background-color: rgb(247, 147, 30);
+  background-color: #f7931e;
   text-decoration: none;
   border-radius: 6px;
   color: white;
@@ -963,42 +1086,52 @@
   margin-bottom: 7px;
   transition: opacity 0.15s ease;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .addNgBtn:hover,
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .addShortcutBtn:hover,
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right a.more-info:hover {
   opacity: 0.8;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .addNgBtn {
   background-color: #b51212;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .pr-photo-box.hide {
   display: none;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .pr-photo-box img {
   width: 100%;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .description-box {
   font-size: 14px;
   word-break: break-all;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .description-box.hide {
   display: none;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher #HemoOfficialScreen .content .content-left {
   flex-basis: 100%;
   max-width: 100%;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher #HemoOfficialScreen .content .content-left .item-list .item {
   flex-basis: 33%;
   max-width: 33%;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher #HemoNgListScreen .ng-content {
   width: 100%;
   display: block;
   margin-left: 10px;
   overflow: auto;
-  height: calc(100% - 90px);
+  height: calc(100% - 50px);
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher #HemoNgListScreen .ng-content .header-title {
   display: block;
   font-size: 21px;
@@ -1010,15 +1143,18 @@
   width: 100%;
   margin-bottom: 7px;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher #HemoNgListScreen .ng-content table {
   width: 100%;
   max-width: 940px;
   text-align: left;
   border-collapse: collapse;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher #HemoNgListScreen .ng-content table th {
   background-color: #efefef;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher #HemoNgListScreen .ng-content table td .btn {
   cursor: pointer;
   background-color: #f7931e;
@@ -1028,19 +1164,20 @@
   text-align: center;
   border-radius: 5px;
   transition: background-color 0.15s ease;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher #HemoNgListScreen .ng-content table td .btn:hover {
   background-color: #c16d00;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher #HemoNgListScreen .ng-content table th, #ext_nico_game_launcher_overlay #ext_nico_game_launcher #HemoNgListScreen .ng-content table td {
   border-collapse: collapse;
   border: 1px solid #cdcdcd;
   padding: 10px 10px;
   font-size: 14px;
 }
+
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher #HemoNgListScreen .ng-content .ng-list .item {
   display: flex;
   align-items: center;
@@ -1050,4 +1187,4 @@
   border: 1px solid #cdcdcd;
   padding: 10px;
   border-radius: 6px;
-}/*# sourceMappingURL=game-launcher.css.map */
+}
