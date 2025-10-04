@@ -1203,6 +1203,7 @@ async function runCommonFetch(url, options){
 
 let _ichibaInterval = null;
 
+
 function setIchibaWaitTime(minutes, seconds) {
     if(_ichibaInterval) {
         clearInterval(_ichibaInterval);
@@ -1230,15 +1231,29 @@ function setIchibaWaitTime(minutes, seconds) {
     }, 1000);
 }
 
+let _bIsFirstShowGameLauncher = true;
+
 // MARK: イベント設定
 function setEventGameLauncher() {
     const overlay = document.querySelector("#ext_nico_game_launcher_overlay");
     const gameLauncher = document.querySelector(".hemo-view-game-btn");
 
     // ランチャー起動ボタン
-    gameLauncher.addEventListener("click", function() {
+    gameLauncher.addEventListener("click", async function() {
         overlay.classList.toggle("show");
         document.querySelector("body").style.overflow = "hidden";
+
+        // 最初の表示だったらトップセクションを表示
+        if(_bIsFirstShowGameLauncher) {
+            _bIsFirstShowGameLauncher = false;
+            await viewTopSection();
+
+            // トップの一覧のアイテムをクリック
+            const topItemLists = document.querySelectorAll("#ext_nico_game_launcher .screen[data-hemo-game-tab='top'] .item-list");
+            topItemLists.forEach(function(topItemList) {
+                topItemList.addEventListener("click", itemClick);
+            });
+        }
     });
 
     // オーバーレイ
@@ -1420,6 +1435,8 @@ function setEventGameLauncher() {
             }
         }
     }
+
+
 
     // 自作ゲーム一覧のアイテムをクリック
     const officalItemLists = document.querySelectorAll("#ext_nico_game_launcher .screen[data-hemo-game-tab='official'] .item-list");
@@ -1611,19 +1628,40 @@ async function addHistory(itemElement) {
 
 // MARK: トップセクションのデータを表示する
 async function viewTopSection() {
-    const itemList = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='top'] .item-list");
+
+    // 既に受信済みでアイテムが表示されてるなら再取得はしない
+    const existedSectionList = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='top'] .content-left .item-list");
+    if(existedSectionList) {
+        return;
+    }
+
+    
     const res = await getTopSection(_embeddedDataJson.program.nicoliveProgramId);
     //await gameListAppend('top', itemList, res.data.sections);
 
     console.log("トップセクションのデータ");
     console.log(res);
 
-    res.data.sections.forEach(async function(section) {
+    let topAllSectionHtml = "";
+
+    //res.data.sections.forEach(async function(section) {
+    for(const section of res.data.sections) {
 
         console.log("コンテンツタイトル：" + section.title);
         console.log("紐づくコンテンツ：", section.contents);
 
-    });
+        section.contents.forEach(function(item) {
+            if(item.serviceName === "akasha") {
+                item.authorName = item.author; // TopのAPIで取得するとakashaなのにauthorNameが入っていないのでここで上書き
+                item.id = item.serviceProductId; // TopのAPIで取得するとakashaなのにリクエスト用IDがserviceProductIdに入っているのでここで上書き
+            }
+        });
+
+        topAllSectionHtml += await makeSectionHtml(section.title, section.contents);
+    }
+
+    const contentBox = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='top'] .content-left");
+    contentBox.insertAdjacentHTML('beforeend', topAllSectionHtml);
 }
 
 async function viewOfficalGameList() {
@@ -1851,11 +1889,25 @@ async function moreBtnClick(keyword, sortKey, fixedTag) {
     await gameListAppend('user', itemList, res.data.contents);
 }
 
-async function topSectionAppend(sectionTitle, gameList) {
+async function makeSectionHtml(sectionTitle, gameList) {
 
     const titleHtml = `<div class="header-title">${DOMPurify.sanitize(sectionTitle)}</div>`;
 
-    await gameListAppend('top', itemListDom, gameList);
+    // ゲームの一覧のHTMLを作成
+    const newGameListHtml = await createItemListHtml('top', gameList);
+
+    const appendHtml = `<div class="item dummy"></div>
+                        <div class="item dummy"></div>
+                        <div class="item dummy"></div>`;
+
+
+    const sectionHtml = `${titleHtml}
+                        <div class="item-list active">
+                            ${newGameListHtml}
+                            ${appendHtml}
+                        </div>`;
+
+    return sectionHtml;
 }
 
 // MARK: ゲームの一覧のHTMLを作成
@@ -1915,9 +1967,10 @@ async function createItemListHtml(tabId, contents) {
 
         // akashaかgameか判定
         let bIsAkashaItem = false;
-        if(item.originName === "unofficial_namagame" || item.category === "user") {
-            // originNameがunofficial_namagameのケース　→　APIから取得してきたアイテム
-            // categoryがuserのケース　→　お気に入りアイテム or 履歴アイテム
+        if(item.originName === "unofficial_namagame" || item.category === "user" || item.serviceName === "akasha") {
+            // originNameがunofficial_namagameのケース　→　一覧取得のAPIから取得してきたアイテム
+            // categoryがuserのケース　→　お気に入りタブのアイテム or 履歴タブのアイテム
+            // serviceNameがakashaのケース　→　トップの取得してきたアイテム
             bIsAkashaItem = true;
         }
 
@@ -1985,7 +2038,7 @@ async function createItemListHtml(tabId, contents) {
                 <div class="desc-box">${itemDescription}</div>
                 <div class="btnBox">
                     <div class="info">
-                        <div class="launchType" data-launch-type="${item.launchType}">${launchTypeStr}</div>
+                        <div class="launchType ${item.launchType ? "" : "hide"}" data-launch-type="${item.launchType}">${launchTypeStr}</div>
                         <div class="author">
                             <span class="category">作者</span>
                             <a href="https://namagame.coe.nicovideo.jp/users/${item.authorUserID}/games" target="_blank"><span class="author-name">${authorName}</span></a>

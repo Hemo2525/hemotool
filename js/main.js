@@ -577,6 +577,8 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
     nicoGameLauncherOverlay.id = "ext_nico_game_launcher_overlay";
     nicoGameLauncherOverlay.innerHTML = gameLauncherHtml;
     document.querySelector('body').appendChild(nicoGameLauncherOverlay);
+
+    // イベント設定
     setEventGameLauncher();
 
 

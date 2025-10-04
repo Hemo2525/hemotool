@@ -837,6 +837,10 @@ $ichibaItemSize: 34px;
                                     &[data-launch-type="self"] {
                                         background-color: #24a54a;
                                     }
+
+                                    &.hide {
+                                        display: none;
+                                    }
                                 }
                                 .author {
                                     text-overflow: ellipsis;
