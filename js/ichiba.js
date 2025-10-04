@@ -363,7 +363,7 @@ async function addIchibaShortcut() {
                 
                 ichibaItemBox.appendChild(dom);
 
-                img.addEventListener('click', function(){
+                img.addEventListener('click', async function(){
                     if(bIsDisableIchiba){
                         return;
                     }
@@ -391,7 +391,11 @@ async function addIchibaShortcut() {
                     console.log("programId:", programId);
 
                     // アイテムをリクエスト
-                    requestIchibaItem(programId, item.folderName, item.itemId);
+                    const bIsSuccess = await requestIchibaItem(programId, item.folderName, item.itemId);
+
+                    if(bIsSuccess) {
+                        addHistory(item);
+                    }
 
                 });
                 
@@ -1111,13 +1115,7 @@ async function getIchibaGameInfo(lgId) {
 }
 
 // MARK: 通信：公式ゲームの一覧を取得
-async function getOfficalGameList(programId, section) {
-    /* 対戦・協力ゲーム
-        全員対戦：vsall
-        協力：coop
-        主と対戦：vsnushi
-    */
-    
+async function getOfficalGameList(programId, section) {    
     const url = "https://eapi.spi.nicovideo.jp/v2/contents/" + programId + "/sections/" + section;
     return runCommonFetch(url, _fetchOptions);
 }
@@ -1166,6 +1164,13 @@ async function getIchibaUseHistory(itemId) {
     const url =  "https://eapi.spi.nicovideo.jp/v2/use_histories/self?contentId=" + itemId;
     return runCommonFetch(url, _fetchOptions);
 }
+
+// MARK: 通信：トップセクションの情報を取得
+async function getTopSection(programId) {
+    const url = "https://eapi.spi.nicovideo.jp/v2/contents/" + programId + "/sections/top";
+    return runCommonFetch(url, _fetchOptions);
+}
+
 
 // MARK: 通信：共通処理
 async function runCommonFetch(url, options){
@@ -1271,6 +1276,7 @@ function setEventGameLauncher() {
         // 画面が切り替わったら、データを取得
         switch(currentTabId) {
             case "top":
+                viewTopSection();
                 break;
             case "official":
                 viewOfficalGameList();
@@ -1603,6 +1609,23 @@ async function addHistory(itemElement) {
     await chrome.storage.local.set({[historyListKey]: historyList});
 }
 
+// MARK: トップセクションのデータを表示する
+async function viewTopSection() {
+    const itemList = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='top'] .item-list");
+    const res = await getTopSection(_embeddedDataJson.program.nicoliveProgramId);
+    //await gameListAppend('top', itemList, res.data.sections);
+
+    console.log("トップセクションのデータ");
+    console.log(res);
+
+    res.data.sections.forEach(async function(section) {
+
+        console.log("コンテンツタイトル：" + section.title);
+        console.log("紐づくコンテンツ：", section.contents);
+
+    });
+}
+
 async function viewOfficalGameList() {
 
     // ブックマーク状態を再チェックする（お気に入りタブでブックマークを解除したアイテムを反映させるため）
@@ -1828,12 +1851,19 @@ async function moreBtnClick(keyword, sortKey, fixedTag) {
     await gameListAppend('user', itemList, res.data.contents);
 }
 
-// MARK: ゲームの一覧のHTMLを作成
-async function gameListAppend(tabId, itemList, gameList) {
+async function topSectionAppend(sectionTitle, gameList) {
 
-    console.log("使えるデータあるかな");
-    console.log(gameList);
-    console.log(itemList);
+    const titleHtml = `<div class="header-title">${DOMPurify.sanitize(sectionTitle)}</div>`;
+
+    await gameListAppend('top', itemListDom, gameList);
+}
+
+// MARK: ゲームの一覧のHTMLを作成
+async function gameListAppend(tabId, itemListDom, gameList) {
+
+    // console.log("使えるデータあるかな");
+    // console.log(gameList);
+    // console.log(itemList);
 
     // ゲームの一覧のHTMLを作成
     const newGameListHtml = await createItemListHtml(tabId, gameList);
@@ -1841,7 +1871,7 @@ async function gameListAppend(tabId, itemList, gameList) {
     //const itemList = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .item-list");
 
     // 既に表示されているアイテムがある場合は末尾の.item.dummy を削除する
-    itemList.querySelectorAll(".item.dummy").forEach(function(item) {
+    itemListDom.querySelectorAll(".item.dummy").forEach(function(item) {
         item.remove();
     });
 
@@ -1852,11 +1882,11 @@ async function gameListAppend(tabId, itemList, gameList) {
 
     // .item-listの中身の一番うしろにnewGameListHtml（文字列）を追加
     if (newGameListHtml) { // 追加するHTMLがある場合のみ実行
-        itemList.insertAdjacentHTML('beforeend', newGameListHtml);
+        itemListDom.insertAdjacentHTML('beforeend', newGameListHtml);
     }
 
     // ダミー要素（文字列）も追加
-    itemList.insertAdjacentHTML('beforeend', appendHtml);
+    itemListDom.insertAdjacentHTML('beforeend', appendHtml);
 }
 
 // ゲームの一覧のHTMLを作成
