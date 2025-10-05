@@ -1078,6 +1078,7 @@ $ichibaItemSize: 34px;
                             line-height: 1;
                         }
                         .addNgBtn,
+                        .disableNgBtn,
                         .addShortcutBtn,
                         a.more-info {
                             cursor: pointer;
@@ -1103,6 +1104,17 @@ $ichibaItemSize: 34px;
                         }
                         .addNgBtn {
                             background-color: #b51212;
+                            &.hide {
+                                display: none;
+                            }
+                        }
+                        .disableNgBtn {
+                            display: none;
+                            cursor: not-allowed;
+                            background-color: rgb(127, 127, 127);
+                            &.show {
+                                display: block;
+                            }
                         }
                     }
                 }

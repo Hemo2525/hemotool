@@ -953,6 +953,7 @@
   line-height: 1;
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .addNgBtn,
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .disableNgBtn,
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .addShortcutBtn,
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right a.more-info {
   cursor: pointer;
@@ -970,11 +971,13 @@
   transition: opacity 0.15s ease;
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .addNgBtn:hover,
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .disableNgBtn:hover,
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .addShortcutBtn:hover,
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right a.more-info:hover {
   opacity: 0.8;
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .addNgBtn.disabled,
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .disableNgBtn.disabled,
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .addShortcutBtn.disabled,
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right a.more-info.disabled {
   background-color: rgb(127, 127, 127);
@@ -982,6 +985,17 @@
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .addNgBtn {
   background-color: #b51212;
+}
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .addNgBtn.hide {
+  display: none;
+}
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .disableNgBtn {
+  display: none;
+  cursor: not-allowed;
+  background-color: rgb(127, 127, 127);
+}
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .disableNgBtn.show {
+  display: block;
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .pr-photo-box.hide {
   display: none;

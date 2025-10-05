@@ -673,6 +673,7 @@ async function showIchibaInfo(itemId, folderName){
     }
 }
 
+
 // ゲームの詳細情報をゲームランチャーに表示
 async function showIchibaInfoToGameLauncher(item, folderName){
     
@@ -680,6 +681,7 @@ async function showIchibaInfoToGameLauncher(item, folderName){
     const itemId = item.getAttribute("data-id");
     const serviceProductId = item.getAttribute("data-service-product-id");
     let authorId = item.getAttribute("data-author-id");
+    const bIsTopTab = item.closest(".screen").getAttribute("data-hemo-game-tab") === "top";
 
     // 既に同じアイテムが表示されている場合は、表示を解除
     /*
@@ -821,7 +823,8 @@ async function showIchibaInfoToGameLauncher(item, folderName){
                     <a class="author-name" href="${authorPageUrl}" target="_blank">${authorName}</a>
                     <a class="more-info" href="${authorGamePageUrl}" target="_blank">作者の他のゲームを見る</a>
                     <div class="addShortcutBtn" data-itemId="${itemId}" data-folderName="${folderName}" data-itemIcon="${thumbnailUrl}" data-itemName="${title}">ショートカットに追加</div>
-                    <div class="addNgBtn" data-authorName="${authorName}" data-authorId="${authorId}">作者の作品を全てNG登録</div>
+                    <div class="addNgBtn ${bIsTopTab ? " hide" : ""}" data-authorName="${authorName}" data-authorId="${authorId}">作者の作品を全てNG登録</div>
+                    <div class="disableNgBtn ${bIsTopTab ? " show" : ""}">[トップ]タブではNG機能は利用できません</div>
                 </div>
             </div>
             <div class="pr-photo-box">
@@ -867,6 +870,7 @@ async function showIchibaInfoToGameLauncher(item, folderName){
     return;
 
 }
+
 
 // MARK:通信：ゲームのリクエストを実行
 async function requestIchibaItem(programId, folderName, itemId) {
@@ -996,6 +1000,7 @@ async function requestIchibaItem(programId, folderName, itemId) {
     }
 }
 
+
 // MARK: バルーンを表示
 function showBalloon(folderName, itemId, message) {
     const balloons = document.querySelectorAll("#ext_ichiba_shortcut .balloon.item-" + folderName + "-" + itemId);
@@ -1034,6 +1039,7 @@ function showBalloon(folderName, itemId, message) {
     }, 1400);
 
 }
+
 
 // MARK: 通信：ゲームの詳細情報を取得
 async function getIchibaGameInfo(lgId) {
@@ -1076,11 +1082,13 @@ async function getIchibaGameInfo(lgId) {
     return data;
 }
 
+
 // MARK: 通信：公式ゲームの一覧を取得
 async function getOfficalGameList(programId, section) {    
     const url = "https://eapi.spi.nicovideo.jp/v2/contents/" + programId + "/sections/" + section;
     return runCommonFetch(url, _fetchOptions);
 }
+
 
 // MARK: 通信：配信における自分の権限を取得
 async function getSelfAuthority(programId) {
@@ -1088,11 +1096,13 @@ async function getSelfAuthority(programId) {
     return runCommonFetch(url, _fetchOptions);
 }
 
+
 // MARK: 通信：番組グレード情報を取得
 async function getGrade(programId) {
     const url = "https://eapi.spi.nicovideo.jp/v1/contents/" + programId + "/grade";
     return runCommonFetch(url, _fetchOptions);
 }
+
 
 // MARK: 通信：サービス情報を取得
 async function getIchibaServiceInfo(folderName, itemId, programId) {
@@ -1100,17 +1110,20 @@ async function getIchibaServiceInfo(folderName, itemId, programId) {
     return runCommonFetch(url, _fetchOptions);
 }
 
+
 // MARK: 通信：オーナー情報を取得
 async function getOwner(ownerId) {
     const url = "https://eapi.spi.nicovideo.jp/v2/products/products/" + ownerId + "/owner";
     return runCommonFetch(url, _fetchOptions);
 }
 
+
 // MARK: 通信：ゲームの詳細情報を取得
 async function getIchibaProductInfo(folderName, itemId, programId) {
     const url =  "https://eapi.spi.nicovideo.jp/v2/services/" + folderName + "/products/" + itemId + "?exclude_registered=false&tmp_page_id=detail&contentId=" + programId;
     return runCommonFetch(url, _fetchOptions);
 }
+
 
 // MARK: 通信：自作ゲームの一覧を取得
 async function getUserGameList(nicoliveProgramId, keyword, sortKey, sortOrder, limit, offset, fixedTag){
@@ -1121,11 +1134,13 @@ async function getUserGameList(nicoliveProgramId, keyword, sortKey, sortOrder, l
     return runCommonFetch(url, _fetchOptions);
 }
 
+
 // MARK: 通信：履歴情報を取得
 async function getIchibaUseHistory(itemId) {
     const url =  "https://eapi.spi.nicovideo.jp/v2/use_histories/self?contentId=" + itemId;
     return runCommonFetch(url, _fetchOptions);
 }
+
 
 // MARK: 通信：トップセクションの情報を取得
 async function getTopSection(programId) {
@@ -1538,6 +1553,8 @@ function setEventGameLauncher() {
         }        
     });
 }
+
+
 // MARK: ブックマークを追加
 async function addBookmark(itemElement) {
 
@@ -1545,10 +1562,10 @@ async function addBookmark(itemElement) {
     const bookmarkListKey = `bookmarkList-${category}`;
 
     const thumbnailUrl = itemElement.querySelector(".title-box img")?.src;
-    const title = itemElement.querySelector(".title-box .title")?.innerText;
+    const title = DOMPurify.sanitize(itemElement.querySelector(".title-box .title")?.innerText);
     const launchType = itemElement.querySelector(".launchType")?.getAttribute("data-launch-type");
-    const authorName = itemElement.querySelector(".author .author-name")?.innerText;
-    const authorUserID = itemElement.getAttribute("data-author-id");
+    const authorName = DOMPurify.sanitize(itemElement.querySelector(".author .author-name")?.innerText);
+    let authorUserID = itemElement.getAttribute("data-author-id");
     const id = itemElement.getAttribute("data-id");
     const originContentID = itemElement.getAttribute("data-lg-id");
     const getBookmarkList = await chrome.storage.local.get([bookmarkListKey]);
@@ -1562,12 +1579,43 @@ async function addBookmark(itemElement) {
     }
 
     if(category === "official") {
+
         // 公式ゲームはserviceProductIdが有り
         const serviceProductId = itemElement.getAttribute("data-service-product-id");
         const author = itemElement.querySelector(".author .author-name")?.innerText; // 公式ゲームのAPIで取得するときと同じパラメーター名にしとく
-        bookmarkList.push({category: category, thumbnailUrl: thumbnailUrl, title: title, launchType: launchType, author: author, authorUserID: authorUserID, id: id, serviceProductId: serviceProductId, originContentID: originContentID});
+
+        if(!category || !thumbnailUrl || !title || !author || !id || !serviceProductId) {
+            console.error(`ブックマークに追加するためのデータが不足しています category: ${category}, thumbnailUrl: ${thumbnailUrl}, title: ${title}, author: ${author}, id: ${id}, serviceProductId: ${serviceProductId}`);
+            return;
+        }
+
+        bookmarkList.push({category: category, thumbnailUrl: thumbnailUrl, title: title, launchType: launchType, author: author, id: id, serviceProductId: serviceProductId});
     }
     if(category === "user") {
+
+        if(!category || !thumbnailUrl || !title || !launchType || !authorName || !authorUserID || !id || !originContentID) {
+            console.error(`ブックマークに追加するためのデータが不足しています category: ${category}, thumbnailUrl: ${thumbnailUrl}, title: ${title}, launchType: ${launchType}, authorName: ${authorName}, authorUserID: ${authorUserID}, id: ${id}, originContentID: ${originContentID}`);
+
+            if(!launchType || !originContentID) {
+                const product = await getIchibaProductInfo("akasha", id, _embeddedDataJson.program.nicoliveProgramId);
+                console.log(product);
+                const owner = await getOwner(product.data.id); // productIdを指定
+                console.log(owner);
+                if(owner && owner.meta.status === 200) {
+                    // アカウントによってはniconicoUserInfoが存在しない場合がある
+                    if(owner.data.niconicoUserInfo){
+                        // 作者のアイコン
+                        authorIcon = owner.data.niconicoUserInfo.icons.urls["150x150"] || owner.data.niconicoUserInfo.icons.urls["50x50"];
+                    
+                        // 作者のID
+                        authorUserID = owner.data.niconicoUserInfo.id;
+                    }
+                }
+            }
+
+            return;
+        }
+
         // serviceProductIdは無し
         bookmarkList.push({category: category, thumbnailUrl: thumbnailUrl, title: title, launchType: launchType, authorName: authorName, authorUserID: authorUserID, id: id, originContentID: originContentID});
     }
@@ -1586,6 +1634,7 @@ async function removeBookmark(itemElement) {
     await chrome.storage.local.set({[bookmarkListKey]: newBookmarkList});
     itemElement.classList.remove("bookmarked");
 }
+
 
 // MARK: 履歴に追加
 async function addHistory(itemElement) {
@@ -1636,8 +1685,43 @@ async function addHistory(itemElement) {
     await chrome.storage.local.set({[historyListKey]: historyList});
 }
 
+
 // MARK: トップセクションのデータを表示する
 async function viewTopSection() {
+
+    // ブックマーク状態を再チェックする（お気に入りタブでブックマークを解除したアイテムを反映させるため）
+    const bookmarkedItemsList = document.querySelectorAll("#ext_nico_game_launcher .screen[data-hemo-game-tab='top'] .content-left .item-list .item.bookmarked");
+    if(bookmarkedItemsList.length > 0) {
+        // 一旦全てのブックマーク状態を解除
+        bookmarkedItemsList.forEach(function(item) {
+            item.classList.remove("bookmarked");
+        });
+
+        // [自作ゲーム]のブックマークリストを取得してブックマーク状態を反映
+        const bookmarkListKeyUser = "bookmarkList-user";
+        const bookmarkListUser = await chrome.storage.local.get([bookmarkListKeyUser]);
+        const bookmarkListDataUser = bookmarkListUser[bookmarkListKeyUser] || [];
+        
+        bookmarkListDataUser.forEach(function(item) {
+            const targetItems = document.querySelectorAll(".screen[data-hemo-game-tab='top'] .item[data-category='user'][data-id='" + item.id + "']");
+            targetItems.forEach(function(item) {
+                item.classList.add("bookmarked");
+            });
+        });
+
+        // [公式ゲーム]のブックマークリストを取得してブックマーク状態を反映
+        const bookmarkListKeyOfficial = "bookmarkList-official";
+        const bookmarkListOfficial = await chrome.storage.local.get([bookmarkListKeyOfficial]);
+        const bookmarkListDataOfficial = bookmarkListOfficial[bookmarkListKeyOfficial] || [];
+        
+        bookmarkListDataOfficial.forEach(function(item) {
+            const targetItems = document.querySelectorAll(".screen[data-hemo-game-tab='top'] .item[data-category='official'][data-id='" + item.id + "']");
+            targetItems.forEach(function(item) {
+                item.classList.add("bookmarked");
+            });
+        });    
+    }
+
 
     // 既に受信済みでアイテムが表示されてるなら再取得はしない
     const existedSectionList = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='top'] .content-left .item-list");
@@ -1730,7 +1814,7 @@ async function viewUserGameList(bIsRefresh = false) {
             bookmarkListData.forEach(function(item) {
                 const itemElement = itemList.querySelector(".item[data-id='" + item.id + "']");
                 itemElement?.classList.add("bookmarked");
-            });    
+            });
         }
     }
 
