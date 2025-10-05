@@ -566,7 +566,7 @@ async function showIchibaInfo(itemId, folderName){
         // "HIDDEN"...非公開状態（でも作者は起動できる）
         // "USABLE"...通常公開状態
         // "ONLY_PREMIUM_USER"...プレミアム会員のみ起動可能？
-        // "DUPLICATED"...？
+        // "DUPLICATED"...現在リクエスト済み？
         if(product.data.usableState !== "HIDDEN") {
             // Game情報を取得
             console.log("Game情報を取得します");
@@ -1563,11 +1563,10 @@ async function addBookmark(itemElement) {
 
     const thumbnailUrl = itemElement.querySelector(".title-box img")?.src;
     const title = DOMPurify.sanitize(itemElement.querySelector(".title-box .title")?.innerText);
-    const launchType = itemElement.querySelector(".launchType")?.getAttribute("data-launch-type");
     const authorName = DOMPurify.sanitize(itemElement.querySelector(".author .author-name")?.innerText);
     let authorUserID = itemElement.getAttribute("data-author-id");
     const id = itemElement.getAttribute("data-id");
-    const originContentID = itemElement.getAttribute("data-lg-id");
+    let originContentID = itemElement.getAttribute("data-lg-id");
     const getBookmarkList = await chrome.storage.local.get([bookmarkListKey]);
     const bookmarkList = getBookmarkList[bookmarkListKey] || [];
 
@@ -1589,35 +1588,39 @@ async function addBookmark(itemElement) {
             return;
         }
 
-        bookmarkList.push({category: category, thumbnailUrl: thumbnailUrl, title: title, launchType: launchType, author: author, id: id, serviceProductId: serviceProductId});
+        bookmarkList.push({category: category, thumbnailUrl: thumbnailUrl, title: title, author: author, id: id, serviceProductId: serviceProductId});
     }
     if(category === "user") {
 
-        if(!category || !thumbnailUrl || !title || !launchType || !authorName || !authorUserID || !id || !originContentID) {
-            console.error(`ブックマークに追加するためのデータが不足しています category: ${category}, thumbnailUrl: ${thumbnailUrl}, title: ${title}, launchType: ${launchType}, authorName: ${authorName}, authorUserID: ${authorUserID}, id: ${id}, originContentID: ${originContentID}`);
+        if(!originContentID) {
+            const service = await getIchibaServiceInfo("akasha", id, _embeddedDataJson.program.nicoliveProgramId);
+            console.log(service);
 
-            if(!launchType || !originContentID) {
-                const product = await getIchibaProductInfo("akasha", id, _embeddedDataJson.program.nicoliveProgramId);
-                console.log(product);
-                const owner = await getOwner(product.data.id); // productIdを指定
-                console.log(owner);
-                if(owner && owner.meta.status === 200) {
-                    // アカウントによってはniconicoUserInfoが存在しない場合がある
-                    if(owner.data.niconicoUserInfo){
-                        // 作者のアイコン
-                        authorIcon = owner.data.niconicoUserInfo.icons.urls["150x150"] || owner.data.niconicoUserInfo.icons.urls["50x50"];
-                    
-                        // 作者のID
-                        authorUserID = owner.data.niconicoUserInfo.id;
-                    }
-                }
+            if(service && service.meta.status === 200) {
+                originContentID = service.data.content.originContentId;
+            } else {
+                console.error("originContentIDを取得できませんでした");
             }
+        }
 
+        if(!authorUserID) {
+            const product = await getIchibaProductInfo("akasha", id, _embeddedDataJson.program.nicoliveProgramId);
+            const owner = await getOwner(product.data.id); // ProductIdを指定
+            console.log(owner);
+            if(owner && owner.meta.status === 200) {
+                authorUserID = owner.data.niconicoUserInfo.id;
+            } else {
+                console.error("authorUserIDを取得できませんでした");
+            }
+        }
+
+        if(!category || !thumbnailUrl || !title || !authorName || !authorUserID || !id || !originContentID) {
+            console.error(`ブックマークに追加するためのデータが不足しています category: ${category}, thumbnailUrl: ${thumbnailUrl}, title: ${title}, authorName: ${authorName}, authorUserID: ${authorUserID}, id: ${id}, originContentID: ${originContentID}`);
             return;
         }
 
         // serviceProductIdは無し
-        bookmarkList.push({category: category, thumbnailUrl: thumbnailUrl, title: title, launchType: launchType, authorName: authorName, authorUserID: authorUserID, id: id, originContentID: originContentID});
+        bookmarkList.push({category: category, thumbnailUrl: thumbnailUrl, title: title, authorName: authorName, authorUserID: authorUserID, id: id, originContentID: originContentID});
     }
     await chrome.storage.local.set({[bookmarkListKey]: bookmarkList});
     itemElement.classList.add("bookmarked");
@@ -1644,7 +1647,6 @@ async function addHistory(itemElement) {
 
     const thumbnailUrl = itemElement.querySelector(".title-box img")?.src;
     const title = itemElement.querySelector(".title-box .title")?.innerText;
-    const launchType = itemElement.querySelector(".launchType")?.getAttribute("data-launch-type");
     const authorName = itemElement.querySelector(".author .author-name")?.innerText;
     const authorUserID = itemElement.getAttribute("data-author-id");
     const id = itemElement.getAttribute("data-id");
@@ -1672,13 +1674,13 @@ async function addHistory(itemElement) {
         // 公式ゲームはserviceProductIdが有り
         const serviceProductId = itemElement.getAttribute("data-service-product-id");
         const author = itemElement.querySelector(".author .author-name")?.innerText; // 公式ゲームのAPIで取得するときと同じパラメーター名にしとく
-        historyList.push({category: category, thumbnailUrl: thumbnailUrl, title: title, launchType: launchType,
+        historyList.push({category: category, thumbnailUrl: thumbnailUrl, title: title,
             author: author, authorUserID: authorUserID, id: id,
             serviceProductId: serviceProductId, originContentID: originContentID, addDate: addDate});
     }
     if(category === "user") {
         // serviceProductIdは無し
-        historyList.push({category: category, thumbnailUrl: thumbnailUrl, title: title, launchType: launchType,
+        historyList.push({category: category, thumbnailUrl: thumbnailUrl, title: title,
             authorName: authorName, authorUserID: authorUserID, id: id, originContentID: originContentID, addDate: addDate});
     }
 
@@ -2075,7 +2077,7 @@ async function createItemListHtml(tabId, contents) {
         /*
         if(bIsAkashaItem && !item.authorUserID) {
             const product = await getIchibaProductInfo(item.serviceName, item.serviceProductId, _embeddedDataJson.program.nicoliveProgramId);
-            const owner = await getOwner(product.data.id); // authorIdを指定
+            const owner = await getOwner(product.data.id); // ProductIdを指定
             console.log(owner);
             if(owner && owner.meta.status === 200) {
                 // アカウントによってはniconicoUserInfoが存在しない場合がある
@@ -2112,22 +2114,6 @@ async function createItemListHtml(tabId, contents) {
         });
 
 
-        let launchTypeStr = "";
-        switch(item.launchType) {
-            case "multi":
-                launchTypeStr = "協力・対戦";
-                break;
-            case "podium":
-                launchTypeStr = "全員対戦";
-                break;
-            case "self":
-                launchTypeStr = "その他";
-                break;
-            default:
-                launchTypeStr = "公式";
-                break;
-        }
-
         // "2025-09-23T05:39:58.000Z" を、 "2025/09/23" に変換
         // let createdDate = item.createdAt.split("T")[0].replace(/-/g, "/");
 
@@ -2145,7 +2131,7 @@ async function createItemListHtml(tabId, contents) {
             // 自作ゲームの場合
             const itemHtml = `
             <div class="item ${isBookmarked ? "bookmarked" : ""} ${isNg ? "ng" : ""}" data-lg-id="${lgId}"
-                data-id="${id}" data-author-id="${item.authorUserID}" data-service-name="akasha" data-category="user">
+                data-id="${id}" data-author-id="${item.authorUserID ? item.authorUserID : ""}" data-service-name="akasha" data-category="user">
                 <div class="title-box">
                     <div class="left">
                         <img src="${itemThumbnail}" alt="${itemTitle}">
@@ -2157,10 +2143,14 @@ async function createItemListHtml(tabId, contents) {
                 <div class="desc-box">${itemDescription}</div>
                 <div class="btnBox">
                     <div class="info">
-                        <div class="launchType ${item.launchType ? "" : "hide"}" data-launch-type="${item.launchType}">${launchTypeStr}</div>
                         <div class="author">
                             <span class="category">作者</span>
-                            <a href="https://namagame.coe.nicovideo.jp/users/${item.authorUserID}/games" target="_blank"><span class="author-name">${authorName}</span></a>
+                            <a class="${item.authorUserID ? "" : "hide"}" href="https://www.nicovideo.jp/user/${item.authorUserID}" target="_blank">
+                                <span class="author-name">${authorName}</span>
+                            </a>
+                            <div style="display:${item.authorUserID ? "none" : "inline"}">
+                                <span class="author-name">${authorName}</span>
+                            </div>
                         </div>
                     </div>    
                     <div class="btn">

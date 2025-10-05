@@ -717,28 +717,6 @@
   display: flex;
   align-items: center;
 }
-#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .info .launchType {
-  display: inline-block;
-  margin-right: 10px;
-  width: 70px;
-  color: white;
-  border-radius: 100px;
-  padding: 3px 4px 4px 4px;
-  font-size: 11px;
-  text-align: center;
-}
-#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .info .launchType[data-launch-type=multi] {
-  background-color: #d14848;
-}
-#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .info .launchType[data-launch-type=podium] {
-  background-color: #2378a0;
-}
-#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .info .launchType[data-launch-type=self] {
-  background-color: #24a54a;
-}
-#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .info .launchType.hide {
-  display: none;
-}
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .info .author {
   text-overflow: ellipsis;
   overflow: hidden;
@@ -764,6 +742,9 @@
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .info .author a:hover {
   opacity: 0.5;
+}
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .info .author a.hide {
+  display: none;
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .btn {
   position: relative;

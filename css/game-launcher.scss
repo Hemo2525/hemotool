@@ -817,31 +817,6 @@ $ichibaItemSize: 34px;
                                 display: flex;
                                 align-items: center;
 
-                                .launchType {
-                                    display: inline-block;
-                                    margin-right: 10px;
-                                    width: 70px;
-
-                                    color: white;
-                                    border-radius: 100px;
-                                    padding: 3px 4px 4px 4px;
-                                    font-size: 11px;
-                                    text-align: center;
-    
-                                    &[data-launch-type="multi"] {
-                                        background-color: #d14848;
-                                    }
-                                    &[data-launch-type="podium"] {
-                                        background-color: #2378a0;
-                                    }
-                                    &[data-launch-type="self"] {
-                                        background-color: #24a54a;
-                                    }
-
-                                    &.hide {
-                                        display: none;
-                                    }
-                                }
                                 .author {
                                     text-overflow: ellipsis;
                                     overflow: hidden;
@@ -865,6 +840,9 @@ $ichibaItemSize: 34px;
                                         transition: opacity 0.15s ease;
                                         &:hover {
                                             opacity: 0.5;
+                                        }
+                                        &.hide {
+                                            display: none;
                                         }
                                     }
                                 }
