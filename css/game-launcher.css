@@ -559,15 +559,14 @@
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .header-title {
   display: block;
-  font-size: 21px;
+  font-size: 19px;
   font-weight: bold;
   color: #4d4d4d;
   background-color: #efefef;
-  padding: 10px 20px;
+  padding: 5px 14px 7px;
   border-radius: 10px;
   width: calc(100% - 17px);
-  margin: 0 auto;
-  margin-bottom: 7px;
+  margin: 0px auto 4px;
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .category-list {
   display: flex;
@@ -717,11 +716,19 @@
   display: flex;
   align-items: center;
 }
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .info .author-icon {
+  background-size: contain, contain;
+  background-position: center, center;
+  border-radius: 100px;
+  margin-right: 10px;
+  width: 24px;
+  height: 24px;
+}
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .btnBox .info .author {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-  width: calc(100% - 84px);
+  width: calc(100% - 42px);
   color: rgb(127, 127, 127);
   display: inline-block;
   font-size: 13px;
@@ -1008,14 +1015,14 @@
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher #HemoNgListScreen .ng-content .header-title {
   display: block;
-  font-size: 21px;
+  font-size: 19px;
   font-weight: bold;
   color: #4d4d4d;
   background-color: #efefef;
-  padding: 10px 20px;
+  padding: 5px 14px 7px;
   border-radius: 10px;
   width: 100%;
-  margin-bottom: 7px;
+  margin-bottom: 4px;
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher #HemoNgListScreen .ng-content table {
   width: 100%;

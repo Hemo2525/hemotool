@@ -2125,6 +2125,14 @@ async function createItemListHtml(tabId, contents) {
         const authorName = DOMPurify.sanitize(item.authorName);
 
 
+        // AuthorIconの取得
+        let authorIcon = "";
+
+        if(item.authorUserID && item.authorUserID.length > 4) {
+            iconPath = item.authorUserID.substring(0, item.authorUserID.length - 4);
+            authorIcon = `https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/${iconPath}/${item.authorUserID}.jpg`;
+        }
+
 
         if(bIsAkashaItem) {
 
@@ -2143,8 +2151,8 @@ async function createItemListHtml(tabId, contents) {
                 <div class="desc-box">${itemDescription}</div>
                 <div class="btnBox">
                     <div class="info">
+                        <div class="author-icon" style="background-image: url(${authorIcon}), url(https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/defaults/blank.jpg);"></div>
                         <div class="author">
-                            <span class="category">作者</span>
                             <a class="${item.authorUserID ? "" : "hide"}" href="https://www.nicovideo.jp/user/${item.authorUserID}" target="_blank">
                                 <span class="author-name">${authorName}</span>
                             </a>
