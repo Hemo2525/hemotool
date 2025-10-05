@@ -151,7 +151,7 @@ function addHemoToolToIchibaBaloon(currentNode) {
     addHemoTool.setAttribute("data-ichiba-id", id);
     addHemoTool.textContent = "へもツールに追加";
     ichibaBaloon.appendChild(addHemoTool);
-    addHemoTool.addEventListener("click", function(){
+    addHemoTool.addEventListener("click", async function(){
         console.log(this.getAttribute("data-ichiba-id"));
         
         addHemoTool.disabled = true;
@@ -159,80 +159,16 @@ function addHemoToolToIchibaBaloon(currentNode) {
 
         const selectItem = document.querySelector("[class^=___ichiba-counter-section___] [data-is-selected='true'] img");
         if(selectItem){
-            console.log("アイコンURL", selectItem.getAttribute("src"));
-            console.log("タイトル", selectItem.getAttribute("alt"));
+            const itemName = selectItem.getAttribute("alt");
+            const itemIcon = selectItem.getAttribute("src");
 
-            /*
-            chrome.storage.localに、以下のように追加していく
-            {
-                ichibaList: [
-                    {
-                        "folderName": "game",
-                        "itemNo": 123,
-                        "itemName": "テスト",
-                        "itemIcon": "https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png"
-                    },
-                    {
-                        "folderName": "akasha",
-                        "itemNo": 345,
-                        "itemName": "テスト"2,
-                        "itemIcon": "https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png"
-                    }
-                ]
-            }
-            */
+            const resultMessage = await addIchibaShortcutDataToStorage(id, folderName, itemName, itemIcon);
 
-            chrome.storage.local.get("ichibaList", function(value){
-                
-                if(value && value.ichibaList && Array.isArray(value.ichibaList)){
+            console.log("追加しました1");
+            addHemoTool.textContent = resultMessage;
 
-                    // 既に追加済みなら追加しない
-                    if(value.ichibaList.find(item => item.itemId === id && item.folderName === folderName)){
-                        addHemoTool.textContent = "追加済みアイテム";
-                        console.log("既に追加済みのアイテムです");
-                        return;
-                    }
-
-                    value.ichibaList.push({
-                        "folderName": folderName,
-                        "itemId": id,
-                        "itemName": selectItem.getAttribute("alt"),
-                        "itemIcon": selectItem.getAttribute("src")
-                    });
-                    chrome.storage.local.set({"ichibaList": value.ichibaList}, function() {
-                        console.log("追加しました1");
-                        addHemoTool.textContent = "追加しました";
-                        addIchibaShortcut();
-                    });
-                } else {
-                    chrome.storage.local.set({"ichibaList": [{
-                        "folderName": folderName,
-                        "itemId": id,
-                        "itemName": selectItem.getAttribute("alt"),
-                        "itemIcon": selectItem.getAttribute("src")
-                    }]}, function() {
-                        console.log("追加しました2");
-                        addHemoTool.textContent = "追加しました";
-                        addIchibaShortcut();
-
-                        // 0件から1件になった場合はショートカット機能を有効状態にする
-
-                        const ichibaShortcut = document.querySelector('#ext_ichiba_shortcut');
-                        ichibaShortcut.classList.add("show");
-                        
-                        // ON状態に
-                        const menu = document.querySelector('.ext-setting-menu .ext-ichiba');
-                        menu.setAttribute("ext-attr-on", "ON");        
-                        
-                        // ストレージにボタンの状態を保存
-                        chrome.storage.local.set({"ext_ichiba": "ON"}, function() {});
-                
-                        // ショートカットをアクティブ状態
-                        document.querySelector('#ext_shortcut .item.ichiba').setAttribute("active", "ON");
-                    });
-                }
-            });
-
+            // 追加したアイテムを含めてアイコンを再表示
+            addIchibaShortcutIcon();
 
         } else {
             console.error("アイコンが選択されていません");
@@ -245,6 +181,46 @@ function addHemoToolToIchibaBaloon(currentNode) {
     infoBtn.textContent = "説明";
     ichibaBaloon.appendChild(infoBtn);
     infoBtn.addEventListener("click", function() {showIchibaInfo(id, folderName)});
+}
+
+async function addIchibaShortcutDataToStorage(requestItemId, folderName, itemName, itemIcon) {
+    
+    const shortcutList = await chrome.storage.local.get(["ichibaList"]);
+    const shortcutListData = shortcutList.ichibaList || [];
+
+    // 0件から1件になった場合はショートカット機能を有効状態にする
+    if(shortcutListData.length === 0){
+        const ichibaShortcut = document.querySelector('#ext_ichiba_shortcut');
+        ichibaShortcut.classList.add("show");
+        
+        // ON状態に
+        const menu = document.querySelector('.ext-setting-menu .ext-ichiba');
+        menu.setAttribute("ext-attr-on", "ON");        
+        
+        // ストレージにボタンの状態を保存
+        chrome.storage.local.set({"ext_ichiba": "ON"});
+
+        // ショートカットをアクティブ状態
+        document.querySelector('#ext_shortcut .item.ichiba').setAttribute("active", "ON");
+    }
+
+    // 既に追加済みなら追加しない
+    if(shortcutListData.find(item => item.itemId === requestItemId && item.folderName === folderName)){
+        console.log("既に追加済みのアイテムです");
+        return "追加済アイテム";
+    }
+
+    // 追加
+    shortcutListData.push({
+        "folderName": folderName,
+        "itemId": requestItemId,
+        "itemName": itemName,
+        "itemIcon": itemIcon
+    });
+
+    await chrome.storage.local.set({"ichibaList": shortcutListData});
+
+    return "追加しました";
 }
 
 function getFrontendId() {
@@ -269,7 +245,7 @@ function getFrontendVersion() {
     return frontendVersion;
 }
 
-async function addIchibaShortcut() {
+async function addIchibaShortcutIcon() {
     const ichibaItemBox = document.querySelector("#ext_ichiba_shortcut .item-box");
     ichibaItemBox.innerHTML = "";
 
@@ -660,7 +636,7 @@ async function showIchibaInfo(itemId, folderName){
         // 作者のアイコン
         const authorIcon = document.querySelector("#ext_ichiba_info .author-box .left img");
         authorIcon.src = owner.data.niconicoUserInfo.icons.urls["150x150"] || owner.data.niconicoUserInfo.icons.urls["50x50"];
-        authorIcon.alt = owner.data.niconicoUserInfo.displayName;
+        authorIcon.alt = owner.data.niconicoUserInfo.nickName;
 
         // 作者の名前
         const authorName = document.querySelector("#ext_ichiba_info .author-box .author-name");
@@ -703,7 +679,7 @@ async function showIchibaInfoToGameLauncher(item, folderName){
     const category = item.getAttribute("data-category");
     const itemId = item.getAttribute("data-id");
     const serviceProductId = item.getAttribute("data-service-product-id");
-    const authorId = item.getAttribute("data-author-id");
+    let authorId = item.getAttribute("data-author-id");
 
     // 既に同じアイテムが表示されている場合は、表示を解除
     /*
@@ -800,10 +776,13 @@ async function showIchibaInfoToGameLauncher(item, folderName){
 
             // 作者のアイコン
             authorIcon = owner.data.niconicoUserInfo.icons.urls["150x150"] || owner.data.niconicoUserInfo.icons.urls["50x50"];
-            authorIconName = DOMPurify.sanitize(owner.data.niconicoUserInfo.displayName);
+            authorIconName = DOMPurify.sanitize(owner.data.niconicoUserInfo.nickName);
         
             // 作者のレベル
             authorLevel = owner.data.niconicoUserInfo.level;
+
+            // 作者のID
+            authorId = owner.data.niconicoUserInfo.id;
 
         }
 
@@ -841,7 +820,7 @@ async function showIchibaInfoToGameLauncher(item, folderName){
                     <span class="level">Lv.${authorLevel}</span>
                     <a class="author-name" href="${authorPageUrl}" target="_blank">${authorName}</a>
                     <a class="more-info" href="${authorGamePageUrl}" target="_blank">作者の他のゲームを見る</a>
-                    <div class="addShortcutBtn">ショートカットに追加</div>
+                    <div class="addShortcutBtn" data-itemId="${itemId}" data-folderName="${folderName}" data-itemIcon="${thumbnailUrl}" data-itemName="${title}">ショートカットに追加</div>
                     <div class="addNgBtn" data-authorName="${authorName}" data-authorId="${authorId}">作者の作品を全てNG登録</div>
                 </div>
             </div>
@@ -869,7 +848,7 @@ async function showIchibaInfoToGameLauncher(item, folderName){
                 <div class="left">
                 </div>
                 <div class="right">
-                    <div class="addShortcutBtn">ショートカットに追加</div>
+                    <div class="addShortcutBtn" data-itemId="${serviceProductId}" data-folderName="${folderName}" data-itemIcon="${thumbnailUrl}" data-itemName="${title}">ショートカットに追加</div>
                 </div>
             </div>
             <div class="description-box">
@@ -878,30 +857,12 @@ async function showIchibaInfoToGameLauncher(item, folderName){
         `;
     }
 
-    
-
 
     // 自作ゲーム画面、お気に入り画面など、ゲーム詳細情報を表示する画面のDOMを取得
     const parentElement = item.closest(".screen").querySelector(".content-right");
 
     // 現在表示している画面のゲーム詳細情報ペインを更新
     parentElement.innerHTML = insertHtml;
-
-
-    // ローディングを非表示
-    //extHideLoading();
-
-    // 作者情報が取得できなかった場合は最後に非表示
-    /*
-    if(!owner || owner.meta.status != 200) {
-        authorBox.classList.add("hide");
-    }
-    // ゲーム情報が取得できなかった場合は最後に非表示
-    if(!game) {
-        const gameInfoBox = document.querySelector("#ext_ichiba_info .game-info-box");
-        gameInfoBox.classList.add("hide");
-    }
-    */
 
     return;
 
@@ -995,7 +956,8 @@ async function requestIchibaItem(programId, folderName, itemId) {
                 case "NOT_FOUND":
                     errorMessage = "アイテムが見つかりません";
                     break;
-                default:
+                case "ITEM_NOT_FOUND":
+                    errorMessage = "アイテムが見つかりません";
                     break;
             }
 
@@ -1460,17 +1422,44 @@ function setEventGameLauncher() {
     itemListFromHistoryList.addEventListener("click", itemClick);
     
 
-    // 自作ゲーム詳細情報内のクリック判定
-    const itemInfo = document.querySelector("#HemoUserGameScreen .content-right");
-    itemInfo.addEventListener("click", async function(e) {
+
+    async function infoBoxClick(e) {
+        if(e.target.classList.contains('addShortcutBtn')) {
+
+            const itemId = e.target.getAttribute("data-itemId");
+            const folderName = e.target.getAttribute("data-folderName");
+            const itemName = e.target.getAttribute("data-itemName");
+            const itemIcon = e.target.getAttribute("data-itemIcon");
+
+            if(!itemId || !folderName || !itemName || !itemIcon) {
+                console.error("ショートカットに追加するためのデータが不足しています");
+                return;
+            }
+
+            const resultMessage = await addIchibaShortcutDataToStorage(itemId, folderName, itemName, itemIcon);
+
+            // 追加したアイテムを含めてアイコンを再表示
+            addIchibaShortcutIcon();
+
+            e.target.textContent = resultMessage;
+            e.target.classList.add("disabled");
+        }
+
         // .addNgBtnがクリックされたら、作者の作品を全てNG登録
         if(e.target.classList.contains('addNgBtn')) {
+
+            const authorName = e.target.getAttribute("data-authorName");
+            const authorId = e.target.getAttribute("data-authorId");
+
+            if(!authorName || !authorId || authorId === "undefined") {
+                alert("NG登録失敗！");
+                console.error("NG登録するためのデータが不足しています");
+                return;
+            }
 
             //確認画面を表示
             if(confirm("NG登録を実行しますか？")){
 
-                const authorName = e.target.getAttribute("data-authorName");
-                const authorId = e.target.getAttribute("data-authorId");
                 // 現在の日時
                 const now = new Date();
                 const year = now.getFullYear();
@@ -1490,17 +1479,38 @@ function setEventGameLauncher() {
                 chrome.storage.local.set({"ngList": ngList}, function() {
                     
                     // 詳細情報を初期化
+                    const itemInfo = e.target.closest(".content-right");
                     itemInfo.innerHTML = "";
 
                     // ゲーム一覧から作者の作品を全て非表示にする(.ngクラスを追加)
-                    const ngItemList = document.querySelectorAll("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .item-list .item[data-author-id='" + authorId + "']");
+                    const ngItemList = document.querySelectorAll("#ext_nico_game_launcher .item-list .item[data-author-id='" + authorId + "']");
                     ngItemList.forEach(function(item) {
                         item.classList.add("ng");
                     });
                 });
             }
-        }        
-    });
+        }
+    }
+
+    // トップ詳細情報内のクリック判定
+    const itemInfoTop = document.querySelector("#HemoGameTopScreen .content-right");
+    itemInfoTop.addEventListener("click", infoBoxClick);
+
+    // 公式ゲーム詳細情報内のクリック判定
+    const itemInfoOfficial = document.querySelector("#HemoOfficialScreen .content-right");
+    itemInfoOfficial.addEventListener("click", infoBoxClick);
+
+    // 自作ゲーム詳細情報内のクリック判定
+    const itemInfoUser = document.querySelector("#HemoUserGameScreen .content-right");
+    itemInfoUser.addEventListener("click", infoBoxClick);
+
+    // お気に入り詳細情報内のクリック判定
+    const itemInfoBookmark = document.querySelector("#HemoBookmarkScreen .content-right");
+    itemInfoBookmark.addEventListener("click", infoBoxClick);
+
+    // 履歴詳細情報内のクリック判定
+    const itemInfoHistory = document.querySelector("#HemoUseHistoryScreen .content-right");
+    itemInfoHistory.addEventListener("click", infoBoxClick);
 
     // NGリストのクリック判定
     const ngList = document.querySelector("#HemoNgListScreen .ng-content table tbody");
@@ -1963,7 +1973,8 @@ async function createItemListHtml(tabId, contents) {
 
         
     let itemListHtml = "";
-    contents.forEach(function(item) {
+    //contents.forEach(async function(item) {
+    for(const item of contents) {
 
         // akashaかgameか判定
         let bIsAkashaItem = false;
@@ -1973,6 +1984,30 @@ async function createItemListHtml(tabId, contents) {
             // serviceNameがakashaのケース　→　トップの取得してきたアイテム
             bIsAkashaItem = true;
         }
+
+
+        // 自作ゲームかつauthorUserIdが存在しない場合は、Owner情報からauthorUserIdを取得
+        // Topタブで取得するゲームがここに該当する
+        /*
+        if(bIsAkashaItem && !item.authorUserID) {
+            const product = await getIchibaProductInfo(item.serviceName, item.serviceProductId, _embeddedDataJson.program.nicoliveProgramId);
+            const owner = await getOwner(product.data.id); // authorIdを指定
+            console.log(owner);
+            if(owner && owner.meta.status === 200) {
+                // アカウントによってはniconicoUserInfoが存在しない場合がある
+                if(owner.data.niconicoUserInfo){
+                    // 作者のアイコン
+                    item.authorIcon = owner.data.niconicoUserInfo.icons.urls["150x150"] || owner.data.niconicoUserInfo.icons.urls["50x50"];
+
+                    // 作者の名前
+                    item.authorName = DOMPurify.sanitize(owner.data.niconicoUserInfo.nickName);
+                
+                    // 作者のID
+                    item.authorUserID = owner.data.niconicoUserInfo.id;
+                }
+            }
+        }
+        */
 
 
         // ブックマークリストに含まれているかを確認
@@ -2092,7 +2127,7 @@ async function createItemListHtml(tabId, contents) {
             `;
             itemListHtml += itemHtml;
         }
-    });
+    };
 
     return itemListHtml;
 }

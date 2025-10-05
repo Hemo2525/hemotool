@@ -974,6 +974,12 @@
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right a.more-info:hover {
   opacity: 0.8;
 }
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .addNgBtn.disabled,
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .addShortcutBtn.disabled,
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right a.more-info.disabled {
+  background-color: rgb(127, 127, 127);
+  cursor: not-allowed;
+}
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .addNgBtn {
   background-color: #b51212;
 }

@@ -1096,6 +1096,10 @@ $ichibaItemSize: 34px;
                             &:hover {
                                 opacity: 0.8;
                             }
+                            &.disabled {
+                                background-color: rgb(127, 127, 127);
+                                cursor: not-allowed;
+                            }
                         }
                         .addNgBtn {
                             background-color: #b51212;

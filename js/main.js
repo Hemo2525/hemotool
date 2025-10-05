@@ -582,8 +582,8 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
     setEventGameLauncher();
 
 
-    // 市場ショートカット用のDOMに各ショートカットを追加する
-    addIchibaShortcut();
+    // 市場ショートカット用のDOMに各ショートカットアイコンを追加する
+    addIchibaShortcutIcon();
 
 
 
