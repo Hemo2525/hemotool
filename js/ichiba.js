@@ -627,7 +627,7 @@ async function addScoreList(entityId, itemScore) {
 
 
 
-
+/*
 const _fetchOptions = {
     "headers": {
         "accept": "application/json",
@@ -646,6 +646,65 @@ const _fetchOptions = {
     "mode": "cors",
     "credentials": "include"
 };
+*/
+
+/**
+ * User-Agent Client Hintsを含む、動的なfetchオプションを生成します。
+ * @returns {Promise<Object>} fetchで使用するオプションオブジェクト
+ */
+async function getDynamicFetchOptions() {
+    // 基本となるオプション
+    const options = {
+      headers: {
+        'accept': 'application/json',
+        'accept-language': 'ja,en-US;q=0.9,en;q=0.8,yi;q=0.7,zh-TW;q=0.6,zh;q=0.5',
+        'content-type': 'application/json',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-site',
+      },
+      referrer: 'https://spi.nicovideo.jp/',
+      referrerPolicy: 'strict-origin-when-cross-origin',
+      method: 'GET',
+      mode: 'cors',
+      credentials: 'include',
+    };
+  
+    // User Agent Client Hints API が利用可能かチェック
+    if (navigator.userAgentData) {
+      try {
+        // ブラウザからプラットフォーム、ブランド（ブラウザ名とバージョン）、モバイルかどうかの情報を非同期で取得
+        const uaData = await navigator.userAgentData.getHighEntropyValues([
+          'platform',
+          'brands',
+          'mobile',
+        ]);
+  
+        // 1. sec-ch-ua ヘッダーを組み立てる
+        // 例: `"Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"`
+        const uaBrands = uaData.brands
+          .map(brand => `"${brand.brand}";v="${brand.version}"`)
+          .join(', ');
+        options.headers['sec-ch-ua'] = uaBrands;
+  
+        // 2. sec-ch-ua-mobile ヘッダー
+        options.headers['sec-ch-ua-mobile'] = uaData.mobile ? '?1' : '?0';
+  
+        // 3. sec-ch-ua-platform ヘッダー
+        // 例: `"Windows"` や `"macOS"`
+        options.headers['sec-ch-ua-platform'] = `"${uaData.platform}"`;
+  
+      } catch (error) {
+        console.error('User Agent Client Hintsの取得に失敗しました:', error);
+        // 万が一APIが失敗した場合のフォールバックとして、古い値を設定することも可能
+        // options.headers['sec-ch-ua'] = '"Google Chrome";v="137", ...';
+        // options.headers['sec-ch-ua-mobile'] = '?0';
+        // options.headers['sec-ch-ua-platform'] = '"Windows"';
+      }
+    }
+  
+    return options;
+  }
 
 function ichibaShortcutToggle() {
     console.log("ichibaShortcut------------------------");
@@ -1528,7 +1587,9 @@ async function requestIchibaItem(programId, folderName, itemId) {
     const url = "https://eapi.spi.nicovideo.jp/v1/ichibas/" + programId + "/products";
 
     // POSTリクエストの場合は、メソッドをPOSTに、ボディを指定する（但し_fetchOptionsは修正しない）
-    const options = {..._fetchOptions};
+    //const options = {..._fetchOptions};
+    const options = await getDynamicFetchOptions();
+
     options.method = "POST";
     options.body = "{\"serviceName\":\"" + folderName 
     + "\",\"serviceProductId\":\"" + itemId 
@@ -1715,42 +1776,43 @@ async function getIchibaGameInfo(lgId) {
 // MARK: 通信：公式ゲームの一覧を取得
 async function getOfficalGameList(programId, section) {    
     const url = "https://eapi.spi.nicovideo.jp/v2/contents/" + programId + "/sections/" + section;
-    return runCommonFetch(url, _fetchOptions);
+    //return runCommonFetch(url, _fetchOptions);
+    return runCommonFetch(url, await getDynamicFetchOptions());
 }
 
 
 // MARK: 通信：配信における自分の権限を取得
 async function getSelfAuthority(programId) {
     const url = "https://eapi.spi.nicovideo.jp/v1/users/self/authority?contentId=" + programId;
-    return runCommonFetch(url, _fetchOptions);
+    return runCommonFetch(url, await getDynamicFetchOptions());
 }
 
 
 // MARK: 通信：番組グレード情報を取得
 async function getGrade(programId) {
     const url = "https://eapi.spi.nicovideo.jp/v1/contents/" + programId + "/grade";
-    return runCommonFetch(url, _fetchOptions);
+    return runCommonFetch(url, await getDynamicFetchOptions());
 }
 
 
 // MARK: 通信：サービス情報を取得
 async function getIchibaServiceInfo(folderName, itemId, programId) {
     const url ="https://services-eapi.spi.nicovideo.jp/v1/services/" + folderName + "/services/program/programs/" + programId + "/contents/" + itemId;
-    return runCommonFetch(url, _fetchOptions);
+    return runCommonFetch(url, await getDynamicFetchOptions());
 }
 
 
 // MARK: 通信：オーナー情報を取得
 async function getOwner(ownerId) {
     const url = "https://eapi.spi.nicovideo.jp/v2/products/products/" + ownerId + "/owner";
-    return runCommonFetch(url, _fetchOptions);
+    return runCommonFetch(url, await getDynamicFetchOptions());
 }
 
 
 // MARK: 通信：ゲームの詳細情報を取得
 async function getIchibaProductInfo(folderName, itemId, programId) {
     const url =  "https://eapi.spi.nicovideo.jp/v2/services/" + folderName + "/products/" + itemId + "?exclude_registered=false&tmp_page_id=detail&contentId=" + programId;
-    return runCommonFetch(url, _fetchOptions);
+    return runCommonFetch(url, await getDynamicFetchOptions());
 }
 
 
@@ -1760,21 +1822,21 @@ async function getUserGameList(nicoliveProgramId, keyword, sortKey, sortOrder, l
     if(keyword) {
         url += "&keyword=" + keyword;
     }
-    return runCommonFetch(url, _fetchOptions);
+    return runCommonFetch(url, await getDynamicFetchOptions());
 }
 
 
 // MARK: 通信：履歴情報を取得
 async function getIchibaUseHistory(itemId) {
     const url =  "https://eapi.spi.nicovideo.jp/v2/use_histories/self?contentId=" + itemId;
-    return runCommonFetch(url, _fetchOptions);
+    return runCommonFetch(url, await getDynamicFetchOptions());
 }
 
 
 // MARK: 通信：トップセクションの情報を取得
 async function getTopSection(programId) {
     const url = "https://eapi.spi.nicovideo.jp/v2/contents/" + programId + "/sections/top";
-    return runCommonFetch(url, _fetchOptions);
+    return runCommonFetch(url, await getDynamicFetchOptions());
 }
 
 

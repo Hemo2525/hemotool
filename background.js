@@ -103,3 +103,56 @@ chrome.runtime.onMessage.addListener(function (request) {
     }
 
 });
+
+
+
+
+
+
+// --- User-Agentを動的に設定する処理 ---
+
+// ルールの一意なID
+const USER_AGENT_RULE_ID = 1;
+
+// User-Agentを書き換える関数
+const updateUserAgentRule = async () => {
+    // 1. ブラウザ自身の正しいUser-Agentを取得
+    const currentUserAgent = navigator.userAgent;
+
+    // 2. 拡張機能の情報を末尾に追加した新しいUser-Agent文字列を作成
+    const newUaString = `${currentUserAgent} HemoTool_ChromeExtension/${chrome.runtime.getManifest().version}`;
+
+    console.log('Applying new User-Agent:', newUaString);
+
+    // 3. declarativeNetRequest APIを使って動的にルールを更新
+    await chrome.declarativeNetRequest.updateDynamicRules({
+    // 最初に古いルールを削除（IDを指定）
+    removeRuleIds: [USER_AGENT_RULE_ID],
+    // 新しいルールを追加
+    addRules: [
+        {
+        id: USER_AGENT_RULE_ID,
+        priority: 1,
+        action: {
+            type: 'modifyHeaders',
+            requestHeaders: [
+            {
+                header: 'User-Agent',
+                operation: 'set',
+                value: newUaString, // 動的に生成した文字列をここに設定
+            },
+            ],
+        },
+        condition: {
+            //requestDomains: ['eapi.spi.nicovideo.jp'],
+            urlFilter: '||spi.nicovideo.jp',
+            resourceTypes: ['xmlhttprequest'],
+        },
+        },
+    ],
+    });
+};
+
+// 拡張機能がインストールされた時、またはブラウザが起動した時にルールを適用
+chrome.runtime.onInstalled.addListener(updateUserAgentRule);
+chrome.runtime.onStartup.addListener(updateUserAgentRule);
