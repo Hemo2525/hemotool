@@ -231,13 +231,13 @@ window.addEventListener('message', (event) => {
                 if(ret.items.length > 0){
                     // _allIchibaGameArrayの末尾に追加
                     _allIchibaGameArray = [..._allIchibaGameArray, ...ret.items];
-                    console.log("_allIchibaGameArray:", _allIchibaGameArray);
+                    // console.log("_allIchibaGameArray:", _allIchibaGameArray);
 
                     //console.log("runningItems:", ret.runningItems);
                     if(ret.runningItems.length > 0){
                         // 最後にrunning: true であるオブジェクトのentityIdを取得
                         _lastRunningEntityId = ret.runningItems[ret.runningItems.length - 1].entityId;
-                        console.log("[1] lastRunningEntityId:", _lastRunningEntityId);
+                        // console.log("[1] lastRunningEntityId:", _lastRunningEntityId);
                     }
 
                 } else {
@@ -246,7 +246,7 @@ window.addEventListener('message', (event) => {
                     if(runningEntityIds.length > 0){
                         if(runningEntityIds[0]) {
                             _lastRunningEntityId = runningEntityIds[0];
-                            console.log("[2] lastRunningEntityId:", _lastRunningEntityId);
+                            // console.log("[2] lastRunningEntityId:", _lastRunningEntityId);
                         }
                     }
                 }
@@ -282,200 +282,6 @@ window.addEventListener('message', (event) => {
         }
     }
 });
-
-/*
-// MARK: スコアリストに追加
-async function addScoreList(entityId, itemScore) {
-
-    const item = _allIchibaGameArray.find(item => item.entityId === entityId);
-    if(!item) {
-        console.error("スコアリストに追加するためのデータが不足しています entityId: ${entityId}");
-        return;
-    }
-
-    console.log(`${item.categoryName}-${item.id} ${item.title}　の得点は ${itemScore} でした`);
-
-    // 得点が0の場合はスコアリストに追加しない
-    if(itemScore === 0) {
-        return;
-    }
-
-    const category = item.categoryName === "game" ? "official" : "user";
-    const id = item.id;
-    const thumbnailUrl = item.thumbnailUrl;
-    const title = DOMPurify.sanitize(item.title);
-    const addDate = new Date().toISOString();
-
-    const scoreListKey = `scoreList`;
-    const getScoreList = await chrome.storage.local.get([scoreListKey]);
-    let scoreList = getScoreList[scoreListKey] || [];
-
-    // categoryと同じIDが既にスコアリストに追加されていれば古いのは削除する
-    const isExist = scoreList.some(item => item.category === category && item.id === id);
-    if(isExist) {
-        // 存在していればスコアを比較しスコアが高ければスコアと日付を上書きしてストレージに保存
-        const item = scoreList.find(item => item.category === category && item.id === id);
-        if(item && item.score < itemScore) {
-            item.score = itemScore;
-            item.addDate = addDate;
-            console.log("スコアを更新しました");
-            await chrome.storage.local.set({[scoreListKey]: scoreList});
-        }
-    } else {
-        // 存在していなければ新規追加
-        if(category === "official") {
-            const product = await getIchibaProductInfo("game", id, _embeddedDataJson.program.nicoliveProgramId);
-            if(product && product.meta.status === 200) {
-                scoreList.push({
-                    category: category, 
-                    thumbnailUrl: thumbnailUrl, 
-                    title: title,
-                    author: product.data.author, 
-                    authorUserID: null, 
-                    id: product.data.id,
-                    serviceProductId: product.data.serviceProductId, 
-                    originContentID: null, 
-                    addDate: addDate,
-                    score: itemScore
-                });
-            } else {
-                console.error("productを取得できませんでした");
-                return;
-            }
-        }
-        if(category === "user") {
-    
-            let originContentID = null;
-            const service = await getIchibaServiceInfo("akasha", id, _embeddedDataJson.program.nicoliveProgramId);
-            console.log(service);
-    
-            if(service && service.meta.status === 200) {
-                originContentID = service.data.content.originContentId;
-            } else {
-                console.error("originContentIDを取得できませんでした");
-                return;
-            }
-            const product = await getIchibaProductInfo("akasha", id, _embeddedDataJson.program.nicoliveProgramId);
-            const owner = await getOwner(product.data.id); // ProductIdを指定
-            console.log(owner);
-            if(owner && owner.meta.status === 200) {
-                const authorUserID = owner.data.niconicoUserInfo.id;
-                const authorName = DOMPurify.sanitize(owner.data.displayName);
-                scoreList.push({
-                    category: category, 
-                    thumbnailUrl: thumbnailUrl, 
-                    title: title,
-                    authorName: authorName, 
-                    authorUserID: authorUserID, 
-                    id: id, 
-                    originContentID: originContentID, 
-                    addDate: addDate,
-                    score: itemScore
-                });
-            } else {
-                console.error("authorUserIDを取得できませんでした");
-                return;
-            }    
-        }
-    }
-    
-    await chrome.storage.local.set({[scoreListKey]: scoreList});
-}
-*/
-/*
-// MARK: スコアリストに追加
-async function addScoreList(entityId, itemScore) {
-
-    const item = _allIchibaGameArray.find(item => item.entityId === entityId);
-    if(!item) {
-        console.error(`スコアリストに追加するためのデータが不足しています entityId: ${entityId}`);
-        return;
-    }
-
-    console.log(`${item.categoryName}-${item.id} ${item.title}　の得点は ${itemScore} でした`);
-
-    if(itemScore === 0) {
-        return;
-    }
-
-    const category = item.categoryName === "game" ? "official" : "user";
-    const id = item.id;
-    // ... (thumbnailUrl, title, addDate の定義は同じ)
-
-    const scoreListKey = `scoreList`;
-    const getScoreList = await chrome.storage.local.get([scoreListKey]);
-    let scoreList = getScoreList[scoreListKey] || [];
-
-    // ★ findIndexで存在チェックとインデックス取得を同時に行う
-    const index = scoreList.findIndex(item => item.category === category && item.id === id);
-
-    if (index !== -1) { 
-        // ★★★ 項目が存在する場合 (更新ロジック) ★★★
-        if (scoreList[index].score < itemScore) {
-            // 新しいスコアの方が高い場合のみ、スコアと日付を更新
-            scoreList[index].score = itemScore;
-            scoreList[index].addDate = new Date().toISOString();
-            console.log("スコアを更新しました");
-        } else {
-            // 既存のスコア以下の場合は何もせずに関数を終了
-            console.log("既存のスコア以下のため更新しませんでした");
-            return;
-        }
-    } else {
-        // ★★★ 項目が存在しない場合 (新規追加ロジック) ★★★
-        // (元のコードの else ブロックの中身をここに移動します)
-        
-        const newItemBase = {
-            category: category, 
-            thumbnailUrl: item.thumbnailUrl, 
-            title: DOMPurify.sanitize(item.title),
-            id: id,
-            addDate: new Date().toISOString(),
-            score: itemScore
-        };
-
-        if (category === "official") {
-            const product = await getIchibaProductInfo("game", id, _embeddedDataJson.program.nicoliveProgramId);
-            if (product?.meta.status === 200) {
-                scoreList.push({
-                    ...newItemBase,
-                    author: product.data.author, 
-                    authorUserID: null,
-                    serviceProductId: product.data.serviceProductId, 
-                    originContentID: null, 
-                });
-            } else {
-                console.error("productを取得できませんでした");
-                return;
-            }
-        }
-        
-        if (category === "user") {
-            const service = await getIchibaServiceInfo("akasha", id, _embeddedDataJson.program.nicoliveProgramId);
-            const product = await getIchibaProductInfo("akasha", id, _embeddedDataJson.program.nicoliveProgramId);
-            const owner = await getOwner(product.data.id);
-
-            if (service?.meta.status === 200 && owner?.meta.status === 200) {
-                scoreList.push({
-                    ...newItemBase,
-                    authorName: DOMPurify.sanitize(owner.data.displayName), 
-                    authorUserID: owner.data.niconicoUserInfo.id,
-                    originContentID: service.data.content.originContentId, 
-                });
-            } else {
-                console.error("新規追加情報の取得に失敗しました", { service, owner });
-                return;
-            }
-        }
-    }
-    
-    // ★ 保存処理は関数の最後に1回だけ！
-    console.log("スコアリストを保存します", scoreList);
-    await chrome.storage.local.set({[scoreListKey]: scoreList});
-}
-*/
-
-
 
 // MARK: スコアリストに追加
 /**
@@ -1233,9 +1039,9 @@ async function showIchibaInfo(itemId, folderName){
     extIchibaInfo.setAttribute("data-item-id", folderName + "-" + itemId);
 
     // Product情報を取得
-    console.log("Product情報を取得します");
+    // console.log("Product情報を取得します");
     const product = await getIchibaProductInfo(folderName, itemId, _embeddedDataJson.program.nicoliveProgramId);
-    console.log(product);
+    // console.log(product);
 
 
     
@@ -1246,9 +1052,9 @@ async function showIchibaInfo(itemId, folderName){
     // 投稿ゲームの場合
     if(product.data.categoryName == "akasha"){
         // Service情報を取得
-        console.log("Service情報を取得します");
+        // console.log("Service情報を取得します");
         service = await getIchibaServiceInfo(folderName, itemId, _embeddedDataJson.program.nicoliveProgramId);
-        console.log(service);
+        // console.log(service);
 
         // 作者が非表示(HIDDEN)状態にしているゲームはゲームページが存在しないので、ゲーム情報を取得できない
         // "HIDDEN"...非公開状態（でも作者は起動できる）
@@ -1257,15 +1063,15 @@ async function showIchibaInfo(itemId, folderName){
         // "DUPLICATED"...現在リクエスト済み？
         if(product.data.usableState !== "HIDDEN") {
             // Game情報を取得
-            console.log("Game情報を取得します");
+            // console.log("Game情報を取得します");
             game = await getIchibaGameInfo(service.data.content.originContentId);
-            console.log(game);
+            // console.log(game);
         }
 
         // Owner情報を取得
-        console.log("Owner情報を取得します");
+        // console.log("Owner情報を取得します");
         owner = await getOwner(product.data.id);
-        console.log(owner);
+        // console.log(owner);
 
     }
 
@@ -1370,6 +1176,7 @@ async function showIchibaInfoToGameLauncher(item, folderName){
     const serviceProductId = item.getAttribute("data-service-product-id");
     let authorId = item.getAttribute("data-author-id");
     const bIsTopTab = item.closest(".screen").getAttribute("data-hemo-game-tab") === "top";
+    const bIsScoreTab = item.closest(".screen").getAttribute("data-hemo-game-tab") === "score";
 
     // 既に同じアイテムが表示されている場合は、表示を解除
     /*
@@ -1486,6 +1293,25 @@ async function showIchibaInfoToGameLauncher(item, folderName){
     // 作者の他のゲームを見る
     authorGamePageUrl = "https://namagame.coe.nicovideo.jp/users/" + authorId + "/games";
 
+    let scoreHtml = "";
+    if(bIsScoreTab) {
+        // ストレージから該当のゲームのスコアを取得
+        const scoreListKey = `scoreList`;
+        const getScoreList = await chrome.storage.local.get([scoreListKey]);
+        let scoreList = getScoreList[scoreListKey] || [];
+        const scoreItem = scoreList.find(item => item.category === category && item.id === itemId);
+        if(scoreItem) {
+            scoreItem.scores.forEach(item => {
+                scoreHtml += `
+                <div class="score-item">
+                    <div class="score">${item.point.toLocaleString()}<span>point</span></div>
+                    <div class="date">${item.date.split("T")[0].replace(/-/g, "/")} ${item.date.split("T")[1].split(":")[0] + ":" + item.date.split("T")[1].split(":")[1]}</div>
+                </div>
+                `;
+            });
+        }
+    }
+
     let insertHtml = "";
     if(folderName == "akasha") {
         insertHtml = `
@@ -1496,6 +1322,9 @@ async function showIchibaInfoToGameLauncher(item, folderName){
                 <div class="right">
                     <div>${title}</div>
                 </div>
+            </div>
+            <div class="score-box">
+                ${scoreHtml}
             </div>
             <div class="game-info-box">
                 <div class="count">起動回数：${playCount}回</div>
@@ -1531,6 +1360,9 @@ async function showIchibaInfoToGameLauncher(item, folderName){
                 <div class="right">
                     <div>${title}</div>
                 </div>
+            </div>
+            <div class="score-box">
+                ${scoreHtml}
             </div>
             <div class="game-info-box">
                 <div class="refCount">親作品登録：${product.data.refCount.toLocaleString()}件</div>
@@ -1973,6 +1805,9 @@ function setEventGameLauncher() {
             case "history":
                 viewUseHistoryList();
                 break;
+            case "score":
+                viewScoreList();
+                break;    
             case "nglist":
                 viewNgList();
                 break;
@@ -2049,6 +1884,12 @@ function setEventGameLauncher() {
     });
 
     async function itemClick(e) {
+
+        // .dummyの場合は何もしない
+        if(e.target.classList.contains('dummy')) {
+            return;
+        }
+
         const tab = e.target.closest('.screen');
         const tabId = tab?.getAttribute("data-hemo-game-tab");
         const screen = e.target.closest('.screen');
@@ -2128,6 +1969,10 @@ function setEventGameLauncher() {
     itemListFromHistoryList.addEventListener("click", itemClick);
     
 
+    // スコアのゲーム一覧のアイテムをクリック
+    const itemListFromScoreList = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='score'] .item-list");
+    itemListFromScoreList.addEventListener("click", itemClick);
+    
 
     async function infoBoxClick(e) {
         if(e.target.classList.contains('addShortcutBtn')) {
@@ -2217,6 +2062,10 @@ function setEventGameLauncher() {
     // 履歴詳細情報内のクリック判定
     const itemInfoHistory = document.querySelector("#HemoUseHistoryScreen .content-right");
     itemInfoHistory.addEventListener("click", infoBoxClick);
+
+    // スコア詳細情報内のクリック判定
+    const itemInfoScore = document.querySelector("#HemoScoreScreen .content-right");
+    itemInfoScore.addEventListener("click", infoBoxClick);
 
     // NGリストのクリック判定
     const ngList = document.querySelector("#HemoNgListScreen .ng-content table tbody");
@@ -2434,8 +2283,8 @@ async function viewTopSection() {
     //res.data.sections.forEach(async function(section) {
     for(const section of res.data.sections) {
 
-        console.log("コンテンツタイトル：" + section.title);
-        console.log("紐づくコンテンツ：", section.contents);
+        // console.log("コンテンツタイトル：" + section.title);
+        // console.log("紐づくコンテンツ：", section.contents);
 
         section.contents.forEach(function(item) {
             if(item.serviceName === "akasha") {
@@ -2625,7 +2474,27 @@ async function viewUseHistoryList() {
     await gameListAppend('history', itemList, historyList);
 
 }
+// 「スコア」タブがクリックされたらデータを表示する
+async function viewScoreList() {
 
+    // 既に表示されているアイテムを削除
+    const itemList = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='score'] .item-list");
+    while (itemList.firstChild) {
+        itemList.removeChild(itemList.firstChild);
+    }
+
+    // 既に表示されているアイテムが無い場合はデータを新規で取得する
+    console.log("スコアの一覧を取得");
+    const getScoreList = await chrome.storage.local.get(["scoreList"]);
+    let scoreList = getScoreList["scoreList"] || [];
+    console.log(scoreList);
+
+    // 履歴リストは最新のものが先頭になるようにソートする
+    scoreList.reverse();
+
+    await gameListAppend('score', itemList, scoreList);
+
+}
 // 「NGリスト」タブがクリックされたらデータを表示する
 async function viewNgList() {
     console.log("NGリストを取得");
@@ -2731,9 +2600,9 @@ async function gameListAppend(tabId, itemListDom, gameList) {
 // ゲームの一覧のHTMLを作成
 async function createItemListHtml(tabId, contents) {
 
-    console.log("ゲームの一覧のHTMLを作成");
-    console.log("tabId", tabId);
-    console.log("contents", contents);
+    // console.log("ゲームの一覧のHTMLを作成");
+    // console.log("tabId", tabId);
+    // console.log("contents", contents);
 
 
 
@@ -2812,7 +2681,7 @@ async function createItemListHtml(tabId, contents) {
         const id = DOMPurify.sanitize(item.id);
         const itemThumbnail = DOMPurify.sanitize(item.thumbnailUrl);
         const itemTitle = DOMPurify.sanitize(item.title);
-        const itemDescription = DOMPurify.sanitize(item.description);
+        let itemDescription = DOMPurify.sanitize(item.description);
         const authorName = DOMPurify.sanitize(item.authorName);
 
 
@@ -2822,6 +2691,20 @@ async function createItemListHtml(tabId, contents) {
         if(item.authorUserID && item.authorUserID.length > 4) {
             iconPath = item.authorUserID.substring(0, item.authorUserID.length - 4);
             authorIcon = `https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/${iconPath}/${item.authorUserID}.jpg`;
+        }
+
+
+        
+        if(tabId === "score" && item.scores.length > 0) {
+            // 3桁区切りのスコア
+            const score = item.scores[0].point.toLocaleString();
+            // "2025-10-09T03:34:03" を、 "2025/10/09 03:34:03" に変換
+            const date = item.scores[0].date.split("T")[0].replace(/-/g, "/");
+            const time = item.scores[0].date.split("T")[1].split(":")[0] + ":" + item.scores[0].date.split("T")[1].split(":")[1];
+            itemDescription = `
+                <div class="score">${score}<span>point</span></div>
+                <div class="date">記録日：${date} ${time}</div>
+            `;
         }
 
 
@@ -2881,7 +2764,7 @@ async function createItemListHtml(tabId, contents) {
                             <div class="title">${itemTitle}</div>
                         </div>
                     </div>
-                    <div class="desc-box"></div>
+                    <div class="desc-box">${itemDescription}</div>
                     <div class="btnBox">
                         <div class="info">
                             <div class="author">

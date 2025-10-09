@@ -635,6 +635,24 @@ $ichibaItemSize: 34px;
                 overflow: auto;
                 overscroll-behavior: contain;
 
+                .tab-desc {
+                    font-size: 14px;
+                    font-weight: bold;
+                    color: #4d4d4d;
+                    background-color: #efefef;
+                    padding: 5px 14px 7px;
+                }
+                .tab-note {
+                    font-size: 14px;
+                    color: #4d4d4d;
+                    padding: 5px 14px 7px;
+                    ul {
+                        padding-inline-start: 23px;
+                        padding-top: 0;
+                        margin-top: 7px;
+                    }
+                }
+
                 .header-title {
                     display: block;
 
@@ -803,6 +821,24 @@ $ichibaItemSize: 34px;
                             font-size: 13px;
 
                             color: #656565;
+
+                            .score {
+                                font-size: 37px;
+                                color: #ff8f00;
+                                text-align: right;
+                                line-height: 1;
+                                font-weight: bold;
+                                span {
+                                    font-size: 15px;
+                                    margin-left: 4px;
+                                }
+                            }
+                            .date {
+                                text-align: right;
+                                margin-top: 4px;
+                                margin-bottom: 14px;
+                                color: #ab9477;
+                            }
                         }
 
                         .btnBox {
@@ -1011,6 +1047,34 @@ $ichibaItemSize: 34px;
                         flex-basis: calc(100% - 50px);
                         font-size: 19px;
                         line-height: 1.3;
+                    }
+                }
+                .score-box {
+                    .score-item {
+                        margin-bottom: 7px;
+                        justify-content: flex-end;
+                        border: 1px solid rgb(255 198 126);
+                        border-radius: 10px;
+                        padding: 12px;
+                        .score {
+                            font-size: 26px;
+                            font-weight: bold;
+                            font-size: 37px;
+                            color: rgb(255, 143, 0);
+                            text-align: right;
+                            line-height: 1;
+                            font-weight: bold;
+                            span {
+                                font-size: 21px;
+                                margin-left: 6px;
+                            }
+                        }
+                        .date {
+                            text-align: right;
+                            margin-top: 4px;
+                            /* margin-bottom: 14px; */
+                            color: #ab9477;
+                        }
                     }
                 }
                 .game-info-box {
