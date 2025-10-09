@@ -1,3 +1,632 @@
+// TextEncoderを使って、検索したい文字列をバイナリ（Uint8Array）に変換しておく
+const SCORE_PACKET_SIGNATURE = new TextEncoder().encode('aggregating_send_score');
+
+/**
+ * Uint8Array（haystack）内に、別のUint8Array（needle）が含まれているかを確認するヘルパー関数
+ * @param {Uint8Array} haystack - 検索対象の大きなバイナリデータ
+ * @param {Uint8Array} needle - 検索したいシグネチャ（目印）となるバイナリデータ
+ * @returns {boolean} - 含まれていればtrue
+ */
+function includesSequence(haystack, needle) {
+    if (needle.length === 0) return true;
+    if (haystack.length < needle.length) return false;
+
+    for (let i = 0; i <= haystack.length - needle.length; i++) {
+        let found = true;
+        for (let j = 0; j < needle.length; j++) {
+            if (haystack[i + j] !== needle[j]) {
+                found = false;
+                break;
+            }
+        }
+        if (found) return true;
+    }
+    return false;
+}
+
+
+/**
+ * 'item'というキーのプロパティ値で、かつ'entityId'を持つオブジェクトを再帰的に探し出す
+ * @param {any} data - 検索対象のオブジェクトまたは配列
+ * @returns {Array<object>} - 見つかったオブジェクトの配列
+ */
+function findItemsWithEntityId(data) {
+    const result = [];
+  
+    function recurse(current) {
+      // nullやundefined、またはオブジェクト/配列でない場合は処理を中断
+      if (current === null || typeof current !== 'object') {
+        return;
+      }
+  
+      // もし現在の要素が配列なら、各要素に対して再帰処理を行う
+      if (Array.isArray(current)) {
+        for (const item of current) {
+          recurse(item);
+        }
+        return;
+      }
+  
+      // ★ここからがメインのロジック★
+      // 現在のオブジェクトが持つプロパティを一つずつチェック
+      for (const key in current) {
+        if (Object.prototype.hasOwnProperty.call(current, key)) {
+          const value = current[key];
+  
+          // 【条件】キーが 'item' であり、その値が 'entityId' を持つオブジェクトか？
+          if (
+            key === 'item' &&
+            value !== null &&
+            typeof value === 'object' &&
+            !Array.isArray(value) && // 配列は除外
+            Object.prototype.hasOwnProperty.call(value, 'entityId')
+          ) {
+            // 条件に一致したら、その値（itemオブジェクト）を結果に追加
+            result.push(value);
+          }
+  
+          // さらに深い階層を探索するため、プロパティの値に対して再帰処理を行う
+          recurse(value);
+        }
+      }
+    }
+  
+    recurse(data);
+    return result;
+  }
+
+ /**
+ * status.running が true であるオブジェクトを探し、その兄弟であるentityIdを取得する関数
+ * @param {any} data - 検索対象のオブジェクトまたは配列
+ * @returns {Array<string>} - 見つかったentityIdの配列
+*/
+function findEntityIdsByRunningStatus(data) {
+    const results = [];
+
+    function recurse(current) {
+        // nullやundefined、またはオブジェクト/配列でない場合は処理を中断
+        if (current === null || typeof current !== 'object') {
+        return;
+        }
+
+        // もし現在の要素が配列なら、各要素に対して再帰処理を行う
+        if (Array.isArray(current)) {
+        for (const item of current) {
+            recurse(item);
+        }
+        return;
+        }
+
+        // ★ここがメインのロジック★
+        // 条件：entityId があり、かつ status.running が true か？
+        // 安全にアクセスするために、各プロパティの存在を順番にチェックする
+        if (
+        Object.prototype.hasOwnProperty.call(current, 'entityId') &&
+        Object.prototype.hasOwnProperty.call(current, 'status') &&
+        current.status && // statusがnullやundefinedでないことを確認
+        typeof current.status === 'object' &&
+        Object.prototype.hasOwnProperty.call(current.status, 'running') &&
+        current.status.running === true
+        ) {
+        // 条件に一致した場合、entityIdの値を結果に追加
+        results.push(current.entityId);
+        }
+
+        // さらに深い階層を探索するため、現在のオブジェクトの各プロパティの値に対して再帰処理を行う
+        for (const key in current) {
+        if (Object.prototype.hasOwnProperty.call(current, key)) {
+            recurse(current[key]);
+        }
+        }
+    }
+
+    recurse(data);
+    return results;
+}
+
+
+/**
+ * 1回のデータ探索で、2種類の条件に合うオブジェクトをそれぞれ分類して取得する関数
+ * @param {any} data - 検索対象のオブジェクトまたは配列
+ * @returns {{items: Array<object>, runningItems: Array<object>}} - 分類されたオブジェクトリストを持つオブジェクト
+ */
+function findCategorizedItems(data) {
+    // 2種類のリストをプロパティに持つ、結果格納用のオブジェクトを用意
+    const results = {
+        items: [],
+        runningItems: [],
+    };
+
+    function recurse(current) {
+        // 基本的な再帰処理（nullチェック、配列処理）
+        if (current === null || typeof current !== 'object') {
+        return;
+        }
+        if (Array.isArray(current)) {
+        for (const item of current) {
+            recurse(item);
+        }
+        return;
+        }
+
+        // --- ここからオブジェクトに対する条件チェック ---
+
+        // 【条件1】'status.running' === true のオブジェクトか？
+        if (current.status?.running === true && current.entityId) {
+        // runningItemsリストに、オブジェクトそのものを追加
+        results.runningItems.push(current);
+        }
+
+        // 【条件2】キーが 'item' で、その値が 'entityId' を持つオブジェクトか？
+        if (current.item?.entityId) {
+        // itemsリストに、「itemの値であるオブジェクト」を追加
+        results.items.push(current.item);
+        }
+
+        // --- チェック終わり ---
+
+        // さらに深い階層を探索するため、すべてのプロパティに対して再帰呼び出し
+        for (const key in current) {
+        if (Object.prototype.hasOwnProperty.call(current, key)) {
+            recurse(current[key]);
+        }
+        }
+    }
+
+    recurse(data);
+
+    // 最終的に、2つのリストが格納されたオブジェクトを返す
+    return results;
+}
+
+
+let _allIchibaGameArray = [];
+let _lastRunningEntityId = "";
+let _lastFindEntityId = "";
+
+window.addEventListener('message', (event) => {
+
+    // console.log("イベントきたよ", event);
+
+    // 自分自身（拡張機能）からのメッセージや、不正な形式のメッセージは無視
+    if (event.source !== window || !event.data || event.data.direction !== 'from-page') {
+        return;
+    }
+
+    // ページから送られてきた解析リクエストか確認
+    if (event.data.type === 'DECODE_MSGPACK_REQUEST') {
+        //console.log("DECODE_MSGPACK_REQUEST");
+        try {
+            let binaryData = event.data.binaryData;
+            // console.log("binaryData", binaryData);
+
+            // postMessageでデータが変換された場合に備え、確実にUint8Arrayに変換します
+            if (!(binaryData instanceof Uint8Array)) {
+                binaryData = new Uint8Array(Object.values(binaryData));
+            }
+
+            // データの長さがヘッダー長（8バイト）より短い場合は、処理対象外
+            if (binaryData.length <= 8) {
+                return;
+            }
+
+            // 1. 先頭8バイトの独自ヘッダーを無視し、それ以降のデータを切り出す
+            const msgpackStream = binaryData.subarray(8);
+
+            const header = binaryData.subarray(0, 8);
+            // console.log(`[${event.data.from}] ヘッダー`, header);
+
+            // Uint8Arrayとして渡されたデータをデコードします。
+            // decodeMultiはジェネレータを返すので、Array.from()で配列に変換します。
+            const decodedObjects = Array.from(MessagePack.decodeMulti(msgpackStream));
+
+            // console.log(`[${event.data.from}] デコードデータ`, decodedObjects);
+            //console.log(`[${event.data.from}] デコードデータ前の長さ`, binaryData.length);
+
+
+            
+            //console.time(`[${event.data.from}] デコードデータからentityIdを持つオブジェクト`);
+            if(event.data.from === "recv"){
+                const ret = findCategorizedItems(decodedObjects);
+                if(ret.items.length > 0){
+                    // _allIchibaGameArrayの末尾に追加
+                    _allIchibaGameArray = [..._allIchibaGameArray, ...ret.items];
+                    console.log("_allIchibaGameArray:", _allIchibaGameArray);
+
+                    //console.log("runningItems:", ret.runningItems);
+                    if(ret.runningItems.length > 0){
+                        // 最後にrunning: true であるオブジェクトのentityIdを取得
+                        _lastRunningEntityId = ret.runningItems[ret.runningItems.length - 1].entityId;
+                        console.log("[1] lastRunningEntityId:", _lastRunningEntityId);
+                    }
+
+                } else {
+                    // status.running が true であるオブジェクトを探し、そのentityIdを取得
+                    const runningEntityIds = findEntityIdsByRunningStatus(decodedObjects);
+                    if(runningEntityIds.length > 0){
+                        if(runningEntityIds[0]) {
+                            _lastRunningEntityId = runningEntityIds[0];
+                            console.log("[2] lastRunningEntityId:", _lastRunningEntityId);
+                        }
+                    }
+                }
+
+                //console.log(`[${event.data.from}] デコードデータからentityIdを持つオブジェクト`, items);
+            }
+
+            //console.timeEnd(`[${event.data.from}] デコードデータからentityIdを持つオブジェクト`);
+
+
+            // 2番目の要素（メインのオブジェクト）を取得
+            const mainObject = decodedObjects[1];
+            //console.log("メインオブジェクト:", mainObject);
+            const type = mainObject?.type;
+            if(type === "aggregating_send_score"){
+                console.log("aggregating_send_score", mainObject);
+                // aggregating_send_scoreは2回送信されることがあるので2回目は弾く
+                if(_lastFindEntityId !== _lastRunningEntityId){
+                    _lastFindEntityId = _lastRunningEntityId;
+
+                    const score = mainObject?.score;
+                    const point = score?.point;
+                    console.log("得点：point:", point);
+
+                    // スコアリストに追加
+                    addScoreList(_lastRunningEntityId, point);
+                }
+                
+            }
+
+        } catch (error) {
+            //console.error("デコードエラー", error);
+        }
+    }
+});
+
+/*
+// MARK: スコアリストに追加
+async function addScoreList(entityId, itemScore) {
+
+    const item = _allIchibaGameArray.find(item => item.entityId === entityId);
+    if(!item) {
+        console.error("スコアリストに追加するためのデータが不足しています entityId: ${entityId}");
+        return;
+    }
+
+    console.log(`${item.categoryName}-${item.id} ${item.title}　の得点は ${itemScore} でした`);
+
+    // 得点が0の場合はスコアリストに追加しない
+    if(itemScore === 0) {
+        return;
+    }
+
+    const category = item.categoryName === "game" ? "official" : "user";
+    const id = item.id;
+    const thumbnailUrl = item.thumbnailUrl;
+    const title = DOMPurify.sanitize(item.title);
+    const addDate = new Date().toISOString();
+
+    const scoreListKey = `scoreList`;
+    const getScoreList = await chrome.storage.local.get([scoreListKey]);
+    let scoreList = getScoreList[scoreListKey] || [];
+
+    // categoryと同じIDが既にスコアリストに追加されていれば古いのは削除する
+    const isExist = scoreList.some(item => item.category === category && item.id === id);
+    if(isExist) {
+        // 存在していればスコアを比較しスコアが高ければスコアと日付を上書きしてストレージに保存
+        const item = scoreList.find(item => item.category === category && item.id === id);
+        if(item && item.score < itemScore) {
+            item.score = itemScore;
+            item.addDate = addDate;
+            console.log("スコアを更新しました");
+            await chrome.storage.local.set({[scoreListKey]: scoreList});
+        }
+    } else {
+        // 存在していなければ新規追加
+        if(category === "official") {
+            const product = await getIchibaProductInfo("game", id, _embeddedDataJson.program.nicoliveProgramId);
+            if(product && product.meta.status === 200) {
+                scoreList.push({
+                    category: category, 
+                    thumbnailUrl: thumbnailUrl, 
+                    title: title,
+                    author: product.data.author, 
+                    authorUserID: null, 
+                    id: product.data.id,
+                    serviceProductId: product.data.serviceProductId, 
+                    originContentID: null, 
+                    addDate: addDate,
+                    score: itemScore
+                });
+            } else {
+                console.error("productを取得できませんでした");
+                return;
+            }
+        }
+        if(category === "user") {
+    
+            let originContentID = null;
+            const service = await getIchibaServiceInfo("akasha", id, _embeddedDataJson.program.nicoliveProgramId);
+            console.log(service);
+    
+            if(service && service.meta.status === 200) {
+                originContentID = service.data.content.originContentId;
+            } else {
+                console.error("originContentIDを取得できませんでした");
+                return;
+            }
+            const product = await getIchibaProductInfo("akasha", id, _embeddedDataJson.program.nicoliveProgramId);
+            const owner = await getOwner(product.data.id); // ProductIdを指定
+            console.log(owner);
+            if(owner && owner.meta.status === 200) {
+                const authorUserID = owner.data.niconicoUserInfo.id;
+                const authorName = DOMPurify.sanitize(owner.data.displayName);
+                scoreList.push({
+                    category: category, 
+                    thumbnailUrl: thumbnailUrl, 
+                    title: title,
+                    authorName: authorName, 
+                    authorUserID: authorUserID, 
+                    id: id, 
+                    originContentID: originContentID, 
+                    addDate: addDate,
+                    score: itemScore
+                });
+            } else {
+                console.error("authorUserIDを取得できませんでした");
+                return;
+            }    
+        }
+    }
+    
+    await chrome.storage.local.set({[scoreListKey]: scoreList});
+}
+*/
+/*
+// MARK: スコアリストに追加
+async function addScoreList(entityId, itemScore) {
+
+    const item = _allIchibaGameArray.find(item => item.entityId === entityId);
+    if(!item) {
+        console.error(`スコアリストに追加するためのデータが不足しています entityId: ${entityId}`);
+        return;
+    }
+
+    console.log(`${item.categoryName}-${item.id} ${item.title}　の得点は ${itemScore} でした`);
+
+    if(itemScore === 0) {
+        return;
+    }
+
+    const category = item.categoryName === "game" ? "official" : "user";
+    const id = item.id;
+    // ... (thumbnailUrl, title, addDate の定義は同じ)
+
+    const scoreListKey = `scoreList`;
+    const getScoreList = await chrome.storage.local.get([scoreListKey]);
+    let scoreList = getScoreList[scoreListKey] || [];
+
+    // ★ findIndexで存在チェックとインデックス取得を同時に行う
+    const index = scoreList.findIndex(item => item.category === category && item.id === id);
+
+    if (index !== -1) { 
+        // ★★★ 項目が存在する場合 (更新ロジック) ★★★
+        if (scoreList[index].score < itemScore) {
+            // 新しいスコアの方が高い場合のみ、スコアと日付を更新
+            scoreList[index].score = itemScore;
+            scoreList[index].addDate = new Date().toISOString();
+            console.log("スコアを更新しました");
+        } else {
+            // 既存のスコア以下の場合は何もせずに関数を終了
+            console.log("既存のスコア以下のため更新しませんでした");
+            return;
+        }
+    } else {
+        // ★★★ 項目が存在しない場合 (新規追加ロジック) ★★★
+        // (元のコードの else ブロックの中身をここに移動します)
+        
+        const newItemBase = {
+            category: category, 
+            thumbnailUrl: item.thumbnailUrl, 
+            title: DOMPurify.sanitize(item.title),
+            id: id,
+            addDate: new Date().toISOString(),
+            score: itemScore
+        };
+
+        if (category === "official") {
+            const product = await getIchibaProductInfo("game", id, _embeddedDataJson.program.nicoliveProgramId);
+            if (product?.meta.status === 200) {
+                scoreList.push({
+                    ...newItemBase,
+                    author: product.data.author, 
+                    authorUserID: null,
+                    serviceProductId: product.data.serviceProductId, 
+                    originContentID: null, 
+                });
+            } else {
+                console.error("productを取得できませんでした");
+                return;
+            }
+        }
+        
+        if (category === "user") {
+            const service = await getIchibaServiceInfo("akasha", id, _embeddedDataJson.program.nicoliveProgramId);
+            const product = await getIchibaProductInfo("akasha", id, _embeddedDataJson.program.nicoliveProgramId);
+            const owner = await getOwner(product.data.id);
+
+            if (service?.meta.status === 200 && owner?.meta.status === 200) {
+                scoreList.push({
+                    ...newItemBase,
+                    authorName: DOMPurify.sanitize(owner.data.displayName), 
+                    authorUserID: owner.data.niconicoUserInfo.id,
+                    originContentID: service.data.content.originContentId, 
+                });
+            } else {
+                console.error("新規追加情報の取得に失敗しました", { service, owner });
+                return;
+            }
+        }
+    }
+    
+    // ★ 保存処理は関数の最後に1回だけ！
+    console.log("スコアリストを保存します", scoreList);
+    await chrome.storage.local.set({[scoreListKey]: scoreList});
+}
+*/
+
+
+
+// MARK: スコアリストに追加
+/**
+ * 現在時刻を日本時間（JST）に基づいた 'YYYY-MM-DDTHH:mm:ss' 形式の文字列で返す
+ * @returns {string} フォーマットされた日付文字列
+ */
+function getJSTISOString() {
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+}
+
+// MARK: スコアリストに追加 (新しいデータ構造バージョン)
+async function addScoreList(entityId, itemScore) {
+
+    const item = _allIchibaGameArray.find(item => item.entityId === entityId);
+    if(!item) {
+        console.error(`スコアリストに追加するためのデータが不足しています entityId: ${entityId}`);
+        return;
+    }
+
+    console.log(`${item.categoryName}-${item.id} ${item.title}　の得点は ${itemScore} でした`);
+
+    if(itemScore === 0) {
+        return;
+    }
+
+    const category = item.categoryName === "game" ? "official" : "user";
+    const id = item.id;
+    
+    const scoreListKey = `scoreList`;
+    const getScoreList = await chrome.storage.local.get([scoreListKey]);
+    let scoreList = getScoreList[scoreListKey] || [];
+
+
+    // 今回プレイしたゲームがリストに既に存在するか探す
+    const gameIndex = scoreList.findIndex(game => game.category === category && game.id === id);
+
+    if (gameIndex !== -1) {
+        // --- 存在した場合：そのゲームのスコア履歴を更新 ---
+        const game = scoreList[gameIndex];
+        
+        // 新しいスコアを追加
+        game.scores.push({
+            point: itemScore,
+            date: getJSTISOString()
+        });
+        
+        // スコア履歴を点数の高い順にソート
+        game.scores.sort((a, b) => b.point - a.point);
+        
+        // スコア履歴を最大10件に絞る
+        game.scores = game.scores.slice(0, 10);
+        
+        console.log(`「${game.title}」のスコア履歴を更新しました。`);
+
+    } else {
+        // --- 存在しなかった場合：新しいゲーム情報として追加 ---
+        console.log(`「${item.title}」を新しいゲームとしてスコアリストに追加します。`);
+
+        const newGame = {
+            category: category, 
+            thumbnailUrl: item.thumbnailUrl, 
+            title: DOMPurify.sanitize(item.title),
+            id: id,
+            scores: [ // 新しいスコア履歴を作成
+                {
+                    point: itemScore,
+                    date: getJSTISOString()
+                }
+            ]
+        };
+
+        // 作者情報など、追加の情報を取得して結合する
+        if (category === "official") {
+            const product = await getIchibaProductInfo("game", id, _embeddedDataJson.program.nicoliveProgramId);
+            if (product?.meta.status === 200) {
+                newGame.author = product.data.author;
+                newGame.authorUserID = null;
+                newGame.serviceProductId = product.data.serviceProductId;
+                newGame.originContentID = null;
+            } else {
+                console.error("productを取得できませんでした"); return;
+            }
+        }
+        
+        if (category === "user") {
+            const service = await getIchibaServiceInfo("akasha", id, _embeddedDataJson.program.nicoliveProgramId);
+            const product = await getIchibaProductInfo("akasha", id, _embeddedDataJson.program.nicoliveProgramId);
+            const owner = await getOwner(product.data.id);
+
+            if (service?.meta.status === 200 && owner?.meta.status === 200) {
+                newGame.authorName = DOMPurify.sanitize(owner.data.displayName);
+                newGame.authorUserID = owner.data.niconicoUserInfo.id;
+                newGame.originContentID = service.data.content.originContentId;
+            } else {
+                console.error("新規追加情報の取得に失敗しました", { service, owner }); return;
+            }
+        }
+        
+        // 完成した新しいゲーム情報をリストに追加
+        scoreList.push(newGame);
+    }
+    
+    // 最終的なリストを保存
+    console.log("スコアリスト全体を保存します", scoreList);
+    await chrome.storage.local.set({[scoreListKey]: scoreList});
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 const _fetchOptions = {
     "headers": {
@@ -1655,11 +2284,11 @@ async function addHistory(itemElement) {
     const getHistoryList = await chrome.storage.local.get([historyListKey]);
     let historyList = getHistoryList[historyListKey] || [];
 
-    // 同じIDが既に履歴に追加されていれば古いのは削除する
-    const isHistory = historyList.some(item => item.id === id);
+    // 同じカテゴリーと同じIDが既に履歴に追加されていれば古いのは削除する
+    const isHistory = historyList.some(item => item.category === category && item.id === id);
     if(isHistory) {
         console.log("既に履歴に追加されています");
-        historyList = historyList.filter(item => item.id !== id);
+        historyList = historyList.filter(item => item.category !== category || item.id !== id);
     }
 
     // 履歴リストが30件を超えていればaddDateが古いものを1件削除する

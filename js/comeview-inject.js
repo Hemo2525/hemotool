@@ -317,7 +317,7 @@ window.fetch = function(...args) {
   }
 }
 
-
+/*
 // WebSocketのProxyを作成
 WebSocket = new Proxy(WebSocket, {
   construct: function (target, args) {
@@ -325,9 +325,169 @@ WebSocket = new Proxy(WebSocket, {
     const instance = new target(...args);
     const messageHandler = (event) => { recvEvent(event); };
     instance.addEventListener('message', messageHandler);
+
+    // 'send'メソッドに対するProxyを作成
+    const sendProxy = new Proxy(instance.send, {
+      apply: function(sendTarget, thisArg, sendArgs) {
+          const dataToSend = sendArgs[0];
+
+          // 送信データがArrayBuffer（バイナリデータ）の場合のみ処理を実行
+          if (dataToSend instanceof ArrayBuffer) {
+              try {
+                  const uint8Array = new Uint8Array(dataToSend);
+
+                  //console.log("uint8Array", uint8Array);
+
+                    // ★拡張機能に解析を依頼
+                    window.postMessage({
+                      direction: 'from-page',
+                      type: 'DECODE_MSGPACK_REQUEST',
+                      binaryData: uint8Array
+                  }, window.location.origin);
+
+              } catch (error) {
+                  // console.warn('Could not decode a binary message:', error);
+                  console.warn('Could not decode a binary message:', error);
+              }
+          }
+
+          // 解析後、元の 'send' メソッドを、改変していない元のデータで呼び出します。
+          return sendTarget.apply(thisArg, sendArgs);
+      }
+    });
+
+    // インスタンスのsendメソッドをプロキシに置き換えます
+    instance.send = sendProxy;
+
+    // WebSocketインスタンスを返すことで、ゲームは通常通り動作します
     return instance;
   }
 });
+// WebSocketの受信イベントハンドラ
+function recvEvent(event) {  
+  console.log("recvEvent", event);
+}
+// WebSocketの送信イベントハンドラ
+function sendEvent(event) {
+}
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// WebSocketのProxyを作成
+WebSocket = new Proxy(WebSocket, {
+  construct: function (target, args) {
+    // WebSocketインスタンスを作成
+    const instance = new target(...args);
+
+    // ★ 'message'イベント（受信）に対するリスナーを追加
+    const messageHandler = (event) => {
+      const receivedData = event.data;
+
+      // 受信データがArrayBuffer（バイナリデータ）の場合のみ処理を実行
+      if (receivedData instanceof ArrayBuffer) {
+        try {
+          const uint8Array = new Uint8Array(receivedData);
+          
+          if(uint8Array.length > 80) {
+
+            //console.log("RECV uint8Array", uint8Array);
+
+            // ★ 拡張機能に解析を依頼
+            window.postMessage({
+              // 'from-server'など、送信と区別できる名前にするとより分かりやすい
+              direction: 'from-page', 
+              from: 'recv',
+              type: 'DECODE_MSGPACK_REQUEST',
+              binaryData: uint8Array,
+            }, window.location.origin);
+          }
+
+        } catch (error) {
+          console.warn('Could not process a received binary message:', error);
+        }
+      }
+      // このリスナーはWebページ本来のリスナーとは別に動作するため、
+      // ここで何かをreturnする必要はありません。イベントは通常通り伝播します。
+    };
+    instance.addEventListener('message', messageHandler);
+
+    // 'send'メソッドに対するProxyを作成（この部分は元のまま）
+    const sendProxy = new Proxy(instance.send, {
+      apply: function(sendTarget, thisArg, sendArgs) {
+        const dataToSend = sendArgs[0];
+
+        // 送信データがArrayBuffer（バイナリデータ）の場合のみ処理を実行
+        if (dataToSend instanceof ArrayBuffer) {
+          try {
+            const uint8Array = new Uint8Array(dataToSend);
+
+            if(uint8Array.length > 80) {
+  
+              //console.log("SEND uint8Array", uint8Array);
+
+              // 拡張機能に解析を依頼
+              window.postMessage({
+                direction: 'from-page',
+                from: 'send',
+                type: 'DECODE_MSGPACK_REQUEST',
+                binaryData: uint8Array
+              }, window.location.origin);
+            }
+
+          } catch (error) {
+            console.warn('Could not decode a binary message:', error);
+          }
+        }
+
+        // 解析後、元の 'send' メソッドを、改変していない元のデータで呼び出します。
+        return sendTarget.apply(thisArg, sendArgs);
+      }
+    });
+
+    // インスタンスのsendメソッドをプロキシに置き換えます
+    instance.send = sendProxy;
+
+    // WebSocketインスタンスを返すことで、ゲームは通常通り動作します
+    return instance;
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /**
  * 指定されたユーザーIDのコメントを\nで連結した文字列を取得する
@@ -461,10 +621,7 @@ let _styleList = {};        // KEY:ユーザーID（184さんならハッシュ�
 let _bIsIamOwner = false;           // 自分が配信者かどうか
 let _bIsIamOwnerCheckOnce = false;  // 自分が配信者かどうか確認したかどうか
 
-// WebSocketの受信イベントハンドラ
-function recvEvent(event) {
-  
-}
+
 
 
 function recvChatComment(message) {

@@ -40,6 +40,7 @@
         "https://ak.cdn.nimg.jp/*"
       ],
       "js": [
+        "/js/lib/msgpack.min.js",
         "/js/main.js",
         "/js/comeview.js",
         "/js/yomiage.js",
