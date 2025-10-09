@@ -462,7 +462,10 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
     // "sample.jpg" を "/拡張機能PATH/img/sample.jpg" に置換
     partsHtml = partsHtml.replace(/src="([^"]+)"/g, 'src="' + chrome.runtime.getURL("/img/$1") + '"');
 
-    //partsHtml = partsHtml.replace("sample.jpg", chrome.runtime.getURL("/img/sample.jpg"));
+
+    partsHtml = partsHtml.replace(/href="\/HEMO\/(.+)"/g, 'href="' + chrome.runtime.getURL("/img/$1") + '"');
+
+
 
     p1.innerHTML = partsHtml;
     settingMenu.parentNode.prepend(p1);
@@ -552,11 +555,19 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
         '<div class="item game" aria-label="ニコ生ゲームの映像を非表示にします">ニコ生ゲーム画面OFF</div>'+
         '<div class="item game-mute" aria-label="ニコ生ゲームの音をミュートします">ニコ生ゲーム音ミュート</div>'+
         '<div class="item ichiba" aria-label="ニコ生ゲームのショートカットを起動します">ニコ生ゲームショートカット</div>'+
+        '<div class="item gamelauncher" aria-label="ニコ生ゲームランチャーを起動します">ニコ生ゲームランチャー</div>'+
         '<div class="item video-wipe" aria-label="ニコ生ゲーム起動時に配信映像をワイプします">ワイプ</div>'+
         '<div class="item video-effect" aria-label="配信映像を加工します">映像加工</div>'+
         '<div class="item picture" aria-label="映像＋コメントを小窓で表示します">小窓表示</div>'+
         '<div class="item rec" aria-label="録画を開始します"><span class="status">●</span><span class="recBtn">録画開始</span></div>';
     document.querySelector('[class^=___player-controller___]').append(shortcut);
+
+
+    // ゲームランチャーのボタンを作成しておく
+    const gameLauncherBtn = document.createElement('div');
+    gameLauncherBtn.id = "ext_game_launcher_btn";
+    gameLauncherBtn.innerText = 'ニコ生ゲームランチャー';
+    document.querySelector('[class^=___ichiba-counter-section___]').append(gameLauncherBtn);
 
 
     // 市場ショートカット用のDOMを作成しておく
@@ -567,7 +578,7 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
     const plusIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path style="fill-rule:evenodd" d="M13.18 13.1h4.6v-2.33h-4.6V6.26h-2.36v4.51h-4.6v2.33h4.6v4.64h2.36V13.1z" fill="#fff"/></svg>';
     const ichibaShortcut = document.createElement('div');
     ichibaShortcut.id = "ext_ichiba_shortcut";
-    ichibaShortcut.innerHTML = '<div class="time-box"></div><div class="hemo-view-game-btn">' + plusIcon + '</div><div class="item-box"></div>';
+    ichibaShortcut.innerHTML = '<div class="time-box"></div><div class="item-box"></div>';
     document.querySelector('[class^=___player-controller___]').append(ichibaShortcut);
 
     // ニコ生ゲームランチャー用のオーバーレイ用のDOMを作成しておく
@@ -1139,6 +1150,30 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
         ichibaShortcutToggle();
     });
 
+    // ニコ生ゲームランチャー
+    document.querySelector('.ext-setting-menu .ext-gamelauncher .item .value').addEventListener('click', gameLauncherToggle);
+    const gameLauncherPin = document.querySelector('.ext-setting-menu .ext-gamelauncher .item .pin');
+    gameLauncherPin.addEventListener('click', function() {
+        if(gameLauncherPin.getAttribute("ext-pin-on")){
+
+            // 設定画面のピンのアイコンをOFF表示
+            gameLauncherPin.removeAttribute("ext-pin-on");
+            // ショートカットを非表示
+            document.querySelector('#ext_shortcut .item.gamelauncher').removeAttribute("ext-pin-on");
+            // 拡張機能の設定に保存
+            chrome.storage.local.set({"ext_gamelauncher_pin": "OFF"}, function() {});
+        } else {
+            // 設定画面のピンのアイコンをON表示
+            gameLauncherPin.setAttribute("ext-pin-on", "ON");
+            // ショートカットを表示
+            document.querySelector('#ext_shortcut .item.gamelauncher').setAttribute("ext-pin-on", "ON");
+            // 拡張機能の設定に保存
+            chrome.storage.local.set({"ext_gamelauncher_pin": "ON"}, function() {});
+        }
+    });
+    document.querySelector('#ext_shortcut .gamelauncher').addEventListener('click', function() {
+        gameLauncherToggle();
+    });
 
     // 映像加工
     document.querySelector('.ext-setting-menu .ext-video-effect .item .value').addEventListener('click', videoEffect);
@@ -1249,6 +1284,12 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
     document.querySelector('.ext-setting-menu .ext-ichiba .setting').addEventListener('click', (e) => {
         changeElement(document.querySelector('.ext-setting-menu .ext-ichiba .option-box'));
         document.querySelector('.ext-setting-menu .ext-ichiba .setting').classList.toggle('active')
+    }, false);
+
+    // [ニコ生ゲームランチャー]の詳細設定ボタン
+    document.querySelector('.ext-setting-menu .ext-gamelauncher .setting').addEventListener('click', (e) => {
+        changeElement(document.querySelector('.ext-setting-menu .ext-gamelauncher .option-box'));
+        document.querySelector('.ext-setting-menu .ext-gamelauncher .setting').classList.toggle('active')
     }, false);
 
     // [映像加工]の詳細設定ボタン
@@ -2416,6 +2457,24 @@ function setSettingValue() {
                 document.querySelector('.ext-setting-menu .ext-ichiba .pin').setAttribute("ext-pin-on", "ON");
                 // ショートカットを表示
                 document.querySelector('#ext_shortcut .item.ichiba').setAttribute("ext-pin-on", "ON");                
+            }
+        });
+
+        // ニコ生ゲームランチャー
+        chrome.storage.local.get("ext_game_launcher", function (value) {
+            if (value.ext_game_launcher == "ON") {
+                gameLauncherToggle();
+                // ショートカットをアクティブ状態
+                document.querySelector('#ext_shortcut .item.gamelauncher').setAttribute("active", "ON");   
+            }
+        });
+        // ニコ生ゲームショートカットのピン状態
+        chrome.storage.local.get("ext_gamelauncher_pin", function (value) {
+            if (value.ext_gamelauncher_pin == "ON") {
+                // 設定画面のピンのアイコンをON表示
+                document.querySelector('.ext-setting-menu .ext-gamelauncher .pin').setAttribute("ext-pin-on", "ON");
+                // ショートカットを表示
+                document.querySelector('#ext_shortcut .item.gamelauncher').setAttribute("ext-pin-on", "ON");                
             }
         });
 
