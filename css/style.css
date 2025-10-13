@@ -379,6 +379,13 @@
   padding: 6px 20px;
   display: block;
 }
+.ext-setting-menu .option-box .option.hide {
+  display: none;
+}
+
+.ext-setting-menu .ext-item.hide {
+  display: none;
+}
 
 .ext-setting-menu .option-box .option.desc a {
   color: white;

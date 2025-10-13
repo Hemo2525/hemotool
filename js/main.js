@@ -59,6 +59,9 @@ function runHemoTool() {
                         // イベント設定
                         setEvents();
 
+                        // FireFox用のUIに切り替える
+                        checkFirefoxUI();
+
                     });                    
 
 
@@ -77,12 +80,12 @@ function runHemoTool() {
 
     
     window.addEventListener('beforeunload', function(e) {
-        chrome.runtime.postMessage({stop: "stop"});
+        browser.runtime.sendMessage({stop: "stop"});
     }, false);
     
     setInterval(() => {
         console.log("サービスワーカーを活かすためのメッセージ送信");
-        chrome.runtime.sendMessage("何でも良いメッセージ");
+        browser.runtime.sendMessage("何でも良いメッセージ");
     }, 25 * 1000);
 
 
@@ -1594,14 +1597,14 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
     // [棒読み] 接続ボタン
     document.querySelector('.ext-setting-menu .ext-bouyomi .option.tryconnect input').addEventListener('click', (e) => {
         if(e.isTrusted){
-            // [棒読み] 音質
+            // [棒読み] 声質
             chrome.storage.local.get("ext_bouyomi_opt_voices", function (value) {
-                initBouyomiChan(value.ext_bouyomi_opt_voices); // 棒読みちゃんの音質一覧を取得してドロップダウンリストを生成
+                initBouyomiChan(value.ext_bouyomi_opt_voices); // 棒読みちゃんの声質一覧を取得してドロップダウンリストを生成
             });
         }
     });
 
-    // [棒読み] 音質
+    // [棒読み] 声質
     document.querySelector('.ext-setting-menu .ext-bouyomi .option.voices select').addEventListener('change', (e) => {
         if(e.isTrusted){
             const voideId = document.querySelector('.ext-setting-menu .ext-bouyomi .option.voices select').value;
@@ -1611,9 +1614,24 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
             // 棒読みを停止（自動再開）
             clearBouyomiTask();
 
-            console.log("棒読みちゃんの音質を変更しました", _bouyomi_voideId);
+            console.log("棒読みちゃんの声質を変更しました", _bouyomi_voideId);
         }
     });
+
+    // [棒読み] 声質（Firefox用）
+    document.querySelector('.ext-setting-menu .ext-bouyomi .option.voices-firefox input').addEventListener('change', (e) => {
+        if(e.isTrusted){
+            const voideId = document.querySelector('.ext-setting-menu .ext-bouyomi .option.voices-firefox input').value;
+            _bouyomi_voideId = voideId;
+            chrome.storage.local.set({"ext_bouyomi_opt_voices": voideId}, function() {});
+
+            // 棒読みを停止（自動再開）
+            clearBouyomiTask();
+
+            console.log("棒読みちゃんの声質を変更しました", _bouyomi_voideId);
+        }
+    });
+
     // [棒読み] 音量
     document.querySelector('.ext-setting-menu .ext-bouyomi .option.volume input').addEventListener('change', (e) => {
         if(e.isTrusted){
@@ -1660,6 +1678,7 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
 
             const default_voideId = 1;
             document.querySelector('.ext-setting-menu .ext-bouyomi .option.voices select').value = default_voideId;
+            document.querySelector('.ext-setting-menu .ext-bouyomi .option.voices-firefox input').value = default_voideId;
             _bouyomi_voideId = default_voideId;
             chrome.storage.local.set({"ext_bouyomi_opt_voices": default_voideId}, function() {});
             
@@ -2325,10 +2344,10 @@ function setSettingValue() {
                 document.querySelector('.ext-setting-menu .ext-bouyomi .option.port input').value = "50080";
             }
         });
-        // [棒読み] 音質
+        // [棒読み] 声質
         chrome.storage.local.get("ext_bouyomi_opt_voices", function (value) {
             if (value.ext_bouyomi_opt_voices) {
-                initBouyomiChan(value.ext_bouyomi_opt_voices); // 棒読みちゃんの音質一覧を取得してドロップダウンリストを生成
+                initBouyomiChan(value.ext_bouyomi_opt_voices); // 棒読みちゃんの声質一覧を取得してドロップダウンリストを生成
                 _bouyomi_voideId = value.ext_bouyomi_opt_voices;
             } else {
                 // デフォルト値
@@ -2668,3 +2687,37 @@ function setSettingValue() {
 
 
 
+/**
+ * 現在実行されているブラウザがChromeかFirefoxかを判定します。
+ * webextension-polyfillを使用していることを前提としています。
+ * @returns {'chrome' | 'firefox' | 'unknown'} ブラウザ名
+ */
+function getBrowserName() {
+    // browser.runtime.getURL('') は拡張機能のルートURLを返します。
+    // 例: "chrome-extension://abcdefg..." or "moz-extension://abcdefg..."
+    const url = browser.runtime.getURL('');
+  
+    if (url.startsWith('moz-extension://')) {
+      return 'firefox';
+    }
+    if (url.startsWith('chrome-extension://')) {
+      return 'chrome';
+    }
+    return 'unknown';
+  }
+
+function checkFirefoxUI() {
+    const currentBrowser = getBrowserName();
+    if (currentBrowser === 'firefox') {
+        document.querySelector('.ext-setting-menu .ext-bouyomi .option.voices-firefox').classList.remove('hide');
+        document.querySelector('.ext-setting-menu .ext-bouyomi .option.voices').classList.add('hide');
+        const onlyFireFox = document.querySelectorAll('.ext-setting-menu .ext-bouyomi .option.only-firefox');
+        onlyFireFox.forEach(item => {
+            item.classList.remove('hide');
+        });
+
+        document.querySelector('.ext-setting-menu .ext-pip').classList.add('hide');
+        document.querySelector('.ext-setting-menu .ext-rec').classList.add('hide');
+
+    }
+}

@@ -44,8 +44,14 @@ function clearBouyomiNowTask() {
 }
 
 
-// 棒読みちゃんの音質一覧を取得する関数
-function getBouyomiVoiceList(host, port) {
+// 棒読みちゃんの声質一覧を取得する関数
+async function getBouyomiVoiceList(host, port) {
+    const yomiage_request = `http://${host}:${port}/GetVoiceList`;
+    const voiceList = await chrome.runtime.sendMessage({type: "GET_BOUYOMI_VOICE_LIST", bouyomiRequest: yomiage_request });
+    console.log("getBouyomiVoiceList", voiceList);
+    return voiceList.voiceList;
+
+    /*
     return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open('GET', `http://${host}:${port}/GetVoiceList`, true);
@@ -66,14 +72,45 @@ function getBouyomiVoiceList(host, port) {
     };
     xhr.send();
     });
+    */
 }
 
-// 音質一覧を取得してドロップダウンリストを生成する関数
-function initBouyomiChan(selectedVoiceId) {
+
+// 声質一覧を取得してドロップダウンリストを生成する関数
+async function initBouyomiChan(selectedVoiceId) {
 
     _bouyomi_host = document.querySelector('.ext-setting-menu .ext-bouyomi .option.host input').value;
     _bouyomi_port = document.querySelector('.ext-setting-menu .ext-bouyomi .option.port input').value;
 
+    const voiceList = await getBouyomiVoiceList(_bouyomi_host, _bouyomi_port);
+
+    const selectElement = document.querySelector('.ext-setting-menu .ext-bouyomi .option.voices select');
+            
+    // 一旦リストをクリア
+    selectElement.replaceChildren();
+
+    if(voiceList) {
+        // ドロップダウンリストを生成
+        voiceList.forEach(voice => {
+            const option = document.createElement('option');
+            option.value = voice.id;
+            if(voice.id == selectedVoiceId){
+                option.selected = true;
+            }
+            option.textContent = voice.alias || voice.name;
+            option.style.color = voice.kind.includes('AquesTalk') ? '#080' : 
+                                voice.kind.includes('SAPI5') ? '#00f' : '#f0f';
+            selectElement.appendChild(option);
+        });
+    }
+
+
+    document.querySelector('.ext-setting-menu .ext-bouyomi .option.voices-firefox input').value = selectedVoiceId;
+
+
+
+
+    /*
     getBouyomiVoiceList(_bouyomi_host, _bouyomi_port)
         .then(voiceList => {
             const selectElement = document.querySelector('.ext-setting-menu .ext-bouyomi .option.voices select');
@@ -97,13 +134,14 @@ function initBouyomiChan(selectedVoiceId) {
         .catch(error => {
             console.log('棒読みちゃんに接続できません', error);
         });
+*/
 }
 
 // 棒読みちゃんにテキストを送信する関数
 function sendTextToBouyomiChan(text) {
 
     const yomiage_request = `http://${_bouyomi_host}:${_bouyomi_port}/Talk?text=${encodeURIComponent(text)}&voice=${_bouyomi_voideId}&speed=${_bouyomi_speed}&tone=${_bouyomi_tone}&volume=${_bouyomi_volume}`;
-    chrome.runtime.sendMessage({bouyomiRequest: yomiage_request });
+    chrome.runtime.sendMessage({type: "RUN_BOUYOMI_TEXT", bouyomiRequest: yomiage_request });
 
     console.log("sendTextToBouyomiChanを実行", yomiage_request);
 

@@ -363,7 +363,17 @@
         padding: 6px 20px;
         display: block;
     }
+
+    &.hide {
+        display: none;
+    }
 }
+.ext-setting-menu .ext-item {
+    &.hide {
+        display: none;
+    }
+}
+
 .ext-setting-menu .option-box .option.desc a {
     color: white;
 }

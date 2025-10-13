@@ -1,8 +1,8 @@
 {
   "name": "ニコ生拡張機能 へもツール",
   "manifest_version": 3,
-  "version": "0.39.4",
-  "description": "ニコ生にコメビュ機能、録画機能、PIP、コメント読み上げ機能、シークバーOFF機能、ニコ生ゲーム音ミュート、映像加工、などなどの拡張機能を追加します",
+  "version": "0.39.5",
+  "description": "ニコ生にコメビュ機能、ニコ生ゲームランチャー、PIP、コメント読み上げ機能、シークバーOFF機能、ニコ生ゲーム音ミュート、映像加工、などなどの拡張機能を追加します",
   "permissions": [
     "storage",
     "unlimitedStorage",
@@ -13,11 +13,22 @@
     "https://*.nicovideo.jp/",
     "https://*.nimg.jp/"
   ],
+
   "declarative_net_request": {
-    "rule_resources": []
+    "rule_resources": [
+      {
+        "id": "ruleset_1",
+        "enabled": true,
+        "path": "rules.json"
+      }
+    ]
   },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "scripts": [
+      "/js/lib/browser-polyfill.min.js",
+      "background.js"
+    ]
   },
   "web_accessible_resources": [
     { 
@@ -48,6 +59,7 @@
         "https://ak.cdn.nimg.jp/*"
       ],
       "js": [
+        "/js/lib/browser-polyfill.min.js",
         "/js/lib/msgpack.min.js",
         "/js/main.js",
         "/js/comeview.js",
@@ -67,5 +79,11 @@
       ],
       "css": ["/css/style.css", "/css/game-launcher.css"]
     }
-  ]
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{3179A799-F81E-4C8E-9054-EF56CBAC9A75}",
+      "strict_min_version": "109.0"
+    }
+  }
 }
