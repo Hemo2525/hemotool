@@ -890,9 +890,9 @@ function recvChatComment(message) {
           no: message.chat.no
         });
       
-        if (_allComment.length > 20000) {
-          console.log("保存しているコメント数が20000を超えたので古いコメントから半分削除します");
-          _allComment.splice(0, 10000);
+        if (_allComment.length > 9000) {
+          console.log("保存しているコメント数が規定数を超えたので古いコメントから少し削除します");
+          _allComment.splice(0, 6000);
         } 
 
       } else {
