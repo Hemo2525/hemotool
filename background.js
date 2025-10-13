@@ -1,59 +1,65 @@
-// --- Web Speech API (speechSynthesis) を使用するための設定 ---
+// ブラウザ環境を判定します。
+// Firefoxのバックグラウンドスクリプトは'window'オブジェクトを持ちますが、
+// ChromeのManifest V3バックグラウンド(Service Worker)は持ちません。
+const isSpeechSynthesisSupported = typeof window !== 'undefined' && window.speechSynthesis;
 
-let _tts_voices;
-let _tts_volume = 1;
-let _tts_pitch = 1;
-let _tts_rate = 1;
-let _queCount = 0;
-// デフォルトの音声名は、利用可能な音声リストから動的に設定する
-let _tts_voiceName = null; 
+// グローバル変数
+var _tts_voices;
+var _tts_volume = 1;
+var _tts_pitch = 1;
+var _tts_rate = 1;
+var _queCount = 0;
+var _tts_voiceName = "Google 日本語"; // デフォルトの音声名
 
-// 利用可能な音声リストを取得して _tts_voices に格納し、デフォルト音声を設定する関数
-function populateVoiceList() {
-    if (typeof speechSynthesis === 'undefined') {
-        console.log('speechSynthesis is not supported.');
-        return;
-    }
-    _tts_voices = speechSynthesis.getVoices();
-
-    // まだデフォルト音声が設定されておらず、音声リストが取得できたら実行
-    if (!_tts_voiceName && _tts_voices.length > 0) {
-        // 日本語の音声を探す (langプロパティが 'ja' または 'ja-JP' で始まるもの)
-        const japaneseVoice = _tts_voices.find(voice => voice.lang.startsWith('ja'));
-        
-        if (japaneseVoice) {
-            // 見つかった最初の日本語音声をデフォルトに設定
-            _tts_voiceName = japaneseVoice.name;
-            console.log(`デフォルトの日本語音声を「${_tts_voiceName}」に設定しました。`);
-        } else {
-            // 日本語音声がない場合は、リストの最初の音声をフォールバックとして設定
-            _tts_voiceName = _tts_voices[0].name;
-            console.log(`日本語音声が見つかりません。デフォルト音声を「${_tts_voiceName}」に設定しました。`);
+/**
+ * 利用可能な音声リストを取得・設定する関数（ブラウザ互換）
+ */
+function initializeVoices() {
+    if (isSpeechSynthesisSupported) {
+        // Firefoxの場合
+        const setVoices = () => {
+            _tts_voices = window.speechSynthesis.getVoices();
+            for (var i = 0; i < _tts_voices.length; i++) {
+                console.log('Available SpeechSynthesis Voice: ' + _tts_voices[i].name);
+            }
+        };
+        setVoices();
+        if (window.speechSynthesis.onvoiceschanged !== undefined) {
+            window.speechSynthesis.onvoiceschanged = setVoices;
         }
+    } else {
+        // Chromeの場合
+        chrome.tts.getVoices(function (availableVoices) {
+            _tts_voices = availableVoices;
+            for (var i = 0; i < _tts_voices.length; i++) {
+                console.log('Available chrome.tts Voice: ' + _tts_voices[i].voiceName);
+            }
+        });
     }
-    console.log("利用可能な音声リスト:", _tts_voices.map(v => `${v.name} (${v.lang})`));
 }
 
-// スクリプト読み込み時に音声リストを取得
-populateVoiceList();
-// 音声リストが非同期で読み込まれる場合に対応
-if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
-    speechSynthesis.onvoiceschanged = populateVoiceList;
-}
+// 拡張機能の起動時に一度だけ音声リストを初期化
+initializeVoices();
 
-// 読み上げを停止する関数
+/**
+ * 読み上げを停止する関数（ブラウザ互換）
+ */
 function stopVoice() {
-    if (typeof speechSynthesis !== 'undefined') {
-        speechSynthesis.cancel();
+    if (isSpeechSynthesisSupported) {
+        // Firefoxの場合
+        window.speechSynthesis.cancel();
+    } else {
+        // Chromeの場合
+        chrome.tts.stop();
     }
     _queCount = 0;
 }
 
 // --- メッセージリスナー ---
 
-browser.runtime.onMessage.addListener(async (request, sender) => {
+chrome.runtime.onMessage.addListener(async (request, sender) => {
 
-    // 棒読みちゃん連携（変更なし）
+    // 棒読みちゃん連携
     if (request.type === "RUN_BOUYOMI_TEXT") {
         try {
             console.log("RUN_BOUYOMI_TEXT", request.bouyomiRequest);
@@ -65,21 +71,6 @@ browser.runtime.onMessage.addListener(async (request, sender) => {
         } catch (error) {
             console.error('Fetch error for bouyomiRequest:', error);
             return { status: 'error', details: error.message }; // エラーを直接returnする
-        }
-    }
-
-    if (request.type === "GET_BOUYOMI_VOICE_LIST") {
-        try {
-            console.log("GET_BOUYOMI_VOICE_LIST", request.bouyomiRequest);
-            const res = await fetch(request.bouyomiRequest);
-            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-            const jsonData = await res.json();
-            console.log('Voice list fetched:', jsonData);
-            // 取得したデータを直接returnするだけで、自動的に送信側に伝わる
-            return { status: 'success', data: jsonData }; 
-        } catch (error) {
-            console.error('Fetch error for getBouyomiVoiceList:', error);
-            return { status: 'error', details: error.message };
         }
     }
 
@@ -131,34 +122,60 @@ browser.runtime.onMessage.addListener(async (request, sender) => {
             console.log("キューの数：" + _queCount);
             _queCount++;
 
-            const utterance = new SpeechSynthesisUtterance(request.toSay);
-
-            utterance.volume = _tts_volume;
-            utterance.pitch = _tts_pitch;
-            utterance.rate = _tts_rate;
-
-            if (_tts_voiceName && _tts_voices) {
-                const selectedVoice = _tts_voices.find(voice => voice.name === _tts_voiceName);
+            // --- ここでブラウザごとに処理を分岐 ---
+            if (isSpeechSynthesisSupported) {
+                // 【Firefox】window.speechSynthesis を使用
+                const utterance = new SpeechSynthesisUtterance(request.toSay);
+                const selectedVoice = _tts_voices && _tts_voices.find(v => v.name === _tts_voiceName);
                 if (selectedVoice) {
                     utterance.voice = selectedVoice;
-                } else {
-                    console.warn(`音声 "${_tts_voiceName}" が見つかりません。デフォルトの音声を使用します。`);
                 }
+                utterance.volume = _tts_volume;
+                utterance.pitch = _tts_pitch;
+                utterance.rate = _tts_rate;
+
+                utterance.onstart = function () {
+                    console.log("読み上げが開始されました");
+                };
+                utterance.onend = function () {
+                    console.log("読み上げが終了しました");
+                    if (_queCount > 0) _queCount--;
+                };
+                utterance.onerror = function (event) {
+                    console.log("読み上げ中にエラーが発生しました: " + event.error);
+                    if (_queCount > 0) _queCount--;
+                };
+
+                window.speechSynthesis.speak(utterance);
+            } else {
+                // 【Chrome】chrome.tts を使用 (ユーザーの元のコードを復元)
+                chrome.tts.speak(request.toSay, {
+                    rate: _tts_rate,
+                    pitch: _tts_pitch,
+                    volume: _tts_volume,
+                    'enqueue': true,
+                    'voiceName': _tts_voiceName,
+                    onEvent: function (event) {
+                        console.log(event);
+                        if (event.type === "start") {
+                            console.log("読み上げが開始されました");
+                        }
+                        if (event.type === "end") {
+                            console.log("読み上げが終了しました");
+                            if (_queCount > 0) _queCount--;
+                        }
+                        if (event.type === "cancelled") {
+                            console.log("読み上げがキャンセルされました");
+                            if (_queCount > 0) _queCount--;
+                        }
+                        // エラーイベントもハンドリング
+                        if (event.type === "error") {
+                            console.log("読み上げ中にエラーが発生しました: " + event.errorMessage);
+                            if (_queCount > 0) _queCount--;
+                        }
+                    }
+                });
             }
-
-            utterance.onstart = function (event) {
-                console.log("読み上げが開始されました");
-            };
-            utterance.onend = function (event) {
-                console.log("読み上げが終了しました");
-                if (_queCount > 0) _queCount--;
-            };
-            utterance.onerror = function (event) {
-                console.error("読み上げでエラーが発生しました: ", event.error);
-                if (_queCount > 0) _queCount--;
-            };
-
-            speechSynthesis.speak(utterance);
         }
     }
 });

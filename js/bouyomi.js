@@ -46,12 +46,14 @@ function clearBouyomiNowTask() {
 
 // 棒読みちゃんの声質一覧を取得する関数
 async function getBouyomiVoiceList(host, port) {
+    /*
     const yomiage_request = `http://${host}:${port}/GetVoiceList`;
     const voiceList = await chrome.runtime.sendMessage({type: "GET_BOUYOMI_VOICE_LIST", bouyomiRequest: yomiage_request });
-    console.log("getBouyomiVoiceList", voiceList);
-    return voiceList.voiceList;
+    console.log("getBouyomiVoiceList", voiceList.data);
+    return voiceList.data;
+    */
 
-    /*
+    
     return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open('GET', `http://${host}:${port}/GetVoiceList`, true);
@@ -72,7 +74,7 @@ async function getBouyomiVoiceList(host, port) {
     };
     xhr.send();
     });
-    */
+    
 }
 
 
