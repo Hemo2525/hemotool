@@ -517,13 +517,14 @@
   align-items: stretch;
   justify-content: flex-start;
   margin-right: 20px;
+  flex-wrap: wrap;
+  gap: 5px;
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .title-tab-box .tab-list .tab-item {
   font-size: 15px;
   padding: 5px 10px 8px;
   width: 103px;
   text-align: center;
-  margin-right: 7px;
   background-color: #f7931e;
   border: 1px solid #f7931e;
   border-radius: 37px;
@@ -638,6 +639,8 @@
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .search-box .search-left .radio-group .radio-item {
   display: inline-block;
+  font-size: 14px;
+  font-weight: bold;
   margin-right: 7px;
   -webkit-user-select: none;
      -moz-user-select: none;
@@ -665,9 +668,8 @@
   flex-basis: 32.3%;
   max-width: 32.3%;
   border-radius: 10px;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
   padding: 10px 15px;
-  gap: 7px;
   border: navajowhite;
   box-shadow: 0px 0px 10px #cdcdcd;
   cursor: pointer;
@@ -733,6 +735,7 @@
   line-height: 1.5;
   font-size: 13px;
   color: #656565;
+  margin-bottom: 11px;
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .desc-box .score {
   font-size: 37px;
@@ -888,6 +891,12 @@
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .popup-box .btn-area .btn:hover {
   background-color: #c16d00;
 }
+@media (max-width: 1500px) {
+  #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item {
+    flex-basis: 48%;
+    max-width: 48%;
+  }
+}
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .more-btn {
   background-color: #f7931e;
   cursor: pointer;
@@ -902,7 +911,7 @@
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .news-list {
   margin-top: 10px;
-  margin-left: 20px;
+  margin-left: 27px;
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .news-list .item {
   display: flex;
@@ -912,8 +921,8 @@
   margin-bottom: 20px;
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .news-list .item .news-left {
-  flex-basis: 100px;
-  max-width: 100px;
+  flex-basis: 80px;
+  max-width: 80px;
   line-height: 1;
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .news-list .item .news-left .date {
@@ -921,11 +930,11 @@
   line-height: 1;
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .news-list .item .news-right {
-  flex-basis: calc(100% - 100px);
-  max-width: calc(100% - 100px);
+  flex-basis: calc(100% - 80px);
+  max-width: calc(100% - 80px);
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .news-list .item .news-right .title {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: bold;
   line-height: 1;
   display: block;
@@ -1115,8 +1124,8 @@
   max-width: 100%;
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher #HemoOfficialScreen .content .content-left .item-list .item {
-  flex-basis: 33%;
-  max-width: 33%;
+  flex-basis: 32.3%;
+  max-width: 32.3%;
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher #HemoNgListScreen .ng-content {
   width: 100%;

@@ -602,15 +602,16 @@ $ichibaItemSize: 34px;
                 display: flex;
                 align-items: stretch;
                 justify-content: flex-start;
-                // margin-bottom: 14px;
-                // margin-top: 20px;
                 margin-right: 20px;
+
+                flex-wrap: wrap;
+                gap: 5px;
+
                 .tab-item {
                     font-size: 15px;
                     padding: 5px 10px 8px;
                     width: 103px;
                     text-align: center;
-                    margin-right: 7px;
                     background-color: #f7931e;
                     border: 1px solid #f7931e;
                     border-radius: 37px;
@@ -730,6 +731,8 @@ $ichibaItemSize: 34px;
                             }
                             .radio-item {
                                 display: inline-block;
+                                font-size: 14px;
+                                font-weight: bold;
                                 margin-right: 7px;
                                 user-select: none;
                                 cursor: pointer;
@@ -754,7 +757,6 @@ $ichibaItemSize: 34px;
                         display: flex;
                     }
 
-
                     .item {
                         position: relative;
 
@@ -765,10 +767,9 @@ $ichibaItemSize: 34px;
                         max-width: 32.3%;
 
                         border-radius: 10px;
-                        margin-bottom: 14px;
+                        margin-bottom: 16px;
                         
                         padding: 10px 15px;
-                        gap: 7px;
 
                         border: navajowhite;
                         box-shadow: 0px 0px 10px #cdcdcd;
@@ -845,7 +846,7 @@ $ichibaItemSize: 34px;
                             font-size: 13px;
 
                             color: #656565;
-
+                            margin-bottom: 11px;
                             .score {
                                 font-size: 37px;
                                 color: #ff8f00;
@@ -1020,6 +1021,14 @@ $ichibaItemSize: 34px;
     
                         }
                     }
+
+                    // 1500px未満の場合は、アイテムを2列にする
+                    @media (max-width: 1500px) {
+                        .item {
+                            flex-basis: 48%;
+                            max-width: 48%;
+                        }
+                    }
                 }
                 .more-btn {
                     background-color: #f7931e;
@@ -1035,7 +1044,7 @@ $ichibaItemSize: 34px;
                 }
                 .news-list {
                     margin-top: 10px;
-                    margin-left: 20px;
+                    margin-left: 27px;
                     .item {
                         display: flex;
                         align-items: top;
@@ -1043,8 +1052,8 @@ $ichibaItemSize: 34px;
                         gap: 10px;
                         margin-bottom: 20px;
                         .news-left {
-                            flex-basis: 100px;
-                            max-width: 100px;
+                            flex-basis: 80px;
+                            max-width: 80px;
                             line-height: 1;
                             .date {
                                 font-size: 14px;
@@ -1052,10 +1061,10 @@ $ichibaItemSize: 34px;
                             }
                         }
                         .news-right {
-                            flex-basis: calc(100% - 100px);
-                            max-width: calc(100% - 100px);
+                            flex-basis: calc(100% - 80px);
+                            max-width: calc(100% - 80px);
                             .title {
-                                font-size: 15px;
+                                font-size: 17px;
                                 font-weight: bold;
                                 line-height: 1;
                                 display: block;
@@ -1256,8 +1265,8 @@ $ichibaItemSize: 34px;
             flex-basis: 100%;
             max-width: 100%;
             .item-list .item {
-                flex-basis: 33%;
-                max-width: 33%;
+                flex-basis: 32.3%;
+                max-width: 32.3%;
             }
         }
 

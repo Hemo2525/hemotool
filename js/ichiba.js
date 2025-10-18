@@ -2429,9 +2429,17 @@ async function viewUserGameList(bIsRefresh = false) {
     // console.log("自作ゲームの一覧を取得");
     const requestCount = 50;
     const res = await getUserGameList(_embeddedDataJson.program.nicoliveProgramId, keyword, sortKey, "DESC", requestCount, itemOffset, fixedTag);
-    // console.log(res);
+    //console.log(res);
 
     await gameListAppend('user', itemList, res.data.contents);
+
+
+    // ゲームの総数を表示
+    const currentLabel = document.querySelector(`#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] label[for='${fixedTag}']`);
+    if(!currentLabel.getAttribute('alredy-count')) {
+        currentLabel.setAttribute('alredy-count', 'true');
+        currentLabel.innerText = currentLabel.innerText + " (" + res.data.max + "件)";
+    }
 
 
     // もっと見るボタンも初期化
@@ -2448,8 +2456,8 @@ async function viewUserGameList(bIsRefresh = false) {
     itemList.parentNode.insertBefore(moreBtn, itemList.nextSibling);
 
 
-    // 取得できたアイテムの数が50未満の場合は、もっと見るボタンを非表示にする
-    if(res.data.contents.length < requestCount) {
+    // 取得できたアイテムの数が0の場合は、もっと見るボタンを非表示にする
+    if(res.data.contents.length === 0) {
         moreBtn.style.display = "none";
     } else {
         moreBtn.style.display = "block";
@@ -2583,10 +2591,10 @@ async function moreBtnClick(keyword, sortKey, fixedTag) {
     // console.log("自作ゲームの一覧を取得(続きを読み込む)");
     const requestCount = 50;    
     const res = await getUserGameList(_embeddedDataJson.program.nicoliveProgramId, keyword, sortKey, "DESC", requestCount, itemOffset, fixedTag);
-    // console.log(res);
+    //console.log(res);
 
-    // 取得できたアイテムの数が50未満の場合は、もっと見るボタンを非表示にする
-    if(res.data.contents.length < requestCount) {
+    // 取得できたアイテムの数が0の場合は、もっと見るボタンを非表示にする
+    if(res.data.contents.length === 0) {
         const moreBtn = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .more-btn");
         moreBtn.style.display = "none";
     }
@@ -2688,8 +2696,6 @@ async function createItemListHtml(tabId, contents) {
     // console.log("ゲームの一覧のHTMLを作成");
     // console.log("tabId", tabId);
     // console.log("contents", contents);
-
-
 
     // ngListのデータを取得
     const getNgList = await chrome.storage.local.get(["ngList"]);
