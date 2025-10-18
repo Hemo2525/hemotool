@@ -1640,6 +1640,11 @@ async function getIchibaGameInfo(lgId) {
     return data;
 }
 
+// MARK: 通信：トピックス情報を取得
+async function getIchibaTopic() {
+    const url = "https://eapi.spi.nicovideo.jp/v1/topics";
+    return runCommonFetch(url, await getDynamicFetchOptions());
+}
 
 // MARK: 通信：公式ゲームの一覧を取得
 async function getOfficalGameList(programId, section) {    
@@ -2332,8 +2337,16 @@ async function viewTopSection() {
         topAllSectionHtml += await makeSectionHtml(section.title, section.contents);
     }
 
+    const topics = await getIchibaTopic();
+    const topicsHtml = await makeTopicHtml(topics);
+
+
+
     const contentBox = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='top'] .content-left");
+    contentBox.insertAdjacentHTML('beforeend', topicsHtml);
     contentBox.insertAdjacentHTML('beforeend', topAllSectionHtml);
+
+
 }
 
 async function viewOfficalGameList() {
@@ -2580,6 +2593,42 @@ async function moreBtnClick(keyword, sortKey, fixedTag) {
 
     await gameListAppend('user', itemList, res.data.contents);
 }
+
+
+async function makeTopicHtml(topics) {
+
+    const titleHtml = `<div class="header-title">お知らせ</div>`;
+    let topicsHtml = "";
+
+    // 一覧の最新2件だけ取得
+    const latestTopics = topics.data.topics.slice(0, 2);
+
+    // お知らせ一覧のHTMLを作成
+    latestTopics.forEach(function(topic) {
+        // 2025-09-12T15:00:00.000Z を、2025/09/12 に変換
+        const date = topic.postedAt.split("T")[0].replace(/-/g, "/");
+        const title = DOMPurify.sanitize(topic.title);
+        const topicHtml = `
+            <div class="item">
+                <div class="news-left">
+                    <span class="date">${date}</span>
+                </div>
+                <div class="news-right">
+                    <a href="${topic.sourceUrl}" target="_blank" class="title">${title}</a>
+                    <span class="summary">${DOMPurify.sanitize(topic.summary)}</span>
+                </div>
+            </div>`;
+        topicsHtml += topicHtml;
+    });
+
+    const sectionHtml = `${titleHtml}
+                        <div class="news-list active">
+                            ${topicsHtml}
+                        </div>`;
+
+    return sectionHtml;
+}
+
 
 async function makeSectionHtml(sectionTitle, gameList) {
 

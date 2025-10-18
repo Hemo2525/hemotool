@@ -894,6 +894,46 @@
   display: block;
   margin: 0 auto;
 }
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .news-list {
+  margin-top: 10px;
+  margin-left: 20px;
+}
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .news-list .item {
+  display: flex;
+  align-items: top;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .news-list .item .news-left {
+  flex-basis: 100px;
+  max-width: 100px;
+  line-height: 1;
+}
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .news-list .item .news-left .date {
+  font-size: 14px;
+  line-height: 1;
+}
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .news-list .item .news-right {
+  flex-basis: calc(100% - 100px);
+  max-width: calc(100% - 100px);
+}
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .news-list .item .news-right .title {
+  font-size: 15px;
+  font-weight: bold;
+  line-height: 1;
+  display: block;
+  color: inherit;
+  margin-bottom: 10px;
+}
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .news-list .item .news-right .summary {
+  font-size: 14px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical; /* 垂直方向に配置 */
+  overflow: hidden; /* 溢れた部分を隠す */
+  text-overflow: ellipsis; /* 溢れた部分に「...」を表示 */
+  -webkit-line-clamp: 2; /* 最大行数を2行に設定 */
+}
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right {
   flex-basis: 490px;
   max-width: 490px;

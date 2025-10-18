@@ -1027,6 +1027,46 @@ $ichibaItemSize: 34px;
                     display: block;
                     margin: 0 auto;
                 }
+                .news-list {
+                    margin-top: 10px;
+                    margin-left: 20px;
+                    .item {
+                        display: flex;
+                        align-items: top;
+                        justify-content: space-between;
+                        gap: 10px;
+                        margin-bottom: 20px;
+                        .news-left {
+                            flex-basis: 100px;
+                            max-width: 100px;
+                            line-height: 1;
+                            .date {
+                                font-size: 14px;
+                                line-height: 1;
+                            }
+                        }
+                        .news-right {
+                            flex-basis: calc(100% - 100px);
+                            max-width: calc(100% - 100px);
+                            .title {
+                                font-size: 15px;
+                                font-weight: bold;
+                                line-height: 1;
+                                display: block;
+                                color: inherit;
+                                margin-bottom: 10px;
+                            }
+                            .summary {
+                                font-size: 14px;
+                                display: -webkit-box;
+                                -webkit-box-orient: vertical;      /* 垂直方向に配置 */
+                                overflow: hidden;                  /* 溢れた部分を隠す */
+                                text-overflow: ellipsis;           /* 溢れた部分に「...」を表示 */
+                                -webkit-line-clamp: 2;             /* 最大行数を2行に設定 */
+                            }
+                        }
+                    }
+                }
             }
             .content-right {
                 flex-basis: 490px;

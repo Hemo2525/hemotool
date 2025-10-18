@@ -80,12 +80,12 @@ function runHemoTool() {
 
     
     window.addEventListener('beforeunload', function(e) {
-        browser.runtime.sendMessage({stop: "stop"});
+        chrome.runtime.sendMessage({stop: "stop"});
     }, false);
     
     setInterval(() => {
         console.log("サービスワーカーを活かすためのメッセージ送信");
-        browser.runtime.sendMessage("何でも良いメッセージ");
+        chrome.runtime.sendMessage("何でも良いメッセージ");
     }, 25 * 1000);
 
 
