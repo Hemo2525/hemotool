@@ -586,6 +586,16 @@ $ichibaItemSize: 34px;
         overflow: hidden;
         padding: 30px 40px;
 
+        &[data-requesting="true"] {
+            .content-left,
+            .item {
+                cursor: wait !important;
+            }
+            .requestBtn {
+                background-color: #888888 !important;
+            }
+        }
+
         .title-tab-box {
             display: flex;
             align-items: center;
@@ -947,7 +957,7 @@ $ichibaItemSize: 34px;
                                     cursor: default;
                         
                                     height: 38px;
-                                    width: 213px;
+                                    width: 260px;
                                     top: -48px;
                                     right: -3px;
                                     left: inherit;
@@ -956,7 +966,7 @@ $ichibaItemSize: 34px;
                         
                                     background-color: rgba(0, 0, 0, 0.941);
                                     color: white;
-                                    font-size: 13px;
+                                    font-size: 15px;
                                     text-align: center;
                                     line-height: 1;
                                     padding: 10px;
@@ -1097,6 +1107,7 @@ $ichibaItemSize: 34px;
                 height: 100%;
                 max-height: 100%;
                 overflow: auto;
+
 
                 .game-box {
                     display: flex;
@@ -1261,6 +1272,24 @@ $ichibaItemSize: 34px;
                         display: none;
                     }
                 }
+
+
+                .loading-box {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    height: 100%;
+                    width: 100%;
+                }
+                .loading {
+                    width: 80px;
+                    height: 80px;
+                    border: 4px solid rgba(0, 0, 0, 0.1); /* Or use a CSS var for this color */
+                    border-radius: 50%;
+                    border-top-color: #787878;
+                    animation: spin 1s ease-in-out infinite;
+                }
+                @keyframes spin { to { transform: rotate(360deg); } }
             }
         }
 

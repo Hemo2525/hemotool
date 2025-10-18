@@ -500,6 +500,13 @@
   overflow: hidden;
   padding: 30px 40px;
 }
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher[data-requesting=true] .content-left,
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher[data-requesting=true] .item {
+  cursor: wait !important;
+}
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher[data-requesting=true] .requestBtn {
+  background-color: #888888 !important;
+}
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .title-tab-box {
   display: flex;
   align-items: center;
@@ -830,7 +837,7 @@
   pointer-events: none;
   cursor: default;
   height: 38px;
-  width: 213px;
+  width: 260px;
   top: -48px;
   right: -3px;
   left: inherit;
@@ -838,7 +845,7 @@
   border: 1px solid white;
   background-color: rgba(0, 0, 0, 0.941);
   color: white;
-  font-size: 13px;
+  font-size: 15px;
   text-align: center;
   line-height: 1;
   padding: 10px;
@@ -1120,6 +1127,26 @@
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .description-box.hide {
   display: none;
+}
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .loading-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .loading {
+  width: 80px;
+  height: 80px;
+  border: 4px solid rgba(0, 0, 0, 0.1); /* Or use a CSS var for this color */
+  border-radius: 50%;
+  border-top-color: #787878;
+  animation: spin 1s ease-in-out infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher #HemoOfficialScreen .content .content-left {
   flex-basis: 100%;

@@ -1206,6 +1206,11 @@ async function showIchibaInfo(itemId, folderName){
 
 // ゲームの詳細情報をゲームランチャーに表示
 async function showIchibaInfoToGameLauncher(item, folderName){
+
+    // ローディングを表示
+    const parentElement = item.closest(".screen").querySelector(".content-right");
+    parentElement.innerHTML = "<div class='loading-box'><div class='loading'></div></div>";
+
     
     const category = item.getAttribute("data-category");
     const itemId = item.getAttribute("data-id");
@@ -1417,8 +1422,7 @@ async function showIchibaInfoToGameLauncher(item, folderName){
     }
 
 
-    // 自作ゲーム画面、お気に入り画面など、ゲーム詳細情報を表示する画面のDOMを取得
-    const parentElement = item.closest(".screen").querySelector(".content-right");
+
 
     // 現在表示している画面のゲーム詳細情報ペインを更新
     parentElement.innerHTML = insertHtml;
@@ -1961,6 +1965,9 @@ function setEventGameLauncher() {
 
             } else  if(e.target.classList.contains('requestBtn')) {
 
+                const gameLauncher = document.querySelector("#ext_nico_game_launcher");
+                gameLauncher.setAttribute("data-requesting", "true");
+
                 // リクエストボタンがクリックされた
                 let bIsSuccess = false;
                 if(category === "official") {
@@ -1972,6 +1979,8 @@ function setEventGameLauncher() {
                 if(bIsSuccess) {
                     addHistory(itemElement);
                 }
+
+                gameLauncher.removeAttribute("data-requesting");
 
                 return;
 
