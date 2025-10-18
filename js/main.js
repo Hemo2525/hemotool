@@ -569,7 +569,9 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
     // ゲームランチャーのボタンを作成しておく
     const gameLauncherBtn = document.createElement('div');
     gameLauncherBtn.id = "ext_game_launcher_btn";
-    gameLauncherBtn.innerText = 'ニコ生ゲームランチャー';
+    const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path style="fill-rule:evenodd" d="M13.18 13.1h4.6v-2.33h-4.6V6.26h-2.36v4.51h-4.6v2.33h4.6v4.64h2.36V13.1z" fill="#fff"/></svg>`;
+    gameLauncherBtn.innerHTML = svgIcon;
+
     document.querySelector('[class^=___ichiba-counter-section___]').append(gameLauncherBtn);
 
 

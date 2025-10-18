@@ -1,19 +1,25 @@
 @charset "UTF-8";
 #ext_game_launcher_btn {
   display: none;
+  height: 100%;
+  aspect-ratio: 1/1;
   background-color: rgb(247, 147, 30);
   border-radius: 5px;
   color: white;
   margin-left: 10px;
-  padding: 8px;
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
 #ext_game_launcher_btn.show {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 #ext_game_launcher_btn:hover {
   background-color: #c16d00;
+}
+#ext_game_launcher_btn svg {
+  width: 22px;
 }
 
 #addHemoTool {
@@ -476,7 +482,7 @@
   color: #3e3e3e;
 }
 #ext_nico_game_launcher_overlay.show {
-  display: flex;
+  display: flex !important;
   z-index: 999999;
 }
 #ext_nico_game_launcher_overlay * {
