@@ -575,6 +575,9 @@
   color: #4d4d4d;
   background-color: #efefef;
   padding: 5px 14px 7px;
+  border-radius: 7px;
+  width: calc(100% - 17px);
+  margin: 0 auto;
 }
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .tab-note {
   font-size: 14px;
@@ -1027,7 +1030,6 @@
   justify-content: space-between;
   gap: 10px;
   margin-bottom: 10px;
-  border: 1px solid white;
   padding: 5px 0px 3px;
   border-radius: 5px;
 }
@@ -1185,4 +1187,104 @@
   border: 1px solid #cdcdcd;
   padding: 10px;
   border-radius: 6px;
+}
+
+html[data-color-theme=dark] #ext_nico_game_launcher_overlay #ext_nico_game_launcher,
+html[data-darkreader-scheme] #ext_nico_game_launcher_overlay #ext_nico_game_launcher {
+  color: #dfdfdf;
+  background-color: #1c1c1c;
+  border: 1px solid white;
+  box-shadow: 0 0 20px white;
+}
+html[data-color-theme=dark] #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .header-title,
+html[data-darkreader-scheme] #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .header-title {
+  background-color: #4d4d4d;
+  color: white;
+}
+html[data-color-theme=dark] #ext_nico_game_launcher_overlay #ext_nico_game_launcher .title-tab-box .time-box,
+html[data-darkreader-scheme] #ext_nico_game_launcher_overlay #ext_nico_game_launcher .title-tab-box .time-box {
+  color: #ff9b9b;
+  border-color: #ff9b9b;
+}
+html[data-color-theme=dark] #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .author-name,
+html[data-darkreader-scheme] #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .author-name {
+  color: inherit;
+}
+html[data-color-theme=dark] #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .game-info-box,
+html[data-darkreader-scheme] #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .game-info-box {
+  color: #ff9b9b;
+}
+html[data-color-theme=dark] #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .desc-box,
+html[data-darkreader-scheme] #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .desc-box {
+  color: #d1d1d1;
+}
+html[data-color-theme=dark] #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .title-box .left img,
+html[data-darkreader-scheme] #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .title-box .left img {
+  background-color: white;
+}
+html[data-color-theme=dark] #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .search-box .search-left input[type=text],
+html[data-darkreader-scheme] #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .search-box .search-left input[type=text] {
+  background-color: inherit;
+  border: 1px solid white;
+  color: white;
+}
+html[data-color-theme=dark] #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .tab-note,
+html[data-darkreader-scheme] #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .tab-note {
+  color: #afafaf;
+}
+html[data-color-theme=dark] #ext_nico_game_launcher_overlay #ext_nico_game_launcher #HemoNgListScreen .ng-content .header-title,
+html[data-color-theme=dark] #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .tab-desc,
+html[data-darkreader-scheme] #ext_nico_game_launcher_overlay #ext_nico_game_launcher #HemoNgListScreen .ng-content .header-title,
+html[data-darkreader-scheme] #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .tab-desc {
+  background-color: rgb(77, 77, 77);
+  color: white;
+}
+html[data-color-theme=dark] #ext_nico_game_launcher_overlay #ext_nico_game_launcher #HemoNgListScreen .ng-content table th,
+html[data-darkreader-scheme] #ext_nico_game_launcher_overlay #ext_nico_game_launcher #HemoNgListScreen .ng-content table th {
+  background-color: #434343;
+}
+
+@media (prefers-color-scheme: dark) {
+  html[data-color-theme=auto] #ext_nico_game_launcher_overlay #ext_nico_game_launcher {
+    color: #dfdfdf;
+    background-color: #1c1c1c;
+    border: 1px solid white;
+    box-shadow: 0 0 20px white;
+  }
+  html[data-color-theme=auto] #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .header-title {
+    background-color: #4d4d4d;
+    color: white;
+  }
+  html[data-color-theme=auto] #ext_nico_game_launcher_overlay #ext_nico_game_launcher .title-tab-box .time-box {
+    color: #ff9b9b;
+    border-color: #ff9b9b;
+  }
+  html[data-color-theme=auto] #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .author-name {
+    color: inherit;
+  }
+  html[data-color-theme=auto] #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .game-info-box {
+    color: #ff9b9b;
+  }
+  html[data-color-theme=auto] #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .desc-box {
+    color: #d1d1d1;
+  }
+  html[data-color-theme=auto] #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .title-box .left img {
+    background-color: white;
+  }
+  html[data-color-theme=auto] #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .search-box .search-left input[type=text] {
+    background-color: inherit;
+    border: 1px solid white;
+    color: white;
+  }
+  html[data-color-theme=auto] #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .tab-note {
+    color: #afafaf;
+  }
+  html[data-color-theme=auto] #ext_nico_game_launcher_overlay #ext_nico_game_launcher #HemoNgListScreen .ng-content .header-title,
+  html[data-color-theme=auto] #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .tab-desc {
+    background-color: rgb(77, 77, 77);
+    color: white;
+  }
+  html[data-color-theme=auto] #ext_nico_game_launcher_overlay #ext_nico_game_launcher #HemoNgListScreen .ng-content table th {
+    background-color: #434343;
+  }
 }/*# sourceMappingURL=game-launcher.css.map */

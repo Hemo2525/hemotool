@@ -312,7 +312,7 @@ function setExtSettingMenuHeight() {
     const BORDER_HEIGHT = 3; // ボーダーの高さ
     
     // 表示状態のアイテム数を取得
-    let maxHeight = document.querySelectorAll('.ext-setting-menu .ext-item:not([ext-view-item-off])').length * ITEM_HEIGHT;
+    let maxHeight = document.querySelectorAll('.ext-setting-menu .ext-item:not([ext-view-item-off]):not(.hide)').length * ITEM_HEIGHT;
     maxHeight += MENU_HEIGHT;
 
     maxHeight += document.querySelectorAll('.ext-setting-menu .ext-item.border-bottom').length * BORDER_HEIGHT;

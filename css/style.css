@@ -233,9 +233,6 @@
 .ext-setting-menu [ext-view-item-off] {
   display: none;
 }
-.ext-setting-menu[ext-view-on] {
-  max-height: 50svh !important; /* 表示設定画面のときは高さを制限しない */
-}
 .ext-setting-menu[ext-view-on] .btn-group {
   justify-content: flex-end;
 }

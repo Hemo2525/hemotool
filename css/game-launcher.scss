@@ -665,6 +665,9 @@ $ichibaItemSize: 34px;
                     color: #4d4d4d;
                     background-color: #efefef;
                     padding: 5px 14px 7px;
+                    border-radius: 7px;
+                    width: calc(100% - 17px);
+                    margin: 0 auto;
                 }
                 .tab-note {
                     font-size: 14px;
@@ -1165,7 +1168,7 @@ $ichibaItemSize: 34px;
                     gap: 10px;
                     margin-bottom: 10px;
                     // background-color: rgba(255, 255, 255, 0.239);
-                    border: 1px solid white;
+                    // border: 1px solid white;
                     padding: 5px 0px 3px;
                     border-radius: 5px;
             
@@ -1347,3 +1350,70 @@ $ichibaItemSize: 34px;
 
 
 
+
+
+
+
+
+@mixin dark-mode {
+    #ext_nico_game_launcher_overlay #ext_nico_game_launcher {
+        color: #dfdfdf;
+        background-color: #1c1c1c;
+        border: 1px solid white;
+        box-shadow: 0 0 20px white;
+    }
+    #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .header-title {
+        background-color: #4d4d4d;
+        color: white;
+    }
+    #ext_nico_game_launcher_overlay #ext_nico_game_launcher .title-tab-box .time-box {
+        color: #ff9b9b;
+        border-color: #ff9b9b;
+    }
+    #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .author-box .right .author-name {
+        color: inherit;
+    }
+    #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-right .game-info-box {
+        color: #ff9b9b;
+    }
+    #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .desc-box {
+        color: #d1d1d1;
+    }
+    #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .title-box .left img {
+        background-color: white;
+    }
+    #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .search-box .search-left input[type="text"] {
+        background-color: inherit;
+        border: 1px solid white;
+        color: white;
+    }
+    #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .tab-note {
+        color: #afafaf;
+    }
+    #ext_nico_game_launcher_overlay #ext_nico_game_launcher #HemoNgListScreen .ng-content .header-title,
+    #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .tab-desc {
+        background-color: rgb(77, 77, 77);
+        color: white;
+    }
+    #ext_nico_game_launcher_overlay #ext_nico_game_launcher #HemoNgListScreen .ng-content table th {
+        background-color: #434343;
+    }
+}
+
+
+
+
+html[data-color-theme="dark"] ,
+html[data-darkreader-scheme] {
+    @include dark-mode;
+}
+
+// デバイス設定がダークモードの場合、かつニコ生の設定が「デバイス設定に合わせる」場合はダークモードにする
+@media (prefers-color-scheme: dark) {
+
+    html[data-color-theme="auto"] {
+
+    @include dark-mode;
+
+    }
+}

@@ -226,7 +226,7 @@
         display: none;
     }
     &[ext-view-on] {
-        max-height: 50svh !important; /* 表示設定画面のときは高さを制限しない */
+        //max-height: 50svh !important; /* 表示設定画面のときは高さを制限しない */
         .btn-group {
             justify-content: flex-end;
         }
