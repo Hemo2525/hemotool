@@ -274,7 +274,12 @@ $ichibaItemSize: 34px;
                 transform: translateY(0);
             }
         }
-
+        &:last-child {
+            .balloon {
+                left: auto;
+                right: 0px;
+            }
+        }
     }
 }
 
@@ -623,7 +628,8 @@ $ichibaItemSize: 34px;
                 .tab-item {
                     font-size: 15px;
                     padding: 5px 10px 8px;
-                    width: 103px;
+                    width: 94px;
+                    letter-spacing: -1px;
                     text-align: center;
                     background-color: #f7931e;
                     border: 1px solid #f7931e;

@@ -230,6 +230,10 @@
   opacity: 1;
   transform: translateY(0);
 }
+#ext_ichiba_shortcut .item:last-child .balloon {
+  left: auto;
+  right: 0px;
+}
 
 #ext_ichiba_shortcut {
   position: relative;
@@ -532,7 +536,8 @@
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .title-tab-box .tab-list .tab-item {
   font-size: 15px;
   padding: 5px 10px 8px;
-  width: 103px;
+  width: 94px;
+  letter-spacing: -1px;
   text-align: center;
   background-color: #f7931e;
   border: 1px solid #f7931e;
