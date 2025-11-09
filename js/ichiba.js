@@ -1,3 +1,5 @@
+const _BOOKMARK_STORAGE_KEY = "bookmarkList-user";
+
 // TextEncoderを使って、検索したい文字列をバイナリ（Uint8Array）に変換しておく
 const SCORE_PACKET_SIGNATURE = new TextEncoder().encode('aggregating_send_score');
 
@@ -1077,7 +1079,7 @@ async function showIchibaInfo(itemId, folderName){
     // Product情報を取得
     // console.log("Product情報を取得します");
     const product = await getIchibaProductInfo(folderName, itemId, _embeddedDataJson.program.nicoliveProgramId);
-    // console.log(product);
+    console.log("Product情報:", product);
 
 
     
@@ -1095,8 +1097,8 @@ async function showIchibaInfo(itemId, folderName){
         // 作者が非表示(HIDDEN)状態にしているゲームはゲームページが存在しないので、ゲーム情報を取得できない
         // "HIDDEN"...非公開状態（でも作者は起動できる）
         // "USABLE"...通常公開状態
-        // "ONLY_PREMIUM_USER"...プレミアム会員のみ起動可能？
-        // "DUPLICATED"...現在リクエスト済み？
+        // "ONLY_PREMIUM_USER"...ニコ生ゲームはプレミアム会員のみ起動可能を示す
+        // "DUPLICATED"...今の放送ですでにリクエスト済み
         if(product.data.usableState !== "HIDDEN") {
             // Game情報を取得
             // console.log("Game情報を取得します");
@@ -1192,14 +1194,19 @@ async function showIchibaInfo(itemId, folderName){
     // ローディングを非表示
     extHideLoading();
 
+
+    const gameInfoBox = document.querySelector("#ext_ichiba_info .game-info-box");
+
     // 作者情報が取得できなかった場合は最後に非表示
     if(!owner || owner.meta.status != 200) {
         authorBox.classList.add("hide");
     }
     // ゲーム情報が取得できなかった場合は最後に非表示
-    if(!game) {
-        const gameInfoBox = document.querySelector("#ext_ichiba_info .game-info-box");
+
+    if(product.data.usableState === "HIDDEN" || !game) {
+        descriptionBox.innerText = "このゲームは現在、非公開です";
         gameInfoBox.classList.add("hide");
+        authorBox.classList.add("hide");
     }
 }
 
@@ -1233,14 +1240,13 @@ async function showIchibaInfoToGameLauncher(item, folderName){
     // extShowLoading();
 
     // Product情報を取得
-    // console.log("Product情報を取得します");
     let product;
     if(category === "official") {
         product = await getIchibaProductInfo(folderName, serviceProductId, _embeddedDataJson.program.nicoliveProgramId);
     } else {
         product = await getIchibaProductInfo(folderName, itemId, _embeddedDataJson.program.nicoliveProgramId);
     }
-    // console.log(product);
+    console.log("Product情報:", product);
 
 
 
@@ -1253,24 +1259,24 @@ async function showIchibaInfoToGameLauncher(item, folderName){
         // Service情報を取得
         // console.log("Service情報を取得します");
         service = await getIchibaServiceInfo(folderName, itemId, _embeddedDataJson.program.nicoliveProgramId);
-        // console.log(service);
+        console.log("Service情報:", service);
 
         // 作者が非表示(HIDDEN)状態にしているゲームはゲームページが存在しないので、ゲーム情報を取得できない
         // "HIDDEN"...非公開状態（でも作者は起動できる）
         // "USABLE"...通常公開状態
-        // "ONLY_PREMIUM_USER"...プレミアム会員のみ起動可能？
-        // "DUPLICATED"...？
+        // "ONLY_PREMIUM_USER"...ニコ生ゲームはプレミアム会員のみ起動可能を示す
+        // "DUPLICATED"...今の放送ですでにリクエスト済み
         if(product.data.usableState !== "HIDDEN") {
             // Game情報を取得
             // console.log("Game情報を取得します");
             game = await getIchibaGameInfo(service.data.content.originContentId);
-            // console.log(game);
+            console.log("Game情報:", game);
         }
 
         // Owner情報を取得
         // console.log("Owner情報を取得します");
         owner = await getOwner(product.data.id);
-        // console.log(owner);
+        console.log("Owner情報:", owner);
 
     }
 
@@ -1366,32 +1372,54 @@ async function showIchibaInfoToGameLauncher(item, folderName){
             </div>
             <div class="score-box">
                 ${scoreHtml}
-            </div>
-            <div class="game-info-box">
-                <div class="count">起動回数：${playCount}回</div>
-                <div class="refCount">親作品登録：${refCount}件</div>
-                <div class="update-date">更新日時：${updateDate}</div>
-            </div>
-            <div class="author-box">
-                <div class="left">
-                    <img src="${authorIcon}" alt="${authorIconName}">
+            </div>`;
+
+        if(product.data.usableState === "HIDDEN") {
+            insertHtml += `
+                <div class="hidden-box">
+                    <div class="hidden-message">このゲームは現在、非公開です</div>
                 </div>
-                <div class="right">
-                    <span class="level">Lv.${authorLevel}</span>
-                    <a class="author-name" href="${authorPageUrl}" target="_blank">${authorName}</a>
-                    <a class="more-info" href="${authorGamePageUrl}" target="_blank">作者の他のゲームを見る</a>
-                    <div class="addShortcutBtn" data-itemId="${itemId}" data-folderName="${folderName}" data-itemIcon="${thumbnailUrl}" data-itemName="${title}">ショートカットに追加</div>
-                    <div class="addNgBtn ${bIsTopTab ? " hide" : ""}" data-authorName="${authorName}" data-authorId="${authorId}">作者の作品を全てNG登録</div>
-                    <div class="disableNgBtn ${bIsTopTab ? " show" : ""}">[トップ]タブではNG機能は利用できません</div>
+                `;
+        } else {
+
+            if(game) {
+                insertHtml += `
+                    <div class="game-info-box">
+                        <div class="count">起動回数：${playCount}回</div>
+                        <div class="refCount">親作品登録：${refCount}件</div>
+                        <div class="update-date">更新日時：${updateDate}</div>
+                    </div>
+                    <div class="author-box">
+                        <div class="left">
+                            <img src="${authorIcon}" alt="${authorIconName}">
+                        </div>
+                        <div class="right">
+                            <span class="level">Lv.${authorLevel}</span>
+                            <a class="author-name" href="${authorPageUrl}" target="_blank">${authorName}</a>
+                            <a class="more-info" href="${authorGamePageUrl}" target="_blank">作者の他のゲームを見る</a>
+                            <div class="addShortcutBtn" data-itemId="${itemId}" data-folderName="${folderName}" data-itemIcon="${thumbnailUrl}" data-itemName="${title}">ショートカットに追加</div>
+                            <div class="addNgBtn ${bIsTopTab ? " hide" : ""}" data-authorName="${authorName}" data-authorId="${authorId}">作者の作品を全てNG登録</div>
+                            <div class="disableNgBtn ${bIsTopTab ? " show" : ""}">[トップ]タブではNG機能は利用できません</div>
+                        </div>
+                    </div>
+                    <div class="pr-photo-box">
+                        <img src="${prPhotoUrl}">
+                    </div>
+                    <div class="description-box">
+                        ${description}
+                    </div>
+                `;
+            } else {
+                insertHtml += `
+                <div class="hidden-box">
+                    <div class="hidden-message">このゲームは現在、最新版が公開されています。自作ゲームタブから最新版を確認してください。</div>
                 </div>
-            </div>
-            <div class="pr-photo-box">
-                <img src="${prPhotoUrl}">
-            </div>
-            <div class="description-box">
-                ${description}
-            </div>
-        `;
+                `;
+            }
+
+
+        }
+
     } else {
         insertHtml = `
             <div class="game-box">
@@ -1437,6 +1465,9 @@ async function requestIchibaItem(programId, folderName, itemId) {
 
     console.log("--------------------------------");
     console.log(_embeddedDataJson);
+    console.log("programId:", programId);
+    console.log("folderName:", folderName);
+    console.log("itemId:", itemId);
     
     const frontendId = getFrontendId();
     const frontendVersion = getFrontendVersion();
@@ -1444,13 +1475,80 @@ async function requestIchibaItem(programId, folderName, itemId) {
     const itemIcon = document.querySelector(".item.ichiba:has(.item-" + folderName + "-" + itemId + ") img");
     itemIcon?.classList.add("loading");
 
-    // 番組グレードを取得するまえに自分の権限を取得（しとかないと番組グレードが正しく取得できないっぽい？）
+
+    if(folderName === "akasha") {
+        
+        const product = await getIchibaProductInfo(folderName, itemId, programId);
+        console.log("リクエストするProduct情報:", product);
+        if(product.meta.status != 200) {
+            let errorMessage = "リクエストに失敗しました";
+            showBalloon(folderName, itemId, errorMessage);
+            itemIcon?.classList.remove("loading");
+            return false;
+        }
+        if(product.data.usableState !== "USABLE" && !product.data.isSecret) {
+
+            let errorMessage = "このゲームは起動できません";
+            if(product.data.usableState === "HIDDEN") {
+                errorMessage = "このゲームは現在非公開です";
+            }
+            if(product.data.usableState === "ONLY_PREMIUM_USER") {
+                errorMessage = "プレミアム会員が必要です";
+            }
+            if(product.data.usableState === "DUPLICATED") {
+                errorMessage = "既にリクエストされています";
+            }
+            showBalloon(folderName, itemId, errorMessage);
+            itemIcon?.classList.remove("loading");
+            return false;
+        }
+
+        const service = await getIchibaServiceInfo(folderName, itemId, _embeddedDataJson.program.nicoliveProgramId);
+        let game = null;
+        console.log("Service情報:", service);
+        if(service) {
+            game = await getIchibaGameInfo(service.data.content.originContentId);
+            console.log("Game情報:", game);
+        } else {
+            let errorMessage = "リクエストに失敗しました";
+            showBalloon(folderName, itemId, errorMessage);
+            itemIcon?.classList.remove("loading");
+            return false;
+        }
+
+        // 旧バージョンだと非公開にしてもUSABLEになってしまいここまできてしまうので、
+        // ここまできてゲーム情報が取得できない場合は旧バージョンのゲームと判断する
+        if(product.data.usableState === "USABLE" && !game) {
+            let errorMessage = "旧バージョンのゲームです\n最新版を再登録してください";
+            showBalloon(folderName, itemId, errorMessage);
+            itemIcon?.classList.remove("loading");
+            return false;
+        }
+
+        // 開発者専用のゲームの場合は、開発者本人のみ起動できるようにする
+        if(product.data.isSecret) {
+            // ゲームの開発者のIDと、ログインしている自分のIDが一致しない場合は、ゲームを起動させない
+            if(service.data.userId !== _embeddedDataJson.user.id) {
+                let errorMessage = "このゲームは開発者専用です";
+                showBalloon(folderName, itemId, errorMessage);
+                itemIcon?.classList.remove("loading");
+                return false;
+            }
+        }
+    }
+
+
+
+    // 番組グレードを取得するまえに自分の権限を取得。取得だけで使わなくていいっぽい。しとかないと番組グレードが正しく取得できないっぽい？
     const authority = await getSelfAuthority(programId);
 
     // 番組グレードを取得
     const grade = await getGrade(programId);
     if(!grade || grade.meta.status != 200) {
-        console.error("番組グレードを取得できませんでした");
+        let errorMessage = "リクエストに失敗しました";
+        // balloonにエラーメッセージを表示
+        showBalloon(folderName, itemId, errorMessage);
+        itemIcon?.classList.remove("loading");
         return false;
     }
     console.log("番組グレード:", grade.data.programGrade);
@@ -1589,7 +1687,7 @@ function showBalloon(folderName, itemId, message) {
                 balloon.style.pointerEvents = "none";
             });
         }
-    }, 900);
+    }, 1700);
 
     setTimeout(function(){
         if(balloonsInLauncher.length > 0) {
@@ -1598,7 +1696,7 @@ function showBalloon(folderName, itemId, message) {
                 balloon.style.pointerEvents = "none";
             });
         }
-    }, 1400);
+    }, 1700);
 
 }
 
@@ -1675,6 +1773,7 @@ async function getGrade(programId) {
 // MARK: 通信：サービス情報を取得
 async function getIchibaServiceInfo(folderName, itemId, programId) {
     const url ="https://services-eapi.spi.nicovideo.jp/v1/services/" + folderName + "/services/program/programs/" + programId + "/contents/" + itemId;
+    console.log("url:", url);
     return runCommonFetch(url, await getDynamicFetchOptions());
 }
 
@@ -1689,6 +1788,7 @@ async function getOwner(ownerId) {
 // MARK: 通信：ゲームの詳細情報を取得
 async function getIchibaProductInfo(folderName, itemId, programId) {
     const url =  "https://eapi.spi.nicovideo.jp/v2/services/" + folderName + "/products/" + itemId + "?exclude_registered=false&tmp_page_id=detail&contentId=" + programId;
+    console.log("url:", url);
     return runCommonFetch(url, await getDynamicFetchOptions());
 }
 
@@ -2702,9 +2802,9 @@ async function gameListAppend(tabId, itemListDom, gameList) {
 // ゲームの一覧のHTMLを作成
 async function createItemListHtml(tabId, contents) {
 
-    // console.log("ゲームの一覧のHTMLを作成");
+    console.log("ゲームの一覧のHTMLを作成");
     // console.log("tabId", tabId);
-    // console.log("contents", contents);
+    console.log("contents", contents);
 
     // ngListのデータを取得
     const getNgList = await chrome.storage.local.get(["ngList"]);
@@ -2784,6 +2884,7 @@ async function createItemListHtml(tabId, contents) {
         let itemDescription = DOMPurify.sanitize(item.description);
         const authorName = DOMPurify.sanitize(item.authorName);
 
+        
 
         // AuthorIconの取得
         let authorIcon = "";
@@ -2812,7 +2913,7 @@ async function createItemListHtml(tabId, contents) {
 
             // 自作ゲームの場合
             const itemHtml = `
-            <div class="item ${isBookmarked ? "bookmarked" : ""} ${isNg ? "ng" : ""}" data-lg-id="${lgId}"
+            <div class="item ${isBookmarked ? "bookmarked" : ""} ${isNg ? "ng" : ""} ${item.isSecret ? "secret" : ""}" data-lg-id="${lgId}"
                 data-id="${id}" data-author-id="${item.authorUserID ? item.authorUserID : ""}" data-service-name="akasha" data-category="user">
                 <div class="title-box">
                     <div class="left">
@@ -2836,7 +2937,7 @@ async function createItemListHtml(tabId, contents) {
                         </div>
                     </div>    
                     <div class="btn">
-                        <div class="requestBtn">リクエスト</div>
+                        <div class="requestBtn">${item.isSecret ? "開発者専用" : "リクエスト"}</div>
                         <div class="balloon item-akasha-${id}"></div>
                     </div>
 

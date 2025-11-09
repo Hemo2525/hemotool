@@ -203,12 +203,13 @@
   position: absolute;
   cursor: default;
   width: 181px;
-  height: 17px;
+  height: auto;
   top: -48px;
   left: -80px;
   right: 0;
   margin: 0 auto;
   border: 1px solid white;
+  white-space: pre-line;
   background-color: rgba(0, 0, 0, 0.941);
   color: white;
   font-size: 12px;
@@ -491,6 +492,7 @@
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher {
   width: 90%;
   height: 90%;
+  max-width: 1800px;
   background-color: rgb(255, 255, 255);
   display: block;
   z-index: 1;
@@ -702,6 +704,9 @@
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item.ng {
   display: none;
 }
+#ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item.secret .btn .requestBtn {
+  background-color: #c34e4e !important;
+}
 #ext_nico_game_launcher_overlay #ext_nico_game_launcher .content .content-left .item-list .item .title-box {
   display: flex;
   align-items: center;
@@ -836,7 +841,8 @@
   position: absolute;
   pointer-events: none;
   cursor: default;
-  height: 38px;
+  white-space: pre-line;
+  height: auto;
   width: 260px;
   top: -48px;
   right: -3px;
@@ -847,7 +853,7 @@
   color: white;
   font-size: 15px;
   text-align: center;
-  line-height: 1;
+  line-height: 1.3;
   padding: 10px;
   border-radius: 5px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
