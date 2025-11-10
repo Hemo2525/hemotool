@@ -951,6 +951,7 @@ $ichibaItemSize: 34px;
                                 .requestBtn {
                                     background-color: #f7931e;
                                     font-size: 15px;
+                                    text-align: center;
                                     padding: 0px 11px 3px;
                                     border-radius: 5px;
                                     color: white;
@@ -1154,12 +1155,90 @@ $ichibaItemSize: 34px;
                 }
                 .score-box {
                     .score-item {
+                        position: relative;
                         margin-bottom: 7px;
                         justify-content: flex-end;
                         border: 1px solid rgb(255, 198, 126);
                         border-radius: 10px;
                         padding: 12px;
+                        &:nth-child(1):before {
+                            content: "1";
+                            position: absolute;
+                            bottom: -12px;
+                            left: 13px;
+                            font-size: 84px;
+                            font-weight: bold;
+                            font-style: italic;
+                            z-index: 0;
+                            width: 20px !important;
+                            color: #ffde2b;
+                        }
+                        &:nth-child(2):before {
+                            content: "2";
+                            position: absolute;
+                            bottom: 0px;
+                            left: 17px;
+                            font-size: 55px;
+                            font-weight: bold;
+                            font-style: italic;
+                            z-index: 0;
+                            width: 20px;
+                            color: #c5c5c5;
+                        }
+                        &:nth-child(3):before {
+                            content: "3";
+                            position: absolute;
+                            bottom: 0px;
+                            left: 17px;
+                            font-size: 45px;
+                            font-weight: bold;
+                            font-style: italic;
+                            z-index: 0;
+                            width: 20px;
+                            color: #d79361;
+                        }
+                        &:nth-child(4):before,
+                        &:nth-child(5):before,
+                        &:nth-child(6):before,
+                        &:nth-child(7):before,
+                        &:nth-child(8):before,
+                        &:nth-child(9):before,
+                        &:nth-child(10):before
+                         {
+                            position: absolute;
+                            bottom: 0px;
+                            left: 17px;
+                            font-size: 30px;
+                            font-weight: bold;
+                            font-style: italic;
+                            z-index: 0;
+                            width: 20px;
+                            color: #838383;
+                        }
+                        &:nth-child(4):before {
+                            content: "4";
+                        }
+                        &:nth-child(5):before {
+                            content: "5";
+                        }
+                        &:nth-child(6):before {
+                            content: "6";
+                        }
+                        &:nth-child(7):before {
+                            content: "7";
+                        }
+                        &:nth-child(8):before {
+                            content: "8";
+                        }
+                        &:nth-child(9):before {
+                            content: "9";
+                        }
+                        &:nth-child(10):before {
+                            content: "10";
+                        }
                         .score {
+                            position: relative;
+                            z-index: 1;
                             font-size: 26px;
                             font-weight: bold;
                             font-size: 37px;

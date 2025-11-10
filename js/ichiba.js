@@ -742,7 +742,7 @@ async function addIchibaShortcutDataToStorage(requestItemId, folderName, itemNam
 
     // 既に追加済みなら追加しない
     if(shortcutListData.find(item => item.itemId === requestItemId && item.folderName === folderName)){
-        console.log("既に追加済みのアイテムです");
+        // console.log("既に追加済みのアイテムです");
         return "追加済アイテム";
     }
 
@@ -1098,7 +1098,7 @@ async function showIchibaInfo(itemId, folderName){
     // Product情報を取得
     // console.log("Product情報を取得します");
     const product = await getIchibaProductInfo(folderName, itemId, _embeddedDataJson.program.nicoliveProgramId);
-    console.log("Product情報:", product);
+    // console.log("Product情報:", product);
 
 
     
@@ -1220,12 +1220,14 @@ async function showIchibaInfo(itemId, folderName){
     if(!owner || owner.meta.status != 200) {
         authorBox.classList.add("hide");
     }
-    // ゲーム情報が取得できなかった場合は最後に非表示
 
-    if(product.data.usableState === "HIDDEN" || !game) {
-        descriptionBox.innerText = "このゲームは現在、非公開です";
-        gameInfoBox.classList.add("hide");
-        authorBox.classList.add("hide");
+    // ゲーム情報が取得できなかった場合は最後に非表示
+    if(product.data.categoryName == "akasha"){
+        if(product.data.usableState === "HIDDEN" || !game) {
+            descriptionBox.innerText = "このゲームは現在、非公開のようです";
+            gameInfoBox.classList.add("hide");
+            authorBox.classList.add("hide");
+        }
     }
 }
 
@@ -1265,7 +1267,7 @@ async function showIchibaInfoToGameLauncher(item, folderName){
     } else {
         product = await getIchibaProductInfo(folderName, itemId, _embeddedDataJson.program.nicoliveProgramId);
     }
-    console.log("Product情報:", product);
+    // console.log("Product情報:", product);
 
 
 
@@ -1278,7 +1280,7 @@ async function showIchibaInfoToGameLauncher(item, folderName){
         // Service情報を取得
         // console.log("Service情報を取得します");
         service = await getIchibaServiceInfo(folderName, itemId, _embeddedDataJson.program.nicoliveProgramId);
-        console.log("Service情報:", service);
+        //console.log("Service情報:", service);
 
         // 作者が非表示(HIDDEN)状態にしているゲームはゲームページが存在しないので、ゲーム情報を取得できない
         // "HIDDEN"...非公開状態（でも作者は起動できる）
@@ -1289,13 +1291,13 @@ async function showIchibaInfoToGameLauncher(item, folderName){
             // Game情報を取得
             // console.log("Game情報を取得します");
             game = await getIchibaGameInfo(service.data.content.originContentId);
-            console.log("Game情報:", game);
+            //console.log("Game情報:", game);
         }
 
         // Owner情報を取得
         // console.log("Owner情報を取得します");
         owner = await getOwner(product.data.id);
-        console.log("Owner情報:", owner);
+        //console.log("Owner情報:", owner);
 
     }
 
@@ -1393,10 +1395,10 @@ async function showIchibaInfoToGameLauncher(item, folderName){
                 ${scoreHtml}
             </div>`;
 
-        if(product.data.usableState === "HIDDEN") {
+        if(product.data.usableState === "HIDDEN" || !game) {
             insertHtml += `
                 <div class="hidden-box">
-                    <div class="hidden-message">このゲームは現在、非公開です</div>
+                    <div class="hidden-message">このゲームは現在、非公開のようです</div>
                 </div>
                 `;
         } else {
@@ -1428,15 +1430,7 @@ async function showIchibaInfoToGameLauncher(item, folderName){
                         ${description}
                     </div>
                 `;
-            } else {
-                insertHtml += `
-                <div class="hidden-box">
-                    <div class="hidden-message">このゲームは現在、最新版が公開されています。自作ゲームタブから最新版を確認してください。</div>
-                </div>
-                `;
             }
-
-
         }
 
     } else {
@@ -1481,24 +1475,25 @@ async function showIchibaInfoToGameLauncher(item, folderName){
 
 // MARK:リクエストを実行
 async function requestIchibaItem(programId, folderName, itemId, updateDate) {
-
+/*
     console.log("--------------------------------");
     console.log(_embeddedDataJson);
     console.log("programId:", programId);
     console.log("folderName:", folderName);
     console.log("itemId:", itemId);
-    
+*/    
     const frontendId = getFrontendId();
     const frontendVersion = getFrontendVersion();
 
     const itemIcon = document.querySelector(".item.ichiba:has(.item-" + folderName + "-" + itemId + ") img");
     itemIcon?.classList.add("loading");
 
+    let successMessage = "リクエストしました";
 
     if(folderName === "akasha") {
         
         const product = await getIchibaProductInfo(folderName, itemId, programId);
-        console.log("リクエストするProduct情報:", product);
+        //console.log("リクエストするProduct情報:", product);
         if(product.meta.status != 200) {
             let errorMessage = "リクエストに失敗しました";
             showBalloon(folderName, itemId, errorMessage);
@@ -1507,7 +1502,7 @@ async function requestIchibaItem(programId, folderName, itemId, updateDate) {
         }
         if(product.data.usableState !== "USABLE" && !product.data.isSecret) {
 
-            let errorMessage = "このゲームは起動できません";
+            let errorMessage = "このゲームはリクエストできません";
             if(product.data.usableState === "HIDDEN") {
                 errorMessage = "このゲームは現在非公開です";
             }
@@ -1517,6 +1512,9 @@ async function requestIchibaItem(programId, folderName, itemId, updateDate) {
             if(product.data.usableState === "DUPLICATED") {
                 errorMessage = "既にリクエストされています";
             }
+            if(product.data.usableState === "FORBIDDEN_WORDS") {
+                errorMessage = "リクエストに失敗しました。不適切な言葉が含まれているようです";
+            }
             showBalloon(folderName, itemId, errorMessage);
             itemIcon?.classList.remove("loading");
             return false;
@@ -1524,10 +1522,10 @@ async function requestIchibaItem(programId, folderName, itemId, updateDate) {
 
         const service = await getIchibaServiceInfo(folderName, itemId, _embeddedDataJson.program.nicoliveProgramId);
         let game = null;
-        console.log("Service情報:", service);
+        //console.log("Service情報:", service);
         if(service) {
             game = await getIchibaGameInfo(service.data.content.originContentId);
-            console.log("Game情報:", game);
+            //console.log("Game情報:", game);
         } else {
             let errorMessage = "リクエストに失敗しました";
             showBalloon(folderName, itemId, errorMessage);
@@ -1561,10 +1559,12 @@ async function requestIchibaItem(programId, folderName, itemId, updateDate) {
         if(product.data.isSecret) {
             // ゲームの開発者のIDと、ログインしている自分のIDが一致しない場合は、ゲームを起動させない
             if(service.data.userId !== _embeddedDataJson.user.id) {
-                let errorMessage = "このゲームは開発者専用です";
+                let errorMessage = "このゲームは作者専用です";
                 showBalloon(folderName, itemId, errorMessage);
                 itemIcon?.classList.remove("loading");
                 return false;
+            } else {
+                successMessage = "作者権限でリクエストしました";
             }
         }
     }
@@ -1583,7 +1583,7 @@ async function requestIchibaItem(programId, folderName, itemId, updateDate) {
         itemIcon?.classList.remove("loading");
         return false;
     }
-    console.log("番組グレード:", grade.data.programGrade);
+    //console.log("番組グレード:", grade.data.programGrade);
 
 
     const url = "https://eapi.spi.nicovideo.jp/v1/ichibas/" + programId + "/products";
@@ -1671,7 +1671,7 @@ async function requestIchibaItem(programId, folderName, itemId, updateDate) {
         // console.log("成功:", data);
 
         // balloonに成功メッセージを表示
-        showBalloon(folderName, itemId, "リクエストしました");
+        showBalloon(folderName, itemId, successMessage);
 
         itemIcon?.classList.remove("loading");
 
@@ -1805,7 +1805,7 @@ async function getGrade(programId) {
 // MARK: 通信：サービス情報を取得
 async function getIchibaServiceInfo(folderName, itemId, programId) {
     const url ="https://services-eapi.spi.nicovideo.jp/v1/services/" + folderName + "/services/program/programs/" + programId + "/contents/" + itemId;
-    console.log("url:", url);
+    //console.log("url:", url);
     return runCommonFetch(url, await getDynamicFetchOptions());
 }
 
@@ -1820,7 +1820,7 @@ async function getOwner(ownerId) {
 // MARK: 通信：ゲームの詳細情報を取得
 async function getIchibaProductInfo(folderName, itemId, programId) {
     const url =  "https://eapi.spi.nicovideo.jp/v2/services/" + folderName + "/products/" + itemId + "?exclude_registered=false&tmp_page_id=detail&contentId=" + programId;
-    console.log("url:", url);
+    //console.log("url:", url);
     return runCommonFetch(url, await getDynamicFetchOptions());
 }
 
@@ -2298,7 +2298,7 @@ async function addBookmark(itemElement) {
     // 同じIDが既にブックマークされているかを確認
     const isBookmarked = bookmarkList.some(item => item.id === id);
     if(isBookmarked) {
-        console.log("既にブックマークされています");
+        //console.log("既にブックマークされています");
         return;
     }
 
@@ -2319,7 +2319,7 @@ async function addBookmark(itemElement) {
 
         if(!originContentID) {
             const service = await getIchibaServiceInfo("akasha", id, _embeddedDataJson.program.nicoliveProgramId);
-            console.log(service);
+            //console.log(service);
 
             if(service && service.meta.status === 200) {
                 originContentID = service.data.content.originContentId;
@@ -2404,7 +2404,7 @@ async function addHistory(itemElement) {
     // 同じカテゴリーと同じIDが既に履歴に追加されていれば古いのは削除する
     const isHistory = historyList.some(item => item.category === category && item.id === id);
     if(isHistory) {
-        console.log("既に履歴に追加されています");
+        //console.log("既に履歴に追加されています");
         historyList = historyList.filter(item => item.category !== category || item.id !== id);
     }
 
@@ -2857,9 +2857,9 @@ async function gameListAppend(tabId, itemListDom, gameList) {
 // ゲームの一覧のHTMLを作成
 async function createItemListHtml(tabId, contents) {
 
-    console.log("ゲームの一覧のHTMLを作成");
+    //console.log("ゲームの一覧のHTMLを作成");
     // console.log("tabId", tabId);
-    console.log("contents", contents);
+    //console.log("contents", contents);
 
     // ngListのデータを取得
     const getNgList = await chrome.storage.local.get([STORAGE_KEY_NG_GAMES]);
@@ -2994,7 +2994,7 @@ async function createItemListHtml(tabId, contents) {
                         </div>
                     </div>    
                     <div class="btn">
-                        <div class="requestBtn">${item.isSecret ? "開発者専用" : "リクエスト"}</div>
+                        <div class="requestBtn">${item.isSecret ? "作者専用" : "リクエスト"}</div>
                         <div class="balloon item-akasha-${id}"></div>
                     </div>
 
