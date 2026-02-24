@@ -283,6 +283,10 @@ function setEvents() {
     setSplitterSize();
 
 
+    if(document.querySelector('.ext-setting-menu .ext-ichiba').hasAttribute("disabled")) {
+        return;
+    }
+
     //監視オプション
     const ichibaOption = {
         childList:              true,    //直接の子の変更を監視

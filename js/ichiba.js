@@ -192,6 +192,11 @@ let _lastFindEntityId = "";
 
 window.addEventListener('message', (event) => {
 
+    if(document.querySelector('.ext-setting-menu .ext-ichiba').hasAttribute("disabled")) {
+        return;
+    }
+    console.log("テストテスト");
+
     // console.log("イベントきたよ", event);
 
     // 自分自身（拡張機能）からのメッセージや、不正な形式のメッセージは無視
