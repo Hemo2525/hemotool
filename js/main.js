@@ -62,7 +62,7 @@ function runHemoTool() {
                         // FireFox用のUIに切り替える
                         checkFirefoxUI();
 
-                    });                    
+                    });
 
 
                 } else {
@@ -78,11 +78,11 @@ function runHemoTool() {
         setAkashicParentFrameEvent();
     }
 
-    
+
     window.addEventListener('beforeunload', function(e) {
         chrome.runtime.sendMessage({stop: "stop"});
     }, false);
-    
+
     setInterval(() => {
         console.log("サービスワーカーを活かすためのメッセージ送信");
         chrome.runtime.sendMessage("何でも良いメッセージ");
@@ -144,33 +144,33 @@ function setSplitterSize(bGetLocalSetting = false) {
             if(bGetLocalSetting) {
 
                 /* 保存してある幅から設定 */
-                        
+
                 if (value.ext_comeview_opt_wide_panelWidth && value.ext_comeview_opt_wide_displayWidth) {
-    
+
                     const getPanelWidth = Number(value.ext_comeview_opt_wide_panelWidth.replace("px", ""));
-    
+
                     /* 画面幅を調整 */
                     const displayElement = document.querySelector('[class^=___player-display___]');
                     const panelElement = document.querySelector("[class^=___player-status-panel___]");
                     const playerSection = document.querySelector('[class^=___player-section___]');
                     const parentWidth = playerSection.clientWidth;
-    
+
                     displayElement.style.width = parentWidth - getPanelWidth + "px";
                     panelElement.style.width = getPanelWidth + "px";
-    
+
                 }
-        
+
             } else {
-        
+
                 /* 現在の幅から画面幅を調整 */
-        
+
                 const displayElement = document.querySelector('[class^=___player-display___]');
                 const panelElement = document.querySelector("[class^=___player-status-panel___]");
                 const playerSection = document.querySelector('[class^=___player-section___]');
                 const parentWidth = playerSection.clientWidth;
-        
+
                 displayElement.style.width = parentWidth - panelElement.clientWidth + "px";
-        
+
                 chrome.storage.local.set({"ext_comeview_opt_wide_panelWidth": panelElement.clientWidth + "px"}, function() {});
                 chrome.storage.local.set({"ext_comeview_opt_wide_displayWidth": displayElement.style.width}, function() {});
             }
@@ -179,7 +179,7 @@ function setSplitterSize(bGetLocalSetting = false) {
             removeSplitterSize();
         }
     });
-    
+
 }
 
 function removeSplitterSize() {
@@ -221,11 +221,11 @@ function setEvents() {
     parent.addEventListener("mousemove", (event) => {
         if(bActive) {
             // プレイヤー画面の左端からの距離を取得
-            const parentRect = document.querySelector('[class^=___player-display___]').getClientRects();                
+            const parentRect = document.querySelector('[class^=___player-display___]').getClientRects();
             const size = event.clientX - parentRect[0].x;
             // プレイヤーDOMとコメント欄DOMの親DOMのサイズからコメント欄DOMのサイズを引いたサイズをコメント欄DOMに設定
             const parentWidth = parent.clientWidth;
-    
+
             panelElement.style.width = parentWidth - size + "px";
             displayElement.style.width = size + "px";
         };
@@ -237,7 +237,7 @@ function setEvents() {
             document.body.style.userSelect = ''; // テキスト選択を許可するCSSを解除
             chrome.storage.local.set({"ext_comeview_opt_wide_panelWidth": panelElement.style.width}, function() {});
             chrome.storage.local.set({"ext_comeview_opt_wide_displayWidth": displayElement.style.width}, function() {});
-        
+
             // アクティブ表示ツールやニコ生ゲームなどが起動しているとマウス移動のイベントが取れないので、オーバーレイを表示したので解除しとく
             if(!document.querySelector('.ext-setting-menu').getAttribute("ext-attr-show")){
                 // メニューもオーバーレイを利用するので、メニューが表示されているならオーバーレイを消さない
@@ -247,7 +247,7 @@ function setEvents() {
     }, false);
 
 
-    
+
     //監視オプション
     const optionsForParent = {
         childList:              true,    //直接の子の変更を監視
@@ -310,7 +310,7 @@ function setExtSettingMenuHeight() {
     const ITEM_HEIGHT = 34;
     const MENU_HEIGHT = 28; //  表示前だから取得できないdocument.querySelector('.ext-setting-menu .item.info').clientHeight の高さ
     const BORDER_HEIGHT = 3; // ボーダーの高さ
-    
+
     // 表示状態のアイテム数を取得
     let maxHeight = document.querySelectorAll('.ext-setting-menu .ext-item:not([ext-view-item-off]):not(.hide)').length * ITEM_HEIGHT;
     maxHeight += MENU_HEIGHT;
@@ -330,14 +330,14 @@ function setExtSettingMenuHeight() {
 
 function setExtPopupHeight() {
     let height = document.querySelector('[class^=___player-display-screen___]').clientHeight * 0.8;
-    
+
     if(height > 400) {
         height = 400;
     }
 
     if(document.querySelector('.ext-popup')){
         document.querySelector('.ext-popup').style.height = height + "px";
-        document.querySelector('.ext-popup').style.top = -height - 60 + "px";    
+        document.querySelector('.ext-popup').style.top = -height - 60 + "px";
     }
 }
 
@@ -368,7 +368,7 @@ function initialize(callback, timeoutMiliSec) {
         //"div[data-layer-name='akashicGameViewLayer'] canvas",
         "div[data-layer-name='akashicGameViewLayer']",
         "#akashic-gameview",
-        
+
     ];
 
     const startMiliSec= Date.now();
@@ -493,7 +493,7 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
     style_comment_for_icon.sheet.insertRule('.premium_by_extention { background-image: url("' + chrome.runtime.getURL("/img/icon-premium.png") + '"); }');
     style_comment_for_icon.sheet.insertRule('.noPremium_by_extention { background-image: url("' + chrome.runtime.getURL("/img/icon-normal.png") + '"); }');
     style_comment_for_icon.sheet.insertRule('.owner_by_extention { background-image: url("' + chrome.runtime.getURL("/img/icon-owner.png") + '"); }');
-    
+
 
 
     // 拡張機能ボタンのメニュー表示
@@ -515,7 +515,7 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
         document.querySelector('.ext-popup').classList.remove('show');
         // ストレージに現在のマニフェストのバージョン情報を保存
         var manifestData = chrome.runtime.getManifest();
-        chrome.storage.local.set({"ext_current_version": manifestData.version});        
+        chrome.storage.local.set({"ext_current_version": manifestData.version});
     });
 
     //let overlay = document.querySelector('#ext_overlay');
@@ -526,13 +526,13 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
         // 表示設定をOFFにする
         document.querySelector('.ext-setting-menu').removeAttribute('ext-view-on');
         //setExtSettingMenuHeight();// メニューの高さを調整
-        
+
         // お知らせポップアップを非表示
         document.querySelector('.ext-popup').classList.remove('show');
 
         // ストレージに現在のマニフェストのバージョン情報を保存
         var manifestData = chrome.runtime.getManifest();
-        chrome.storage.local.set({"ext_current_version": manifestData.version});             
+        chrome.storage.local.set({"ext_current_version": manifestData.version});
     });
 
     let settingBtn = document.querySelector("[class^=___setting-popup-control___]");
@@ -547,7 +547,7 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
     // 各種ショートカット用のDOMを作成しておく
     let shortcut = document.createElement('div');
     shortcut.id = "ext_shortcut";
-    shortcut.innerHTML = 
+    shortcut.innerHTML =
         '<div class="item comeview" aria-label="コメントビューアー機能をONにします">コメビュ</div>'+
         '<div class="item yomiage" aria-label="読み上げ機能をONにします">読み上げ</div>'+
         '<div class="item bouyomi" aria-label="棒読みちゃん連携をONにします">棒読み</div>'+
@@ -635,8 +635,8 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
     hideBtn.addEventListener('click', function(){
         document.querySelector("#ext_ichiba_info").classList.remove("show");
     });
-    
-    
+
+
 
     chrome.storage.local.get("ext_viewoff_array", function (value) {
         if(value && value.ext_viewoff_array && Array.isArray(value.ext_viewoff_array)) {
@@ -649,12 +649,12 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
         }
     });
 
-    
+
     document.getElementById('ext-view').addEventListener('click', function(){
         const viewOn = document.querySelector('.ext-setting-menu').getAttribute('ext-view-on');
         if(viewOn) {
             document.querySelector('.ext-setting-menu').removeAttribute('ext-view-on');
-            setExtSettingMenuHeight();// メニューの高さを調整     
+            setExtSettingMenuHeight();// メニューの高さを調整
 
         } else {
             document.querySelector('.ext-setting-menu').setAttribute('ext-view-on','on');
@@ -666,14 +666,14 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
             // 歯車のオプションメニューを全て非表示
             document.querySelectorAll('.ext-setting-menu .option-box').forEach(function(item){
                 item.classList.remove('show');
-            });            
+            });
         }
     });
     const menuViewButtons = document.querySelectorAll('.ext-setting-menu .btn-group .view');
     menuViewButtons.forEach(function(btn){
-        
+
         btn.addEventListener('click', function(e){
-            
+
             if(this.getAttribute('view-off')) {
                 this.removeAttribute('view-off')
                 this.closest('.ext-item').removeAttribute('ext-view-item-off');
@@ -689,7 +689,7 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
                         let viewOffArray = value.ext_viewoff_array;
                         if (viewOffArray.includes(classStr)) {
                             viewOffArray = viewOffArray.filter(item => item !== classStr);
-                            chrome.storage.local.set({"ext_viewoff_array": viewOffArray});                                
+                            chrome.storage.local.set({"ext_viewoff_array": viewOffArray});
                         }
                         console.log("OFFクラス：" + viewOffArray);
                     }
@@ -698,7 +698,7 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
             } else {
                 this.setAttribute('view-off', 'on');
                 this.closest('.ext-item').setAttribute('ext-view-item-off','on');
-                
+
                 const classes = Array.from(this.closest('.ext-item').classList);
                 let classStr = "";
                 classes.forEach(className => {
@@ -719,8 +719,8 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
                         viewOffArray.push(classStr);
                         chrome.storage.local.set({"ext_viewoff_array": viewOffArray});
                         console.log("OFFクラスリストの保存：" + viewOffArray);
-                    } 
-                });   
+                    }
+                });
             }
         });
     });
@@ -729,7 +729,7 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
 
     // 簡易録画機能
     document.querySelector('.ext-setting-menu .ext-rec .item .value').addEventListener('click', function(){
-        
+
         if(document.querySelector('#ext_shortcut .item.rec').getAttribute("ext-pin-on")) {
             // ON → OFF
             document.querySelector('.ext-setting-menu .ext-rec').removeAttribute("ext-attr-on");
@@ -757,9 +757,9 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
         } else {
             // OFF → ON
             recStart();
-           
+
             // オプション操作を無効化しておく
-            
+
             document.querySelector('.option.videoBitrato select').setAttribute("disabled", 'on');
 
         }
@@ -823,7 +823,7 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
     document.querySelector('#ext_shortcut .yomiage').addEventListener('click', function() {
         yomiage();
     });
-    
+
 
     // 棒読みちゃん連携
     let bouyomiBtn = document.querySelector('.ext-setting-menu .ext-bouyomi .item .value');
@@ -1035,7 +1035,7 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
     document.querySelector('[class^=___volume-setting___]').insertBefore(overlayMute, nicoMuteBtn);
 
     document.querySelector('#ext_volume_overlay').addEventListener("click", (event) => {
-        
+
         let video = document.querySelector('div[data-layer-name="videoLayer"] video');
         if(video.muted) {
 
@@ -1043,12 +1043,12 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
             chrome.storage.local.set({"ext_game_volume_mute": "OFF"}, function() {});
             // スピーカーのアイコン表示
             document.querySelector('#ext_volume_overlay').innerHTML = `<svg width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="fill-rule: evenodd; clip-rule: evenodd; stroke-linejoin: round; stroke-miterlimit: 1.41421;"><path d="M24.122,24l21.106,-22.748c1.155,-1.246 2.863,-1.598 4.339,-0.894c1.475,0.705 2.433,2.328 2.433,4.126c0,21.38 0,69.652 0,91.032c0,1.798 -0.958,3.421 -2.433,4.126c-1.476,0.704 -3.184,0.352 -4.339,-0.894l-21.106,-22.748l-16.122,0c-2.122,0 -4.157,-0.843 -5.657,-2.343c-1.5,-1.5 -2.343,-3.535 -2.343,-5.657c0,-9.777 0,-26.223 0,-36c0,-2.122 0.843,-4.157 2.343,-5.657c1.5,-1.5 3.535,-2.343 5.657,-2.343l16.122,0ZM75.486,14.675c0.155,-0.244 0.338,-0.473 0.546,-0.681c0.468,-0.494 0.959,-0.985 1.425,-1.451c1.48,-1.481 3.853,-1.569 5.439,-0.202c10.477,9.178 17.104,22.651 17.104,37.659c0,0 0,0 0,0c0,15.008 -6.627,28.481 -17.112,37.649c-1.582,1.363 -3.946,1.275 -5.422,-0.201c-0.299,-0.288 -0.604,-0.589 -0.909,-0.893c-0.18,-0.178 -0.36,-0.358 -0.538,-0.536c-0.787,-0.787 -1.21,-1.866 -1.169,-2.978c0.042,-1.112 0.545,-2.156 1.388,-2.882c2.768,-2.402 5.201,-5.179 7.221,-8.252c0.137,-0.208 0.271,-0.417 0.404,-0.628c0.148,-0.234 0.293,-0.469 0.436,-0.706c0.115,-0.192 0.229,-0.384 0.34,-0.577c0.065,-0.11 0.128,-0.221 0.191,-0.333c0.11,-0.192 0.217,-0.386 0.323,-0.581l0.061,-0.11l0.113,-0.212c0.095,-0.179 0.189,-0.358 0.281,-0.538c0.256,-0.497 0.502,-1.001 0.737,-1.511c0.13,-0.282 0.257,-0.566 0.381,-0.851c0.511,-1.179 0.966,-2.388 1.363,-3.623c0.198,-0.613 0.38,-1.232 0.548,-1.857c0.062,-0.231 0.122,-0.463 0.18,-0.696c0.04,-0.158 0.078,-0.316 0.115,-0.475c0.059,-0.249 0.116,-0.499 0.17,-0.751c0.264,-1.224 0.472,-2.47 0.621,-3.733l0.032,-0.274c0.162,-1.461 0.245,-2.946 0.245,-4.451c0,0 0,0 0,0c0,-10.566 -4.106,-20.181 -10.808,-27.335l-0.112,-0.12l-0.064,-0.067c-0.289,-0.304 -0.583,-0.604 -0.881,-0.9l-0.155,-0.153l-0.119,-0.115c-0.173,-0.168 -0.346,-0.334 -0.522,-0.498c-0.357,-0.335 -0.72,-0.663 -1.09,-0.985c-0.104,-0.09 -0.204,-0.185 -0.298,-0.285c-0.207,-0.219 -0.386,-0.459 -0.537,-0.715c-0.025,-0.043 -0.05,-0.087 -0.073,-0.131l-0.013,-0.023l-0.01,-0.019l-0.013,-0.026l-0.004,-0.007c-0.03,-0.059 -0.058,-0.119 -0.086,-0.179c-0.208,-0.463 -0.328,-0.966 -0.347,-1.484c-0.029,-0.772 0.168,-1.528 0.555,-2.181c0.012,-0.02 0.024,-0.039 0.036,-0.059l0.027,-0.043ZM62.189,27.828c0.363,-0.38 0.73,-0.747 1.079,-1.096c1.427,-1.427 3.693,-1.568 5.286,-0.329c0.879,0.697 1.719,1.441 2.516,2.229c5.508,5.453 8.93,13.014 8.93,21.368c0,0 0,0 0,0c0,9.562 -4.483,18.084 -11.46,23.579c-0.049,0.039 -0.099,0.076 -0.15,0.112l-0.077,0.053c-0.642,0.431 -1.375,0.654 -2.11,0.673l-0.089,0.001c-1.029,0.005 -2.055,-0.389 -2.831,-1.165c-0.307,-0.288 -0.621,-0.595 -0.938,-0.909c-0.178,-0.177 -0.357,-0.356 -0.536,-0.535c-0.184,-0.184 -0.347,-0.383 -0.49,-0.595c-0.036,-0.053 -0.07,-0.107 -0.103,-0.161c-0.02,-0.034 -0.039,-0.067 -0.058,-0.101l-0.018,-0.031l-0.006,-0.01c-0.022,-0.04 -0.043,-0.081 -0.064,-0.122c-0.319,-0.628 -0.469,-1.337 -0.424,-2.055c0.07,-1.144 0.628,-2.203 1.533,-2.908c3.013,-2.301 5.345,-5.445 6.651,-9.077c0.176,-0.489 0.333,-0.987 0.471,-1.493c0.456,-1.675 0.699,-3.437 0.699,-5.256c0,0 0,0 0,0c0,-6.449 -3.059,-12.19 -7.804,-15.848c-0.898,-0.7 -1.453,-1.752 -1.523,-2.888c-0.07,-1.136 0.351,-2.248 1.156,-3.053c0.059,-0.064 0.119,-0.128 0.179,-0.192l0.181,-0.191Z"></path></svg>`;
-            document.querySelector('#ext_volume_overlay').setAttribute('muted', 'OFF');  
+            document.querySelector('#ext_volume_overlay').setAttribute('muted', 'OFF');
         } else {
             video.muted = true;
             chrome.storage.local.set({"ext_game_volume_mute": "ON"}, function() {});
             // ミュートスピーカーのアイコン表示
-            document.querySelector('#ext_volume_overlay').innerHTML = `<svg width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="fill-rule: evenodd; clip-rule: evenodd; stroke-linejoin: round; stroke-miterlimit: 1.41421;"><path d="M24.122,24l21.106,-22.748c1.155,-1.246 2.863,-1.598 4.339,-0.894c1.475,0.705 2.433,2.328 2.433,4.126c0,21.38 0,69.652 0,91.032c0,1.798 -0.958,3.421 -2.433,4.126c-1.476,0.704 -3.184,0.352 -4.339,-0.894l-21.106,-22.748l-16.122,0c-2.122,0 -4.157,-0.843 -5.657,-2.343c-1.5,-1.5 -2.343,-3.535 -2.343,-5.657c0,-9.777 0,-26.223 0,-36c0,-2.122 0.843,-4.157 2.343,-5.657c1.5,-1.5 3.535,-2.343 5.657,-2.343l16.122,0ZM80,42.731c0,0 7.186,-7.186 11.454,-11.454c1.703,-1.703 4.464,-1.703 6.168,0c0.364,0.365 0.736,0.737 1.101,1.101c1.703,1.704 1.703,4.465 0,6.168c-4.268,4.268 -11.454,11.454 -11.454,11.454c0,0 7.186,7.186 11.454,11.454c1.703,1.703 1.703,4.464 0,6.168c-0.365,0.364 -0.737,0.736 -1.101,1.101c-1.704,1.703 -4.465,1.703 -6.168,0c-4.268,-4.268 -11.454,-11.454 -11.454,-11.454c0,0 -7.186,7.186 -11.454,11.454c-1.703,1.703 -4.464,1.703 -6.168,0c-0.364,-0.365 -0.736,-0.737 -1.101,-1.101c-1.703,-1.704 -1.703,-4.465 0,-6.168c4.268,-4.268 11.454,-11.454 11.454,-11.454c0,0 -7.186,-7.186 -11.454,-11.454c-1.703,-1.703 -1.703,-4.464 0,-6.168c0.365,-0.364 0.737,-0.736 1.101,-1.101c1.704,-1.703 4.465,-1.703 6.168,0c4.268,4.268 11.454,11.454 11.454,11.454Z"></path></svg>`;            
+            document.querySelector('#ext_volume_overlay').innerHTML = `<svg width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="fill-rule: evenodd; clip-rule: evenodd; stroke-linejoin: round; stroke-miterlimit: 1.41421;"><path d="M24.122,24l21.106,-22.748c1.155,-1.246 2.863,-1.598 4.339,-0.894c1.475,0.705 2.433,2.328 2.433,4.126c0,21.38 0,69.652 0,91.032c0,1.798 -0.958,3.421 -2.433,4.126c-1.476,0.704 -3.184,0.352 -4.339,-0.894l-21.106,-22.748l-16.122,0c-2.122,0 -4.157,-0.843 -5.657,-2.343c-1.5,-1.5 -2.343,-3.535 -2.343,-5.657c0,-9.777 0,-26.223 0,-36c0,-2.122 0.843,-4.157 2.343,-5.657c1.5,-1.5 3.535,-2.343 5.657,-2.343l16.122,0ZM80,42.731c0,0 7.186,-7.186 11.454,-11.454c1.703,-1.703 4.464,-1.703 6.168,0c0.364,0.365 0.736,0.737 1.101,1.101c1.703,1.704 1.703,4.465 0,6.168c-4.268,4.268 -11.454,11.454 -11.454,11.454c0,0 7.186,7.186 11.454,11.454c1.703,1.703 1.703,4.464 0,6.168c-0.365,0.364 -0.737,0.736 -1.101,1.101c-1.704,1.703 -4.465,1.703 -6.168,0c-4.268,-4.268 -11.454,-11.454 -11.454,-11.454c0,0 -7.186,7.186 -11.454,11.454c-1.703,1.703 -4.464,1.703 -6.168,0c-0.364,-0.365 -0.736,-0.737 -1.101,-1.101c-1.703,-1.704 -1.703,-4.465 0,-6.168c4.268,-4.268 11.454,-11.454 11.454,-11.454c0,0 -7.186,-7.186 -11.454,-11.454c-1.703,-1.703 -1.703,-4.464 0,-6.168c0.365,-0.364 0.737,-0.736 1.101,-1.101c1.704,-1.703 4.465,-1.703 6.168,0c4.268,4.268 11.454,11.454 11.454,11.454Z"></path></svg>`;
             document.querySelector('#ext_volume_overlay').setAttribute('muted', 'ON');
         }
     });
@@ -1070,7 +1070,7 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
     extSlider.max = "100";
     extSlider.step = "1";
     extSlider.value = document.querySelector('div[data-layer-name="videoLayer"] video').volume;
-    document.querySelector('[class^=___volume-size-control___]').insertBefore(extSlider, 
+    document.querySelector('[class^=___volume-size-control___]').insertBefore(extSlider,
     document.querySelector('[class^=___volume-size-control___] span[class^=___slider___]'));
 
 
@@ -1080,7 +1080,7 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
         // changeイベントではなくinputイベントにすることでつまみを移動させているあいだも発火してくれる
 
         // ストレージにビデオ音量を保存
-        chrome.storage.local.set({"ext_game_volume": e.target.value}, function() {});        
+        chrome.storage.local.set({"ext_game_volume": e.target.value}, function() {});
 
         document.querySelector('div[data-layer-name="videoLayer"] video').volume =  e.target.value / 100;
         document.querySelector('div[data-layer-name="videoLayer"] video').muted = false;
@@ -1099,31 +1099,31 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
         var delta = Math.sign(-e.deltaY); // Get the direction of the wheel scroll
         var currentValue = parseInt(volumeSlider.value);
         var newValue = currentValue + delta;
-    
+
         // Ensure the new value stays within the range of min and max
         newValue = Math.max(parseInt(volumeSlider.min), Math.min(newValue, parseInt(volumeSlider.max)));
-    
+
         volumeSlider.value = newValue; // Update the value of the volume slider
 
         // ストレージにビデオ音量を保存
-        chrome.storage.local.set({"ext_game_volume": newValue}, function() {});        
+        chrome.storage.local.set({"ext_game_volume": newValue}, function() {});
 
         document.querySelector('div[data-layer-name="videoLayer"] video').volume =  newValue / 100;
         document.querySelector('div[data-layer-name="videoLayer"] video').muted = false;
 
         document.querySelector('#ext_videoVolumeSlider').setAttribute('aria-label', '音量:' + newValue);
-        
+
 
         // 拡張機能用のミュートボタンを制御
         document.querySelector('#ext_volume_overlay').innerHTML = `<svg width="100%" height="100%" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="fill-rule: evenodd; clip-rule: evenodd; stroke-linejoin: round; stroke-miterlimit: 1.41421;"><path d="M24.122,24l21.106,-22.748c1.155,-1.246 2.863,-1.598 4.339,-0.894c1.475,0.705 2.433,2.328 2.433,4.126c0,21.38 0,69.652 0,91.032c0,1.798 -0.958,3.421 -2.433,4.126c-1.476,0.704 -3.184,0.352 -4.339,-0.894l-21.106,-22.748l-16.122,0c-2.122,0 -4.157,-0.843 -5.657,-2.343c-1.5,-1.5 -2.343,-3.535 -2.343,-5.657c0,-9.777 0,-26.223 0,-36c0,-2.122 0.843,-4.157 2.343,-5.657c1.5,-1.5 3.535,-2.343 5.657,-2.343l16.122,0ZM75.486,14.675c0.155,-0.244 0.338,-0.473 0.546,-0.681c0.468,-0.494 0.959,-0.985 1.425,-1.451c1.48,-1.481 3.853,-1.569 5.439,-0.202c10.477,9.178 17.104,22.651 17.104,37.659c0,0 0,0 0,0c0,15.008 -6.627,28.481 -17.112,37.649c-1.582,1.363 -3.946,1.275 -5.422,-0.201c-0.299,-0.288 -0.604,-0.589 -0.909,-0.893c-0.18,-0.178 -0.36,-0.358 -0.538,-0.536c-0.787,-0.787 -1.21,-1.866 -1.169,-2.978c0.042,-1.112 0.545,-2.156 1.388,-2.882c2.768,-2.402 5.201,-5.179 7.221,-8.252c0.137,-0.208 0.271,-0.417 0.404,-0.628c0.148,-0.234 0.293,-0.469 0.436,-0.706c0.115,-0.192 0.229,-0.384 0.34,-0.577c0.065,-0.11 0.128,-0.221 0.191,-0.333c0.11,-0.192 0.217,-0.386 0.323,-0.581l0.061,-0.11l0.113,-0.212c0.095,-0.179 0.189,-0.358 0.281,-0.538c0.256,-0.497 0.502,-1.001 0.737,-1.511c0.13,-0.282 0.257,-0.566 0.381,-0.851c0.511,-1.179 0.966,-2.388 1.363,-3.623c0.198,-0.613 0.38,-1.232 0.548,-1.857c0.062,-0.231 0.122,-0.463 0.18,-0.696c0.04,-0.158 0.078,-0.316 0.115,-0.475c0.059,-0.249 0.116,-0.499 0.17,-0.751c0.264,-1.224 0.472,-2.47 0.621,-3.733l0.032,-0.274c0.162,-1.461 0.245,-2.946 0.245,-4.451c0,0 0,0 0,0c0,-10.566 -4.106,-20.181 -10.808,-27.335l-0.112,-0.12l-0.064,-0.067c-0.289,-0.304 -0.583,-0.604 -0.881,-0.9l-0.155,-0.153l-0.119,-0.115c-0.173,-0.168 -0.346,-0.334 -0.522,-0.498c-0.357,-0.335 -0.72,-0.663 -1.09,-0.985c-0.104,-0.09 -0.204,-0.185 -0.298,-0.285c-0.207,-0.219 -0.386,-0.459 -0.537,-0.715c-0.025,-0.043 -0.05,-0.087 -0.073,-0.131l-0.013,-0.023l-0.01,-0.019l-0.013,-0.026l-0.004,-0.007c-0.03,-0.059 -0.058,-0.119 -0.086,-0.179c-0.208,-0.463 -0.328,-0.966 -0.347,-1.484c-0.029,-0.772 0.168,-1.528 0.555,-2.181c0.012,-0.02 0.024,-0.039 0.036,-0.059l0.027,-0.043ZM62.189,27.828c0.363,-0.38 0.73,-0.747 1.079,-1.096c1.427,-1.427 3.693,-1.568 5.286,-0.329c0.879,0.697 1.719,1.441 2.516,2.229c5.508,5.453 8.93,13.014 8.93,21.368c0,0 0,0 0,0c0,9.562 -4.483,18.084 -11.46,23.579c-0.049,0.039 -0.099,0.076 -0.15,0.112l-0.077,0.053c-0.642,0.431 -1.375,0.654 -2.11,0.673l-0.089,0.001c-1.029,0.005 -2.055,-0.389 -2.831,-1.165c-0.307,-0.288 -0.621,-0.595 -0.938,-0.909c-0.178,-0.177 -0.357,-0.356 -0.536,-0.535c-0.184,-0.184 -0.347,-0.383 -0.49,-0.595c-0.036,-0.053 -0.07,-0.107 -0.103,-0.161c-0.02,-0.034 -0.039,-0.067 -0.058,-0.101l-0.018,-0.031l-0.006,-0.01c-0.022,-0.04 -0.043,-0.081 -0.064,-0.122c-0.319,-0.628 -0.469,-1.337 -0.424,-2.055c0.07,-1.144 0.628,-2.203 1.533,-2.908c3.013,-2.301 5.345,-5.445 6.651,-9.077c0.176,-0.489 0.333,-0.987 0.471,-1.493c0.456,-1.675 0.699,-3.437 0.699,-5.256c0,0 0,0 0,0c0,-6.449 -3.059,-12.19 -7.804,-15.848c-0.898,-0.7 -1.453,-1.752 -1.523,-2.888c-0.07,-1.136 0.351,-2.248 1.156,-3.053c0.059,-0.064 0.119,-0.128 0.179,-0.192l0.181,-0.191Z"></path></svg>`;
         chrome.storage.local.set({"ext_game_volume_mute": "OFF"}, function() {});
-        
+
     });
     document.querySelector('#ext_videoVolumeSlider').addEventListener('mouseenter', function(event) {
         // console.log('マウスが乗りました');
         document.querySelector('#ext_videoVolumeSlider').classList.add('mouseOver');
     });
-    
+
     document.querySelector('#ext_videoVolumeSlider').addEventListener('mouseleave', function(event) {
         // console.log('マウスが離れました');
         document.querySelector('#ext_videoVolumeSlider').classList.remove('mouseOver');
@@ -1134,6 +1134,11 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
     document.querySelector('.ext-setting-menu .ext-ichiba .item .value').addEventListener('click', ichibaShortcutToggle);
     const ichibaPin = document.querySelector('.ext-setting-menu .ext-ichiba .item .pin');
     ichibaPin.addEventListener('click', function() {
+
+        if(document.querySelector('.ext-setting-menu .ext-ichiba').hasAttribute("disabled")) {
+            return;
+        }
+
         if(ichibaPin.getAttribute("ext-pin-on")){
 
             // 設定画面のピンのアイコンをOFF表示
@@ -1159,8 +1164,13 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
     document.querySelector('.ext-setting-menu .ext-gamelauncher .item .value').addEventListener('click', gameLauncherToggle);
     const gameLauncherPin = document.querySelector('.ext-setting-menu .ext-gamelauncher .item .pin');
     gameLauncherPin.addEventListener('click', function() {
-        if(gameLauncherPin.getAttribute("ext-pin-on")){
 
+        if(document.querySelector('.ext-setting-menu .ext-gamelauncher').hasAttribute("disabled")) {
+            return;
+        }
+
+
+        if(gameLauncherPin.getAttribute("ext-pin-on")){
             // 設定画面のピンのアイコンをOFF表示
             gameLauncherPin.removeAttribute("ext-pin-on");
             // ショートカットを非表示
@@ -1308,7 +1318,7 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
 
         let items = el.querySelectorAll('.option');
         let borders = el.querySelectorAll('.border');
-        
+
         const height = (items.length * 43) + (borders.length * 10) + 10;
         el.style.setProperty("--max-height", height + "px");
         console.log(items.length);
@@ -1317,13 +1327,13 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
 
 
 
-    
+
     // [録画機能] 映像ビットレート
     document.querySelector('.ext-setting-menu .ext-rec .option.videoBitrato select').addEventListener('change', (e) => {
         if(e.isTrusted){
 
             setRecBitrato(document.querySelector('.ext-setting-menu .ext-rec .option.videoBitrato select').value);
-            
+
             chrome.storage.local.set({"ext_rec_opt_videoBitrato": document.querySelector('.ext-setting-menu .ext-rec .option.videoBitrato select').value}, function() {});
 
         }
@@ -1334,7 +1344,7 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
         if(e.isTrusted){
 
             apllyRecSize(document.querySelector('.ext-setting-menu .ext-rec .option.size select').value);
-            
+
             chrome.storage.local.set({"ext_rec_opt_size": document.querySelector('.ext-setting-menu .ext-rec .option.size select').value}, function() {});
 
         }
@@ -1345,7 +1355,7 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
         if(e.isTrusted){
 
             setRecKaku(document.querySelector('.ext-setting-menu .ext-rec .option.kaku select').value);
-            
+
             chrome.storage.local.set({"ext_rec_opt_kaku": document.querySelector('.ext-setting-menu .ext-rec .option.kaku select').value}, function() {});
 
         }
@@ -1400,7 +1410,7 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
         if(e.isTrusted){
 
             videoeffect_option_rotate(document.querySelector('.ext-setting-menu .ext-video-effect .option.rotate select').value);
-            
+
             chrome.storage.local.set({"ext_videoeffect_opt_rotate": document.querySelector('.ext-setting-menu .ext-video-effect .option.rotate select').value}, function() {});
         }
     });
@@ -1533,7 +1543,7 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
     document.querySelector('.ext-setting-menu .ext-yomiage .option.syoryaku input').addEventListener('change', (e) => {
         let syoryakuValue = document.querySelector('.ext-setting-menu .ext-yomiage .option.syoryaku input').value;
         if(syoryakuValue && !isNaN(syoryakuValue)) {
-            chrome.storage.local.set({"ext_yomiage_opt_syoryaku": syoryakuValue}, function() {});            
+            chrome.storage.local.set({"ext_yomiage_opt_syoryaku": syoryakuValue}, function() {});
         }
     });
     // [読み上げ] 名前の読み上げ
@@ -1562,7 +1572,7 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
             voices.forEach(function (voice, i) {
                 //console.debug(voice.name + " (" + voice.lang + ")");
                 let item = document.createElement('option');
-                
+
                 item.text = voice.name + " (" + voice.lang + ")";
                 item.value = voice.name;
 
@@ -1570,7 +1580,7 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
                     && value.ext_yomiage_opt_voices === item.value) {
                     item.selected = true;
                 }
-        
+
                 let select = document.querySelector('.ext-setting-menu .ext-yomiage .option.voices select');
                 select.appendChild(item);
             });
@@ -1683,12 +1693,12 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
             document.querySelector('.ext-setting-menu .ext-bouyomi .option.voices-firefox input').value = default_voideId;
             _bouyomi_voideId = default_voideId;
             chrome.storage.local.set({"ext_bouyomi_opt_voices": default_voideId}, function() {});
-            
+
             const default_volume = 10;
             document.querySelector('.ext-setting-menu .ext-bouyomi .option.volume input').value = default_volume;
             _bouyomi_volume = default_volume;
             chrome.storage.local.set({"ext_bouyomi_opt_volume": default_volume}, function() {});
-            
+
             const default_rate = 90;
             document.querySelector('.ext-setting-menu .ext-bouyomi .option.rate input').value = default_rate;
             _bouyomi_speed = default_rate;
@@ -1701,7 +1711,7 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
 
             // 棒読みを停止（自動再開）
             clearBouyomiTask();
-            
+
         }
     });
 
@@ -1710,12 +1720,12 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
     //     let syoryakuValue = document.querySelector('.ext-setting-menu .ext-bouyomi .option.syoryaku input').value;
     //     if(syoryakuValue && !isNaN(syoryakuValue)) {
     //         chrome.storage.local.set({"ext_bouyomi_opt_syoryaku": syoryakuValue}, function() {});
-            
+
     //         // 現在の棒読みを停止（自動再開）
     //         clearBouyomiNowTask();
     //     }
     // });
-    
+
     // [棒読み] 名前の読み上げ
     document.querySelector('.ext-setting-menu .ext-bouyomi .option.nameyomiage input').addEventListener('change', (e) => {
         if(document.querySelector('.ext-setting-menu .ext-bouyomi .option.nameyomiage input').checked){
@@ -1775,7 +1785,7 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
     const targetBouyomiDom = document.getElementById('ext_bouyomiBox');
 
     const bouyomiObserver = new MutationObserver(watchBouyomiBox);
-    bouyomiObserver.observe(targetBouyomiDom, bouyomiOption);    
+    bouyomiObserver.observe(targetBouyomiDom, bouyomiOption);
 
 
 
@@ -1795,19 +1805,19 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
 
         if(!value.ext_current_version) {
             console.log("初期インストールです");
-            
+
             comeview();
-            
+
             document.querySelector('.ext-setting-menu .ext-comeview .option.name input').checked = true;
             comeview_option_name();
-            
+
             document.querySelector('.ext-setting-menu .ext-comeview .option.icon input').checked = true;
             comeview_option_icon();
-            
+
             document.querySelector('.ext-setting-menu .ext-comeview .option.wide input').checked = true;
             // 5秒後にコメビュ幅の調整バーを表示（起動直後にバーを表示するとコメント欄のスクロールバーが発生するため）
             setTimeout(comeview_option_wide, 3000);
-            
+
             document.querySelector('.ext-setting-menu .ext-comeview .option.orikaeshi input').checked = true;
             comeview_option_orikaeshi();
 
@@ -1832,19 +1842,19 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
 
             setExtPopupHeight();
 
-        
+
            //---------------------------------------------------------------------
 
             // ポップアップを表示
             document.querySelector('.ext-popup #ext-info-box-title').classList.add('show');
             document.querySelector('.ext-popup #ext-info-box').classList.add('show');
             document.querySelector('.ext-popup').classList.add('show');
-           
+
             // 画面クリックでポップアップを消せるようにオーバーレイを表示
             document.querySelector("#ext_overlay").style.display = "block";
 
             //---------------------------------------------------------------------
-            
+
 
         }
     });
@@ -1854,7 +1864,7 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
         // ストレージに現在のマニフェストのバージョン情報を保存
         var manifestData = chrome.runtime.getManifest();
         chrome.storage.local.set({"ext_current_version": manifestData.version});
-        
+
         document.querySelector("#ext_overlay").style.display = "none";
     });
 
@@ -1880,18 +1890,18 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
         subtree: false, //全ての子要素を監視
     }
     const commandToolDom = document.querySelector("[class^=___command-tool___]");
-  
+
     if (commandToolDom) {
         // コマンドのツールのDOMは、クリックされないと生成されないので、生成されることを監視する
         const obs = new MutationObserver(function(mutationsList, observer){
-            
+
             for (const mutation of mutationsList) {
                 if(mutation.addedNodes){
                     // コマンドツールのDOMの「匿名で投稿する」のボタンのクリックイベントを監視する
                     const commandPalleteDom = document.querySelector('[class^=___anonymous-comment-post-toggle-button-field___] button');
                     if(commandPalleteDom){
                         commandPalleteDom.addEventListener('click', function(){
-                            
+
                             if(commandPalleteDom.getAttribute('data-toggle-state') === "false"){
                                 //console.log("匿名コメントモード B");
                                 setCommentMode(false); // 生IDコメントモード 　→　なふだOFF（匿名）コメント
@@ -1913,11 +1923,11 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
     }
 
     function setCommentMode(bIsRowIDMode) {
-        
+
         const sendBtn = document.querySelector('[class^=___submit-button___]');
         const textBox = document.querySelector('[class^=___comment-text-box___]');
         if(bIsRowIDMode === true) {
-            
+
             // なふだON（生ID）コメント
             textBox.style.backgroundImage = 'none';
             sendBtn.textContent = 'なふだコメント';
@@ -1925,7 +1935,7 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
             /*
             textBox.setAttribute('placeholder', '匿名でコメントする');
             sendBtn.textContent = '匿名コメント';
-            
+
             // デフォルトアイコンを設定
             textBox.style.backgroundImage = 'url("https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/defaults/blank.jpg")';
             console.log('なふだON（生ID）コメント');
@@ -1940,11 +1950,11 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
             /*
             const userIcon = document.querySelector('[class^=common-header-] img');
             if(userIcon) {
-                textBox.style.backgroundImage = 'url("'+ userIcon.getAttribute('src')  +'")';    
+                textBox.style.backgroundImage = 'url("'+ userIcon.getAttribute('src')  +'")';
             }
             */
             //console.log('なふだOFF（匿名）コメント');
-        } 
+        }
     }
 
     // 放送者とリスナーでコメントモードを切り替える
@@ -1954,7 +1964,7 @@ async function insertBtnToPlayer(partsHtml, infoHtml) {
         const textBox = document.querySelector('[class^=___comment-text-box___]');
         const userIcon = document.querySelector('[class^=common-header-] img');
         if(userIcon) {
-            textBox.style.backgroundImage = 'url("'+ userIcon.getAttribute('src')  +'")';    
+            textBox.style.backgroundImage = 'url("'+ userIcon.getAttribute('src')  +'")';
         }
     } else {
         // リスナー ---------------------------
@@ -2014,13 +2024,13 @@ function watchLogBox(mutationRecords, observer){
                     ___first_run = false;
                     chrome.runtime.sendMessage({setVoiceName: document.querySelector('.ext-setting-menu .ext-yomiage .option.voices select').value});
                 }
-    
+
                 // 読み上げ
                 chrome.runtime.sendMessage({toSay: yomiage_text });
                 console.log("読み上げ : " + yomiage_text)
-                
+
                 logBox.removeChild( logBox.firstChild );
-                        
+
             });
 
         }
@@ -2040,11 +2050,11 @@ function watchBouyomiBox(mutationRecords, observer){
                 let logBox = document.getElementById('ext_bouyomiBox');
 
                 let yomiage_text = addNode.outerText;
-                
+
                 console.log("棒読み : " + yomiage_text);
                 sendTextToBouyomiChan(yomiage_text);
-                
-                logBox.removeChild( logBox.firstChild );                        
+
+                logBox.removeChild( logBox.firstChild );
             });
         }
     });
@@ -2078,12 +2088,12 @@ function setSettingValue() {
 
                 // ONマークをアクティブ状態
                 document.querySelector('.ext-setting-menu .ext-rec').setAttribute("ext-attr-on", "on");
-  
+
                 // ショートカットエリアにプレイヤーを表示
                 document.querySelector('#ext_shortcut .item.rec').setAttribute("ext-pin-on", "ON");
             }
         });
-        
+
         // 録画機能の映像ビットレート
         chrome.storage.local.get("ext_rec_opt_videoBitrato", function (value) {
             if (value.ext_rec_opt_videoBitrato) {
@@ -2123,7 +2133,7 @@ function setSettingValue() {
                 comeview();
 
                 // ショートカットをアクティブ状態
-                document.querySelector('#ext_shortcut .item.comeview').setAttribute("active", "ON");   
+                document.querySelector('#ext_shortcut .item.comeview').setAttribute("active", "ON");
             }
         });
         // コメビュ機能のピン状態
@@ -2132,9 +2142,9 @@ function setSettingValue() {
                 // 設定画面のピンのアイコンをON表示
                 document.querySelector('.ext-setting-menu .ext-comeview .pin').setAttribute("ext-pin-on", "ON");
                 // ショートカットを表示
-                document.querySelector('#ext_shortcut .item.comeview').setAttribute("ext-pin-on", "ON");                
+                document.querySelector('#ext_shortcut .item.comeview').setAttribute("ext-pin-on", "ON");
             }
-        });       
+        });
         // コメビュ機能の名前表示オプション
         chrome.storage.local.get("ext_comeview_opt_name", function (value) {
             if (value.ext_comeview_opt_name == "ON") {
@@ -2155,31 +2165,31 @@ function setSettingValue() {
                 document.querySelector('.ext-setting-menu .ext-comeview .option.wide input').checked = true;
 
                 if (value.ext_comeview_opt_wide_panelWidth && value.ext_comeview_opt_wide_displayWidth) {
-                    
+
                     const getPanelWidth = Number(value.ext_comeview_opt_wide_panelWidth.replace("px", ""));
-    
+
                     /* 画面幅を調整 */
                     const displayElement = document.querySelector('[class^=___player-display___]');
                     const panelElement = document.querySelector("[class^=___player-status-panel___]");
                     const playerSection = document.querySelector('[class^=___player-section___]');
                     const parentWidth = playerSection.clientWidth;
-    
+
                     displayElement.style.width = parentWidth - getPanelWidth + "px";
                     panelElement.style.width = getPanelWidth + "px";
-    
+
                 }
-                
+
                 // 5秒後にコメビュ幅の調整バーを表示（起動直後にバーを表示するとコメント欄のスクロールバーが発生するため）
                 setTimeout(comeview_option_wide, 3000);
                 //comeview_option_wide();
             }
         });
-        
 
 
 
-        
-    
+
+
+
         // コメビュ機能の折り返しオプション
         chrome.storage.local.get("ext_comeview_opt_orikaeshi", function (value) {
             if (value.ext_comeview_opt_orikaeshi == "ON") {
@@ -2234,7 +2244,7 @@ function setSettingValue() {
                 // 設定画面のピンのアイコンをON表示
                 document.querySelector('.ext-setting-menu .ext-yomiage .pin').setAttribute("ext-pin-on", "ON");
                 // ショートカットを表示
-                document.querySelector('#ext_shortcut .item.yomiage').setAttribute("ext-pin-on", "ON");                
+                document.querySelector('#ext_shortcut .item.yomiage').setAttribute("ext-pin-on", "ON");
             }
         });
         // 読み上げ機能の音声の種類
@@ -2311,8 +2321,8 @@ function setSettingValue() {
                 document.querySelector('.ext-setting-menu .ext-yomiage .option.kyoiku input').checked = true;
             }
         });
-        
-        
+
+
         // 棒読みちゃん連携機能
         chrome.storage.local.get("ext_bouyomi", function (value) {
             if (value.ext_bouyomi == "ON") {
@@ -2325,7 +2335,7 @@ function setSettingValue() {
                 // 設定画面のピンのアイコンをON表示
                 document.querySelector('.ext-setting-menu .ext-bouyomi .pin').setAttribute("ext-pin-on", "ON");
                 // ショートカットを表示
-                document.querySelector('#ext_shortcut .item.bouyomi').setAttribute("ext-pin-on", "ON");                
+                document.querySelector('#ext_shortcut .item.bouyomi').setAttribute("ext-pin-on", "ON");
             }
         });
         // [棒読み] ホスト
@@ -2356,7 +2366,7 @@ function setSettingValue() {
                 initBouyomiChan("1");
                 _bouyomi_voideId = "1";
             }
-        });   
+        });
         // [棒読み] 音量
         chrome.storage.local.get("ext_bouyomi_opt_volume", function (value) {
             if (value.ext_bouyomi_opt_volume) {
@@ -2410,7 +2420,7 @@ function setSettingValue() {
                 rightClick();
 
                 // ショートカットをアクティブ状態
-                document.querySelector('#ext_shortcut .item.click').setAttribute("active", "ON");   
+                document.querySelector('#ext_shortcut .item.click').setAttribute("active", "ON");
             }
         });
         // 右クリックOFF機能のピン状態
@@ -2419,7 +2429,7 @@ function setSettingValue() {
                 // 設定画面のピンのアイコンをON表示
                 document.querySelector('.ext-setting-menu .ext-rightClick .pin').setAttribute("ext-pin-on", "ON");
                 // ショートカットを表示
-                document.querySelector('#ext_shortcut .item.click').setAttribute("ext-pin-on", "ON");                
+                document.querySelector('#ext_shortcut .item.click').setAttribute("ext-pin-on", "ON");
             }
         });
 
@@ -2440,7 +2450,7 @@ function setSettingValue() {
                 // 設定画面のピンのアイコンをON表示
                 document.querySelector('.ext-setting-menu .ext-seekbar .pin').setAttribute("ext-pin-on", "ON");
                 // ショートカットを表示
-                document.querySelector('#ext_shortcut .item.seek').setAttribute("ext-pin-on", "ON");                
+                document.querySelector('#ext_shortcut .item.seek').setAttribute("ext-pin-on", "ON");
             }
         });
 
@@ -2450,7 +2460,7 @@ function setSettingValue() {
             if (value.ext_video == "ON") {
                 videoOff();
                 // ショートカットをアクティブ状態
-                document.querySelector('#ext_shortcut .item.video').setAttribute("active", "ON");   
+                document.querySelector('#ext_shortcut .item.video').setAttribute("active", "ON");
             }
         });
         // 配信映像OFF機能のピン状態
@@ -2459,7 +2469,7 @@ function setSettingValue() {
                 // 設定画面のピンのアイコンをON表示
                 document.querySelector('.ext-setting-menu .ext-video .pin').setAttribute("ext-pin-on", "ON");
                 // ショートカットを表示
-                document.querySelector('#ext_shortcut .item.video').setAttribute("ext-pin-on", "ON");                
+                document.querySelector('#ext_shortcut .item.video').setAttribute("ext-pin-on", "ON");
             }
         });
 
@@ -2468,16 +2478,20 @@ function setSettingValue() {
             if (value.ext_ichiba == "ON") {
                 ichibaShortcutToggle();
                 // ショートカットをアクティブ状態
-                document.querySelector('#ext_shortcut .item.ichiba').setAttribute("active", "ON");   
+                document.querySelector('#ext_shortcut .item.ichiba').setAttribute("active", "ON");
             }
         });
         // ニコ生ゲームショートカットのピン状態
         chrome.storage.local.get("ext_ichiba_pin", function (value) {
             if (value.ext_ichiba_pin == "ON") {
+                if(document.querySelector('.ext-setting-menu .ext-ichiba').hasAttribute("disabled")) {
+                    return;
+                }
+
                 // 設定画面のピンのアイコンをON表示
                 document.querySelector('.ext-setting-menu .ext-ichiba .pin').setAttribute("ext-pin-on", "ON");
                 // ショートカットを表示
-                document.querySelector('#ext_shortcut .item.ichiba').setAttribute("ext-pin-on", "ON");                
+                document.querySelector('#ext_shortcut .item.ichiba').setAttribute("ext-pin-on", "ON");
             }
         });
 
@@ -2486,16 +2500,20 @@ function setSettingValue() {
             if (value.ext_game_launcher == "ON") {
                 gameLauncherToggle();
                 // ショートカットをアクティブ状態
-                document.querySelector('#ext_shortcut .item.gamelauncher').setAttribute("active", "ON");   
+                document.querySelector('#ext_shortcut .item.gamelauncher').setAttribute("active", "ON");
             }
         });
         // ニコ生ゲームショートカットのピン状態
         chrome.storage.local.get("ext_gamelauncher_pin", function (value) {
             if (value.ext_gamelauncher_pin == "ON") {
+                if(document.querySelector('.ext-setting-menu .ext-gamelauncher').hasAttribute("disabled")) {
+                    return;
+                }
+
                 // 設定画面のピンのアイコンをON表示
                 document.querySelector('.ext-setting-menu .ext-gamelauncher .pin').setAttribute("ext-pin-on", "ON");
                 // ショートカットを表示
-                document.querySelector('#ext_shortcut .item.gamelauncher').setAttribute("ext-pin-on", "ON");                
+                document.querySelector('#ext_shortcut .item.gamelauncher').setAttribute("ext-pin-on", "ON");
             }
         });
 
@@ -2552,7 +2570,7 @@ function setSettingValue() {
             if (value.ext_video_effect == "ON") {
                 videoEffect();
                 // ショートカットをアクティブ状態
-                document.querySelector('#ext_shortcut .item.video-effect').setAttribute("active", "ON");   
+                document.querySelector('#ext_shortcut .item.video-effect').setAttribute("active", "ON");
             } else {
                 document.querySelector('.ext-setting-menu .ext-video-effect .option.reverse input').setAttribute("disabled", "true");
                 document.querySelector('.ext-setting-menu .ext-video-effect .option.rotate select').setAttribute("disabled", "true");
@@ -2569,7 +2587,7 @@ function setSettingValue() {
                 // 設定画面のピンのアイコンをON表示
                 document.querySelector('.ext-setting-menu .ext-video-effect .pin').setAttribute("ext-pin-on", "ON");
                 // ショートカットを表示
-                document.querySelector('#ext_shortcut .item.video-effect').setAttribute("ext-pin-on", "ON");                
+                document.querySelector('#ext_shortcut .item.video-effect').setAttribute("ext-pin-on", "ON");
             }
         });
 
@@ -2578,7 +2596,7 @@ function setSettingValue() {
             if (value.ext_video_mute == "ON") {
                 videoMute();
                 // ショートカットをアクティブ状態
-                document.querySelector('#ext_shortcut .item.video-mute').setAttribute("active", "ON");  
+                document.querySelector('#ext_shortcut .item.video-mute').setAttribute("active", "ON");
             }
         });
         // 配信映像ミュート機能のピン状態
@@ -2587,7 +2605,7 @@ function setSettingValue() {
                 // 設定画面のピンのアイコンをON表示
                 document.querySelector('.ext-setting-menu .ext-video-mute .pin').setAttribute("ext-pin-on", "ON");
                 // ショートカットを表示
-                document.querySelector('#ext_shortcut .item.video-mute').setAttribute("ext-pin-on", "ON");                
+                document.querySelector('#ext_shortcut .item.video-mute').setAttribute("ext-pin-on", "ON");
             }
         });
 
@@ -2603,7 +2621,7 @@ function setSettingValue() {
                 // 設定画面のピンのアイコンをON表示
                 document.querySelector('.ext-setting-menu .ext-game .pin').setAttribute("ext-pin-on", "ON");
                 // ショートカットを表示
-                document.querySelector('#ext_shortcut .item.game').setAttribute("ext-pin-on", "ON");                
+                document.querySelector('#ext_shortcut .item.game').setAttribute("ext-pin-on", "ON");
             }
         });
 
@@ -2614,12 +2632,12 @@ function setSettingValue() {
 
             if (value.ext_game_mute == "ON") {
                 console.log("前回ゲーム音ミュートが有効でした");
-                //document.querySelector('.ext-setting-menu .ext-game-mute').setAttribute("ext-attr-on", "true"); 
+                //document.querySelector('.ext-setting-menu .ext-game-mute').setAttribute("ext-attr-on", "true");
                 chrome.storage.local.get("ext_game_volume", function (value) {
-                    
+
                     //console.log(value);
                     if (value.ext_game_volume) {
-                        
+
                         // 前回のビデオボリュームを設定
                         document.querySelector('div[data-layer-name="videoLayer"] video').volume =  value.ext_game_volume / 100;
                         document.querySelector('#ext_videoVolumeSlider').value = value.ext_game_volume;
@@ -2650,7 +2668,7 @@ function setSettingValue() {
                 // 設定画面のピンのアイコンをON表示
                 document.querySelector('.ext-setting-menu .ext-game-mute .pin').setAttribute("ext-pin-on", "ON");
                 // ショートカットを表示
-                document.querySelector('#ext_shortcut .item.game-mute').setAttribute("ext-pin-on", "ON");                
+                document.querySelector('#ext_shortcut .item.game-mute').setAttribute("ext-pin-on", "ON");
             }
         });
 
@@ -2659,14 +2677,14 @@ function setSettingValue() {
             if (value.ext_wipe == "ON") {
                 autoWipe();
             }
-        });        
+        });
         // ワイプ機能のピン状態
         chrome.storage.local.get("ext_wipe_pin", function (value) {
             if (value.ext_wipe_pin == "ON") {
                 // 設定画面のピンのアイコンをON表示
                 document.querySelector('.ext-setting-menu .ext-video-wipe .pin').setAttribute("ext-pin-on", "ON");
                 // ショートカットを表示
-                document.querySelector('#ext_shortcut .item.video-wipe').setAttribute("ext-pin-on", "ON");                
+                document.querySelector('#ext_shortcut .item.video-wipe').setAttribute("ext-pin-on", "ON");
             }
         });
 
@@ -2676,8 +2694,8 @@ function setSettingValue() {
                 // 設定画面のピンのアイコンをON表示
                 document.querySelector('.ext-setting-menu .ext-pip .pin').setAttribute("ext-pin-on", "ON");
                 // ショートカットを表示
-                document.querySelector('#ext_shortcut .item.picture').setAttribute("ext-pin-on", "ON");       
-                
+                document.querySelector('#ext_shortcut .item.picture').setAttribute("ext-pin-on", "ON");
+
             }
         });
 
@@ -2698,7 +2716,7 @@ function getBrowserName() {
     // browser.runtime.getURL('') は拡張機能のルートURLを返します。
     // 例: "chrome-extension://abcdefg..." or "moz-extension://abcdefg..."
     const url = browser.runtime.getURL('');
-  
+
     if (url.startsWith('moz-extension://')) {
       return 'firefox';
     }

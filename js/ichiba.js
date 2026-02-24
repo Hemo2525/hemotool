@@ -38,13 +38,13 @@ function includesSequence(haystack, needle) {
  */
 function findItemsWithEntityId(data) {
     const result = [];
-  
+
     function recurse(current) {
       // nullやundefined、またはオブジェクト/配列でない場合は処理を中断
       if (current === null || typeof current !== 'object') {
         return;
       }
-  
+
       // もし現在の要素が配列なら、各要素に対して再帰処理を行う
       if (Array.isArray(current)) {
         for (const item of current) {
@@ -52,13 +52,13 @@ function findItemsWithEntityId(data) {
         }
         return;
       }
-  
+
       // ★ここからがメインのロジック★
       // 現在のオブジェクトが持つプロパティを一つずつチェック
       for (const key in current) {
         if (Object.prototype.hasOwnProperty.call(current, key)) {
           const value = current[key];
-  
+
           // 【条件】キーが 'item' であり、その値が 'entityId' を持つオブジェクトか？
           if (
             key === 'item' &&
@@ -70,13 +70,13 @@ function findItemsWithEntityId(data) {
             // 条件に一致したら、その値（itemオブジェクト）を結果に追加
             result.push(value);
           }
-  
+
           // さらに深い階層を探索するため、プロパティの値に対して再帰処理を行う
           recurse(value);
         }
       }
     }
-  
+
     recurse(data);
     return result;
   }
@@ -230,7 +230,7 @@ window.addEventListener('message', (event) => {
             //console.log(`[${event.data.from}] デコードデータ前の長さ`, binaryData.length);
 
 
-            
+
             //console.time(`[${event.data.from}] デコードデータからentityIdを持つオブジェクト`);
             if(event.data.from === "recv"){
                 const ret = findCategorizedItems(decodedObjects);
@@ -280,7 +280,7 @@ window.addEventListener('message', (event) => {
                     // スコアリストに追加
                     addScoreList(_lastRunningEntityId, point);
                 }
-                
+
             }
 
         } catch (error) {
@@ -324,7 +324,7 @@ async function addScoreList(entityId, itemScore) {
 
     const category = item.categoryName === "game" ? "official" : "user";
     const id = item.id;
-    
+
     const scoreListKey = `scoreList`;
     const getScoreList = await chrome.storage.local.get([scoreListKey]);
     let scoreList = getScoreList[scoreListKey] || [];
@@ -336,19 +336,19 @@ async function addScoreList(entityId, itemScore) {
     if (gameIndex !== -1) {
         // --- 存在した場合：そのゲームのスコア履歴を更新 ---
         const game = scoreList[gameIndex];
-        
+
         // 新しいスコアを追加
         game.scores.push({
             point: itemScore,
             date: getJSTISOString()
         });
-        
+
         // スコア履歴を点数の高い順にソート
         game.scores.sort((a, b) => b.point - a.point);
-        
+
         // スコア履歴を最大10件に絞る
         game.scores = game.scores.slice(0, 10);
-        
+
         // console.log(`「${game.title}」のスコア履歴を更新しました。`);
 
     } else {
@@ -356,8 +356,8 @@ async function addScoreList(entityId, itemScore) {
         // console.log(`「${item.title}」を新しいゲームとしてスコアリストに追加します。`);
 
         const newGame = {
-            category: category, 
-            thumbnailUrl: item.thumbnailUrl, 
+            category: category,
+            thumbnailUrl: item.thumbnailUrl,
             title: DOMPurify.sanitize(item.title),
             id: id,
             scores: [ // 新しいスコア履歴を作成
@@ -380,7 +380,7 @@ async function addScoreList(entityId, itemScore) {
                 console.error("productを取得できませんでした"); return;
             }
         }
-        
+
         if (category === "user") {
             const service = await getIchibaServiceInfo("akasha", id, _embeddedDataJson.program.nicoliveProgramId);
             const product = await getIchibaProductInfo("akasha", id, _embeddedDataJson.program.nicoliveProgramId);
@@ -394,11 +394,11 @@ async function addScoreList(entityId, itemScore) {
                 console.error("新規追加情報の取得に失敗しました", { service, owner }); return;
             }
         }
-        
+
         // 完成した新しいゲーム情報をリストに追加
         scoreList.push(newGame);
     }
-    
+
     // 最終的なリストを保存
     // console.log("スコアリスト全体を保存します", scoreList);
     await chrome.storage.local.set({[scoreListKey]: scoreList});
@@ -481,7 +481,7 @@ async function getDynamicFetchOptions() {
       mode: 'cors',
       credentials: 'include',
     };
-  
+
     // User Agent Client Hints API が利用可能かチェック
     if (navigator.userAgentData) {
       try {
@@ -491,21 +491,21 @@ async function getDynamicFetchOptions() {
           'brands',
           'mobile',
         ]);
-  
+
         // 1. sec-ch-ua ヘッダーを組み立てる
         // 例: `"Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"`
         const uaBrands = uaData.brands
           .map(brand => `"${brand.brand}";v="${brand.version}"`)
           .join(', ');
         options.headers['sec-ch-ua'] = uaBrands;
-  
+
         // 2. sec-ch-ua-mobile ヘッダー
         options.headers['sec-ch-ua-mobile'] = uaData.mobile ? '?1' : '?0';
-  
+
         // 3. sec-ch-ua-platform ヘッダー
         // 例: `"Windows"` や `"macOS"`
         options.headers['sec-ch-ua-platform'] = `"${uaData.platform}"`;
-  
+
       } catch (error) {
         console.error('User Agent Client Hintsの取得に失敗しました:', error);
         // 万が一APIが失敗した場合のフォールバックとして、古い値を設定することも可能
@@ -514,23 +514,27 @@ async function getDynamicFetchOptions() {
         // options.headers['sec-ch-ua-platform'] = '"Windows"';
       }
     }
-  
+
     return options;
   }
 
 function ichibaShortcutToggle() {
 
-    const ichibaShortcut = document.querySelector('#ext_ichiba_shortcut');    
+    const ichibaShortcut = document.querySelector('#ext_ichiba_shortcut');
     let menu = document.querySelector('.ext-setting-menu .ext-ichiba');
+
+    if(menu.hasAttribute("disabled")) {
+        return;
+    }
 
     if(menu.getAttribute("ext-attr-on")) {
         /* ON →　OFF */
-    
+
         ichibaShortcut.classList.remove("show");
 
         // ボタンをOFF状態に
         menu.removeAttribute("ext-attr-on");
-        
+
         // ストレージにボタンの状態を保存
         chrome.storage.local.set({"ext_ichiba": "OFF"}, function() {});
 
@@ -543,8 +547,8 @@ function ichibaShortcutToggle() {
         ichibaShortcut.classList.add("show");
 
         // ON状態に
-        menu.setAttribute("ext-attr-on", "ON");        
-        
+        menu.setAttribute("ext-attr-on", "ON");
+
         // ストレージにボタンの状態を保存
         chrome.storage.local.set({"ext_ichiba": "ON"}, function() {});
 
@@ -556,17 +560,21 @@ function ichibaShortcutToggle() {
 
 function gameLauncherToggle() {
 
-    const gameLauncherBtn = document.querySelector('#ext_game_launcher_btn');    
+    const gameLauncherBtn = document.querySelector('#ext_game_launcher_btn');
     let menu = document.querySelector('.ext-setting-menu .ext-gamelauncher');
+
+    if(menu.hasAttribute("disabled")) {
+        return;
+    }
 
     if(menu.getAttribute("ext-attr-on")) {
         /* ON →　OFF */
-    
+
         gameLauncherBtn.classList.remove("show");
 
         // ボタンをOFF状態に
         menu.removeAttribute("ext-attr-on");
-        
+
         // ストレージにボタンの状態を保存
         chrome.storage.local.set({"ext_game_launcher": "OFF"}, function() {});
 
@@ -580,8 +588,8 @@ function gameLauncherToggle() {
         gameLauncherBtn.classList.add("show");
 
         // ON状態に
-        menu.setAttribute("ext-attr-on", "ON");        
-        
+        menu.setAttribute("ext-attr-on", "ON");
+
         // ストレージにボタンの状態を保存
         chrome.storage.local.set({"ext_game_launcher": "ON"}, function() {});
 
@@ -600,7 +608,7 @@ function watchIchibaBaloon(mutationsList, observer) {
         attributes:             true,   //属性の変化を監視
         subtree:                false,   //全ての子要素を監視
     }
-    
+
     // console.log(mutationsList);
     for (const mutation of mutationsList) {
         if(mutation.type === "childList"){
@@ -689,7 +697,7 @@ function addHemoToolToIchibaBaloon(currentNode) {
     ichibaBaloon.appendChild(addHemoTool);
     addHemoTool.addEventListener("click", async function(){
         // console.log(this.getAttribute("data-ichiba-id"));
-        
+
         addHemoTool.disabled = true;
         addHemoTool.style.backgroundColor = "rgb(71, 71, 71)";
 
@@ -720,7 +728,7 @@ function addHemoToolToIchibaBaloon(currentNode) {
 }
 
 async function addIchibaShortcutDataToStorage(requestItemId, folderName, itemName, itemIcon) {
-    
+
     const shortcutList = await chrome.storage.local.get([STORAGE_KEY_SHORTCUT_GAMES]);
     const shortcutListData = shortcutList[STORAGE_KEY_SHORTCUT_GAMES] || [];
 
@@ -728,11 +736,11 @@ async function addIchibaShortcutDataToStorage(requestItemId, folderName, itemNam
     if(shortcutListData.length === 0){
         const ichibaShortcut = document.querySelector('#ext_ichiba_shortcut');
         ichibaShortcut.classList.add("show");
-        
+
         // ON状態に
         const menu = document.querySelector('.ext-setting-menu .ext-ichiba');
-        menu.setAttribute("ext-attr-on", "ON");        
-        
+        menu.setAttribute("ext-attr-on", "ON");
+
         // ストレージにボタンの状態を保存
         chrome.storage.local.set({"ext_ichiba": "ON"});
 
@@ -819,7 +827,7 @@ async function addIchibaShortcutIcon() {
         if(authority.data.cooldownTime > 0) {
             // 秒数から、n分m秒を取得
             const minutes = Math.floor(authority.data.cooldownTime / 60);
-            const seconds = authority.data.cooldownTime % 60;            
+            const seconds = authority.data.cooldownTime % 60;
             setIchibaWaitTime(minutes, seconds);
         } else {
             waitTime.innerText = "リクエストが可能です";
@@ -831,7 +839,7 @@ async function addIchibaShortcutIcon() {
     chrome.storage.local.getして、#ext_ichiba_shortcutに、以下のようにDOMを追加する
     <div class="item ichiba" aria-label="アイテムタイトル"><img src="画像URL" alt="アイテムタイトル"><span class="delete-btn">×</span>/div>
     */
-    const ichibaGameList = await chrome.storage.local.get([STORAGE_KEY_SHORTCUT_GAMES]);    
+    const ichibaGameList = await chrome.storage.local.get([STORAGE_KEY_SHORTCUT_GAMES]);
     const ichibaList = ichibaGameList[STORAGE_KEY_SHORTCUT_GAMES] || [];
     if(ichibaList && ichibaList.length > 0) {
 
@@ -845,13 +853,13 @@ async function addIchibaShortcutIcon() {
             dom.setAttribute("aria-label", item.itemName);
             dom.setAttribute("data-item-id", item.itemId);
             dom.setAttribute("draggable", true); // ドラッグで並び替えできるようにする
-            
+
             let img = document.createElement('img');
             img.src = item.itemIcon;
             img.alt = item.itemName;
             img.setAttribute("draggable", false); // 画像だけドラッグされることを防ぐ
             dom.appendChild(img);
-            
+
             let deleteBtn = document.createElement('span');
             deleteBtn.className = "delete-btn";
             deleteBtn.textContent = "×";
@@ -863,12 +871,12 @@ async function addIchibaShortcutIcon() {
                     // 削除
                     const targetItemId = item.itemId;
                     const targetFolderName = item.folderName;
-                    
-                
+
+
                     // LocalStorageから削除
-                    const ichibaGameList = await chrome.storage.local.get([STORAGE_KEY_SHORTCUT_GAMES]);    
+                    const ichibaGameList = await chrome.storage.local.get([STORAGE_KEY_SHORTCUT_GAMES]);
                     const ichibaList = ichibaGameList[STORAGE_KEY_SHORTCUT_GAMES] || [];
-                    const updatedList = ichibaList.filter(listItem => 
+                    const updatedList = ichibaList.filter(listItem =>
                         !(listItem.itemId === targetItemId && listItem.folderName === targetFolderName)
                     );
                     await chrome.storage.local.set({[STORAGE_KEY_SHORTCUT_GAMES] : updatedList});
@@ -888,7 +896,7 @@ async function addIchibaShortcutIcon() {
             balloon.classList.add("balloon");
             balloon.classList.add("item-" + item.folderName + "-" + item.itemId);
             dom.appendChild(balloon);
-            
+
             ichibaItemBox.appendChild(dom);
 
             img.addEventListener('click', async function(){
@@ -928,7 +936,7 @@ async function addIchibaShortcutIcon() {
                 */
 
             });
-            
+
         });
 
         // 追加したアイテムはドラッグで並び替えできるようにする
@@ -941,7 +949,7 @@ async function addIchibaShortcutIcon() {
                 draggedElement = event.target;
                 event.target.classList.add('dragging');
             });
-            
+
             item.addEventListener('dragend', function(event){
                 event.target.classList.remove('dragging');
                 draggedElement = null;
@@ -950,14 +958,14 @@ async function addIchibaShortcutIcon() {
 
         ichibaItemBox.addEventListener('dragover', function(event){
             event.preventDefault();
-            
+
             // ドロップ可能な位置を視覚的に示す
             const afterElement = getDragAfterElement(ichibaItemBox, event.clientX);
             const draggables = [...ichibaItemBox.querySelectorAll('.item:not(.dragging)')];
-            
+
             // 既存のインジケーターを削除
             draggables.forEach(item => item.classList.remove('drag-after'));
-            
+
             if (afterElement) {
                 afterElement.classList.add('drag-after');
             }
@@ -965,12 +973,12 @@ async function addIchibaShortcutIcon() {
 
         ichibaItemBox.addEventListener('drop', function(event){
             event.preventDefault();
-            
+
             if (!draggedElement) return;
-            
+
             // ドロップ位置を計算
             const afterElement = getDragAfterElement(ichibaItemBox, event.clientX);
-            
+
             if (afterElement == null) {
                 // 末尾に挿入
                 ichibaItemBox.appendChild(draggedElement);
@@ -978,12 +986,12 @@ async function addIchibaShortcutIcon() {
                 // 指定した要素の前に挿入
                 ichibaItemBox.insertBefore(draggedElement, afterElement);
             }
-            
+
             // 視覚的インジケーターをクリア
-            [...ichibaItemBox.querySelectorAll('.item')].forEach(item => 
+            [...ichibaItemBox.querySelectorAll('.item')].forEach(item =>
                 item.classList.remove('drag-after')
             );
-            
+
             // 新しい順序をLocalStorageに保存
             saveNewOrder();
         });
@@ -991,11 +999,11 @@ async function addIchibaShortcutIcon() {
         // ドロップ位置の後ろにある要素を取得
         function getDragAfterElement(container, x) {
             const draggableElements = [...container.querySelectorAll('.item:not(.dragging)')];
-            
+
             return draggableElements.reduce((closest, child) => {
                 const box = child.getBoundingClientRect();
                 const offset = x - box.left - box.width / 2;
-                
+
                 if (offset < 0 && offset > closest.offset) {
                     return { offset: offset, element: child };
                 } else {
@@ -1012,17 +1020,17 @@ async function addIchibaShortcutIcon() {
                     folderName: item.getAttribute('data-folder-name') // 必要に応じて追加
                 };
             });
-            
+
             const shortcutList = await chrome.storage.local.get([STORAGE_KEY_SHORTCUT_GAMES]);
             const shortcutListData = shortcutList[STORAGE_KEY_SHORTCUT_GAMES] || [];
             if (shortcutListData) {
                 // 新しい順序に合わせて配列を並び替え
                 const reorderedList = currentOrder.map(orderItem => {
-                    return shortcutListData.find(item => 
+                    return shortcutListData.find(item =>
                         item.itemId === orderItem.itemId
                     );
                 }).filter(Boolean);
-                
+
                 await chrome.storage.local.set({[STORAGE_KEY_SHORTCUT_GAMES]: reorderedList});
             }
         }
@@ -1101,7 +1109,7 @@ async function showIchibaInfo(itemId, folderName){
     // console.log("Product情報:", product);
 
 
-    
+
     let service;
     let game;
     let owner;
@@ -1150,7 +1158,7 @@ async function showIchibaInfo(itemId, folderName){
     title.innerText = product.data.title;
     right.appendChild(title);
 
-    
+
     if(game) {
         const count = document.querySelector("#ext_ichiba_info .game-info-box .count");
         count.innerText = "起動回数：" + game.playCount + "回";
@@ -1172,8 +1180,8 @@ async function showIchibaInfo(itemId, folderName){
             prPhoto.classList.add("hide");
         }
     }
-    
-    
+
+
 
 
     /*--------------------------------
@@ -1239,7 +1247,7 @@ async function showIchibaInfoToGameLauncher(item, folderName){
     const parentElement = item.closest(".screen").querySelector(".content-right");
     parentElement.innerHTML = "<div class='loading-box'><div class='loading'></div></div>";
 
-    
+
     const category = item.getAttribute("data-category");
     const itemId = item.getAttribute("data-id");
     const serviceProductId = item.getAttribute("data-service-product-id");
@@ -1342,7 +1350,7 @@ async function showIchibaInfoToGameLauncher(item, folderName){
             // 作者のアイコン
             authorIcon = owner.data.niconicoUserInfo.icons.urls["150x150"] || owner.data.niconicoUserInfo.icons.urls["50x50"];
             authorIconName = DOMPurify.sanitize(owner.data.niconicoUserInfo.nickName);
-        
+
             // 作者のレベル
             authorLevel = owner.data.niconicoUserInfo.level;
 
@@ -1481,7 +1489,7 @@ async function requestIchibaItem(programId, folderName, itemId, updateDate) {
     console.log("programId:", programId);
     console.log("folderName:", folderName);
     console.log("itemId:", itemId);
-*/    
+*/
     const frontendId = getFrontendId();
     const frontendVersion = getFrontendVersion();
 
@@ -1491,7 +1499,7 @@ async function requestIchibaItem(programId, folderName, itemId, updateDate) {
     let successMessage = "リクエストしました";
 
     if(folderName === "akasha") {
-        
+
         const product = await getIchibaProductInfo(folderName, itemId, programId);
         //console.log("リクエストするProduct情報:", product);
         if(product.meta.status != 200) {
@@ -1593,13 +1601,13 @@ async function requestIchibaItem(programId, folderName, itemId, updateDate) {
     const options = await getDynamicFetchOptions();
 
     options.method = "POST";
-    options.body = "{\"serviceName\":\"" + folderName 
-    + "\",\"serviceProductId\":\"" + itemId 
-    + "\",\"frontendId\":" + frontendId 
-    + ",\"frontendVersion\":\"" + frontendVersion 
+    options.body = "{\"serviceName\":\"" + folderName
+    + "\",\"serviceProductId\":\"" + itemId
+    + "\",\"frontendId\":" + frontendId
+    + ",\"frontendVersion\":\"" + frontendVersion
     + "\",\"expectedGrade\":" + grade.data.programGrade + "}";
 
-    
+
     try {
         // fetchリクエストを送信し、サーバーからの応答を待つ
         const response = await fetch(url, options);
@@ -1608,7 +1616,7 @@ async function requestIchibaItem(programId, folderName, itemId, updateDate) {
         // falseの場合、サーバーがエラーを返したことを意味する
         if (!response.ok) {
             console.error(`HTTPエラーが発生しました: ${response.status} ${response.statusText}`);
-            
+
             let errorBody;
             try {
                 // エラーレスポンスの本体をJSONとして解析試行
@@ -1617,7 +1625,7 @@ async function requestIchibaItem(programId, folderName, itemId, updateDate) {
                 // JSONでなければテキストとして取得
                 errorBody = await response.text();
             }
-            
+
             // サーバーから返されたエラーの詳細をコンソールに表示
             console.error("サーバーからのエラー詳細:", errorBody);
 
@@ -1633,7 +1641,7 @@ async function requestIchibaItem(programId, folderName, itemId, updateDate) {
                     const minutes = Math.floor(authority.data.cooldownTime / 60);
                     const seconds = authority.data.cooldownTime % 60;
                     errorMessage =  "残り " + minutes + "分" + seconds + "秒 待機が必要です";
-                    
+
                     setIchibaWaitTime(minutes, seconds);
                     break;
                 case "ITEM_ALREADY_EXISTS":
@@ -1661,9 +1669,9 @@ async function requestIchibaItem(programId, folderName, itemId, updateDate) {
             showBalloon(folderName, itemId, errorMessage);
 
             itemIcon?.classList.remove("loading");
-            
+
             // エラーなのでここで処理を中断
-            return false; 
+            return false;
         }
 
         // 通信が成功した場合、応答をJSONとして解析
@@ -1679,7 +1687,7 @@ async function requestIchibaItem(programId, folderName, itemId, updateDate) {
         const gradeData = await getGrade(programId);
         // 次のリクエストまでの時間を取得して表示しておく
         const minutes = Math.floor(gradeData.data.freezeTime / 60);
-        const seconds = gradeData.data.freezeTime % 60;    
+        const seconds = gradeData.data.freezeTime % 60;
         setIchibaWaitTime(minutes, seconds);
 
         return true;
@@ -1697,7 +1705,7 @@ async function requestIchibaItem(programId, folderName, itemId, updateDate) {
 function showBalloon(folderName, itemId, message) {
     const balloons = document.querySelectorAll("#ext_ichiba_shortcut .balloon.item-" + folderName + "-" + itemId);
     const balloonsInLauncher = document.querySelectorAll("#ext_nico_game_launcher .balloon.item-" + folderName + "-" + itemId);
-    
+
     if(balloons.length > 0) {
         balloons.forEach(balloon => {
             balloon.textContent = message;
@@ -1741,7 +1749,7 @@ async function getIchibaGameInfo(lgId) {
 
     const url = "https://namagame.coe.nicovideo.jp/games/" + lgId;
     const response = await fetch(url);
-    
+
     if (!response.ok) {
         console.error(`HTTPエラーが発生しました: ${response.status} ${response.statusText}`);
         return {};
@@ -1770,7 +1778,7 @@ async function getIchibaGameInfo(lgId) {
         // console.log("ゲームのネタ詳細ページが非公開か削除されたようです");
         data = null;
     }
-    
+
     return data;
 }
 
@@ -1781,7 +1789,7 @@ async function getIchibaTopic() {
 }
 
 // MARK: 通信：公式ゲームの一覧を取得
-async function getOfficalGameList(programId, section) {    
+async function getOfficalGameList(programId, section) {
     const url = "https://eapi.spi.nicovideo.jp/v2/contents/" + programId + "/sections/" + section;
     //return runCommonFetch(url, _fetchOptions);
     return runCommonFetch(url, await getDynamicFetchOptions());
@@ -1865,10 +1873,10 @@ async function runCommonFetch(url, options){
             // JSONでなければテキストとして取得
             errorBody = await response.text();
         }
-        
+
         // サーバーから返されたエラーの詳細をコンソールに表示
         console.error("サーバーからのエラー詳細:", errorBody);
-        return errorBody; 
+        return errorBody;
     }
 
     // 通信が成功した場合、応答をJSONとして解析
@@ -1948,7 +1956,7 @@ function setEventGameLauncher() {
     // タブのリスト
     const tabList = document.querySelector("#ext_nico_game_launcher .tab-list");
     tabList.addEventListener("click", function(e) {
-        
+
         // タブをクリックしたら、タブのアクティブクラスを追加する
         const tab = e.target;
         tabList.querySelectorAll(".tab-item").forEach(function(tab) {
@@ -1984,7 +1992,7 @@ function setEventGameLauncher() {
                 break;
             case "score":
                 viewScoreList();
-                break;    
+                break;
             case "nglist":
                 viewNgList();
                 break;
@@ -2024,7 +2032,7 @@ function setEventGameLauncher() {
     keywordContainer.addEventListener("keydown", function(event) {
         // Enterキーが押されたら、フィルターを適用
         if (event.key === "Enter") {
-            
+
             // 日本語入力変換中のEnterキー操作を無視する（推奨）
             if (event.isComposing) {
                 return;
@@ -2043,7 +2051,7 @@ function setEventGameLauncher() {
     sortTypeContainer.addEventListener("change", function(event) {
 
         // イベントの発生元が目的のラジオボタンかを確認
-        if (event.target.name === 'sort_type') {            
+        if (event.target.name === 'sort_type') {
             // フィルターを適用
             viewUserGameList(true);
         }
@@ -2078,21 +2086,21 @@ function setEventGameLauncher() {
         const updateDate = itemElement.getAttribute("data-update-date");
 
         if(itemElement) {
-            
+
             if(e.target.classList.contains('bookmarkAdd') || e.target.closest('.bookmarkAdd')) {
 
                 // ブックマークボタンがクリックされた
                 if(itemElement.classList.contains('bookmarked')) {
                     // console.log("ブックマークから削除");
                     await removeBookmark(itemElement);
-                    
+
                     // お気に入りタブを開いている場合は一覧を更新
                     if(tabId === 'bookmark') {
                         viewBookmarkList();
                     }
                 } else {
                     // console.log("ブックマークを追加");
-                    addBookmark(itemElement);    
+                    addBookmark(itemElement);
                 }
                 return;
 
@@ -2117,7 +2125,7 @@ function setEventGameLauncher() {
 
                 return;
 
-            } else {            
+            } else {
                 // アイテム本体がクリックされた
                 showIchibaInfoToGameLauncher(itemElement, serviceName);
                 screen.querySelectorAll(".item.active").forEach(function(item) {
@@ -2150,12 +2158,12 @@ function setEventGameLauncher() {
     // 履歴のゲーム一覧のアイテムをクリック
     const itemListFromHistoryList = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='history'] .item-list");
     itemListFromHistoryList.addEventListener("click", itemClick);
-    
+
 
     // スコアのゲーム一覧のアイテムをクリック
     const itemListFromScoreList = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='score'] .item-list");
     itemListFromScoreList.addEventListener("click", itemClick);
-    
+
 
     async function infoBoxClick(e) {
         if(e.target.classList.contains('addShortcutBtn')) {
@@ -2211,7 +2219,7 @@ function setEventGameLauncher() {
                 const ngList = getNgList.ngList || [];
                 ngList.push({authorName: authorName, authorId: authorId, date: date});
                 chrome.storage.local.set({[STORAGE_KEY_NG_GAMES]: ngList}, function() {
-                    
+
                     // 詳細情報を初期化
                     const itemInfo = e.target.closest(".content-right");
                     itemInfo.innerHTML = "";
@@ -2273,7 +2281,7 @@ function setEventGameLauncher() {
                     viewNgList();
                 });
             }
-        }        
+        }
     });
 }
 
@@ -2325,7 +2333,7 @@ async function addBookmark(itemElement) {
                 originContentID = service.data.content.originContentId;
             } else {
                 console.error("originContentIDを取得できませんでした");
-            }            
+            }
         }
 
         if(!authorUserID) {
@@ -2378,7 +2386,7 @@ async function removeBookmark(itemElement) {
 async function addHistory(itemElement) {
 
     const category = itemElement.getAttribute("data-category");
-    
+
     const thumbnailUrl = itemElement.querySelector(".title-box img")?.src;
     const title = itemElement.querySelector(".title-box .title")?.innerText;
     const authorName = itemElement.querySelector(".author .author-name")?.innerText;
@@ -2448,7 +2456,7 @@ async function viewTopSection() {
         // [自作ゲーム]のブックマークリストを取得してブックマーク状態を反映
         const bookmarkListUser = await chrome.storage.local.get([STORAGE_KEY_BOOKMARK_USER_GAMES]);
         const bookmarkListDataUser = bookmarkListUser[STORAGE_KEY_BOOKMARK_USER_GAMES] || [];
-        
+
         bookmarkListDataUser.forEach(function(item) {
             const targetItems = document.querySelectorAll(".screen[data-hemo-game-tab='top'] .item[data-category='user'][data-id='" + item.id + "']");
             targetItems.forEach(function(item) {
@@ -2459,13 +2467,13 @@ async function viewTopSection() {
         // [公式ゲーム]のブックマークリストを取得してブックマーク状態を反映
         const bookmarkListOfficial = await chrome.storage.local.get([STORAGE_KEY_BOOKMARK_OFFICIAL_GAMES]);
         const bookmarkListDataOfficial = bookmarkListOfficial[STORAGE_KEY_BOOKMARK_OFFICIAL_GAMES] || [];
-        
+
         bookmarkListDataOfficial.forEach(function(item) {
             const targetItems = document.querySelectorAll(".screen[data-hemo-game-tab='top'] .item[data-category='official'][data-id='" + item.id + "']");
             targetItems.forEach(function(item) {
                 item.classList.add("bookmarked");
             });
-        });    
+        });
     }
 
 
@@ -2475,7 +2483,7 @@ async function viewTopSection() {
         return;
     }
 
-    
+
     const res = await getTopSection(_embeddedDataJson.program.nicoliveProgramId);
     //await gameListAppend('top', itemList, res.data.sections);
 
@@ -2527,9 +2535,9 @@ async function viewOfficalGameList() {
         bookmarkListData.forEach(function(item) {
             const itemElement = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='official'] .item[data-id='" + item.id + "']");
             itemElement?.classList.add("bookmarked");
-        });    
+        });
     }
-    
+
     // アクティブ状態のitem-listを全て取得
     const itemLists = document.querySelectorAll("#ext_nico_game_launcher .screen[data-hemo-game-tab='official'] .content-left .item-list.active");
 
@@ -2583,7 +2591,7 @@ async function viewUserGameList(bIsRefresh = false) {
     const sortKey = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .search-box .radio-group.sort-type .radio-item input[name='sort_type']:checked").getAttribute('value');
     const fixedTag = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .search-box .radio-group.game-type .radio-item input[name='fixedTag']:checked").getAttribute('value');
     const keyword = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .search-box #hemo-gamelauncher-keyword").value;
-    
+
 
 
     // 既に表示されているアイテムが無い場合はデータを新規で取得する
@@ -2717,7 +2725,7 @@ async function viewScoreList() {
 async function viewNgList() {
     // console.log("NGリストを取得");
 
-    const ngGameList = await chrome.storage.local.get([STORAGE_KEY_NG_GAMES]);    
+    const ngGameList = await chrome.storage.local.get([STORAGE_KEY_NG_GAMES]);
     const ngList = ngGameList[STORAGE_KEY_NG_GAMES] || [];
     if(ngList.length > 0) {
         let itemHtml = "";
@@ -2727,7 +2735,7 @@ async function viewNgList() {
             return new Date(b.date) - new Date(a.date);
         });
 
-        ngList.forEach(function(item) {    
+        ngList.forEach(function(item) {
             itemHtml += `
                 <tr>
                     <td>${DOMPurify.sanitize(item.authorName)}</td>
@@ -2751,9 +2759,9 @@ async function moreBtnClick(keyword, sortKey, fixedTag) {
     // 現在表示されているアイテムの数を取得
     const itemList = document.querySelector("#ext_nico_game_launcher .screen[data-hemo-game-tab='user'] .item-list");
     const itemOffset = itemList.querySelectorAll(".item:not(.dummy)").length;
-    
+
     // console.log("自作ゲームの一覧を取得(続きを読み込む)");
-    const requestCount = 50;    
+    const requestCount = 50;
     const res = await getUserGameList(_embeddedDataJson.program.nicoliveProgramId, keyword, sortKey, "DESC", requestCount, itemOffset, fixedTag);
     //console.log(res);
 
@@ -2872,7 +2880,7 @@ async function createItemListHtml(tabId, contents) {
     const bookmarkListOfficial = getBookmarkListOfficial[STORAGE_KEY_BOOKMARK_OFFICIAL_GAMES] || [];
 
 
-        
+
     let itemListHtml = "";
     //contents.forEach(async function(item) {
     for(const item of contents) {
@@ -2902,7 +2910,7 @@ async function createItemListHtml(tabId, contents) {
 
                     // 作者の名前
                     item.authorName = DOMPurify.sanitize(owner.data.niconicoUserInfo.nickName);
-                
+
                     // 作者のID
                     item.authorUserID = owner.data.niconicoUserInfo.id;
                 }
@@ -2939,7 +2947,7 @@ async function createItemListHtml(tabId, contents) {
         let itemDescription = DOMPurify.sanitize(item.description);
         const authorName = DOMPurify.sanitize(item.authorName);
 
-        
+
 
         // AuthorIconの取得
         let authorIcon = "";
@@ -2950,7 +2958,7 @@ async function createItemListHtml(tabId, contents) {
         }
 
 
-        
+
         if(tabId === "score" && item.scores.length > 0) {
             // 3桁区切りのスコア
             const score = item.scores[0].point.toLocaleString();
@@ -2969,7 +2977,7 @@ async function createItemListHtml(tabId, contents) {
             // 自作ゲームの場合
             const itemHtml = `
             <div class="item ${isBookmarked ? "bookmarked" : ""} ${isNg ? "ng" : ""} ${item.isSecret ? "secret" : ""}" data-lg-id="${lgId}"
-                data-id="${id}" data-author-id="${item.authorUserID ? item.authorUserID : ""}" 
+                data-id="${id}" data-author-id="${item.authorUserID ? item.authorUserID : ""}"
                 data-update-date="${item.updateDate ? item.updateDate : ""}"
                 data-service-name="akasha" data-category="user">
                 <div class="title-box">
@@ -2992,7 +3000,7 @@ async function createItemListHtml(tabId, contents) {
                                 <span class="author-name">${authorName}</span>
                             </div>
                         </div>
-                    </div>    
+                    </div>
                     <div class="btn">
                         <div class="requestBtn">${item.isSecret ? "作者専用" : "リクエスト"}</div>
                         <div class="balloon item-akasha-${id}"></div>
@@ -3028,7 +3036,7 @@ async function createItemListHtml(tabId, contents) {
                             <div class="author">
                                 <span class="author-name">${item.author}</span>
                             </div>
-                        </div>    
+                        </div>
                         <div class="btn">
                             <div class="requestBtn">リクエスト</div>
                             <div class="balloon item-game-${item.serviceProductId}"></div>

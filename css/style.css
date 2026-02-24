@@ -227,9 +227,6 @@
   padding-left: 7px;
 }
 
-.ext-setting-menu {
-  transition: 0.5s;
-}
 .ext-setting-menu [ext-view-item-off] {
   display: none;
 }
@@ -238,6 +235,9 @@
 }
 .ext-setting-menu[ext-view-on] [ext-view-item-off] {
   display: block;
+}
+.ext-setting-menu {
+  transition: 0.5s;
 }
 .ext-setting-menu:has(.setting.active) {
   max-height: 50svh !important; /* オプション表示のときは高さを制限しない */
@@ -332,7 +332,7 @@
   fill: #056dff;
 }
 
-/* 
+/*
 .ext-setting-menu .item .view {
     display: none;
     width: 14px;
@@ -382,6 +382,10 @@
 
 .ext-setting-menu .ext-item.hide {
   display: none;
+}
+.ext-setting-menu .ext-item[disabled] * {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
 }
 
 .ext-setting-menu .option-box .option.desc a {
@@ -504,12 +508,15 @@
 .ext-popup #ext-info-box,
 .ext-popup #ext-info-gift {
   display: none;
-  overflow-y: auto;
-  height: calc(100% - 22px);
 }
 .ext-popup #ext-info-box.show,
 .ext-popup #ext-info-gift.show {
   display: block;
+}
+.ext-popup #ext-info-box,
+.ext-popup #ext-info-gift {
+  overflow-y: auto;
+  height: calc(100% - 22px);
 }
 .ext-popup #ext-info-box .item,
 .ext-popup #ext-info-gift .item {
@@ -809,7 +816,7 @@ div#ext_dom_message {
           user-select: none;
   box-sizing: border-box;
   /*padding-top: 3px;
-  text-align: justify;    
+  text-align: justify;
   */
 }
 
@@ -977,12 +984,6 @@ div#ext_dom_message {
   margin-right: 12px !important;
   margin-left: 9px !important;
   flex-shrink: 0; /* コメント文がFlexBoxより大きくなっても名前は縮まないようにする */
-  /* 長い名前はCSSで省略(省略記号...表示) */
-  max-width: 100px;
-  -webkit-line-clamp: 1 !important;
-  -webkit-box-orient: vertical !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
 }
 [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user-name-button span {
   color: #b70000 !important;
@@ -991,6 +992,14 @@ div#ext_dom_message {
   overflow: hidden;
   white-space: nowrap;
   color: inherit;
+}
+[class^=___contents-area___][ext-master-comeview][ext-opt-name] .user-name-button {
+  /* 長い名前はCSSで省略(省略記号...表示) */
+  max-width: 100px;
+  -webkit-line-clamp: 1 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 [class^=___contents-area___][ext-master-comeview] .wrapComment_by_extention {
@@ -1045,7 +1054,7 @@ div#ext_dom_message {
   min-width: 20px;
 }
 
-/* 
+/*
 公式生放送ではコメント番号がDOMにないのでへもツール独自のユーザー名を表示できない。
 公式生放送の場合は標準でユーザー名がDOMに入っているユーザー名を使う方式にするため、display:block;で表示させる。
  */
@@ -1085,11 +1094,11 @@ div#ext_dom_message {
 [class^=___contents-area___][ext-master-comeview][ext-opt-name] [class^=___comment-author-name___]:empty:before {
     content: "184";
     color: #424242;
-    border: 1px solid #424242; 
-    padding: 2px 10px 1px 10px; 
-    margin-right: 9px; 
-    border-radius: 10px; 
-    font-size: 12px; 
+    border: 1px solid #424242;
+    padding: 2px 10px 1px 10px;
+    margin-right: 9px;
+    border-radius: 10px;
+    font-size: 12px;
     background-color: white;
 }
 */

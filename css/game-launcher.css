@@ -1,6 +1,13 @@
 @charset "UTF-8";
 #ext_game_launcher_btn {
   display: none;
+}
+#ext_game_launcher_btn.show {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#ext_game_launcher_btn {
   height: 100%;
   aspect-ratio: 1/1;
   background-color: rgb(247, 147, 30);
@@ -9,11 +16,6 @@
   margin-left: 10px;
   cursor: pointer;
   transition: background-color 0.15s ease;
-}
-#ext_game_launcher_btn.show {
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 #ext_game_launcher_btn:hover {
   background-color: #c16d00;
@@ -266,6 +268,11 @@
   -webkit-user-select: none;
      -moz-user-select: none;
           user-select: none;
+}
+#ext_ichiba_shortcut .item[draggable=true]:active {
+  cursor: grabbing;
+}
+#ext_ichiba_shortcut .item[draggable=true] {
   /*
   &::after {
       content: '⋮⋮';
@@ -279,9 +286,6 @@
       transition: opacity 0.2s ease;
   }
   */
-}
-#ext_ichiba_shortcut .item[draggable=true]:active {
-  cursor: grabbing;
 }
 #ext_ichiba_shortcut .item[draggable=true]:hover::after {
   opacity: 1;
@@ -456,10 +460,12 @@
 }
 #ext_ichiba_info .loading-box {
   display: none;
-  /* HTML: <div class="loader"></div> */
 }
 #ext_ichiba_info .loading-box.show {
   display: block;
+}
+#ext_ichiba_info .loading-box {
+  /* HTML: <div class="loader"></div> */
 }
 #ext_ichiba_info .loading-box .loader {
   width: 30px;

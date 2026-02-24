@@ -29,7 +29,7 @@
     opacity: 1;
 }
 
-.ext-setting-btn { 
+.ext-setting-btn {
     cursor: pointer;
     background-color:transparent;
     border: 0;
@@ -40,7 +40,7 @@
     position: relative;
     width: 32px;
 }
-.ext-setting-btn svg { 
+.ext-setting-btn svg {
     height: var(--player-controller-icon-butoon-icon-size,16px);
     vertical-align: bottom;
     width: var(--player-controller-icon-butoon-icon-size,16px);
@@ -146,7 +146,7 @@
     justify-content: flex-end;
     background-color: #141414;
     padding: 5px 10px;
-    
+
     .ext-info-item {
         user-select: none;
         font-size: 11px;
@@ -173,7 +173,7 @@
         margin-top: 2px;
         margin-bottom: -3px;
         cursor: pointer;
-        
+
         svg {
             margin-left: -1px;
         }
@@ -206,7 +206,7 @@
     position: absolute;
     top: -1px;
     right: -30px;
-    font-size: 12px;    
+    font-size: 12px;
 }
 .ext-setting-menu .item .name.update::after {
     content: "update";
@@ -214,7 +214,7 @@
     position: absolute;
     top: -1px;
     right: -50px;
-    font-size: 12px;    
+    font-size: 12px;
 }
 .ext-setting-menu .item .name .mini {
     color: #ff6767;
@@ -255,7 +255,7 @@
     &[ext-view-on] {
         svg g {
             fill: rgb(5, 109, 255) !important;
-        }    
+        }
     }
 }
 .ext-setting-menu[ext-view-on] .btn-group {
@@ -320,7 +320,7 @@
 .ext-setting-menu .item .setting.active svg path {
     fill: #056dff;
 }
-/* 
+/*
 .ext-setting-menu .item .view {
     display: none;
     width: 14px;
@@ -372,6 +372,10 @@
     &.hide {
         display: none;
     }
+    &[disabled] * {
+        opacity: 0.5 !important;
+        cursor: not-allowed !important;
+    }
 }
 
 .ext-setting-menu .option-box .option.desc a {
@@ -404,7 +408,7 @@
     position: absolute;
     top: -1px;
     right: -30px;
-    font-size: 12px;    
+    font-size: 12px;
 }
 
 .ext-setting-menu .option-box .option .value {
@@ -468,19 +472,19 @@
     width: 265px;
     left: -126px;
     opacity: 0.94;
-    
+
     #ext-info-box-title,
     #ext-info-gift-title {
         display: none;
         position: absolute;
-        
+
         top: 8px;
         left: 0;
         right: 0;
-        
+
         color: gray;
         letter-spacing: 1px;
-        
+
         &.show {
             display: inline-block;
         }
@@ -523,7 +527,7 @@
             & h3 {
                 font-weight: bold;
                 font-size: 15px;
-                
+
                 line-height: 1.2;
                 margin: 0;
                 margin-bottom: 6px;
@@ -547,7 +551,7 @@
                 & li {
                     font-size: 13px;
                     text-align: justify;
-                    line-height: 1.5;    
+                    line-height: 1.5;
                     margin-bottom: 3px;
                     &:last-child {
                         margin-bottom: 0px;
@@ -571,7 +575,7 @@
                 vertical-align: -webkit-baseline-middle;
                 line-height: 1;
                 margin-bottom: 11px;
-                display: inline-block;                
+                display: inline-block;
             }
         }
 
@@ -619,7 +623,7 @@
       transform: translateY(-10px);
     }
   }
-  
+
 
 #ext_overlay {
     background-color: transparent;
@@ -682,8 +686,8 @@ div#ext_dom_message {
     &:has([ext-pin-on]) {
         padding: 0px 6px 7px;
     }
-    
-    
+
+
 }
 #ext_shortcut .item {
     display: none;
@@ -696,7 +700,7 @@ div#ext_dom_message {
     border-radius: 5px;
 
     padding: 2px 10px 2px;
-    margin-left: 3px;    
+    margin-left: 3px;
     color: white;
 }
 #ext_shortcut .item[ext-pin-on] {
@@ -735,7 +739,7 @@ div#ext_dom_message {
     height: 16px;
 }
 #ext_shortcut .item {
-    
+
 }
 #ext_shortcut .item:hover {
     color: #858585;
@@ -768,7 +772,7 @@ div#ext_dom_message {
     0%,100% {
       opacity: 1;
     }
-  
+
     50% {
       opacity: 0;
     }
@@ -789,7 +793,7 @@ div#ext_dom_message {
     user-select: none;
     box-sizing: border-box;
     /*padding-top: 3px;
-    text-align: justify;    
+    text-align: justify;
     */
 
 }
@@ -825,7 +829,7 @@ div#ext_dom_message {
     user-select: none;
     box-sizing: border-box;
     padding-top: 3px;
-    text-align: justify;  
+    text-align: justify;
 }
 #ext_video_volume_overlay.show {
     display: block;
@@ -877,11 +881,11 @@ div#ext_dom_message {
 }
 
 #ext_videoVolumeSlider::-webkit-slider-thumb {
-    
+
     /* 独自の見た目を有効化 */
     -webkit-appearance: none;
     appearance: none;
-    
+
     background: #7a4900;
     width: 16px;
     height: 16px;
@@ -907,14 +911,14 @@ div#ext_dom_message {
 
 
 /* コメビュ用 */
-.user_name_by_extention { 
+.user_name_by_extention {
     display: none;
     color: #b70000;
-    border: 1px solid #b70000; 
-    padding: 2px 7px 1px 7px; 
-    margin-right: 9px; 
-    border-radius: 10px; 
-    font-size: 12px; 
+    border: 1px solid #b70000;
+    padding: 2px 7px 1px 7px;
+    margin-right: 9px;
+    border-radius: 10px;
+    font-size: 12px;
     background-color: white;
 
     flex-shrink: 0; /* コメント文がFlexBoxより大きくなっても名前は縮まないようにする */
@@ -924,12 +928,12 @@ div#ext_dom_message {
     -webkit-line-clamp: 1 !important;
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
-    text-overflow: ellipsis !important;    
+    text-overflow: ellipsis !important;
 }
-.user_name_by_extention.user184 { 
-    color: #424242; 
-    border: 1px solid #424242; 
-    padding: 2px 6px 1px 10px; 
+.user_name_by_extention.user184 {
+    color: #424242;
+    border: 1px solid #424242;
+    padding: 2px 6px 1px 10px;
     font-size: 11px;
     background-color: white;
 
@@ -941,9 +945,9 @@ div#ext_dom_message {
     text-overflow: ellipsis !important;
 
 }
-.user_name_by_extention.kotehan { 
-    color: #0034a3; 
-    border: 1px solid #0034a3; 
+.user_name_by_extention.kotehan {
+    color: #0034a3;
+    border: 1px solid #0034a3;
 }
 
 [class^=___contents-area___][ext-master-comeview][ext-opt-name] .user_name_by_extention {
@@ -979,7 +983,7 @@ div#ext_dom_message {
     -webkit-line-clamp: 1 !important;
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
-    text-overflow: ellipsis !important;    
+    text-overflow: ellipsis !important;
 }
 
 [class^=___contents-area___][ext-master-comeview] .wrapComment_by_extention {
@@ -1035,18 +1039,18 @@ div#ext_dom_message {
     min-width: 20px;
 }
 
-/* 
+/*
 公式生放送ではコメント番号がDOMにないのでへもツール独自のユーザー名を表示できない。
 公式生放送の場合は標準でユーザー名がDOMに入っているユーザー名を使う方式にするため、display:block;で表示させる。
  */
 [class^=___contents-area___][ext-master-comeview][ext-opt-name] [class^=___comment-author-name___] {
     display: block;
     color: #424242;
-    border: 1px solid #424242; 
-    padding: 2px 7px 1px 7px; 
-    margin-right: 9px; 
-    border-radius: 10px; 
-    font-size: 12px; 
+    border: 1px solid #424242;
+    padding: 2px 7px 1px 7px;
+    margin-right: 9px;
+    border-radius: 10px;
+    font-size: 12px;
     background-color: white;
 
     /* 長い名前はCSSで省略(省略記号...表示) */
@@ -1075,11 +1079,11 @@ div#ext_dom_message {
 [class^=___contents-area___][ext-master-comeview][ext-opt-name] [class^=___comment-author-name___]:empty:before {
     content: "184";
     color: #424242;
-    border: 1px solid #424242; 
-    padding: 2px 10px 1px 10px; 
-    margin-right: 9px; 
-    border-radius: 10px; 
-    font-size: 12px; 
+    border: 1px solid #424242;
+    padding: 2px 10px 1px 10px;
+    margin-right: 9px;
+    border-radius: 10px;
+    font-size: 12px;
     background-color: white;
 }
 */
@@ -1123,7 +1127,7 @@ div#ext_dom_message {
 
 
 
-.premium_by_extention { 
+.premium_by_extention {
     display: none;
     margin-right: 6px;
     /* background-image: url("chrome-extension://pibfefehkigcakddgjnbgjkllhfbabjm/img/icon-premium.png"); */
@@ -1141,7 +1145,7 @@ div#ext_dom_message {
     display: inline-block;
 }
 
-.noPremium_by_extention { 
+.noPremium_by_extention {
     display: none;
     margin-right: 6px;
     padding: 0;
@@ -1168,7 +1172,7 @@ div#ext_dom_message {
 }
 
 
-.owner_by_extention { 
+.owner_by_extention {
     display: none;
     margin-right: 6px;
     padding: 0;
@@ -1186,7 +1190,7 @@ div#ext_dom_message {
     flex-shrink: 0;
     width: 12px;
     height: 12px;
-    padding: 0;    
+    padding: 0;
 }
 [class^=___contents-area___][ext-master-comeview][ext-opt-premium] .owner_by_extention {
     display: inline-block;
@@ -1220,7 +1224,7 @@ div#ext_dom_message {
 }
 
 [ext-master-comeview][ext-opt-orikaeshi] .comment-text {
-    height: auto;    
+    height: auto;
     /* text-overflow: ellipsis; */
     /*display: -webkit-box;*/
     /* display: inline-block;
@@ -1231,7 +1235,7 @@ div#ext_dom_message {
     font-size: 12px !important;
     padding: 0 !important;
     max-height: 30px !important;
-    
+
     /*
     下記みたいなコメントがあると、コメントの高さが壊れるので、その対策
     ███████████████████████████████████████████████████████
@@ -1340,7 +1344,7 @@ div[data-layer-name="videoLayer"] video {
     z-index: 111111111;
     left: calc(50% - 40px);
     top: calc(50% - 40px);
-    
+
     box-shadow: 4px 4px 10px rgba(118, 118, 118, 0.322);
 }
 
@@ -1440,7 +1444,7 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
 
 [class^=___seek-information___] #ext_thumb {
     width: 100%;
-    margin-top: 10px;    
+    margin-top: 10px;
 }
 
 
@@ -1467,7 +1471,7 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;    
+    height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 100000;
     &.show {
@@ -1484,7 +1488,7 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
     transform: translate(0%, 0%) scale(0.8);
     transform-origin: top left;
     background-color: rgba(255, 255, 255, 0.315);
-    
+
 }
 [ext-master-wipe] [class^=___video-layer___] {
     transform: translate(35%, 35%) scale(0.3);
@@ -1566,7 +1570,7 @@ html[data-darkreader-scheme] [class^=___context-menu___] .ext-menu label {
     height: 100%;
     z-index: 100000;
     line-height: 2;
-    
+
     &.show {
         display: flex;
         justify-content: center;
@@ -1630,7 +1634,7 @@ html[data-color-theme="dark"] .user_name_by_extention,
 html[data-darkreader-scheme] .user_name_by_extention {
     // background-color: inherit !important;
     // color: #e54b4b;
-    // border: 1px solid #e54b4b; 
+    // border: 1px solid #e54b4b;
 
     background-color: #1a1a1a;
     color: #df7474;
@@ -1642,14 +1646,14 @@ html[data-darkreader-scheme] .user_name_by_extention.user184 {
     // background-color: inherit;
     background-color: #1a1a1a;
     color: #d3d3d3;
-    border: 1px solid #d3d3d3; 
+    border: 1px solid #d3d3d3;
 }
 
 html[data-color-theme="dark"] .user_name_by_extention.kotehan,
 html[data-darkreader-scheme] .user_name_by_extention.kotehan {
     background-color: inherit;
-    color: #83a9fb; 
-    border: 1px solid #83a9fb; 
+    color: #83a9fb;
+    border: 1px solid #83a9fb;
 }
 
 html[data-color-theme="dark"] [class^=___player-area___],
@@ -1670,10 +1674,10 @@ html[data-darkreader-scheme] .ext-popup::before {
 
 
 html[data-color-theme="dark"] [class^="___contents-area___"][ext-master-comeview][ext-opt-name] .user-name-button,
-html[data-darkreader-scheme] [class^="___contents-area___"][ext-master-comeview][ext-opt-name] .user-name-button {    
+html[data-darkreader-scheme] [class^="___contents-area___"][ext-master-comeview][ext-opt-name] .user-name-button {
     background-color: inherit;
     color: #e54b4b !important;
-    border: 1px solid #e54b4b !important; 
+    border: 1px solid #e54b4b !important;
     & span {
         color: #e54b4b !important;
     }
@@ -1708,25 +1712,25 @@ html[data-darkreader-scheme] [class^="___context-menu___"] .ext-menu label texta
 
     html[data-color-theme="auto"] {
 
-        .user_name_by_extention {    
+        .user_name_by_extention {
             background-color: #1a1a1a;
             color: #df7474;
             border-color: #df7474;
         }
-        
+
         .user_name_by_extention.user184 {
             // background-color: inherit;
             background-color: #1a1a1a;
             color: #d3d3d3;
-            border: 1px solid #d3d3d3; 
+            border: 1px solid #d3d3d3;
         }
-        
+
         .user_name_by_extention.kotehan {
             background-color: inherit;
-            color: #83a9fb; 
-            border: 1px solid #83a9fb; 
+            color: #83a9fb;
+            border: 1px solid #83a9fb;
         }
-        
+
         [class^=___player-area___] {
             background-image: none !important;
         }
@@ -1735,35 +1739,35 @@ html[data-darkreader-scheme] [class^="___context-menu___"] .ext-menu label texta
             background-color: rgba(37, 37, 37, 0.95);
             color: white;
         }
-        
+
         .ext-popup::before {
             border-top: 15px solid rgba(37, 37, 37, 0.95);
         }
-        
-        
-        [class^="___contents-area___"][ext-master-comeview][ext-opt-name] .user-name-button {    
+
+
+        [class^="___contents-area___"][ext-master-comeview][ext-opt-name] .user-name-button {
             background-color: inherit;
             color: #e54b4b !important;
-            border: 1px solid #e54b4b !important; 
+            border: 1px solid #e54b4b !important;
             & span {
                 color: #e54b4b !important;
             }
         }
-        
+
         [ext-master-comeview] [class^="___table-row___"] {
             border-top: 1px dashed rgba(255, 255, 255, 0.123) !important;
         }
-        
+
         #ext_tooltipBox {
             background-color: #141414 !important;
             color: white !important;
         }
-        
+
         [class^="___context-menu___"] .ext-menu label {
             background-color: rgb(51, 51, 51) !important;
             color: white !important;
         }
-        
+
         [class^="___context-menu___"] .ext-menu label input,
         [class^="___context-menu___"] .ext-menu label textarea {
             background-color: rgb(51, 51, 51) !important;
