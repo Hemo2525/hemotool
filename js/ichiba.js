@@ -1927,7 +1927,7 @@ let _bIsFirstShowGameLauncher = true;
 function setEventGameLauncher() {
     const overlay = document.querySelector("#ext_nico_game_launcher_overlay");
     const gameLauncher = document.querySelector("#ext_game_launcher_btn");
-
+/*
     // ランチャー起動ボタン
     gameLauncher.addEventListener("click", async function() {
         overlay.classList.toggle("show");
@@ -1945,6 +1945,7 @@ function setEventGameLauncher() {
             });
         }
     });
+*/
 
     // オーバーレイ
     overlay.addEventListener("click", function(e) {
