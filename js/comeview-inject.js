@@ -204,8 +204,8 @@ function extractNicoLiveCommentContent(binaryData) {
             commentObjct.chat.no = no;
         } else {
             // 未知のフィールド
-            // console.log(`未知のフィールド number: ${fieldNumber}`);
-            // console.log(`未知のフィールド tag: ${fieldTag}`);
+            console.log(`未知のフィールド number: ${fieldNumber}`);
+            console.log(`未知のフィールド tag: ${fieldTag}`);
 
             const oldOffset = offset;
             let someValue = readVarInt();
@@ -239,34 +239,34 @@ const streamBuffers = new Map();
 window.fetch = function(...args) {
   const [resource, config] = args;
   const url = typeof resource === 'string' ? resource : resource.url;
-  
+
   if( url.includes('mpn.live.nicovideo.jp/data/backward/v4')) {
     return originalFetch.apply(this, args).then(response => {
 
         //console.log('[backward] Fetch:', url);
         const clonedResponse = response.clone();
-        
+
         clonedResponse.arrayBuffer().then(buffer => {
           //console.log('Fetched Niconico live comments buffer size:', buffer.byteLength);
-  
+
           // ArrayBufferをUint8Arrayに変換
           const uint8Array = new Uint8Array(buffer);
-  
+
           // console.log('Decoding Niconico live messages(backward)...', uint8Array);
           const decodedMessages = extractNicoLiveCommentContent(uint8Array);
           // console.log(JSON.stringify(decodedMessages, null, 2));
-            
+
           //const extractedComments = extractComments(buffer);
           //console.log('Extracted comments count:', extractedComments.length);
           //worker.postMessage({ action: 'parseComments', comments: extractedComments });
-  
+
         }).catch(error => {
           console.error('Error processing comment data:', error);
         });
-      
+
       return response;
     });
-    
+
   }
   else if (url.includes('mpn.live.nicovideo.jp/data/segment/v4'))
   {
@@ -274,19 +274,19 @@ window.fetch = function(...args) {
 
       //console.log('[segment] Fetch:', url);
       const originalBody = response.body;
-      
+
       // 新しいReadableStreamを作成
       const newBody = new ReadableStream({
         start(controller) {
           const reader = originalBody.getReader();
-          
+
           function pump() {
             return reader.read().then(({ done, value }) => {
               if (done) {
                 controller.close();
                 return;
               }
-  
+
               // ArrayBufferをUint8Arrayに変換
               const uint8Array = new Uint8Array(value);
 
@@ -364,7 +364,7 @@ WebSocket = new Proxy(WebSocket, {
   }
 });
 // WebSocketの受信イベントハンドラ
-function recvEvent(event) {  
+function recvEvent(event) {
   console.log("recvEvent", event);
 }
 // WebSocketの送信イベントハンドラ
@@ -400,7 +400,7 @@ WebSocket = new Proxy(WebSocket, {
       if (receivedData instanceof ArrayBuffer) {
         try {
           const uint8Array = new Uint8Array(receivedData);
-          
+
           if(uint8Array.length > 80) {
 
             //console.log("RECV uint8Array", uint8Array);
@@ -408,7 +408,7 @@ WebSocket = new Proxy(WebSocket, {
             // ★ 拡張機能に解析を依頼
             window.postMessage({
               // 'from-server'など、送信と区別できる名前にするとより分かりやすい
-              direction: 'from-page', 
+              direction: 'from-page',
               from: 'recv',
               type: 'DECODE_MSGPACK_REQUEST',
               binaryData: uint8Array,
@@ -435,7 +435,7 @@ WebSocket = new Proxy(WebSocket, {
             const uint8Array = new Uint8Array(dataToSend);
 
             if(uint8Array.length > 80) {
-  
+
               //console.log("SEND uint8Array", uint8Array);
 
               // 拡張機能に解析を依頼
@@ -512,7 +512,7 @@ function getCommentsStringByUserId(userId, commentNo) {
   const latestComments = userComments.slice(-10).map(comment => ({ ...comment }));
   // console.timeEnd("userComments");
 
-  
+
   for (const key in latestComments) {
     const comment = latestComments[key];
     // const totalSeconds = Math.floor(comment.vpos / 100);
@@ -582,7 +582,7 @@ function setKotehanInInject(userId, kotehan, is184User) {
   console.log("currentTime : " + currentTime);
 
   let kotehanItem = {id: userId, kotehan: kotehan, is184User: is184User, createDate: currentTime};
-        
+
   // 既に同じIDの人が登録されていれば削除してから追加
   _kotehanList = _kotehanList.filter(function (x) { return x.id !== userId }); // 削除
   _kotehanList.push(kotehanItem); // 追加
@@ -596,7 +596,7 @@ function setKotehanInInject(userId, kotehan, is184User) {
     newYomiCommentDom.appendChild(newYomiCommentText);
     kotehanBox.appendChild(newYomiCommentDom);
     // console.log(newYomiCommentText);
-  }  
+  }
 }
 
 
@@ -634,7 +634,7 @@ function recvChatComment(message) {
   //   return;
   // }
 
-  
+
   // chatメッセージのみ解析
   if (message.chat) {
 
@@ -652,7 +652,7 @@ function recvChatComment(message) {
 
     if (_startTime !== undefined && (Number(message.chat.vpos) + (10 * 100)) > _startTime) {  // startTimeは常に更新してるので10秒の足を履かせる(vposは10ミリ秒単位なので+100すると1秒プラスと同じ)
     //if (_startTime !== undefined){
-      
+
       /*--------------------------------------------------------------
       //  読み上げ
       --------------------------------------------------------------*/
@@ -660,7 +660,7 @@ function recvChatComment(message) {
 
         let yomiage_text = message.chat.content.toLowerCase();
         let isSystemComment = false;
-        
+
         if (message.chat.content.startsWith('/gift', 0)) {
           isSystemComment = true;
           if (document.querySelector('.ext-yomiage .option.gift input').checked ){
@@ -675,7 +675,7 @@ function recvChatComment(message) {
             yomiage_text = "";
           }
         }
-      
+
         if (message.chat.content.startsWith('/nicoad', 0)) {
           isSystemComment = true;
           if (document.querySelector('.ext-yomiage .option.koukoku input').checked ){
@@ -689,7 +689,7 @@ function recvChatComment(message) {
             yomiage_text = "";
           }
         }
-        
+
         if (message.chat.content.startsWith('/info', 0)) {
           isSystemComment = true;
           if (document.querySelector('.ext-yomiage .option.raijosya input').checked ){
@@ -749,7 +749,7 @@ function recvChatComment(message) {
         yomiage_text = yomiage_text.replace(/・/g, '');  // 「なかぐろ」と読み上げられる為
 
         if ( yomiage_text.match(/http/)) yomiage_text = "URL省略";
-        
+
         // オプションの省略機能が有効ならば
         if (yomiage_text.length > 0 && document.querySelector('.ext-yomiage .option.syoryaku input').value ){
           let syouryaku = document.querySelector('.ext-yomiage .option.syoryaku input').value;
@@ -791,7 +791,7 @@ function recvChatComment(message) {
 
         let yomiage_text = message.chat.content.toLowerCase();
         let isSystemComment = false;
-        
+
         // オプションの省略機能が有効ならば
         // if (yomiage_text.length > 0 && document.querySelector('.ext-bouyomi .option.syoryaku input').value ){
         //   let syouryaku = document.querySelector('.ext-bouyomi .option.syoryaku input').value;
@@ -828,7 +828,7 @@ function recvChatComment(message) {
           //console.error("異常系：comeview-inject.js : " + yomiage_text);
         }
 
-      }      
+      }
 
       //console.log("読み上げます → [" + message.chat.no + "] " + yomiage_text);
     } else {
@@ -858,7 +858,7 @@ function recvChatComment(message) {
         }
 
         // コテハンの保存
-        setKotehanInInject(message.chat.user_id, kotehan, is184User);        
+        setKotehanInInject(message.chat.user_id, kotehan, is184User);
       }
     }
 
@@ -873,7 +873,7 @@ function recvChatComment(message) {
     }
 
     /*--------------------------------------------------------------
-    //  
+    //
     --------------------------------------------------------------*/
     if (message.chat && message.chat.no && message.chat.user_id && message.chat.content && message.chat.vpos) {
 
@@ -889,11 +889,11 @@ function recvChatComment(message) {
           comment: message.chat.content,
           no: message.chat.no
         });
-      
+
         if (_allComment.length > 9000) {
           console.log("保存しているコメント数が規定数を超えたので古いコメントから少し削除します");
           _allComment.splice(0, 6000);
-        } 
+        }
 
       } else {
         console.log("NG対象のコメントです", message.chat.no, message.chat.user_id, message.chat.content);
@@ -909,7 +909,7 @@ function recvChatComment(message) {
       _commentRawIdList[message.chat.no]  = message.chat.user_id;
       _commentListFull[message.chat.no]   = message.chat.user_id;
       _183UserList[message.chat.no]       = message.chat.user_id;
-      
+
     } else {
       // 生IDさんの処理----------------------------
       _commentRawIdList[message.chat.no] = message.chat.user_id;
@@ -951,15 +951,15 @@ function recvChatComment(message) {
             // HTMLをパースしてDOMDocumentを作成
             var parser = new DOMParser();
             var htmlDoc = parser.parseFromString(request.responseText, 'text/html');
-            
+
             var userName = "";
             var userNameFull = "";
-            
+
             // JSON-LDスキーマから名前を取得
             const jsonLdScript = htmlDoc.querySelector('script[type="application/ld+json"]');
-            
+
             const jsonData = JSON.parse(jsonLdScript.textContent);
-                
+
             // Person型のスキーマからnameを取得
             if (jsonData['@type'] === 'Person' && jsonData.name) {
               userName = jsonData.name;
@@ -975,7 +975,7 @@ function recvChatComment(message) {
                   _commentListFull[key] = userNameFull;
                 }
               }
-    
+
               var currentCommentList = document.querySelectorAll('.user_name_by_extention:not(.user184)');
               for (var i = 0; i < currentCommentList.length; i++) {
                 if (currentCommentList[i].innerText == message.chat.user_id) {
@@ -985,7 +985,7 @@ function recvChatComment(message) {
               }
 
             }
-            
+
           } catch (error) {
             console.error("★★ HTML解析エラー:", error);
             console.log("★★ レスポンステキストの一部:", request.responseText.substring(0, 500));
@@ -1015,7 +1015,7 @@ function InsertUserName(fragment, newNo, bIsMyComment) {
 
   } else {
     // 生IDさんの処理----------------------------
-    
+
     let userId = _commentRawIdList[newNo];
     let iconPath = 0;
     if(userId && userId.length > 4) {
@@ -1038,7 +1038,7 @@ function InsertUserName(fragment, newNo, bIsMyComment) {
   // 自身がコメント主なら非表示にする(DOMは残しておかないとカラー機能が使えなくなる)
   if(bIsMyComment) {
     iconElement.classList.add("myComment");
-  } 
+  }
 
   // 作成したDOMの挿入
   fragment.appendChild(iconElement);
@@ -1075,7 +1075,7 @@ if(hitKotehan[0]){
   // コテハンがHITしなかった場合---------
 
   let fullUserName = _commentListFull[newNo];
-  
+
   kotehan = _commentListFull[newNo]
   if (_183UserList[newNo]) {
     kotehanElement.classList.add("user_name_by_extention", "viewKotehan", "user184");
@@ -1084,7 +1084,7 @@ if(hitKotehan[0]){
   }
 
   kotehanContent = document.createTextNode(kotehan);
-  kotehanElement.appendChild(kotehanContent);  
+  kotehanElement.appendChild(kotehanContent);
   kotehanElement.setAttribute("title", fullUserName);
   kotehanElement.setAttribute("data-extension-userid", _commentRawIdList[newNo]);
 
@@ -1117,7 +1117,7 @@ fragment.appendChild(kotehanElement);
   if(bIsMyComment) {
     nameElement.classList.add("myComment");
   }
-  
+
   // 作成したDOMの挿入
   fragment.appendChild(nameElement);
 
@@ -1129,7 +1129,7 @@ fragment.appendChild(kotehanElement);
   console.log(_commentRawIdList);
 */
 
-  
+
   return fragment;
 }
 
@@ -1149,11 +1149,11 @@ function InsertPremium(fragment, newNo, bIsOwner) {
     // リスナーのコメント ------------------
     if (_premiumList[newNo] === true) {
       newElement.setAttribute("class", "premium_by_extention");
-      newElement.setAttribute("title", "プレミアムアカウント");   
+      newElement.setAttribute("title", "プレミアムアカウント");
     } else {
       newElement.setAttribute("class", "noPremium_by_extention");
       newElement.setAttribute("title", "一般アカウント");
-    }  
+    }
   }
 
   // 作成したDOMの挿入
@@ -1164,11 +1164,11 @@ function InsertPremium(fragment, newNo, bIsOwner) {
 
 
 function watchCommentDOM(mutationsList, observer) {
-  
+
   for (const mutation of mutationsList) {
     if(mutation.type === "childList"){
       // 初回動作以外
-      mutation.addedNodes.forEach((currentNode) => {        
+      mutation.addedNodes.forEach((currentNode) => {
         editComment(currentNode, mutationsList);
       });
 
@@ -1181,7 +1181,7 @@ function editComment(currentNode) {
   const commentNumberDom = currentNode.querySelector(".comment-number"); // コメント番号のDOM
 
   // DOMの存在確認
-  if (!commentNumberDom || !commentTextElement) { 
+  if (!commentNumberDom || !commentTextElement) {
     return;
   }
   // コメント番号とテキストが存在しているか確認(「「アニメ」が好きな2人が来場しました」などのシステムメッセージの対応)
@@ -1200,7 +1200,7 @@ function editComment(currentNode) {
   /*
   console.log("--------------------------------");
   console.log(`対象ノードの表示コメント番号 ${newNo}のコメントは「${commentText}」です`);
-  const jsonComment = _allComment.filter(item => item.no >= newNo); 
+  const jsonComment = _allComment.filter(item => item.no >= newNo);
   console.log(`JSONコメントのコメント番号${newNo}のコメントは「${jsonComment[0].comment}」です`);
   */
 
@@ -1274,7 +1274,7 @@ function editComment(currentNode) {
 
       // プレ垢のDOMを挿入
       let bIsOwner = false;
-      
+
       if(currentNode.getAttribute("data-comment-type") === "operator") {
         //console.log("配信者のコメントです");
         bIsOwner = true;
@@ -1314,7 +1314,7 @@ function editComment(currentNode) {
 
       // プレ垢のDOMを挿入
       let bIsOwner = false;
-      
+
       if(currentNode.getAttribute("data-comment-type") === "operator") {
         //console.log("配信者のコメントです");
         bIsOwner = true;
@@ -1342,8 +1342,8 @@ function editComment(currentNode) {
 
     // editCommentしたコメントの証拠を残しておく（次回やらなくて済むように）
     currentNode.setAttribute("data-extension-edited", "true");
-    
-    
+
+
     // 受信している全てのコメントの中で、現在のユーザーIDのコメントの中で、
     // 現在のコメント番号より若いコメントが存在していなければ、そのユーザーの一番最初のコメントだと判定
     const userId = _commentRawIdList[newNo];
@@ -1351,7 +1351,7 @@ function editComment(currentNode) {
                                     .filter(item => item.no < newNo);         // 指定したコメント番号より古いコメントを抽出
     if(userComments.length === 0) {
       // 一番最初のコメントならCSSで太字にする
-      currentNode.setAttribute("data-extension-firstcomment", "true");       
+      currentNode.setAttribute("data-extension-firstcomment", "true");
     }
 
 
@@ -1372,9 +1372,9 @@ function startWatchCommentDOM(mutationsList, observer) {
     // ギフト画面を表示 → ギフト画面を非表示　をした場合には既存のコメントは裸のままになるのでここでeditComment()しておく
     const tableDom = document.querySelector("[class^=___table___]"); // コメントDOMの直上の親DOMを指定
     if (tableDom) {
-        
-      tableDom.childNodes.forEach((currentNode)=>{   
-    
+
+      tableDom.childNodes.forEach((currentNode)=>{
+
         editComment(currentNode);
 
       });
@@ -1443,7 +1443,7 @@ function startWatchCommentDOM(mutationsList, observer) {
     myKotehanDom_CancelBtn.id = "ext_myKotehanBox_CancelBtn";
     myKotehanDom_CancelBtn.innerText = "キャンセル";
     myKotehanDomCenter.appendChild(myKotehanDom_CancelBtn);
-        
+
     // DOMに追加
     myKotehanDom.appendChild(myKotehanDomCenter);
     document.querySelector("[class^=___comment-data-grid___]").appendChild(myKotehanDom);
@@ -1476,9 +1476,9 @@ function startWatchCommentDOM(mutationsList, observer) {
             currentCommentList[i].classList.add("kotehan");
             currentCommentList[i].classList.remove("user184");
           }
-        }                  
+        }
       }
-    });  
+    });
     document.getElementById("ext_myKotehanBox_ClearBtn").addEventListener('click', function(e) {
       document.getElementById("ext_myKotehanBox").classList.remove("show");
 
@@ -1501,7 +1501,7 @@ function startWatchCommentDOM(mutationsList, observer) {
           if(mouseClick.is184User) {
             currentCommentList[i].innerText = mouseClick.userId;
             currentCommentList[i].classList.remove("kotehan");
-            currentCommentList[i].classList.add("user184");  
+            currentCommentList[i].classList.add("user184");
           } else {
             currentCommentList[i].innerText = mouseClick.userName;
             currentCommentList[i].classList.remove("kotehan");
@@ -1512,7 +1512,7 @@ function startWatchCommentDOM(mutationsList, observer) {
     });
     document.getElementById("ext_myKotehanBox_CancelBtn").addEventListener('click', function(e) {
       document.getElementById("ext_myKotehanBox").classList.remove("show");
-    }); 
+    });
   }
 }
 
@@ -1531,7 +1531,7 @@ let mouseClick = {
 }
 
 function startWatchGridDOM() {
-  
+
   const target = document.querySelector("[class^=___comment-data-grid___]");
   if(!target) return;
 
@@ -1542,7 +1542,7 @@ function startWatchGridDOM() {
     characterDataOldValue: false, //属性の変化前を記録
     attributes: false,            //属性の変化を監視
     subtree: false,               //全ての子要素を監視
-  }  
+  }
 
   const obs = new MutationObserver(function(mutationsList, observer){
 
@@ -1598,7 +1598,7 @@ function startWatchGridDOM() {
             } else {
               inputElement.value = "#000000";
             }
-            
+
             // カラーピッカーの色を動かしたときのイベント
             inputElement.addEventListener('input', function(e) {
               //console.log("色をつけます" , currentUserID, this.value);
@@ -1621,7 +1621,7 @@ function startWatchGridDOM() {
 
               // 色を選択しているユーザーIDを保存しておく
               _tempCurrentUserID = mouseClick.userId;
-            
+
             });
             // カラーピッカーの色変更を確定したときのイベント
             inputElement.addEventListener('change', function(e) {
@@ -1632,7 +1632,7 @@ function startWatchGridDOM() {
               // カラー情報を保存するDOMに保存
               let colorBox = document.getElementById("ext_colorBox");
               if(colorBox) {
-                let item = { 
+                let item = {
                   id : _tempCurrentUserID,
                   textColor : _styleList[_tempCurrentUserID].textColor,
                   bgColor : _styleList[_tempCurrentUserID].bgColor,
@@ -1648,7 +1648,7 @@ function startWatchGridDOM() {
             });
 
 
-            
+
 
             let liBgColorElement = document.createElement("li");
             liBgColorElement.id = "menu-setBgColor";
@@ -1682,13 +1682,13 @@ function startWatchGridDOM() {
               } else {
                 // 未追加なら追加
                 let index = style.sheet.insertRule('[ext-master-comeview][ext-opt-color] span:has([data-extension-userid="'+ mouseClick.userId + '"] ) { background-color: ' + this.value + ';}', style.sheet.cssRules.length);
-                _styleList[mouseClick.userId].bgIndex = index;  
+                _styleList[mouseClick.userId].bgIndex = index;
               }
               // console.log("index", style.sheet.cssRules);
 
               // 色を選択しているユーザーIDを保存しておく
               _tempCurrentUserID = mouseClick.userId;
-            
+
             });
             // カラーピッカーの色変更を確定したときのイベント
             inputBgColorElement.addEventListener('change', function(e) {
@@ -1699,7 +1699,7 @@ function startWatchGridDOM() {
               // カラー情報を保存するDOMに保存
               let colorBox = document.getElementById("ext_colorBox");
               if(colorBox) {
-                let item = { 
+                let item = {
                   id : _tempCurrentUserID,
                   textColor : _styleList[_tempCurrentUserID].textColor,
                   bgColor : _styleList[_tempCurrentUserID].bgColor,
@@ -1720,7 +1720,7 @@ function startWatchGridDOM() {
             let labelResetColorElement = document.createElement("label");
             labelResetColorElement.innerText = "色設定をクリア";
 
-            // 色設定をクリアするボタンのイベント              
+            // 色設定をクリアするボタンのイベント
             liResetColorElement.addEventListener('click', function(e) {
               console.log("色設定を削除します", mouseClick.userId, _styleList);
 
@@ -1745,7 +1745,7 @@ function startWatchGridDOM() {
               // カラー情報を保存するDOMに保存
               let colorBox = document.getElementById("ext_colorBox");
               if(colorBox) {
-                let item = { 
+                let item = {
                   id : mouseClick.userId,
                   deleteFlag : true
                 };
@@ -1763,7 +1763,7 @@ function startWatchGridDOM() {
             //liKotehanElement.style.display = "none";
             liKotehanElement.id = "menu-kotehan";
             let labelKotehanElement = document.createElement("label");
-            labelKotehanElement.innerText = "コテハンを設定";              
+            labelKotehanElement.innerText = "コテハンを設定";
 
             // コテハン設定ボタンのClickイベント
             liKotehanElement.addEventListener('click', function(e) {
@@ -1773,7 +1773,7 @@ function startWatchGridDOM() {
               // document.getElementById('ext_myKotehanDom_comment').innerText = userComment;
 
               // コンテキストメニューを閉じておく
-              document.querySelector('[class^=___context-menu___]').style.display = "none"              
+              document.querySelector('[class^=___context-menu___]').style.display = "none"
             });
 
 
@@ -1798,7 +1798,7 @@ function startWatchGridDOM() {
 
             // [コテハンを設定]メニュー
             liKotehanElement.appendChild(labelKotehanElement);
-            ulElement.appendChild(liKotehanElement);        
+            ulElement.appendChild(liKotehanElement);
 
 
             // コンテキストメニューの監視を解除
@@ -1808,7 +1808,7 @@ function startWatchGridDOM() {
             /*
             let commentContext = document.querySelector("[class^=___program-comment-menu___]"); // コメント関係のメニューDOMを指定
             if(commentContext && commentContext.parentNode){
-              commentContext.parentNode.insertBefore(ulElement, commentContext);    
+              commentContext.parentNode.insertBefore(ulElement, commentContext);
             }
             */
 
@@ -1828,20 +1828,20 @@ function startWatchGridDOM() {
             */
             let commentContext = document.querySelector("[class^=___context-menu___]"); // コメント関係のメニューDOMを指定
             if(commentContext && commentContext.parentNode){
-              commentContext.insertBefore(ulElement, commentContext.firstChild);  
+              commentContext.insertBefore(ulElement, commentContext.firstChild);
             }
 
             // コンテキストメニューの監視を再開
             const target = document.querySelector("[class^=___comment-data-grid___]");
             observer.observe(target, optionsForGrid);
           }
-          
+
         }
       }
     }
 
   });
-  
+
   obs.observe(target, optionsForGrid);
 
   document.querySelector("[class^=___comment-data-grid___]").addEventListener("mouseover", function(e) {
@@ -1867,7 +1867,7 @@ function startWatchGridDOM() {
         mouseOver.commentNo = 0;
       }
     }
-  });    
+  });
 
   document.querySelector("[class^=___comment-data-grid___]").addEventListener("mousemove", function(e) {
     // マウスカーソルを移動したときにツールチップを追従させる
@@ -1880,10 +1880,10 @@ function startWatchGridDOM() {
         // 要素の位置を更新。 要素の右下の座標を計算。
         const right = e.clientX - 10;
         const bottom = e.clientY - 30;
-  
+
         // 要素の位置を更新する
         tootlTip.style.right = `calc(100% - ${right}px)`;
-        tootlTip.style.bottom = `calc(100% - ${bottom}px)`;  
+        tootlTip.style.bottom = `calc(100% - ${bottom}px)`;
       } else {
         // システムメッセージなどの場合は非表示にする
         tootlTip.classList.remove("show");
@@ -1896,19 +1896,19 @@ function startWatchGridDOM() {
     const tootlTip = document.getElementById('ext_tooltipBox');
     // tootlTip.style.display = "none";
     if(tootlTip) tootlTip.classList.remove("show");
-  }); 
+  });
 
   // ツールチップや色関係で使うユーザーIDを取得する
   document.querySelector("[class^=___comment-data-grid___]").addEventListener("mousedown", function(e) {
-    // 右クリックからコンテキストメニューを表示した際のクリックしたコメント情報を保存    
+    // 右クリックからコンテキストメニューを表示した際のクリックしたコメント情報を保存
     if (e.button == 2 && e.target.parentNode) { // 右クリックの場合、かつ、親のDOMが存在する場合
 
       let commentDom = e.target.closest("[class^=___table-cell___]").querySelector(".comment-number");
       let userNameDom = e.target.closest("[class^=___table-cell___]").querySelector(".user_name_by_extention");
       let userCommentDom = e.target.closest("[class^=___table-cell___]").querySelector(".comment-text");
 
-      if(commentDom && commentDom.innerText 
-        && userCommentDom && userCommentDom.innerText 
+      if(commentDom && commentDom.innerText
+        && userCommentDom && userCommentDom.innerText
         && userNameDom && userNameDom.innerText
       ) {
 
@@ -1929,11 +1929,11 @@ function startWatchGridDOM() {
         } else {
           mouseClick.kotehan = ""; // ちゃんと初期化する
         }
-        
-        console.log("クリックしたコメント情報", mouseClick);      
+
+        console.log("クリックしたコメント情報", mouseClick);
       }
     }
-  });    
+  });
 }
 
 
@@ -1961,8 +1961,8 @@ if (document.readyState === 'loading') {
 }
 
 function runComeviewInject() {
-  
-  
+
+
 
   // コメントDOMの監視を開始
   startWatchCommentDOM();
@@ -2022,7 +2022,7 @@ function runComeviewInject() {
               break;
             }
           }
-        }        
+        }
       } else {
         console.log("コテハンがありません");
       }
@@ -2099,7 +2099,7 @@ function runComeviewInject() {
 
 };
 
-function watchTime(mutationRecords, observer){ 
+function watchTime(mutationRecords, observer){
   // 一度に2つ以上のDOM追加にも対応
   mutationRecords.forEach(item => {
       _startTime = getStartPlayTime();
@@ -2107,7 +2107,7 @@ function watchTime(mutationRecords, observer){
   });
 };
 
-function watchKotehan(mutationRecords, observer){ 
+function watchKotehan(mutationRecords, observer){
 
   // 初回に一度だけ受信する用
 
