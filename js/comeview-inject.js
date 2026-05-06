@@ -7,32 +7,167 @@ let _kugiri = [];
 
 // バイナリデータを解析してコメントを抽出する
 function extractNicoLiveCommentContent(binaryData) {
-  //const binaryData = new Uint8Array(hexString.split(/\s+/).map(byte => parseInt(byte, 16)));
-
-  let commentObjcts = [];
-
+  const commentObjcts = [];
   let offset = 0;
 
-  function readVarInt() {
+  if (typeof protobuf === "undefined" || !protobuf.Reader) {
+    console.error("protobuf.Reader が見つからないためコメント解析をスキップします");
+    return commentObjcts;
+  }
+
+  function readLengthAt(data, startOffset) {
     let value = 0;
     let shift = 0;
-    while (true) {
-      const byte = binaryData[offset++];
+    let cursor = startOffset;
+
+    for (let i = 0; i < 5; i++) {
+      if (cursor >= data.length) {
+        return null;
+      }
+      const byte = data[cursor++];
       value |= (byte & 0x7F) << shift;
-      if ((byte & 0x80) === 0) break;
+      if ((byte & 0x80) === 0) {
+        return { value, nextOffset: cursor };
+      }
       shift += 7;
     }
-    return value;
+    return null;
   }
 
-  function extractContent(length) {
-    const endOffset = offset + length;
-    const contentData = binaryData.slice(offset, endOffset);
-    const content = new TextDecoder('utf-8').decode(contentData);
-    offset += length;
-    return content;
+  function normalizeId(value) {
+    if (value == null) return "";
+    if (typeof value === "number") return String(value);
+    if (typeof value === "string") return value;
+    if (typeof value === "object" && typeof value.toString === "function") {
+      return value.toString();
+    }
+    return String(value);
   }
 
+  function extractChatPayloadFromContent(contentBytes) {
+    const reader = protobuf.Reader.create(contentBytes);
+    while (reader.pos < reader.len) {
+      const tag = reader.uint32();
+      const fieldNumber = tag >>> 3;
+      const wireType = tag & 0x07;
+
+      if (fieldNumber === 1 && wireType === 2) {
+        return reader.bytes();
+      }
+      reader.skipType(wireType);
+    }
+    return null;
+  }
+
+  function decodeChatMessage(chatBytes) {
+    const reader = protobuf.Reader.create(chatBytes);
+    const commentObjct = { chat: {} };
+
+    while (reader.pos < reader.len) {
+      const tag = reader.uint32();
+      const fieldNumber = tag >>> 3;
+      const wireType = tag & 0x07;
+
+      /*
+       以下のswitch文についてはニコ生のソースコードから C.typeName = "dwango.nicolive.chat.data.Chat" の部分を検索して調べられる。
+       Classにするとしたら以下の形に落とせる。
+
+       message Chat {
+        string content = 1;
+        optional string name = 2;
+        int32 vpos = 3;
+        AccountStatus account_status = 4;
+        optional int64 raw_user_id = 5;
+        optional string hashed_user_id = 6;
+        Modifier modifier = 7;
+        int32 no = 8;
+      }
+      */
+      switch (fieldNumber) {
+        case 1: // content
+          if (wireType === 2) {
+            commentObjct.chat.content = reader.string();
+          } else {
+            reader.skipType(wireType);
+          }
+          break;
+        case 2: // name
+          if (wireType === 2) {
+            commentObjct.name = reader.string();
+          } else {
+            reader.skipType(wireType);
+          }
+          break;
+        case 3: // vpos
+          if (wireType === 0) {
+            commentObjct.chat.vpos = reader.int32();
+          } else {
+            reader.skipType(wireType);
+          }
+          break;
+        case 4: // account_status
+          if (wireType === 0) {
+            commentObjct.chat.premium = reader.int32();
+          } else {
+            reader.skipType(wireType);
+          }
+          break;
+        case 5: // raw_user_id
+          if (wireType === 0) {
+            commentObjct.chat.user_id = normalizeId(reader.int64());
+          } else {
+            reader.skipType(wireType);
+          }
+          break;
+        case 6: // hashed_user_id
+          if (wireType === 2) {
+            commentObjct.chat.user_id = reader.string();
+          } else {
+            reader.skipType(wireType);
+          }
+          break;
+        case 8: // no
+          if (wireType === 0) {
+            commentObjct.chat.no = reader.int32();
+          } else {
+            reader.skipType(wireType);
+          }
+          break;
+        default:
+          // modifier(7)を含む未知フィールドは安全に読み飛ばす
+          reader.skipType(wireType);
+      }
+    }
+
+    if (typeof commentObjct.chat.content !== "string") {
+      return null;
+    }
+    return commentObjct;
+  }
+
+  function decodeWrappedComment(commentBytes) {
+    const reader = protobuf.Reader.create(commentBytes);
+    let chatPayload = null;
+
+    while (reader.pos < reader.len) {
+      const tag = reader.uint32();
+      const fieldNumber = tag >>> 3;
+      const wireType = tag & 0x07;
+
+      if (fieldNumber === 2 && wireType === 2) {
+        const contentBytes = reader.bytes();
+        chatPayload = extractChatPayloadFromContent(contentBytes);
+      } else {
+        // metadata(1)など未知の外側フィールドを安全に読み飛ばす
+        reader.skipType(wireType);
+      }
+    }
+
+    if (!chatPayload) {
+      return null;
+    }
+    return decodeChatMessage(chatPayload);
+  }
 
   if(_firstSegment && binaryData.length >= 3 && binaryData[2] === 0x00) {
     _firstSegment = false;
@@ -51,179 +186,50 @@ function extractNicoLiveCommentContent(binaryData) {
   }
 
   while (offset < binaryData.length) {
-
+    const loopStartOffset = offset;
     if (binaryData[offset] === 0x0A) {
-      offset++; // Skip 0A
+      offset++; // field 1 (length-delimited)
     }
 
-    let commentObjct = {};
-
-    // １コメント構造体の長さを取得
-    const commentLength = readVarInt();
-    const commentEndOffset = offset + commentLength;
-
-    // console.log(`コメント開始 (長さ: ${commentLength})`);
-
-    // メタデータをスキップ
-    const metadataTag = readVarInt();
-    if ((metadataTag & 0x07) !== 2) {
-      //throw new Error(`予期しないメタデータタグ: ${metadataTag}`);
-      console.error(`予期しないメタデータタグ: ${metadataTag}`);
+    if (offset >= binaryData.length) {
       break;
     }
-    const metadataLength = readVarInt();
-    offset += metadataLength;
 
-    // コンテンツデータ（親フィールド）の処理
-    const contentTag = readVarInt();
-    if ((contentTag & 0x07) !== 2) {
-      //throw new Error(`予期しないコンテンツタグ: ${contentTag}`);
-      console.error(`予期しないコンテンツタグ: ${contentTag}`);
+    const lengthInfo = readLengthAt(binaryData, offset);
+    if (!lengthInfo) {
+      console.warn("コメント長の取得に失敗したため解析を終了します");
+      break;
     }
-    const parentContentLength = readVarInt();
+    const commentLength = lengthInfo.value;
+    offset = lengthInfo.nextOffset;
 
-    offset++; // Skip 0A
-
-    const subContentLength = readVarInt();
-
-    offset++; // Skip 0A
-    let currentSubContentLength = 0;
-    currentSubContentLength++;
-
-    const contentLength = readVarInt();
-    currentSubContentLength += contentLength;
-
-    // console.log(`コメント内容の長さ: ${contentLength} バイト`);
-
-    // コメント内容の抽出
-    const content = extractContent(contentLength);
-    // console.log(`コメント内容: ${content}`);
-
-    commentObjct.chat = {};
-    commentObjct.chat.content = content;
-
-    // console.log("currentSubContentLength : " + currentSubContentLength + ", subContentLength : " + subContentLength);
-
-
-    while(currentSubContentLength < subContentLength) {
-
-        let fieldTag = readVarInt();
-        let fieldNumber = fieldTag >> 3;
-
-        // console.log(fieldTag, fieldNumber);
-
-        currentSubContentLength++;
-
-
-        if(fieldNumber === 2) {
-            // "name"
-            const oldOffset = offset;
-            const nameLength = readVarInt();
-            currentSubContentLength += offset - oldOffset;
-
-            const nameData = extractContent(nameLength);
-            currentSubContentLength += nameLength;
-
-            // console.log(`name: ${nameData}`);
-
-            commentObjct.name = nameData;
-
-        } else if(fieldNumber === 3) {
-            // "vpos"
-            const oldOffset = offset;
-            const vpos = readVarInt();
-            currentSubContentLength += offset - oldOffset;
-
-            // console.log(`vpos: ${vpos}`);
-
-            commentObjct.chat.vpos = vpos;
-
-        } else if(fieldNumber === 4) {
-            // "account_status"
-            const oldOffset = offset;
-            const account_status = readVarInt();
-            currentSubContentLength += offset - oldOffset;
-
-            // console.log(`account_status: ${account_status}`);
-
-            commentObjct.chat.premium = account_status;
-
-        } else if(fieldNumber === 5) {
-            // "raw_user_id"
-            const oldOffset = offset;
-            const raw_user_id = readVarInt();
-            currentSubContentLength += offset - oldOffset;
-
-            // console.log(`raw_user_id: ${raw_user_id}`);
-
-            commentObjct.chat.user_id = String(raw_user_id); // lengthを調べることがあるので文字列型に変換
-
-        } else if(fieldNumber === 6) {
-            // "hashed_user_id"
-            const oldOffset = offset;
-            const hashed_user_idLength = readVarInt();
-            currentSubContentLength += offset - oldOffset;
-
-            const hashed_user_idData = extractContent(hashed_user_idLength);
-            currentSubContentLength += hashed_user_idLength;
-
-            // console.log(`hashed_user_id: ${hashed_user_idData}`);
-
-            commentObjct.chat.user_id = hashed_user_idData;
-
-        } else if(fieldNumber === 7) {
-            // "modifier"（コメントの修飾情報）
-            const oldOffset = offset;
-            const modifierLength = readVarInt();
-            currentSubContentLength += offset - oldOffset;
-
-            // console.log(`modifierLength: ${modifierLength}`);
-            if(modifierLength !== 0x00) {
-
-              //const modifier = extractContent(modifierLength);
-
-              const endOffset = offset + modifierLength;
-              const modifier = binaryData.slice(offset, endOffset);
-              // console.log(`modifier: ${modifier}`);
-              commentObjct.chat.modifier = modifier;
-              offset += modifierLength;
-
-              currentSubContentLength += modifierLength;
-            }
-
-            //commentObjct.modifier = modifier;
-
-        } else if(fieldNumber === 8) {
-            // "no"
-            const oldOffset = offset;
-            let no = readVarInt();
-            currentSubContentLength += offset - oldOffset;
-
-            // console.log(`no: ${no}`);
-
-            commentObjct.chat.no = no;
-        } else {
-            // 未知のフィールド
-            console.log(`未知のフィールド number: ${fieldNumber}`);
-            console.log(`未知のフィールド tag: ${fieldTag}`);
-
-            const oldOffset = offset;
-            let someValue = readVarInt();
-            commentObjct.chat.someValue = someValue;
-            currentSubContentLength += offset - oldOffset;
-
-            // console.log(`someValue: ${someValue}`);
-            // console.log("現在の位置：currentSubContentLength : " + currentSubContentLength);
-        }
+    if (commentLength <= 0) {
+      console.warn("不正なコメント長を検出したため解析を終了します", commentLength);
+      break;
     }
 
-    recvChatComment(commentObjct);
+    const commentEndOffset = offset + commentLength;
+    if (commentEndOffset > binaryData.length) {
+      console.warn("コメント長がペイロード境界を超えたため解析を終了します", {
+        commentLength,
+        offset,
+        binaryLength: binaryData.length
+      });
+      break;
+    }
 
-    commentObjcts.push(commentObjct);
+    const commentBytes = binaryData.slice(offset, commentEndOffset);
+    const commentObjct = decodeWrappedComment(commentBytes);
+    if (commentObjct) {
+      recvChatComment(commentObjct);
+      commentObjcts.push(commentObjct);
+    }
 
     offset = commentEndOffset;
-
-    // console.log("--------------------");
+    if (offset <= loopStartOffset) {
+      console.error("解析位置が前進しなかったため解析を中断します");
+      break;
+    }
   }
 
   return commentObjcts;

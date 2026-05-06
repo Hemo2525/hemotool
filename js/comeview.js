@@ -386,6 +386,7 @@ if(location.href.startsWith("https://live.nicovideo.jp/")){
         s.setAttribute('src', file);
         th.appendChild(s);
       }
+      injectScript( chrome.runtime.getURL('/js/lib/protobuf.min.js'), 'body');
       injectScript( chrome.runtime.getURL('/js/comeview-inject.js'), 'body');
 /*
     }
