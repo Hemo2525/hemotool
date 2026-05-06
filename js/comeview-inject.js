@@ -4,6 +4,8 @@
 
 // バイナリデータを解析してコメントを抽出する
 function extractNicoLiveCommentContent(binaryData) {
+  // この関数は「今あるバッファ内で完結しているフレームだけ」を処理する。
+  // 途中で切れているフレームは consumedBytes で呼び出し元へ返し、次チャンクへ持ち越す。
   const commentObjcts = [];
   let offset = 0;
 
@@ -16,6 +18,7 @@ function extractNicoLiveCommentContent(binaryData) {
   }
 
   function readLengthAt(data, startOffset) {
+    // Protobufの length-delimited で使う varint 長を安全に読む（最大5byte: 32bit長想定）
     let value = 0;
     let shift = 0;
     let cursor = startOffset;
@@ -45,6 +48,7 @@ function extractNicoLiveCommentContent(binaryData) {
   }
 
   function extractChatPayloadFromContent(contentBytes) {
+    // outer.content の中から chat 本体(field=1)だけを取り出す
     const reader = protobuf.Reader.create(contentBytes);
     while (reader.pos < reader.len) {
       const tag = reader.uint32();
@@ -60,6 +64,8 @@ function extractNicoLiveCommentContent(binaryData) {
   }
 
   function decodeChatMessage(chatBytes) {
+    // Chatメッセージ本体を最小フィールドだけデコードする
+    // 必要ない field は skipType で読み飛ばす（modifier含む）
     const reader = protobuf.Reader.create(chatBytes);
     const commentObjct = { chat: {} };
 
@@ -146,6 +152,8 @@ function extractNicoLiveCommentContent(binaryData) {
   }
 
   function decodeWrappedComment(commentBytes) {
+    // 1コメントフレーム（metadata + content）を解き、
+    // content内の chat payload を抽出してから Chat デコードへ渡す
     const reader = protobuf.Reader.create(commentBytes);
     let chatPayload = null;
 
@@ -182,6 +190,7 @@ function extractNicoLiveCommentContent(binaryData) {
 
     const lengthInfo = readLengthAt(binaryData, offset);
     if (lengthInfo.status === "incomplete") {
+      // varint自体がチャンク末尾で分断されているので次回に回す
       offset = loopStartOffset;
       break;
     }
@@ -251,6 +260,8 @@ function concatUint8Arrays(left, right) {
 }
 
 function processCommentStreamChunk(streamKey, chunk, flush) {
+  // 受信チャンクを前回の残りと結合し、読める分だけ消費する。
+  // 残りは streamKey ごとに保持して次チャンクで再試行する。
   const prev = streamBuffers.get(streamKey) || new Uint8Array(0);
   const merged = concatUint8Arrays(prev, chunk);
 
@@ -259,6 +270,7 @@ function processCommentStreamChunk(streamKey, chunk, flush) {
   const remains = merged.length > consumedBytes ? merged.slice(consumedBytes) : new Uint8Array(0);
 
   if (flush) {
+    // backward系などの終端処理。残りがあればデバッグ情報として残す。
     streamBuffers.delete(streamKey);
     if (remains.length > 0) {
       console.warn("未消費バイトが残りました（末尾不完全フレームの可能性）", {
