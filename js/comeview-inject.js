@@ -2,9 +2,6 @@
  コメビュ機能
 ----------------------------------------*/
 
-let _firstSegment = true;
-let _kugiri = [];
-
 // バイナリデータを解析してコメントを抽出する
 function extractNicoLiveCommentContent(binaryData) {
   const commentObjcts = [];
@@ -12,7 +9,10 @@ function extractNicoLiveCommentContent(binaryData) {
 
   if (typeof protobuf === "undefined" || !protobuf.Reader) {
     console.error("protobuf.Reader が見つからないためコメント解析をスキップします");
-    return commentObjcts;
+    return {
+      comments: commentObjcts,
+      consumedBytes: 0
+    };
   }
 
   function readLengthAt(data, startOffset) {
@@ -22,16 +22,16 @@ function extractNicoLiveCommentContent(binaryData) {
 
     for (let i = 0; i < 5; i++) {
       if (cursor >= data.length) {
-        return null;
+        return { status: "incomplete" };
       }
       const byte = data[cursor++];
       value |= (byte & 0x7F) << shift;
       if ((byte & 0x80) === 0) {
-        return { value, nextOffset: cursor };
+        return { status: "ok", value, nextOffset: cursor };
       }
       shift += 7;
     }
-    return null;
+    return { status: "invalid" };
   }
 
   function normalizeId(value) {
@@ -169,26 +169,11 @@ function extractNicoLiveCommentContent(binaryData) {
     return decodeChatMessage(chatPayload);
   }
 
-  if(_firstSegment && binaryData.length >= 3 && binaryData[2] === 0x00) {
-    _firstSegment = false;
-    _kugiri[0] = binaryData[0];
-    _kugiri[1] = binaryData[1];
-    _kugiri[2] = binaryData[2];
-    console.log("区切り文字を取得しました", _kugiri);
-  }
-
-  if (binaryData[0] === _kugiri[0]
-      && binaryData[1] === _kugiri[1]
-      && binaryData[2] === _kugiri[2]
-  ){
-    // console.log("SKIPします");
-    offset += 3; // Skip [02 08 00]
-  }
-
   while (offset < binaryData.length) {
     const loopStartOffset = offset;
     if (binaryData[offset] === 0x0A) {
-      offset++; // field 1 (length-delimited)
+      // field 1 (length-delimited) のタグ付きフレーム
+      offset++;
     }
 
     if (offset >= binaryData.length) {
@@ -196,8 +181,12 @@ function extractNicoLiveCommentContent(binaryData) {
     }
 
     const lengthInfo = readLengthAt(binaryData, offset);
-    if (!lengthInfo) {
-      console.warn("コメント長の取得に失敗したため解析を終了します");
+    if (lengthInfo.status === "incomplete") {
+      offset = loopStartOffset;
+      break;
+    }
+    if (lengthInfo.status !== "ok") {
+      console.warn("コメント長(varint)の解釈に失敗したため解析を終了します");
       break;
     }
     const commentLength = lengthInfo.value;
@@ -210,16 +199,23 @@ function extractNicoLiveCommentContent(binaryData) {
 
     const commentEndOffset = offset + commentLength;
     if (commentEndOffset > binaryData.length) {
-      console.warn("コメント長がペイロード境界を超えたため解析を終了します", {
-        commentLength,
-        offset,
-        binaryLength: binaryData.length
-      });
+      // チャンク途中でフレームが分断されている場合は次回へ持ち越す
+      offset = loopStartOffset;
       break;
     }
 
     const commentBytes = binaryData.slice(offset, commentEndOffset);
-    const commentObjct = decodeWrappedComment(commentBytes);
+    let commentObjct = null;
+    try {
+      commentObjct = decodeWrappedComment(commentBytes);
+    } catch (error) {
+      // 一部の非コメントフレーム/破損フレームはスキップして継続する
+      console.warn("コメントフレームのデコードに失敗したためスキップします", {
+        error: String(error),
+        offset: loopStartOffset,
+        frameLength: commentLength
+      });
+    }
     if (commentObjct) {
       recvChatComment(commentObjct);
       commentObjcts.push(commentObjct);
@@ -232,7 +228,10 @@ function extractNicoLiveCommentContent(binaryData) {
     }
   }
 
-  return commentObjcts;
+  return {
+    comments: commentObjcts,
+    consumedBytes: offset
+  };
 }
 
 // fetchのインターセプトを行うため、オリジナルのfetch関数を保存
@@ -240,6 +239,42 @@ const originalFetch = window.fetch;
 
 // 累積バッファを保持するオブジェクト（ストリームごとに個別のバッファを持つ）
 const streamBuffers = new Map();
+
+function concatUint8Arrays(left, right) {
+  if (!left || left.length === 0) return right;
+  if (!right || right.length === 0) return left;
+
+  const merged = new Uint8Array(left.length + right.length);
+  merged.set(left, 0);
+  merged.set(right, left.length);
+  return merged;
+}
+
+function processCommentStreamChunk(streamKey, chunk, flush) {
+  const prev = streamBuffers.get(streamKey) || new Uint8Array(0);
+  const merged = concatUint8Arrays(prev, chunk);
+
+  const result = extractNicoLiveCommentContent(merged);
+  const consumedBytes = result.consumedBytes || 0;
+  const remains = merged.length > consumedBytes ? merged.slice(consumedBytes) : new Uint8Array(0);
+
+  if (flush) {
+    streamBuffers.delete(streamKey);
+    if (remains.length > 0) {
+      console.warn("未消費バイトが残りました（末尾不完全フレームの可能性）", {
+        streamKey,
+        bytes: remains.length
+      });
+    }
+    return;
+  }
+
+  if (remains.length > 0) {
+    streamBuffers.set(streamKey, remains);
+  } else {
+    streamBuffers.delete(streamKey);
+  }
+}
 
 // fetchのインターセプト
 window.fetch = function(...args) {
@@ -251,6 +286,7 @@ window.fetch = function(...args) {
 
         //console.log('[backward] Fetch:', url);
         const clonedResponse = response.clone();
+        const streamKey = `backward:${url}`;
 
         clonedResponse.arrayBuffer().then(buffer => {
           //console.log('Fetched Niconico live comments buffer size:', buffer.byteLength);
@@ -259,7 +295,7 @@ window.fetch = function(...args) {
           const uint8Array = new Uint8Array(buffer);
 
           // console.log('Decoding Niconico live messages(backward)...', uint8Array);
-          const decodedMessages = extractNicoLiveCommentContent(uint8Array);
+          processCommentStreamChunk(streamKey, uint8Array, true);
           // console.log(JSON.stringify(decodedMessages, null, 2));
 
           //const extractedComments = extractComments(buffer);
@@ -280,6 +316,7 @@ window.fetch = function(...args) {
 
       //console.log('[segment] Fetch:', url);
       const originalBody = response.body;
+      const streamKey = `segment:${url}`;
 
       // 新しいReadableStreamを作成
       const newBody = new ReadableStream({
@@ -289,6 +326,7 @@ window.fetch = function(...args) {
           function pump() {
             return reader.read().then(({ done, value }) => {
               if (done) {
+                processCommentStreamChunk(streamKey, new Uint8Array(0), true);
                 controller.close();
                 return;
               }
@@ -297,7 +335,7 @@ window.fetch = function(...args) {
               const uint8Array = new Uint8Array(value);
 
               // console.log('Decoding Niconico live messages(segment)...', uint8Array);
-              const decodedMessages = extractNicoLiveCommentContent(uint8Array);
+              processCommentStreamChunk(streamKey, uint8Array, false);
               // console.log(JSON.stringify(decodedMessages, null, 2));
 
               // 新しいストリームにデータを書き込む
